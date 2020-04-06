@@ -14,6 +14,8 @@ bad optimization, or others bullshits :)
 Please send me your feedback.
 I enjoy all constructive comments and help is welcome.
 
+ImGuiFontStudio url : https://github.com/aiekick/ImGuiFontStudio
+
 ## The features :
 
 * can open ttf or otf font file
@@ -58,4 +60,3 @@ ImGuiFontStudio if an open soruce software under [license apache 2.0](LICENSE)
 * [sfntly - Apache 2.0](https://github.com/rillig/sfntly)
 * [cTools - MIT](https://github.com/aiekick/cTools)
 * [ImGuiFileDialog - MIT](https://github.com/aiekick/ImGuiFileDialog)
-
