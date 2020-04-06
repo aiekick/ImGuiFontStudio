@@ -201,10 +201,12 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 					{
 						ImGui::Text("Order Glyphs by :");
 						ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("CodePoint", "order by glyph CodePoint",
-							&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_CODEPOINT, 50.0f, true, true);
+							&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_CODEPOINT, 50.0f, true, true,
+							GenModeFlags::GENERATOR_MODE_RADIO_CDP_NAMES);
 						ImGui::SameLine();
 						ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Names", "order by glyph Name",
-							&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES, 50.0f, true, true);
+							&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES, 50.0f, true, true,
+							GenModeFlags::GENERATOR_MODE_RADIO_CDP_NAMES);
 					}
 					ImGui::Unindent();
 				}
