@@ -22,7 +22,7 @@ ImGuiFontStudio url : https://github.com/aiekick/ImGuiFontStudio
 * can subset font file (one file same time or by batch)
 * can generate header with corresponding glyph names and codepoint
 * can generate cpp file with compressed data o=foir embedded use
-* can merge many font file in one (WIP, there is some pending issues about this last)
+* can merge many font file in one (WIP, there is some pending issues #1 about this last)
 * can edit codepoint and glyph names
 * have a project file
 * many tool available for select glyphs (by zone, by line, by codepoint range)
