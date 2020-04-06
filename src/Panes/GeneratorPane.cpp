@@ -231,7 +231,7 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 			{
 				ImGui::Indent();
 
-				if (ImGui::Button("Generate"))
+				if (ImGui::Button(ICON_IGFS_GENERATE " Generate"))
 				{
 					btnClick = true;
 					if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_FONT)) exts = ".ttf\0\0";
