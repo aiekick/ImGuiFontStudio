@@ -33,6 +33,13 @@ enum FinalFontPaneModeFlags
 	FINAL_FONT_PANE_MERGED_ORDERED_BY_NAMES = (1 << 5)
 };
 
+enum CurrentFontPaneModeFlags
+{
+	CURRENT_FONT_PANE_NONE = 0,
+	CURRENT_FONT_PANE_ORDERED_BY_CODEPOINT = (1 << 0),
+	CURRENT_FONT_PANE_ORDERED_BY_NAMES = (1 << 1),
+};
+
 class FinalFontPane
 {
 private:
@@ -43,6 +50,9 @@ private:
 private:
 	FinalFontPaneModeFlags m_FinalFontPaneModeFlags = 
 		FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_NO_ORDER;
+	CurrentFontPaneModeFlags m_CurrentFontPaneModeFlags =
+		CurrentFontPaneModeFlags::CURRENT_FONT_PANE_ORDERED_BY_NAMES;
+
 	bool m_GlyphEdition = false;
 	bool m_AutoUpdateCodepoint_WhenEditWithButtons = false;
 

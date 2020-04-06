@@ -24,6 +24,7 @@
 #define FINAL_PANE "Final Font"
 #define GENERATOR_PANE "Generator"
 #define CURRENT_FONT_PANE "Current Font"
+#define GLYPH_PANE "Glyph Edition"
 
 enum PaneFlags
 {
@@ -33,7 +34,8 @@ enum PaneFlags
 	PANE_FINAL = (1 << 3),
 	PANE_PARAM = (1 << 4),
 	PANE_GENERATOR = (1 << 5),
-	PANE_ALLS = PANE_SELECTED_FONT | PANE_SOURCE | PANE_FINAL | PANE_PARAM | PANE_GENERATOR
+	PANE_GLYPH = (1 << 6),
+	PANE_ALLS = PANE_SELECTED_FONT | PANE_SOURCE | PANE_FINAL | PANE_PARAM | PANE_GENERATOR// | PANE_GLYPH
 };
 
 class GuiLayout : public conf::ConfigAbstract

@@ -24,6 +24,7 @@
 #include "Gui/GuiLayout.h"
 #include "Res/CustomFont.h"
 #include "Helper/SelectionHelper.h"
+#include "Panes/GlyphPane.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui_internal.h"
@@ -72,47 +73,44 @@ int FinalFontPane::DrawFinalFontPane(ProjectFile *vProjectFile, int vWidgetId)
 					{
 						if (ImGui::BeginMenu("View Mode"))
 						{
-							if (ImGui::MenuItem("by Font, no order", "",
-								m_FinalFontPaneModeFlags & FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_NO_ORDER))
-							{
-								m_FinalFontPaneModeFlags = FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_NO_ORDER;
-								// nothing to prepare, will read directly m_SelectedGlyphs in each FontInfos
-							}
+							ImGui::MenuItem<FinalFontPaneModeFlags>("by Font, no order", "",
+								&m_FinalFontPaneModeFlags, 
+								FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_NO_ORDER, true);
 
-							if (ImGui::MenuItem("by Font, ordered by CodePoint", "",
-								m_FinalFontPaneModeFlags & FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_CODEPOINT))
+							if (ImGui::MenuItem<FinalFontPaneModeFlags>("by Font, ordered by CodePoint", "",
+								&m_FinalFontPaneModeFlags , 
+								FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_CODEPOINT))
 							{
-								m_FinalFontPaneModeFlags = FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_CODEPOINT;
 								PrepareSelectionByFontOrderedByCodePoint(vProjectFile);
 							}
 
-							if (ImGui::MenuItem("by Font, ordered by Name", "",
-								m_FinalFontPaneModeFlags & FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_NAMES))
+							if (ImGui::MenuItem<FinalFontPaneModeFlags>("by Font, ordered by Name", "",
+								&m_FinalFontPaneModeFlags , 
+								FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_NAMES, true))
 							{
-								m_FinalFontPaneModeFlags = FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_NAMES;
 								PrepareSelectionByFontOrderedByGlyphNames(vProjectFile);
 							}
 
 							ImGui::Separator();
 
-							if (ImGui::MenuItem("Merged, no order", "",
-								m_FinalFontPaneModeFlags & FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_NO_ORDER))
+							if (ImGui::MenuItem<FinalFontPaneModeFlags>("Merged, no order", "",
+								&m_FinalFontPaneModeFlags , 
+								FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_NO_ORDER, true))
 							{
-								m_FinalFontPaneModeFlags = FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_NO_ORDER;
 								PrepareSelectionMergedNoOrder(vProjectFile);
 							}
 
-							if (ImGui::MenuItem("Merged, ordered by CodePoint", "",
-								m_FinalFontPaneModeFlags & FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_ORDERED_BY_CODEPOINT))
+							if (ImGui::MenuItem<FinalFontPaneModeFlags>("Merged, ordered by CodePoint", "",
+								&m_FinalFontPaneModeFlags , 
+								FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_ORDERED_BY_CODEPOINT, true))
 							{
-								m_FinalFontPaneModeFlags = FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_ORDERED_BY_CODEPOINT;
 								PrepareSelectionMergedOrderedByCodePoint(vProjectFile);
 							}
 
-							if (ImGui::MenuItem("Merged, ordered by Name", "",
-								m_FinalFontPaneModeFlags & FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_ORDERED_BY_NAMES))
+							if (ImGui::MenuItem<FinalFontPaneModeFlags>("Merged, ordered by Name", "",
+								&m_FinalFontPaneModeFlags , 
+								FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_ORDERED_BY_NAMES, true))
 							{
-								m_FinalFontPaneModeFlags = FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_ORDERED_BY_NAMES;
 								PrepareSelectionMergedOrderedByGlyphNames(vProjectFile);
 							}
 
@@ -131,12 +129,17 @@ int FinalFontPane::DrawFinalFontPane(ProjectFile *vProjectFile, int vWidgetId)
 
 						SelectionHelper::Instance()->DrawSelectionMenu(vProjectFile, SelectionContainerEnum::SELECTION_CONTAINER_FINAL);
 
-						ImGui::Checkbox("Edit", &m_GlyphEdition);
-
-						if (m_GlyphEdition)
+						if (ImGui::BeginMenu("Edition"))
 						{
-							ImGui::Checkbox("Auto Update codePoint during Edition",
-								&m_AutoUpdateCodepoint_WhenEditWithButtons);
+							ImGui::MenuItem("Active Edit mode", "", &m_GlyphEdition);
+
+							if (m_GlyphEdition)
+							{
+								ImGui::MenuItem("Auto Update codePoint during Edition", "",
+									&m_AutoUpdateCodepoint_WhenEditWithButtons);
+							}
+
+							ImGui::EndMenu();
 						}
 
 						ImGui::EndMenuBar();
@@ -195,13 +198,44 @@ int FinalFontPane::DrawCurrentFontPane(ProjectFile *vProjectFile, int vWidgetId)
 				{
 					if (ImGui::BeginMenuBar())
 					{
-						ImGui::Checkbox("Auto Update codePoint during Edition",
-							&m_AutoUpdateCodepoint_WhenEditWithButtons);
+						if (ImGui::BeginMenu("Sorting"))
+						{
+							if (ImGui::MenuItem<CurrentFontPaneModeFlags>("by CodePoint", "",
+								&m_CurrentFontPaneModeFlags,
+								CurrentFontPaneModeFlags::CURRENT_FONT_PANE_ORDERED_BY_CODEPOINT, true))
+							{
+								PrepareSelectionByFontOrderedByCodePoint(vProjectFile);
+							}
+
+							if (ImGui::MenuItem<CurrentFontPaneModeFlags>("by Name", "",
+								&m_CurrentFontPaneModeFlags,
+								CurrentFontPaneModeFlags::CURRENT_FONT_PANE_ORDERED_BY_NAMES, true))
+							{
+								PrepareSelectionByFontOrderedByGlyphNames(vProjectFile);
+							}
+
+							ImGui::EndMenu();
+						}
+
+						if (ImGui::BeginMenu("Edition"))
+						{
+							ImGui::MenuItem("Auto Update codePoint during Edition", "",
+								&m_AutoUpdateCodepoint_WhenEditWithButtons);
+
+							ImGui::EndMenu();
+						}
 
 						ImGui::EndMenuBar();
 					}
 
-					DrawSelectionsByFontNoOrder_OneFontOnly(vProjectFile, vProjectFile->m_CurrentFont, false, true, false);
+					if (m_CurrentFontPaneModeFlags & CurrentFontPaneModeFlags::CURRENT_FONT_PANE_ORDERED_BY_CODEPOINT)
+					{
+						DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(vProjectFile, vProjectFile->m_CurrentFont, false, true, false);
+					}
+					else if (m_CurrentFontPaneModeFlags & CurrentFontPaneModeFlags::CURRENT_FONT_PANE_ORDERED_BY_NAMES)
+					{
+						DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(vProjectFile, vProjectFile->m_CurrentFont, false, true, false);
+					}
 				}
 			}
 		}
@@ -320,10 +354,17 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 		
 		if (res)
 		{
-			SelectionHelper::Instance()->SelectWithToolOrApplyOnGlyph(
-				vProjectFile, vFontInfos,
-				vGlyph->glyph, 0, selected, true, 
-				SelectionContainerEnum::SELECTION_CONTAINER_FINAL);
+			if (vForceEditMode)
+			{
+				GlyphPane::Instance()->LoadGlyph(vFontInfos, vGlyph->glyph.Codepoint);
+			}
+			else
+			{
+				SelectionHelper::Instance()->SelectWithToolOrApplyOnGlyph(
+					vProjectFile, vFontInfos,
+					vGlyph->glyph, 0, selected, true,
+					SelectionContainerEnum::SELECTION_CONTAINER_FINAL);
+			}
 		}
 
 		if (m_GlyphEdition || vForceEditMode)
@@ -639,8 +680,8 @@ void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
 	ProjectFile *vProjectFile, 
 	FontInfos *vFontInfos,
 	bool vWithFramedGroup, 
-	bool /*vForceEditMode*/, 
-	bool /*vForceEditModeOneColumn*/)
+	bool vForceEditMode, 
+	bool vForceEditModeOneColumn)
 {
 	if (vProjectFile && vFontInfos)
 	{
@@ -651,101 +692,108 @@ void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
 		{
 			if (vFontInfos->m_ImFontAtlas.TexID)
 			{
-				int startCodePoint = vFontInfos->m_GlyphsOrderedByCodePoints.begin()->second[0]->newCodePoint;
-
-				char buffer[1024] = "\0";
-				snprintf(buffer, 1023, "Font %s / Start CodePoint %i / Count %zu",
-					vFontInfos->m_FontFileName.c_str(), startCodePoint,
-					vFontInfos->m_GlyphsOrderedByCodePoints.size());
-				bool frm = true;
-				if (vWithFramedGroup)
-					frm = ImGui::BeginFramedGroup(buffer);
-				if (frm)
+				if (vFontInfos->m_GlyphsOrderedByCodePoints.empty())
 				{
-					int glyphCountX = vProjectFile->m_Preview_Glyph_CountX;
-					if (glyphCountX)
+					PrepareSelectionByFontOrderedByCodePoint(vProjectFile);
+				}
+				else
+				{
+					int startCodePoint = vFontInfos->m_GlyphsOrderedByCodePoints.begin()->second[0]->newCodePoint;
+
+					char buffer[1024] = "\0";
+					snprintf(buffer, 1023, "Font %s / Start CodePoint %i / Count %zu",
+						vFontInfos->m_FontFileName.c_str(), startCodePoint,
+						vFontInfos->m_GlyphsOrderedByCodePoints.size());
+					bool frm = true;
+					if (vWithFramedGroup)
+						frm = ImGui::BeginFramedGroup(buffer);
+					if (frm)
 					{
-						bool showRangeColoring = vProjectFile->IsRangeColorignShown();
-
-						ImVec2 cell_size;
-						CalcGlyphsCountAndSize(&cell_size, &glyphCountX);
-
-						int idx = 0;
-						int lastGlyphCodePoint = 0;
-						ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
-
-						bool nameUpdated = false;
-						bool codepointUpdated = false;
-
-						for (auto &itGlyph : vFontInfos->m_GlyphsOrderedByCodePoints)
+						int glyphCountX = vProjectFile->m_Preview_Glyph_CountX;
+						if (glyphCountX)
 						{
-							ImWchar codePoint = itGlyph.first;
-							auto glyphVector = itGlyph.second;
+							bool showRangeColoring = vProjectFile->IsRangeColorignShown();
 
-							// si plus d'un glyph ici, alors deux glyph partagent le meme codepoint
-							// et il va falloir le montrer
-							// un rerange sera necesaire
-							for (auto & glyphInfo : glyphVector)
+							ImVec2 cell_size;
+							CalcGlyphsCountAndSize(&cell_size, &glyphCountX, vForceEditMode, vForceEditModeOneColumn);
+
+							int idx = 0;
+							int lastGlyphCodePoint = 0;
+							ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
+
+							bool nameUpdated = false;
+							bool codepointUpdated = false;
+
+							for (auto &itGlyph : vFontInfos->m_GlyphsOrderedByCodePoints)
 							{
-								int x = idx++ % glyphCountX;
+								ImWchar codePoint = itGlyph.first;
+								auto glyphVector = itGlyph.second;
 
-								if (x) ImGui::SameLine();
-
-								if (showRangeColoring)
+								// si plus d'un glyph ici, alors deux glyph partagent le meme codepoint
+								// et il va falloir le montrer
+								// un rerange sera necesaire
+								for (auto & glyphInfo : glyphVector)
 								{
-									if (glyphInfo->newCodePoint != lastGlyphCodePoint + 1)
+									int x = idx++ % glyphCountX;
+
+									if (x) ImGui::SameLine();
+
+									if (showRangeColoring)
 									{
-										glyphRangeColoring = vProjectFile->GetColorFromInteger(glyphInfo->newCodePoint);
+										if (glyphInfo->newCodePoint != lastGlyphCodePoint + 1)
+										{
+											glyphRangeColoring = vProjectFile->GetColorFromInteger(glyphInfo->newCodePoint);
+										}
+
+										ImGui::PushStyleColor(ImGuiCol_Button, glyphRangeColoring);
+										ImVec4 bh = glyphRangeColoring; bh.w = 0.75f;
+										ImGui::PushStyleColor(ImGuiCol_ButtonHovered, bh);
+										ImVec4 ba = glyphRangeColoring; ba.w = 1.0f;
+										ImGui::PushStyleColor(ImGuiCol_ButtonActive, ba);
 									}
 
-									ImGui::PushStyleColor(ImGuiCol_Button, glyphRangeColoring);
-									ImVec4 bh = glyphRangeColoring; bh.w = 0.75f;
-									ImGui::PushStyleColor(ImGuiCol_ButtonHovered, bh);
-									ImVec4 ba = glyphRangeColoring; ba.w = 1.0f;
-									ImGui::PushStyleColor(ImGuiCol_ButtonActive, ba);
-								}
+									DrawGlyph(vProjectFile, vFontInfos,
+										cell_size, glyphInfo, glyphVector.size() > 1,
+										&nameUpdated, &codepointUpdated, vForceEditMode);
 
-								DrawGlyph(vProjectFile, vFontInfos,
-									cell_size, glyphInfo, glyphVector.size() > 1,
-									&nameUpdated, &codepointUpdated);
-
-								if (showRangeColoring)
-								{
-									ImGui::PopStyleColor(3);
-								}
-
-								if (vProjectFile->m_FinalPane_ShowGlyphTooltip)
-								{
-									if (ImGui::IsItemHovered())
+									if (showRangeColoring)
 									{
-										ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nfont : %s",
-											glyphInfo->newHeaderName.c_str(),
-											glyphInfo->newCodePoint,
-											glyphInfo->oldHeaderName.c_str(),
-											glyphInfo->glyph.Codepoint,
-											vFontInfos->m_FontFileName.c_str());
+										ImGui::PopStyleColor(3);
 									}
-								}
 
-								lastGlyphCodePoint = codePoint;
+									if (vProjectFile->m_FinalPane_ShowGlyphTooltip)
+									{
+										if (ImGui::IsItemHovered())
+										{
+											ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nfont : %s",
+												glyphInfo->newHeaderName.c_str(),
+												glyphInfo->newCodePoint,
+												glyphInfo->oldHeaderName.c_str(),
+												glyphInfo->glyph.Codepoint,
+												vFontInfos->m_FontFileName.c_str());
+										}
+									}
+
+									lastGlyphCodePoint = codePoint;
+								}
+							}
+
+							if (nameUpdated)
+							{
+								PrepareSelectionByFontOrderedByGlyphNames(vProjectFile);
+								PrepareSelectionMergedOrderedByGlyphNames(vProjectFile);
+							}
+
+							if (codepointUpdated)
+							{
+								PrepareSelectionByFontOrderedByCodePoint(vProjectFile);
+								PrepareSelectionMergedOrderedByCodePoint(vProjectFile);
 							}
 						}
 
-						if (nameUpdated)
-						{
-							PrepareSelectionByFontOrderedByGlyphNames(vProjectFile);
-							PrepareSelectionMergedOrderedByGlyphNames(vProjectFile);
-						}
-
-						if (codepointUpdated)
-						{
-							PrepareSelectionByFontOrderedByCodePoint(vProjectFile);
-							PrepareSelectionMergedOrderedByCodePoint(vProjectFile);
-						}
+						if (vWithFramedGroup)
+							ImGui::EndFramedGroup();
 					}
-
-					if (vWithFramedGroup)
-						ImGui::EndFramedGroup();
 				}
 			}
 		}
@@ -794,8 +842,8 @@ void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(
 	ProjectFile *vProjectFile, 
 	FontInfos *vFontInfos,
 	bool vWithFramedGroup, 
-	bool /*vForceEditMode*/, 
-	bool /*vForceEditModeOneColumn*/)
+	bool vForceEditMode, 
+	bool vForceEditModeOneColumn)
 {
 	if (vFontInfos->m_GlyphCodePointNames.empty())
 		return;
@@ -806,107 +854,113 @@ void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(
 		{
 			if (vFontInfos->m_ImFontAtlas.TexID)
 			{
-				std::string name = vFontInfos->m_GlyphsOrderedByGlyphName.begin()->second[0]->newHeaderName;
-
-				char buffer[1024] = "\0";
-				snprintf(buffer, 1023, "Font %s / Start Name %s / Count Names %zu",
-					vFontInfos->m_FontFileName.c_str(), name.c_str(),
-					vFontInfos->m_GlyphsOrderedByGlyphName.size());
-				bool frm = true;
-				if (vWithFramedGroup)
-					frm = ImGui::BeginFramedGroup(buffer);
-				if (frm)
+				if (vFontInfos->m_GlyphsOrderedByGlyphName.empty())
 				{
-					int glyphCountX = vProjectFile->m_Preview_Glyph_CountX;
-					if (glyphCountX)
+					PrepareSelectionByFontOrderedByGlyphNames(vProjectFile);
+				}
+				else
+				{
+					std::string name = vFontInfos->m_GlyphsOrderedByGlyphName.begin()->second[0]->newHeaderName;
+
+					char buffer[1024] = "\0";
+					snprintf(buffer, 1023, "Font %s / Start Name %s / Count Names %zu",
+						vFontInfos->m_FontFileName.c_str(), name.c_str(),
+						vFontInfos->m_GlyphsOrderedByGlyphName.size());
+					bool frm = true;
+					if (vWithFramedGroup)
+						frm = ImGui::BeginFramedGroup(buffer);
+					if (frm)
 					{
-						bool showRangeColoring = vProjectFile->IsRangeColorignShown();
-
-						ImVec2 cell_size;
-						CalcGlyphsCountAndSize(&cell_size, &glyphCountX);
-
-						int idx = 0;
-						int lastGlyphCodePoint = 0;
-
-						ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
-
-						bool nameUpdated = false;
-						bool codepointUpdated = false;
-
-						for (auto &itGlyph : vFontInfos->m_GlyphsOrderedByGlyphName)
+						int glyphCountX = vProjectFile->m_Preview_Glyph_CountX;
+						if (glyphCountX)
 						{
-							auto glyphVector = itGlyph.second;
+							bool showRangeColoring = vProjectFile->IsRangeColorignShown();
 
-							// si plus d'un glyph ici, alors deux glyph partagent le meme codepoint
-							// et il va falloir le montrer
-							// un rerange sera necesaire
-							for (auto & glyphInfo : glyphVector)
+							ImVec2 cell_size;
+							CalcGlyphsCountAndSize(&cell_size, &glyphCountX, vForceEditMode, vForceEditModeOneColumn);
+
+							int idx = 0;
+							int lastGlyphCodePoint = 0;
+
+							ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
+
+							bool nameUpdated = false;
+							bool codepointUpdated = false;
+
+							for (auto &itGlyph : vFontInfos->m_GlyphsOrderedByGlyphName)
 							{
-								int x = idx++ % glyphCountX;
+								auto glyphVector = itGlyph.second;
 
-								if (x) ImGui::SameLine();
-
-								if (showRangeColoring)
+								// si plus d'un glyph ici, alors deux glyph partagent le meme codepoint
+								// et il va falloir le montrer
+								// un rerange sera necesaire
+								for (auto & glyphInfo : glyphVector)
 								{
-									if (glyphInfo->newCodePoint != lastGlyphCodePoint + 1)
+									int x = idx++ % glyphCountX;
+
+									if (x) ImGui::SameLine();
+
+									if (showRangeColoring)
 									{
-										glyphRangeColoring = vProjectFile->GetColorFromInteger(glyphInfo->newCodePoint);
+										if (glyphInfo->newCodePoint != lastGlyphCodePoint + 1)
+										{
+											glyphRangeColoring = vProjectFile->GetColorFromInteger(glyphInfo->newCodePoint);
+										}
+
+										ImGui::PushStyleColor(ImGuiCol_Button, glyphRangeColoring);
+										ImVec4 bh = glyphRangeColoring; bh.w = 0.75f;
+										ImGui::PushStyleColor(ImGuiCol_ButtonHovered, bh);
+										ImVec4 ba = glyphRangeColoring; ba.w = 1.0f;
+										ImGui::PushStyleColor(ImGuiCol_ButtonActive, ba);
 									}
 
-									ImGui::PushStyleColor(ImGuiCol_Button, glyphRangeColoring);
-									ImVec4 bh = glyphRangeColoring; bh.w = 0.75f;
-									ImGui::PushStyleColor(ImGuiCol_ButtonHovered, bh);
-									ImVec4 ba = glyphRangeColoring; ba.w = 1.0f;
-									ImGui::PushStyleColor(ImGuiCol_ButtonActive, ba);
-								}
+									DrawGlyph(vProjectFile, vFontInfos,
+										cell_size, glyphInfo, glyphVector.size() > 1,
+										&nameUpdated, &codepointUpdated, vForceEditMode);
 
-								DrawGlyph(vProjectFile, vFontInfos,
-									cell_size, glyphInfo, glyphVector.size() > 1,
-									&nameUpdated, &codepointUpdated);
-
-								if (showRangeColoring)
-								{
-									ImGui::PopStyleColor(3);
-								}
-
-								if (vProjectFile->m_FinalPane_ShowGlyphTooltip)
-								{
-									if (ImGui::IsItemHovered())
+									if (showRangeColoring)
 									{
-										ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nfont : %s",
-											glyphInfo->newHeaderName.c_str(),
-											glyphInfo->newCodePoint,
-											glyphInfo->oldHeaderName.c_str(),
-											glyphInfo->glyph.Codepoint,
-											vFontInfos->m_FontFileName.c_str());
+										ImGui::PopStyleColor(3);
 									}
-								}
 
-								lastGlyphCodePoint = glyphInfo->newCodePoint;
+									if (vProjectFile->m_FinalPane_ShowGlyphTooltip)
+									{
+										if (ImGui::IsItemHovered())
+										{
+											ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nfont : %s",
+												glyphInfo->newHeaderName.c_str(),
+												glyphInfo->newCodePoint,
+												glyphInfo->oldHeaderName.c_str(),
+												glyphInfo->glyph.Codepoint,
+												vFontInfos->m_FontFileName.c_str());
+										}
+									}
+
+									lastGlyphCodePoint = glyphInfo->newCodePoint;
+								}
+							}
+
+							if (nameUpdated)
+							{
+								PrepareSelectionByFontOrderedByGlyphNames(vProjectFile);
+								PrepareSelectionMergedOrderedByGlyphNames(vProjectFile);
+							}
+
+							if (codepointUpdated)
+							{
+								PrepareSelectionByFontOrderedByCodePoint(vProjectFile);
+								PrepareSelectionMergedOrderedByCodePoint(vProjectFile);
 							}
 						}
 
-						if (nameUpdated)
-						{
-							PrepareSelectionByFontOrderedByGlyphNames(vProjectFile);
-							PrepareSelectionMergedOrderedByGlyphNames(vProjectFile);
-						}
-
-						if (codepointUpdated)
-						{
-							PrepareSelectionByFontOrderedByCodePoint(vProjectFile);
-							PrepareSelectionMergedOrderedByCodePoint(vProjectFile);
-						}
+						if (vWithFramedGroup)
+							ImGui::EndFramedGroup();
 					}
-
-					if (vWithFramedGroup)
-						ImGui::EndFramedGroup();
 				}
 			}
 		}
 	}
 }
-
 
 void FinalFontPane::PrepareSelectionMergedNoOrder(ProjectFile *vProjectFile)
 {

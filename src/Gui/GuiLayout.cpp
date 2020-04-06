@@ -91,7 +91,8 @@ void GuiLayout::ApplyInitialDockingLayout(ImVec2 vSize)
 	ImGui::DockBuilderDockWindow(FINAL_PANE, dockMainID);
 	ImGui::DockBuilderDockWindow(GENERATOR_PANE, dockRightID); // dockGeneratorID
 	ImGui::DockBuilderDockWindow(CURRENT_FONT_PANE, dockRightID); // dockSelectionID
-	
+	ImGui::DockBuilderDockWindow(GLYPH_PANE, dockMainID);
+
 	ImGui::DockBuilderFinish(m_DockSpaceID);
 
 	m_Pane_Shown = PaneFlags::PANE_ALLS;
@@ -113,7 +114,8 @@ void GuiLayout::DisplayMenu(ImVec2 vSize)
 		ImGui::MenuItem<PaneFlags>("Show/Hide Selected Font Pane", "", &m_Pane_Shown, PaneFlags::PANE_SELECTED_FONT);
 		ImGui::MenuItem<PaneFlags>("Show/Hide Final Pane", "", &m_Pane_Shown, PaneFlags::PANE_FINAL);
 		ImGui::MenuItem<PaneFlags>("Show/Hide Generator Pane", "", &m_Pane_Shown, PaneFlags::PANE_GENERATOR);
-		
+		ImGui::MenuItem<PaneFlags>("Show/Hide Glyph Pane", "", &m_Pane_Shown, PaneFlags::PANE_GLYPH);
+
 		ImGui::EndMenu();
 	}
 }

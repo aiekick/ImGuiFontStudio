@@ -88,30 +88,6 @@ int GeneratorPane::DrawGeneratorPane(ProjectFile *vProjectFile, int vWidgetId)
 				{
 					SelectionHelper::Instance()->DrawMenu(vProjectFile);
 
-#ifdef _DEBUG
-					/*if (ImGui::BeginFramedGroup("Debug - Quick menu"))
-					{
-						if (ImGui::Button("Generate Font Solo "))
-						{
-							auto rerange = vProjectFile->m_ReRangeGlyphs;
-							vProjectFile->m_ReRangeGlyphs = false;
-							Generator::Instance()->GenerateFontFile("test.ttf", vProjectFile);
-							SourceFontPane::Instance()->OpenFont(vProjectFile, "test.ttf", false); // directly load the generated font file
-							vProjectFile->m_ReRangeGlyphs = rerange;
-						}
-						if (ImGui::Button("Generate Font Merged "))
-						{
-							auto rerange = vProjectFile->m_ReRangeGlyphs;
-							vProjectFile->m_ReRangeGlyphs = false;
-							Generator::Instance()->GenerateFontFile("test.ttf", vProjectFile);
-							SourceFontPane::Instance()->OpenFont(vProjectFile, "test.ttf", false); // directly load the generated font file
-							vProjectFile->m_ReRangeGlyphs = rerange;
-						}
-												
-						ImGui::EndFramedGroup(true);
-					}*/
-#endif
-
 					GeneratorPane_WidgetId = DrawFontsGenerator(vProjectFile, GeneratorPane_WidgetId);
 				}
 			}

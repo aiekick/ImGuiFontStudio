@@ -87,16 +87,30 @@ namespace ImGui
 	}
 	template<typename T> 
 	IMGUI_API bool MenuItem(
-		const char* label, const char *shortcut, T *vContainer, T vFlag, bool enabled = true)
+		const char* label, const char *shortcut, T *vContainer, T vFlag, bool vOnlyOneSameTime = false)
 	{
-		bool check = *vContainer & vFlag;
-		bool res = MenuItem(label, shortcut, &check, enabled);
+		bool selected = *vContainer & vFlag;
+		bool res = MenuItem(label, shortcut, &selected, true);
 		if (res)
 		{
-			if (check)
-				*vContainer = (T)(*vContainer | vFlag);// add
+			if (selected)
+			{
+				if (vOnlyOneSameTime)
+				{
+					*vContainer = vFlag; // set
+				}
+				else
+				{
+					*vContainer = (T)(*vContainer | vFlag);// add
+				}
+			}
 			else
-				*vContainer = (T)(*vContainer & ~vFlag); // remove
+			{
+				if (!vOnlyOneSameTime)
+				{
+					*vContainer = (T)(*vContainer & ~vFlag); // remove
+				}
+			}
 		}
 		return res;
 	}
