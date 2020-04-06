@@ -1,0 +1,171 @@
+addExtension ttf
+
+// big endian standard
+import bestd
+
+class TTFFile as File
+{
+	// header
+	uint(32) scalerType;
+	uint(16) numTables;
+	uint(16) searchRange;
+	uint(16) entrySelector;
+	uint(16) rangeShift;
+	var rootPos = @pos;
+	Table table[numTables];
+	// table datas
+	var numGlyphs = 0;
+	for (var i=0;i<numTables;i++)
+	{
+		if (table[i].tag == "head")
+		{
+			@pos = table[i].offset * 8;
+			headTable(@pos) *;
+		}
+		if (table[i].tag == "maxp")
+		{
+			@pos = table[i].offset * 8;
+			maxpTable(@pos) *;
+			numGlyphs = [].numGlyphs;
+		}
+		if (table[i].tag == "post")
+		{
+			@pos = table[i].offset * 8;
+			postTable(@pos, numGlyphs) *;
+		}
+		if (table[i].tag == "cmap")
+		{
+			@pos = table[i].offset * 8;
+			cmapTable(@pos) *;
+		}
+	}
+}
+
+class cmapTable(pos)
+{
+	@value = @args.pos;
+	uint(16) version;
+	uint(16) numberSubtables;
+	cmapSubTable subTables[numberSubtables];
+}
+
+class cmapSubTable()
+{
+	uint(16) platformID;
+	uint(16) platformSpecificID;
+	uint(32) offset;
+	uint(16) format;
+	uint(16) length;
+	if (format == 0)
+	{
+		uint(16) language;
+		uint(8) glyphIndexArray[256];
+	}
+	else if (format == 2)
+	{
+		
+	}
+}
+
+class Table()
+{
+	String(4) tag;
+	uint(32) checkSum;
+	uint(32) offset;
+	uint(32) length;
+	@value = tag;
+}
+
+class headTable(pos)
+{
+	@value = @args.pos;
+	int(16) version;
+	int(16) fontRevision;
+	uint(32) checkSumAdjustment;
+	uint(32) magicNumber;
+	Bitset(16) flags;
+	uint(16) unitsPerEm;
+	int(64) created;
+	int(64) modified;
+	int(16) xMin;
+	int(16) yMin;
+	int(16) xMax;
+	int(16) yMax;
+	Bitset(16) macStyle;
+	uint(16) lowestRecPPEM;
+	int(16) fontDirectionHint;
+	int(16) indexToLocFormat;
+	int(16) glyphDataFormat;
+}
+
+class Fixed
+{
+	int(16) high;
+	int(16) low;
+	@value = %str(high) + "." + %str(low);
+}
+
+class FWord
+{
+	int(16) v;
+	@value = v;
+}
+
+class maxpTable(pos)
+{
+	@value = @args.pos;
+	Fixed version;
+	uint(16) numGlyphs;
+	uint(16) maxPoints;
+	uint(16) maxContours;
+	uint(16) maxComponentPoints;
+	uint(16) maxComponentContours;
+	uint(16) maxZones;
+	uint(16) maxTwilightPoints;
+	uint(16) maxStorage;
+	uint(16) maxFunctionDefs;
+	uint(16) maxInstructionDefs;
+	uint(16) maxStackElements;
+	uint(16) maxSizeOfInstructions;
+	uint(16) maxComponentElements;
+	uint(16) maxComponentDepth;
+}
+
+class postTable(pos, numGlyphs)
+{
+	@value = @args.pos;
+	Fixed format;
+	Fixed italicAngle;
+	FWord underlinePosition;
+	FWord underlineThickness;
+	uint(32) isFixedPitch;
+	uint(32) minMemType42;
+	uint(32) maxMemType42;
+	uint(32) minMemType1;
+	uint(32) maxMemType1;
+	if (format.high == 2)
+	{
+		postTableF2(@args.numGlyphs) *;
+	}
+}
+
+class postTableF2
+{
+	uint(16) numberOfGlyphs;
+	if (numberOfGlyphs > 0)
+	{
+		uint(16) glyphNameIndex[numberOfGlyphs];
+		uint(8) space;
+		postString names[numberOfGlyphs];
+	}
+}
+
+class postString
+{
+	uint(8) len;
+	if (len > 0)
+	{
+		String(len) name;
+		@value = name;
+	}
+}

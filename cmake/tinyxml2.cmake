@@ -1,0 +1,6 @@
+file(GLOB TINYXML2_FILES ${CMAKE_SOURCE_DIR}/3rdparty/tinyxml2/tinyxml2.h ${CMAKE_SOURCE_DIR}/3rdparty/tinyxml2/tinyxml2.cpp)
+add_library(tinyxml2 STATIC ${TINYXML2_FILES})
+set_target_properties(tinyxml2 PROPERTIES LINKER_LANGUAGE CXX)
+set_target_properties(tinyxml2 PROPERTIES FOLDER 3rdparty)
+set(TINYXML2_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/tinyxml2)
+set(TINYXML2_LIBRARIES tinyxml2)
