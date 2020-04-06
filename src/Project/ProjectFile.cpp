@@ -1,0 +1,324 @@
+// This is an open source non-commercial project. Dear PVS-Studio, please check it.
+// PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
+
+/*
+ * Copyright 2020 Stephane Cuillerdier (aka Aiekick)
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *      http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+#include "ProjectFile.h"
+
+#include "Helper/Messaging.h"
+#include "Helper/SelectionHelper.h"
+
+#include <FileHelper.h>
+
+ProjectFile::ProjectFile()
+{
+
+}
+
+ProjectFile::ProjectFile(const std::string& vFilePathName)
+{
+	m_ProjectFilePathName = FileHelper::Instance()->SimplifyFilePath(vFilePathName);
+	auto ps = FileHelper::Instance()->ParsePathFileName(m_ProjectFilePathName);
+	if (ps.isOk)
+	{
+		m_ProjectFilePath = ps.path;
+	}
+}
+
+ProjectFile::~ProjectFile()
+{
+	
+}
+
+void ProjectFile::Clear()
+{
+	m_ProjectFilePathName.clear();
+	m_ProjectFilePath.clear();
+	m_MergedFontPrefix.clear();
+	m_Fonts.clear();
+	m_ShowRangeColoring = false;
+	m_RangeColoringHash = ImVec4(10, 15, 35, 0.5f);
+	m_Preview_Glyph_CountX = 20;
+	m_CurrentFont = 0;
+	m_CountSelectedGlyphs = 0; // for all fonts
+	m_IsLoaded = false;
+	m_IsThereAnyNotSavedChanged = false;
+	m_GenMode = (GenModeFlags)(
+		GenModeFlags::GENERATOR_MODE_CURRENT_HEADER |
+		GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES |
+		GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
+
+	Messaging::Instance()->Clear();
+}
+
+void ProjectFile::New()
+{
+	Clear();
+	m_IsLoaded = true;
+	m_NeverSaved = true;
+}
+
+void ProjectFile::New(const std::string& vFilePathName)
+{
+	Clear();
+	m_ProjectFilePathName = FileHelper::Instance()->SimplifyFilePath(vFilePathName);
+	auto ps = FileHelper::Instance()->ParsePathFileName(m_ProjectFilePathName);
+	if (ps.isOk)
+	{
+		m_ProjectFilePath = ps.path;
+	}
+	m_IsLoaded = true;
+	SetProjectChange(false);
+}
+
+bool ProjectFile::Load()
+{
+	return LoadAs(m_ProjectFilePathName);
+}
+
+bool ProjectFile::LoadAs(const std::string& vFilePathName)
+{
+	Clear();
+	std::string filePathName = FileHelper::Instance()->SimplifyFilePath(vFilePathName);
+	if (LoadConfigFile(filePathName))
+	{
+		m_ProjectFilePathName = filePathName;
+		auto ps = FileHelper::Instance()->ParsePathFileName(m_ProjectFilePathName);
+		if (ps.isOk)
+		{
+			m_ProjectFilePath = ps.path;
+		}
+		m_IsLoaded = true;
+		SetProjectChange(false);
+	}
+	else
+	{
+		Clear();
+	}
+
+	return m_IsLoaded;
+}
+
+bool ProjectFile::Save()
+{
+	if (m_NeverSaved) 
+		return false;
+
+	if (SaveConfigFile(m_ProjectFilePathName))
+	{
+		SetProjectChange(false);
+		return true;
+	}
+
+	return false;
+}
+
+bool ProjectFile::SaveAs(const std::string& vFilePathName)
+{
+	std::string filePathName = FileHelper::Instance()->SimplifyFilePath(vFilePathName);
+	auto ps = FileHelper::Instance()->ParsePathFileName(filePathName);
+	if (ps.isOk)
+	{
+		m_ProjectFilePathName = FileHelper::Instance()->ComposePath(ps.path, ps.name, "ifs");
+		m_ProjectFilePath = ps.path;
+		m_NeverSaved = false;
+		return Save();
+	}
+	return false;
+}
+
+bool ProjectFile::IsLoaded()
+{
+	return m_IsLoaded;
+}
+
+bool ProjectFile::IsThereAnyNotSavedChanged()
+{
+	return m_IsThereAnyNotSavedChanged;
+}
+
+void ProjectFile::SetProjectChange(bool vChange)
+{
+	m_IsThereAnyNotSavedChanged = vChange;
+}
+
+void ProjectFile::UpdateCountSelectedGlyphs()
+{
+	m_CountSelectedGlyphs = 0;
+	m_CountFontWithSelectedGlyphs = 0;
+
+	for (auto &it : m_Fonts)
+	{
+		m_CountSelectedGlyphs += it.second.m_SelectedGlyphs.size();
+		if (!it.second.m_SelectedGlyphs.empty())
+		{
+			m_CountFontWithSelectedGlyphs++;
+		}
+	}
+
+	SelectionHelper::Instance()->AnalyseSourceSelection(this);
+}
+
+bool ProjectFile::IsRangeColorignShown()
+{
+	return m_ShowRangeColoring || SelectionHelper::Instance()->IsSelectionType(GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_RANGE);
+}
+
+std::string ProjectFile::GetAbsolutePath(const std::string& vFilePathName)
+{
+	std::string res = vFilePathName;
+
+	if (!vFilePathName.empty())
+	{
+		if (!FileHelper::Instance()->IsAbsolutePath(vFilePathName)) // relative
+		{
+			res = FileHelper::Instance()->SimplifyFilePath(
+				m_ProjectFilePath + FileHelper::Instance()->m_SlashType + vFilePathName);
+		}
+	}
+
+	return res;
+}
+
+std::string ProjectFile::GetRelativePath(const std::string& vFilePathName)
+{
+	std::string res = vFilePathName;
+
+	if (!vFilePathName.empty())
+	{
+		res = FileHelper::Instance()->GetRelativePathToPath(vFilePathName, m_ProjectFilePath);
+	}
+
+	return res;
+}
+
+std::string ProjectFile::getXml(const std::string& vOffset)
+{
+	std::string str;
+
+	str += vOffset + "<project>\n";
+
+	if (!m_Fonts.empty())
+	{
+		for (auto &it : m_Fonts)
+		{
+			str += it.second.getXml(vOffset + "\t");
+		}
+	}
+
+	str += vOffset + "\t<rangecoloring show=\"" + 
+		(m_ShowRangeColoring ? "true" : "false") + "\" hash=\"" + 
+		ct::fvec4(m_RangeColoringHash).string() + "\"/>\n";
+
+	str += vOffset + "\t<countglyph_x>" + ct::toStr(m_Preview_Glyph_CountX) + "</countglyph_x>\n";
+	str += vOffset + "\t<mergedfontprefix>" + m_MergedFontPrefix + "</mergedfontprefix>\n";
+	
+	str += vOffset + "\t<genmode>" + ct::toStr(m_GenMode) + "</genmode>\n";
+	
+	str += vOffset + "</project>\n";
+
+	return str;
+}
+
+void ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent)
+{
+	// The value of this child identifies the name of this element
+	std::string strName = "";
+	std::string strValue = "";
+	std::string strParentName = "";
+
+	strName = vElem->Value();
+	if (vElem->GetText())
+		strValue = vElem->GetText();
+	if (vParent != 0)
+		strParentName = vParent->Value();
+
+	if (strName == "project")
+	{
+		for (tinyxml2::XMLElement* child = vElem->FirstChildElement(); child != 0; child = child->NextSiblingElement())
+		{
+			RecursParsingConfig(child->ToElement(), vElem);
+		}
+	}
+
+	if (strParentName == "project")
+	{
+		if (strName == "font")
+		{
+			FontInfos f;
+			f.setFromXml(vElem, vParent);
+			if (!f.m_FontFileName.empty())
+			{
+				m_Fonts[f.m_FontFileName] = f;
+			}
+		}
+		else if (strName == "rangecoloring")
+		{
+			for (const tinyxml2::XMLAttribute* attr = vElem->FirstAttribute(); attr != 0; attr = attr->Next())
+			{
+				std::string attName = attr->Name();
+				std::string attValue = attr->Value();
+
+				if (attName == "show")
+					m_ShowRangeColoring = ct::ivariant(attValue).getB();
+				else if (attName == "hash")
+					m_RangeColoringHash = ct::toImVec4(ct::fvariant(attValue).getV4());
+			}
+		}
+		else if (strName == "countglyph_x")
+			m_Preview_Glyph_CountX = ct::ivariant(strValue).getI();
+		else if (strName == "mergedfontprefix")
+			m_MergedFontPrefix = strValue;
+		else if (strName == "genmode")
+			m_GenMode = (GenModeFlags)ct::ivariant(strValue).getI();
+	}
+}
+
+ImVec4 ProjectFile::GetColorFromInteger(int vInteger)
+{
+	ImVec4 res;
+
+	if (IsLoaded())
+	{
+		res.x = sinf(m_RangeColoringHash.x * (float)vInteger) * 0.5f + 0.5f;
+		res.y = sinf(m_RangeColoringHash.y * (float)vInteger) * 0.5f + 0.5f;
+		res.z = sinf(m_RangeColoringHash.z * (float)vInteger) * 0.5f + 0.5f;
+		res.w = m_RangeColoringHash.w;
+	}
+
+	return res;
+}
+
+void ProjectFile::AddGenMode(GenModeFlags vFlags)
+{
+	m_GenMode = (GenModeFlags)(m_GenMode | vFlags);
+}
+
+void ProjectFile::RemoveGenMode(GenModeFlags vFlags)
+{
+	m_GenMode = (GenModeFlags)(m_GenMode & ~vFlags);
+}
+
+GenModeFlags ProjectFile::GetGenMode()
+{
+	return m_GenMode;
+}
+
+ bool ProjectFile::IsGenMode(GenModeFlags vFlags)
+{
+	return m_GenMode & vFlags;
+}
+
