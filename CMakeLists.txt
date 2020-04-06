@@ -15,33 +15,14 @@ include(cmake/3rdparty.cmake)
 if(UNIX)
     if(APPLE)
         add_definitions(-DAPPLE)
-		##set(ICON icon.icns)
-		##set_source_files_properties(icon.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
-		set_target_properties(${PROJECT}
-			PROPERTIES
-			OUTPUT_NAME "ImGuiFontStudio_Gcc_Osx"
-			MACOSX_BUNDLE_EXECUTABLE_NAME "ImGuiFontStudio_Gcc_Osx"
-			MACOSX_BUNDLE_BUNDLE_NAME "ImGuiFontStudio_Gcc_Osx"
-			FOLDER "ImGuiFontStudio_Gcc_Osx"
-			##RESOURCE icon.icns
-			MACOSX_BUNDLE_SHORT_VERSION_STRING "0.5"
-			MACOSX_BUNDLE_LONG_VERSION_STRING "Beta 0.5"
-			##MACOSX_BUNDLE_ICON_FILE icon.icns
-			MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/MacOSXBundleInfo.plist.in")
     else()
         add_definitions(-DLINUX)
-		set_target_properties(${PROJECT}
-			PROPERTIES
-			OUTPUT_NAME "ImGuiFontStudio_Gcc_Linux")
     endif()
     add_definitions(-DUNIX)
 elseif(WIN32)
     add_definitions(-DWIN32)
 	if(MINGW)
 		add_definitions(-DMINGW32)
-		set_target_properties(${PROJECT}
-			PROPERTIES
-			OUTPUT_NAME "ImGuiFontStudio_Gcc_Win32")
 	endif()
     set(DIRENT_INCLUDE_DIR ${CMAKE_SOURCE_DIR}/3rdparty/dirent/include)
     include_directories(${DIRENT_INCLUDE_DIR})
@@ -52,9 +33,6 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /IGNORE:4055")
     add_definitions(-D_USE_MATH_DEFINES)
     add_definitions(-DMSVC)
-	set_target_properties(${PROJECT}
-			PROPERTIES
-			OUTPUT_NAME "ImGuiFontStudio_Msvc_Win32")
 else ()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -std=c++11")
 endif ()
@@ -87,7 +65,6 @@ file(GLOB IMGUIFONTSTUDIO_PROJECT
 file(GLOB IMGUIFONTSTUDIO_PANES
 		${CMAKE_SOURCE_DIR}/src/Panes/*.cpp 
 		${CMAKE_SOURCE_DIR}/src/Panes/*.h)
-		
 source_group(src FILES ${IMGUIFONTSTUDIO_SRC})
 source_group(src\\Generator FILES ${IMGUIFONTSTUDIO_GENERATOR})
 source_group(src\\Helper FILES ${IMGUIFONTSTUDIO_HELPER})
@@ -96,6 +73,11 @@ source_group(src\\Panes FILES ${IMGUIFONTSTUDIO_PANES})
 source_group(src\\Project FILES ${IMGUIFONTSTUDIO_PROJECT})
 source_group(src\\Res FILES ${IMGUIFONTSTUDIO_RES})
 source_group(src\\Gui FILES ${IMGUIFONTSTUDIO_GUI})
+
+if (APPLE)
+	##set(ICON icon.icns)
+	##set_source_files_properties(icon.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
+endif()
 
 add_executable(${PROJECT}
 		MACOSX_BUNDLE
@@ -111,6 +93,39 @@ add_executable(${PROJECT}
 		${IMGUIFONTSTUDIO_PROJECT}
 		${IMGUIFONTSTUDIO_PANES}
 )
+
+if(UNIX)
+	if (APPLE)
+		set_target_properties(${PROJECT}
+			PROPERTIES
+			OUTPUT_NAME "ImGuiFontStudio_Gcc_Osx"
+			MACOSX_BUNDLE_EXECUTABLE_NAME "ImGuiFontStudio_Gcc_Osx"
+			MACOSX_BUNDLE_BUNDLE_NAME "ImGuiFontStudio_Gcc_Osx"
+			FOLDER "ImGuiFontStudio_Gcc_Osx"
+			##RESOURCE icon.icns
+			MACOSX_BUNDLE_SHORT_VERSION_STRING "0.5"
+			MACOSX_BUNDLE_LONG_VERSION_STRING "Beta 0.5"
+			##MACOSX_BUNDLE_ICON_FILE icon.icns
+			MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/MacOSXBundleInfo.plist.in")
+	else()
+		set_target_properties(${PROJECT}
+			PROPERTIES
+			OUTPUT_NAME "ImGuiFontStudio_Gcc_Linux")
+	endif()
+elseif(WIN32)
+	if(MINGW)
+		set_target_properties(${PROJECT}
+			PROPERTIES
+			OUTPUT_NAME "ImGuiFontStudio_Gcc_Win32")
+	elseif(MSVC)
+		set_target_properties(${PROJECT}
+			PROPERTIES
+			OUTPUT_NAME "ImGuiFontStudio_Msvc_Win32")
+	endif()
+endif()
+
+set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}")
+install(TARGETS ${PROJECT} DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 include_directories(
 		src
@@ -134,8 +149,6 @@ target_link_libraries(${PROJECT} PRIVATE
         ${CTOOLS_LIBRARIES}
 		${SFNTLY_LIBRARIES}
 		${SUBTLY_LIBRARIES}
+		${TINYXML2_LIBRARIES}
+		${IMGUIFILEDIALOG_LIBRARIES}
 )
-
-set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}")
-install(TARGETS ${PROJECT} DESTINATION ${CMAKE_INSTALL_PREFIX})
-
