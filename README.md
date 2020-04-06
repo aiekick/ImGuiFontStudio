@@ -52,7 +52,7 @@ ImGuiFontStudio if an open soruce software under [license apache 2.0](LICENSE)
 ## Library used :
 
 * [Glfw - ZLIB](http://www.glfw.org/)
-* [Dear ImGui - Docking branch - MIT](ghttps://github.com/ocornut/imgui)
+* [Dear ImGui - Docking branch - MIT](https://github.com/ocornut/imgui)
 * [Glad - MIT](https://github.com/Dav1dde/glad)
 * [Stb - MIT](https://github.com/nothings/stb)
 * [tinyxml2 - ZLIB]( https://github.com/leethomason/tinyxml2)
