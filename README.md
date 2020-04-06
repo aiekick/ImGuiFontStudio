@@ -14,7 +14,7 @@ bad optimization, or others bullshits :)
 Please send me your feedback.
 I enjoy all constructive comments and help is welcome.
 
-## the features :
+## The features :
 
 * can open ttf or otf font file
 * can subset font file (one file same time or by batch)
@@ -28,7 +28,7 @@ I enjoy all constructive comments and help is welcome.
 * Change / define ImGui app Theme
 * No lib, one executable only
 
-##Screenshot (with the default theme)
+## Screenshot (with the default theme)
 
 Main View : Source pane
 ![Source pane](doc/src.png)
@@ -39,7 +39,7 @@ Main View : Final pane with two fonts
 Main View : Final pane for edition
 ![Final pane for edition](doc/dst_edit.png)
 
-##Contributions / Issues / Features request
+## Contributions / Issues / Features request
 
 You can use the issue tab for report issues or for features request.
 
