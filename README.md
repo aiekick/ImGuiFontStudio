@@ -28,7 +28,7 @@ I enjoy all constructive comments and help is welcome.
 * Change / define ImGui app Theme
 * No lib, one executable only
 
-## Screenshot (with the default theme)
+## Screenshots (with the default theme)
 
 Main View : Source pane
 ![Source pane](doc/src.png)
