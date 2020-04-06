@@ -69,16 +69,26 @@ int SourceFontPane::DrawSourceFontPane(ProjectFile *vProjectFile, int vWidgetId)
 				{
 					if (ImGui::BeginMenuBar())
 					{
+						if (ImGui::BeginMenu("Infos"))
+						{
+							if (ImGui::MenuItem("Show Tooltip", "", &vProjectFile->m_SourcePane_ShowGlyphTooltip))
+							{
+								vProjectFile->SetProjectChange();
+							}
+
+							ImGui::EndMenu();
+						}
+
 						SelectionHelper::Instance()->DrawSelectionMenu(vProjectFile, SelectionContainerEnum::SELECTION_CONTAINER_SOURCE);
 
 						ImGui::EndMenuBar();
 					}
 
-					if (m_FontPaneFlags & FontPaneFlags::FONT_PANE_GLYPH)
+					if (m_FontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH)
 					{
 						DrawFontAtlas(vProjectFile, vProjectFile->m_CurrentFont);
 					}
-					else if (m_FontPaneFlags & FontPaneFlags::FONT_PANE_TEXTURE)
+					else if (m_FontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_TEXTURE)
 					{
 						DrawFontTexture(vProjectFile->m_CurrentFont);
 					}
@@ -198,15 +208,15 @@ int SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId)
 
 					if (ImGui::BeginFramedGroup("Pane Mode"))
 					{
-						ImGui::RadioButtonLabeled_BitWize<FontPaneFlags>(
+						ImGui::RadioButtonLabeled_BitWize<SourceFontPaneFlags>(
 							ICON_IGFS_GLYPHS " Glyphs", "Show Font Glyphs", 
-							&m_FontPaneFlags, FontPaneFlags::FONT_PANE_GLYPH, 0.0f, true); 
+							&m_FontPaneFlags, SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH, 0.0f, true);
 						
 						ImGui::SameLine();
 
-						ImGui::RadioButtonLabeled_BitWize<FontPaneFlags>(
+						ImGui::RadioButtonLabeled_BitWize<SourceFontPaneFlags>(
 							ICON_IGFS_TEXTURE " Texture", "Show Font Texture", 
-							&m_FontPaneFlags, FontPaneFlags::FONT_PANE_TEXTURE, 0.0f, true);
+							&m_FontPaneFlags, SourceFontPaneFlags::SOURCE_FONT_PANE_TEXTURE, 0.0f, true);
 						
 						ImGui::EndFramedGroup(true);
 					}
@@ -228,7 +238,7 @@ int SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId)
 							vProjectFile->SetProjectChange();
 						}
 
-						if (m_FontPaneFlags & FontPaneFlags::FONT_PANE_GLYPH)
+						if (m_FontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH)
 						{
 							bool change = ImGui::SliderInt("Width Count", &vProjectFile->m_Preview_Glyph_CountX, 50, 1);
 
@@ -383,10 +393,13 @@ void SourceFontPane::DrawFontAtlas(ProjectFile *vProjectFile, FontInfos *vFontIn
 							ImGui::PopStyleColor(3);
 						}
 
-						if (ImGui::IsItemHovered())
+						if (vProjectFile->m_SourcePane_ShowGlyphTooltip)
 						{
-							ImGui::SetTooltip("name : %s\ncodepoint : %u\nadv x : %.2f\nuv0 : (%.3f,%.3f)\nuv1 : (%.3f,%.3f)",
-								name.c_str(), glyph.Codepoint, glyph.AdvanceX, glyph.U0, glyph.V0, glyph.U1, glyph.V1);
+							if (ImGui::IsItemHovered())
+							{
+								ImGui::SetTooltip("name : %s\ncodepoint : %u\nadv x : %.2f\nuv0 : (%.3f,%.3f)\nuv1 : (%.3f,%.3f)",
+									name.c_str(), glyph.Codepoint, glyph.AdvanceX, glyph.U0, glyph.V0, glyph.U1, glyph.V1);
+							}
 						}
 
 						lastGlyphCodePoint = glyph.Codepoint;

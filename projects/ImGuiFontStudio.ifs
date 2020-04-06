@@ -24,6 +24,8 @@
 				<glyph orgId="61553" newId="61553" orgName="warning_sign" newName="warning"/>
 				<glyph orgId="61563" newId="61563" orgName="folder_close" newName="folder"/>
 				<glyph orgId="61564" newId="61564" orgName="folder_open" newName="folder_open"/>
+				<glyph orgId="61573" newId="61573" orgName="cogs" newName="generate"/>
+				<glyph orgId="61616" newId="61616" orgName="filter" newName="filter"/>
 				<glyph orgId="61618" newId="61618" orgName="fullscreen" newName="fullscreen"/>
 				<glyph orgId="61636" newId="61636" orgName="cut" newName="cut"/>
 				<glyph orgId="61637" newId="61637" orgName="copy" newName="copy"/>
@@ -44,14 +46,14 @@
 				<glyph orgId="62021" newId="62021" orgName="_545" newName="select"/>
 				<glyph orgId="62060" newId="62060" orgName="_582" newName="layout"/>
 			</glyphs>
-			<prefix>test</prefix>
-			<pathfilename>../samples_Fonts/fontawesome-webfont.ttf</pathfilename>
+			<prefix>IGFS</prefix>
+			<pathfilename>..\samples_Fonts\fontawesome-webfont.ttf</pathfilename>
 			<oversample>3</oversample>
 			<fontsize>20</fontsize>
 		</font>
 		<rangecoloring show="false" hash="42.606;14.789;27.817;0.5"/>
-		<countglyph_x>17</countglyph_x>
+		<countglyph_x>26</countglyph_x>
 		<mergedfontprefix>IGFS</mergedfontprefix>
-		<genmode>331</genmode>
+		<genmode>333</genmode>
 	</project>
 </config>

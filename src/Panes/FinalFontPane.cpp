@@ -119,6 +119,16 @@ int FinalFontPane::DrawFinalFontPane(ProjectFile *vProjectFile, int vWidgetId)
 							ImGui::EndMenu();
 						}
 
+						if (ImGui::BeginMenu("Infos"))
+						{
+							if (ImGui::MenuItem("Show Tooltip", "", &vProjectFile->m_FinalPane_ShowGlyphTooltip))
+							{
+								vProjectFile->SetProjectChange();
+							}
+							
+							ImGui::EndMenu();
+						}
+
 						SelectionHelper::Instance()->DrawSelectionMenu(vProjectFile, SelectionContainerEnum::SELECTION_CONTAINER_FINAL);
 
 						ImGui::Checkbox("Edit", &m_GlyphEdition);
@@ -544,16 +554,19 @@ void FinalFontPane::DrawSelectionsByFontNoOrder_OneFontOnly(
 							ImGui::PopStyleColor(3);
 						}
 
-						if (ImGui::IsItemHovered())
+						if (vProjectFile->m_FinalPane_ShowGlyphTooltip)
 						{
-							ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nadv x : %.2f\nuv0 : (%.3f,%.3f)\nuv1 : (%.3f,%.3f)",
-								glyphInfo->newHeaderName.c_str(),
-								glyphInfo->newCodePoint,
-								glyphInfo->oldHeaderName.c_str(),
-								glyphInfo->glyph.Codepoint,
-								glyphInfo->glyph.AdvanceX,
-								glyphInfo->glyph.U0, glyphInfo->glyph.V0,
-								glyphInfo->glyph.U1, glyphInfo->glyph.V1);
+							if (ImGui::IsItemHovered())
+							{
+								ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nadv x : %.2f\nuv0 : (%.3f,%.3f)\nuv1 : (%.3f,%.3f)",
+									glyphInfo->newHeaderName.c_str(),
+									glyphInfo->newCodePoint,
+									glyphInfo->oldHeaderName.c_str(),
+									glyphInfo->glyph.Codepoint,
+									glyphInfo->glyph.AdvanceX,
+									glyphInfo->glyph.U0, glyphInfo->glyph.V0,
+									glyphInfo->glyph.U1, glyphInfo->glyph.V1);
+							}
 						}
 
 						lastGlyphCodePoint = codePoint;
@@ -701,14 +714,17 @@ void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
 									ImGui::PopStyleColor(3);
 								}
 
-								if (ImGui::IsItemHovered())
+								if (vProjectFile->m_FinalPane_ShowGlyphTooltip)
 								{
-									ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nfont : %s",
-										glyphInfo->newHeaderName.c_str(),
-										glyphInfo->newCodePoint,
-										glyphInfo->oldHeaderName.c_str(),
-										glyphInfo->glyph.Codepoint,
-										vFontInfos->m_FontFileName.c_str());
+									if (ImGui::IsItemHovered())
+									{
+										ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nfont : %s",
+											glyphInfo->newHeaderName.c_str(),
+											glyphInfo->newCodePoint,
+											glyphInfo->oldHeaderName.c_str(),
+											glyphInfo->glyph.Codepoint,
+											vFontInfos->m_FontFileName.c_str());
+									}
 								}
 
 								lastGlyphCodePoint = codePoint;
@@ -853,14 +869,17 @@ void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(
 									ImGui::PopStyleColor(3);
 								}
 
-								if (ImGui::IsItemHovered())
+								if (vProjectFile->m_FinalPane_ShowGlyphTooltip)
 								{
-									ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nfont : %s",
-										glyphInfo->newHeaderName.c_str(),
-										glyphInfo->newCodePoint,
-										glyphInfo->oldHeaderName.c_str(),
-										glyphInfo->glyph.Codepoint,
-										vFontInfos->m_FontFileName.c_str());
+									if (ImGui::IsItemHovered())
+									{
+										ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nfont : %s",
+											glyphInfo->newHeaderName.c_str(),
+											glyphInfo->newCodePoint,
+											glyphInfo->oldHeaderName.c_str(),
+											glyphInfo->glyph.Codepoint,
+											vFontInfos->m_FontFileName.c_str());
+									}
 								}
 
 								lastGlyphCodePoint = glyphInfo->newCodePoint;
@@ -967,14 +986,17 @@ void FinalFontPane::DrawSelectionMergedNoOrder(ProjectFile *vProjectFile)
 							ImGui::PopStyleColor(3);
 						}
 
-						if (ImGui::IsItemHovered())
+						if (vProjectFile->m_FinalPane_ShowGlyphTooltip)
 						{
-							ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nfont : %s",
-								glyphInfo->newHeaderName.c_str(),
-								glyphInfo->newCodePoint,
-								glyphInfo->oldHeaderName.c_str(),
-								glyphInfo->glyph.Codepoint,
-								vFontInfos->m_FontFileName.c_str());
+							if (ImGui::IsItemHovered())
+							{
+								ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nfont : %s",
+									glyphInfo->newHeaderName.c_str(),
+									glyphInfo->newCodePoint,
+									glyphInfo->oldHeaderName.c_str(),
+									glyphInfo->glyph.Codepoint,
+									vFontInfos->m_FontFileName.c_str());
+							}
 						}
 
 						lastGlyphCodePoint = glyphInfo->newCodePoint;
@@ -1087,14 +1109,17 @@ void FinalFontPane::DrawSelectionMergedOrderedByCodePoint(ProjectFile *vProjectF
 								ImGui::PopStyleColor(3);
 							}
 
-							if (ImGui::IsItemHovered())
+							if (vProjectFile->m_FinalPane_ShowGlyphTooltip)
 							{
-								ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nfont : %s",
-									glyphInfo->newHeaderName.c_str(),
-									glyphInfo->newCodePoint,
-									glyphInfo->oldHeaderName.c_str(),
-									glyphInfo->glyph.Codepoint,
-									vFontInfos->m_FontFileName.c_str());
+								if (ImGui::IsItemHovered())
+								{
+									ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nfont : %s",
+										glyphInfo->newHeaderName.c_str(),
+										glyphInfo->newCodePoint,
+										glyphInfo->oldHeaderName.c_str(),
+										glyphInfo->glyph.Codepoint,
+										vFontInfos->m_FontFileName.c_str());
+								}
 							}
 
 							lastGlyphCodePoint = codePoint;
@@ -1206,14 +1231,17 @@ void FinalFontPane::DrawSelectionMergedOrderedByGlyphNames(ProjectFile *vProject
 								ImGui::PopStyleColor(3);
 							}
 
-							if (ImGui::IsItemHovered())
+							if (vProjectFile->m_FinalPane_ShowGlyphTooltip)
 							{
-								ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nfont : %s",
-									glyphInfo->newHeaderName.c_str(),
-									glyphInfo->newCodePoint,
-									glyphInfo->oldHeaderName.c_str(),
-									glyphInfo->glyph.Codepoint,
-									vFontInfos->m_FontFileName.c_str());
+								if (ImGui::IsItemHovered())
+								{
+									ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nfont : %s",
+										glyphInfo->newHeaderName.c_str(),
+										glyphInfo->newCodePoint,
+										glyphInfo->oldHeaderName.c_str(),
+										glyphInfo->glyph.Codepoint,
+										vFontInfos->m_FontFileName.c_str());
+								}
 							}
 
 							lastGlyphCodePoint = glyphInfo->newCodePoint;

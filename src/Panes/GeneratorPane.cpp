@@ -84,7 +84,7 @@ int GeneratorPane::DrawGeneratorPane(ProjectFile *vProjectFile, int vWidgetId)
 		{
 			if (vProjectFile && vProjectFile->IsLoaded())
 			{
-				if (SourceFontPane::Instance()->m_FontPaneFlags & SourceFontPane::FontPaneFlags::FONT_PANE_GLYPH)
+				if (SourceFontPane::Instance()->m_FontPaneFlags & SourceFontPane::SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH)
 				{
 					SelectionHelper::Instance()->DrawMenu(vProjectFile);
 

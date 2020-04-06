@@ -139,7 +139,7 @@ void MainFrame::Display(ImVec2 vSize)
 	widgetId = FinalFontPane::Instance()->DrawFinalFontPane(&m_ProjectFile, widgetId);
 	widgetId = FinalFontPane::Instance()->DrawCurrentFontPane(&m_ProjectFile, widgetId);
 	widgetId = GeneratorPane::Instance()->DrawGeneratorPane(&m_ProjectFile, widgetId);
-
+	
 	DisplayDialogsAndPopups();
 
 	GuiLayout::Instance()->InitAfterFirstDisplay(vSize);

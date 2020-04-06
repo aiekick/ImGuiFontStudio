@@ -60,6 +60,8 @@ void ProjectFile::Clear()
 		GenModeFlags::GENERATOR_MODE_CURRENT_HEADER |
 		GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES |
 		GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
+	m_SourcePane_ShowGlyphTooltip = true;
+	m_FinalPane_ShowGlyphTooltip = true;
 
 	Messaging::Instance()->Clear();
 }
@@ -225,7 +227,10 @@ std::string ProjectFile::getXml(const std::string& vOffset)
 
 	str += vOffset + "\t<countglyph_x>" + ct::toStr(m_Preview_Glyph_CountX) + "</countglyph_x>\n";
 	str += vOffset + "\t<mergedfontprefix>" + m_MergedFontPrefix + "</mergedfontprefix>\n";
-	
+
+	str += vOffset + "\t<srcglyphtooltip>" + (m_SourcePane_ShowGlyphTooltip ? "true" : "false") +"</srcglyphtooltip>\n";
+	str += vOffset + "\t<dstglyphtooltip>" + (m_FinalPane_ShowGlyphTooltip ? "true" : "false") +"</dstglyphtooltip>\n";
+
 	str += vOffset + "\t<genmode>" + ct::toStr(m_GenMode) + "</genmode>\n";
 	
 	str += vOffset + "</project>\n";
@@ -284,6 +289,10 @@ void ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 			m_MergedFontPrefix = strValue;
 		else if (strName == "genmode")
 			m_GenMode = (GenModeFlags)ct::ivariant(strValue).getI();
+		else if (strName == "srcglyphtooltip")
+			m_SourcePane_ShowGlyphTooltip = ct::ivariant(strValue).getB();
+		else if (strName == "dstglyphtooltip")
+			m_FinalPane_ShowGlyphTooltip = ct::ivariant(strValue).getB();
 	}
 }
 

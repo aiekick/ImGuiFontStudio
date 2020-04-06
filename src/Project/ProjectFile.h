@@ -37,6 +37,8 @@ public: // to save
 		GenModeFlags::GENERATOR_MODE_CURRENT_HEADER | 
 		GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES | 
 		GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
+	bool m_SourcePane_ShowGlyphTooltip = true;
+	bool m_FinalPane_ShowGlyphTooltip = true;
 
 public: // dont save
 	FontInfos *m_CurrentFont = 0;

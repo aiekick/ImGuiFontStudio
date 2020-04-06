@@ -94,7 +94,7 @@ void GuiLayout::ApplyInitialDockingLayout(ImVec2 vSize)
 	
 	ImGui::DockBuilderFinish(m_DockSpaceID);
 
-	m_Pane_Shown = (PaneFlags)(PANE_SELECTED_FONT | PANE_SOURCE | PANE_FINAL | PANE_PARAM | PANE_GENERATOR);
+	m_Pane_Shown = PaneFlags::PANE_ALLS;
 }
 
 void GuiLayout::DisplayMenu(ImVec2 vSize)
@@ -113,7 +113,7 @@ void GuiLayout::DisplayMenu(ImVec2 vSize)
 		ImGui::MenuItem<PaneFlags>("Show/Hide Selected Font Pane", "", &m_Pane_Shown, PaneFlags::PANE_SELECTED_FONT);
 		ImGui::MenuItem<PaneFlags>("Show/Hide Final Pane", "", &m_Pane_Shown, PaneFlags::PANE_FINAL);
 		ImGui::MenuItem<PaneFlags>("Show/Hide Generator Pane", "", &m_Pane_Shown, PaneFlags::PANE_GENERATOR);
-
+		
 		ImGui::EndMenu();
 	}
 }

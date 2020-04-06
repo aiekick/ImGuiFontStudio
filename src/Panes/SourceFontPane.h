@@ -28,12 +28,12 @@ struct ImGuiWindow;
 class SourceFontPane
 {
 public:
-	enum FontPaneFlags
+	enum SourceFontPaneFlags
 	{
-		FONT_PANE_NONE = 0,
-		FONT_PANE_GLYPH = (1 << 0),
-		FONT_PANE_TEXTURE = (1 << 1)
-	} m_FontPaneFlags = FontPaneFlags::FONT_PANE_GLYPH;
+		SOURCE_FONT_PANE_NONE = 0,
+		SOURCE_FONT_PANE_GLYPH = (1 << 0),
+		SOURCE_FONT_PANE_TEXTURE = (1 << 1)
+	} m_FontPaneFlags = SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH;
 
 public:
 	int DrawSourceFontPane(ProjectFile *vProjectFile, int vWidgetId);
