@@ -88,9 +88,6 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 						GenerateCodePointToGlypNamesDB();
 						GetInfos();
 
-						FontHelper fontHelper;
-						fontHelper.OpenFontFile(fontFilePathName, &m_FontInstance);
-						
 						// update glyph ptrs
 						for (auto &it : m_SelectedGlyphs)
 						{
@@ -270,77 +267,6 @@ void FontInfos::GetInfos()
 		stbtt_GetFontVMetrics(&fontInfo, &m_Ascent, &m_Descent, &m_LineGap);
 		stbtt_GetFontBoundingBox(&fontInfo, &m_BoundingBox.x, &m_BoundingBox.y, &m_BoundingBox.z, &m_BoundingBox.w);
 		m_Point = stbtt_ScaleForPixelHeight(&fontInfo, (float)m_FontSize);
-	}
-}
-
-void FontInfos::GetGlyphCurves(ImWchar vCodePoint)
-{
-	if (!m_ImFontAtlas.ConfigData.empty())
-	{
-		m_GlyphNames.clear();
-
-		stbtt_fontinfo fontInfo;
-		const int font_offset = stbtt_GetFontOffsetForIndex(
-			(unsigned char*)m_ImFontAtlas.ConfigData[0].FontData,
-			m_ImFontAtlas.ConfigData[0].FontNo);
-		if (stbtt_InitFont(&fontInfo, (unsigned char*)m_ImFontAtlas.ConfigData[0].FontData, font_offset))
-		{
-			int glyphIndex = stbtt_FindGlyphIndex(&fontInfo, vCodePoint);
-
-			// get table offet and length
-			// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html => Table Directory
-			stbtt_int32 num_tables = ttUSHORT(fontInfo.data + fontInfo.fontstart + 4);
-			stbtt_uint32 tabledir = fontInfo.fontstart + 12;
-			stbtt_uint32 tableMaxpPos = 0;
-			stbtt_uint32 tableMaxpLen = 0;
-			stbtt_uint32 tableGlyfPos = 0;
-			stbtt_uint32 tableGlyfLen = 0;
-			stbtt_uint32 tableLocaPos = 0;
-			stbtt_uint32 tableLocaLen = 0;
-			for (int i = 0; i < num_tables; ++i)
-			{
-				stbtt_uint32 loc = tabledir + 16 * i;
-				if (stbtt_tag(fontInfo.data + loc + 0, "maxp"))
-				{
-					tableMaxpPos = ttULONG(fontInfo.data + loc + 8);
-					tableMaxpLen = ttULONG(fontInfo.data + loc + 12);
-					continue;
-				}
-				if (stbtt_tag(fontInfo.data + loc + 0, "glyf"))
-				{
-					tableGlyfPos = ttULONG(fontInfo.data + loc + 8);
-					tableGlyfLen = ttULONG(fontInfo.data + loc + 12);
-					continue;
-				}
-				if (stbtt_tag(fontInfo.data + loc + 0, "loca"))
-				{
-					tableLocaPos = ttULONG(fontInfo.data + loc + 8);
-					tableLocaLen = ttULONG(fontInfo.data + loc + 12);
-					continue;
-				}
-			}
-			if (tableMaxpPos && tableGlyfPos && tableLocaPos)
-			{
-				stbtt_uint8 *maxpData = fontInfo.data + tableMaxpPos;//count glyphs
-				stbtt_uint8 *locaData = fontInfo.data + tableLocaPos;//glyphs offset
-				stbtt_uint8 *glyfData = fontInfo.data + tableGlyfPos;//glyphs data
-
-				stbtt_int16 numberOfContours = ttUSHORT(glyfData);
-				if (numberOfContours >= 0) // simple glyf
-				{
-					stbtt_int16	xMin = ttUSHORT(glyfData + 2);
-					stbtt_int16	yMin = ttUSHORT(glyfData + 4);
-					stbtt_int16	xMax = ttUSHORT(glyfData + 6);
-					stbtt_int16	yMax = ttUSHORT(glyfData + 8);
-
-					int i = 0;
-				}
-				else // compoind glyf
-				{
-
-				}
-			}
-		}
 	}
 }
 

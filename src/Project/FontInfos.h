@@ -19,7 +19,6 @@
 #include "tinyxml2/tinyxml2.h"
 
 #include "GlyphInfos.h"
-#include "Helper/FontHelper.h"
 
 #include <imgui.h>
 #include <string>
@@ -52,8 +51,7 @@ public: // not to save
 	ct::ivec4 m_BoundingBox;
 	float m_Point = 0.0f;
 	std::string m_FontFileName;
-	FontInstance m_FontInstance;
-
+	
 public: // to save
 	std::map<ImWchar, GlyphInfos> m_SelectedGlyphs;
 	std::string m_FontPrefix; // peut servir pour la generation par lot
@@ -72,9 +70,6 @@ private: // Glyph Names Extraction / DB
 	void FillGlyphNames();
 	void GenerateCodePointToGlypNamesDB();
 	void GetInfos();
-
-private: // glyph curves
-	void GetGlyphCurves(ImWchar vCodePoint);
 
 private: // Opengl Texture
 	void CreateFontTexture();
