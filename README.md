@@ -45,7 +45,7 @@ You can use the issue tab for report issues or for features request.
 
 ## License :
 
-ImGuiFontStudio if an open soruce software under [license apache 2.0](LICENE)
+ImGuiFontStudio if an open soruce software under [license apache 2.0](LICENSE)
  
 ## Library used :
 
