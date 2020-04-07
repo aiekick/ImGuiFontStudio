@@ -260,8 +260,22 @@ bool FinalFontPane::IsFinalFontPaneMode(FinalFontPaneModeFlags vFinalFontPaneMod
 	return (m_FinalFontPaneModeFlags & vFinalFontPaneModeFlags);
 }
 
+bool FinalFontPane::IsCurrentFontPaneMode(CurrentFontPaneModeFlags vCurrentFontPaneModeFlags)
+{
+	return (m_CurrentFontPaneModeFlags & vCurrentFontPaneModeFlags);
+}
+
 void FinalFontPane::PrepareSelection(ProjectFile *vProjectFile)
 {
+	if (IsCurrentFontPaneMode(CurrentFontPaneModeFlags::CURRENT_FONT_PANE_ORDERED_BY_CODEPOINT))
+	{
+		PrepareSelectionByFontOrderedByCodePoint(vProjectFile);
+	}
+	else if (IsCurrentFontPaneMode(CurrentFontPaneModeFlags::CURRENT_FONT_PANE_ORDERED_BY_NAMES))
+	{
+		PrepareSelectionByFontOrderedByGlyphNames(vProjectFile);
+	}
+
 	if (IsFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_NO_ORDER))
 	{
 		// nothing to prepare becasue this is the default view => pointed on FontInfos->m_SelectedGlyphs
@@ -356,7 +370,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 		{
 			if (vForceEditMode)
 			{
-				GlyphPane::Instance()->LoadGlyph(vProjectFile, vFontInfos, vGlyph->glyph.Codepoint);
+				GlyphPane::Instance()->LoadGlyph(vProjectFile, vFontInfos, vGlyph);
 			}
 			else
 			{

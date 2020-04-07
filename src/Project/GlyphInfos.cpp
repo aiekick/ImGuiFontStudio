@@ -18,6 +18,80 @@
  */
 #include "GlyphInfos.h"
 
+ //////////////////////////////////////////////////////////
+ //////////////////////////////////////////////////////////
+ //////////////////////////////////////////////////////////
+
+void SimpleGlyph_Solo::clear()
+{
+	coords.clear();
+	onCurve.clear();
+	isValid = false;
+	rc = 0;
+}
+
+void SimpleGlyph_Solo::LoadSimpleGlyph(sfntly::GlyphTable::SimpleGlyph *vGlyph)
+{
+	if (vGlyph)
+	{
+		vGlyph->Initialize();
+		clear();
+		int cmax = vGlyph->NumberOfContours();
+		for (int c = 0; c < cmax; c++)
+		{
+			onCurve.push_back(std::vector<bool>());
+			coords.push_back(std::vector<ct::ivec2>());
+			int pmax = vGlyph->numberOfPoints(c);
+			for (int p = 0; p < pmax; p++)
+			{
+				int32_t x = vGlyph->xCoordinate(c, p);
+				int32_t y = vGlyph->yCoordinate(c, p);
+				coords[c].push_back(ct::ivec2(x, y));
+				bool oc = vGlyph->onCurve(c, p);
+				onCurve[c].push_back(oc);
+			}
+		}
+		isValid = !coords.empty();
+		rc.x = vGlyph->XMin();
+		rc.y = vGlyph->YMin();
+		rc.z = vGlyph->XMax();
+		rc.w = vGlyph->YMax();
+	}
+}
+
+int SimpleGlyph_Solo::GetCountContours()
+{
+	return (int)coords.size();
+}
+
+ct::ivec2 SimpleGlyph_Solo::GetCoords(int32_t vContour, int32_t vPoint)
+{
+	int count = (int)coords[vContour].size();
+	return coords[vContour][vPoint % count];
+}
+
+bool SimpleGlyph_Solo::IsOnCurve(int32_t vContour, int32_t vPoint)
+{
+	int count = (int)coords[vContour].size();
+	return onCurve[vContour][vPoint % count];
+}
+
+ct::ivec2 SimpleGlyph_Solo::Scale(ct::ivec2 p, double scale)
+{
+	return ct::ivec2(
+		(int)round(scale * ((double)p.x - (double)rc.x)),
+		(int)round(scale * ((double)rc.w - (double)p.y)));
+}
+
+ct::ivec2 SimpleGlyph_Solo::GetCoords(int32_t vContour, int32_t vPoint, double scale)
+{
+	return Scale(GetCoords(vContour, vPoint), scale);
+}
+
+//////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////
+
 GlyphInfos::GlyphInfos()
 {
 	glyph.AdvanceX = 0;

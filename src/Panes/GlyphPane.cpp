@@ -85,7 +85,6 @@ int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
 		{
 			if (vProjectFile && vProjectFile->IsLoaded())
 			{
-				
 				if (ImGui::BeginMenuBar())
 				{
 					ImGui::PushItemWidth(100.0f);
@@ -98,7 +97,7 @@ int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
 					ImGui::EndMenuBar();
 				}
 
-				DrawSimpleGlyph(m_SimpleGlyph, vProjectFile->m_CurrentFont, _scale, _progress, _stroke, _controLines);
+				DrawSimpleGlyph(m_Glyph, vProjectFile->m_CurrentFont, _scale, _progress, _stroke, _controLines);
 			}
 		}
 
@@ -116,11 +115,11 @@ int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
 
 static int limitContour = 0;
 
-bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, ImWchar vCodepoint)
+bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, GlyphInfos *vGlyphInfos)
 {
 	bool res = false;
 
-	if (vFontInfos)
+	if (vFontInfos && vGlyphInfos)
 	{
 		std::string fontPathName = vProjectFile->GetAbsolutePath(vFontInfos->m_FontFilePathName);
 
@@ -140,7 +139,8 @@ bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, ImWc
 
 					if (m_fontInstance.m_GlyfTable && m_fontInstance.m_LocaTable)
 					{
-						int32_t glyphId = m_fontInstance.m_CMapTable->GlyphId(vCodepoint);
+						int codePoint = vGlyphInfos->glyph.Codepoint;
+						int32_t glyphId = m_fontInstance.m_CMapTable->GlyphId(codePoint);
 						int32_t length = m_fontInstance.m_LocaTable->GlyphLength(glyphId);
 						int32_t offset = m_fontInstance.m_LocaTable->GlyphOffset(glyphId);
 
@@ -149,14 +149,15 @@ bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, ImWc
 						
 						if (g->GlyphType() == sfntly::GlyphType::kSimple)
 						{
-							m_SimpleGlyph = down_cast<sfntly::GlyphTable::SimpleGlyph*>(g);
-							if (m_SimpleGlyph)
+							auto glyph = down_cast<sfntly::GlyphTable::SimpleGlyph*>(g);
+							if (glyph)
 							{
-								limitContour = m_SimpleGlyph->NumberOfContours();
+								vGlyphInfos->simpleGlyph.LoadSimpleGlyph(glyph);
+								limitContour = vGlyphInfos->simpleGlyph.GetCountContours();
+								m_Glyph = vGlyphInfos;
+								res = true;
 							}
 						}
-						
-						res = true;
 					}
 				}
 			}
@@ -167,10 +168,10 @@ bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, ImWc
 }
 
 // https://github.com/rillig/sfntly/tree/master/java/src/com/google/typography/font/tools/fontviewer
-bool GlyphPane::DrawSimpleGlyph(sfntly::Ptr<sfntly::GlyphTable::SimpleGlyph> vSimpleGlyph, FontInfos* vFontInfos,
-	float vScale, float vProgress, bool vFill, bool vControlLines)
+bool GlyphPane::DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
+	double vScale, double vProgress, bool vFill, bool vControlLines)
 {
-	if (vSimpleGlyph && vFontInfos)
+	if (vGlyph && vFontInfos)
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (window->SkipItems)
@@ -179,130 +180,133 @@ bool GlyphPane::DrawSimpleGlyph(sfntly::Ptr<sfntly::GlyphTable::SimpleGlyph> vSi
 
 		/////////////////////////////////////////////////
 
-		int MARGIN = 10;
-
-		int cmax = vSimpleGlyph->NumberOfContours();
-		
-		ImVec2 contentSize = ImGui::GetContentRegionMax();
-		ImRect glypRect = ImRect(
-			vSimpleGlyph->XMin() * vScale, vSimpleGlyph->YMin() * vScale, 
-			vSimpleGlyph->XMax() * vScale, vSimpleGlyph->YMax() * vScale);
-		ImVec2 glyphCenter = glypRect.GetCenter();
-		ImVec2 pos = ImGui::GetCursorScreenPos() + contentSize * 0.5f - glyphCenter;
-		
-		if (ImGui::BeginMenuBar())
+		auto g = &vGlyph->simpleGlyph;
+		if (g->isValid)
 		{
-			ImGui::PushItemWidth(100.0f);
-			ImGui::SliderInt("Contours", &limitContour, 0, cmax);
-			ImGui::PopItemWidth();
+			int cmax = (int)g->coords.size();
+			ct::ivec4 rc = g->rc;
 
-			ImGui::EndMenuBar();
-		}
+			ImVec2 contentSize = ImGui::GetContentRegionMax();
+			ImRect glypRect = ImRect(
+				rc.x * vScale, rc.y * vScale,
+				rc.z * vScale, rc.w * vScale);
+			ImVec2 glyphCenter = glypRect.GetCenter();
+			ImVec2 pos = ImGui::GetCursorScreenPos() + contentSize * 0.5f - glyphCenter;
 
-		for (int c = 0; c < cmax; c++)
-		{
-			if (c >= limitContour) break;
+			if (ImGui::BeginMenuBar())
+			{
+				ImGui::PushItemWidth(100.0f);
+				ImGui::SliderInt("Contours", &limitContour, 0, cmax);
+				ImGui::PopItemWidth();
 
-			ScreenCoordinateMapper screen(vSimpleGlyph, c, MARGIN, vScale, vSimpleGlyph->XMin(), vSimpleGlyph->YMax());
-			
+				ImGui::EndMenuBar();
+			}
+
+			// x 0
 			drawList->AddLine(
-				ImVec2(screen.x(vSimpleGlyph->XMin()), screen.y(vFontInfos->m_Ascent)) + pos,
-				ImVec2(screen.x(vSimpleGlyph->XMax()), screen.y(vFontInfos->m_Ascent)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2(0, rc.y), vScale)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2(0, rc.w), vScale)) + pos,
+				ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), 2.0f);
+
+			// Ascent
+			drawList->AddLine(
+				ct::toImVec2(g->Scale(ct::ivec2(rc.x, vFontInfos->m_Ascent), vScale)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2(rc.z, vFontInfos->m_Ascent), vScale)) + pos,
 				ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
-			
+
+			// y 0
 			drawList->AddLine(
-				ImVec2(screen.x(vSimpleGlyph->XMin()), screen.y(0)) + pos,
-				ImVec2(screen.x(vSimpleGlyph->XMax()), screen.y(0)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2(rc.x, 0), vScale)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2(rc.z, 0), vScale)) + pos,
 				ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 1.0f);
-			
+
+			// Descent
 			drawList->AddLine(
-				ImVec2(screen.x(vSimpleGlyph->XMin()), screen.y(vFontInfos->m_Descent)) + pos,
-				ImVec2(screen.x(vSimpleGlyph->XMax()), screen.y(vFontInfos->m_Descent)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2(rc.x, vFontInfos->m_Descent), vScale)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2(rc.z, vFontInfos->m_Descent), vScale)) + pos,
 				ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
 
-			int pmax = vSimpleGlyph->numberOfPoints(c);
-
-			int firstOn = 0;
-			for (int p = 0; p < pmax; p++)
+			for (int c = 0; c < cmax; c++)
 			{
-				if (screen.onCurve(p))
-				{
-					firstOn = p;
-					break;
-				}
-			}
+				if (c >= limitContour) break;
 
-			// curve
+				int pmax = (int)g->coords[c].size();
 
-			drawList->PathLineTo(ImVec2(screen.cx(firstOn), screen.cy(firstOn)) + pos);
-
-			for (int i = 0; i < pmax; i++)
-			{
-				int icurr = firstOn + i + 1;
-				int inext = firstOn + i + 2;
-				int currx = screen.cx(icurr);
-				int curry = screen.cy(icurr);
-				if (screen.onCurve(icurr))
+				int firstOn = 0;
+				for (int p = 0; p < pmax; p++)
 				{
-					drawList->PathLineTo(ImVec2(currx, curry) + pos);
-				}
-				else
-				{
-					double nextx = screen.cx(inext);
-					double nexty = screen.cy(inext);
-					if (!screen.onCurve(inext))
+					if (g->IsOnCurve(c, p))
 					{
-						nextx = 0.5 * (currx + nextx);
-						nexty = 0.5 * (curry + nexty);
+						firstOn = p;
+						break;
 					}
-					drawList->PathQuadCurveTo(
-						ImVec2(currx, curry) + pos,
-						ImVec2(nextx, nexty) + pos, 20);
 				}
-			}
 
-			if (_stroke)
-			{
-				drawList->PathStroke(ImGui::GetColorU32(ImVec4(0, 0, 0, 1)), true);
-			}
-			else
-			{
-				drawList->PathFillConvex(ImGui::GetColorU32(ImVec4(0, 0, 0, 1)));
-			}
+				// curve
 
-			// control lines
-			if (vControlLines)
-			{
-				drawList->PathLineTo(ImVec2(screen.cx(firstOn), screen.cy(firstOn)) + pos);
+				drawList->PathLineTo(ct::toImVec2(g->GetCoords(c, firstOn, vScale)) + pos);
 
 				for (int i = 0; i < pmax; i++)
 				{
 					int icurr = firstOn + i + 1;
 					int inext = firstOn + i + 2;
-					int currx = screen.cx(icurr);
-					int curry = screen.cy(icurr);
-					if (screen.onCurve(icurr))
+					ct::ivec2 cur = g->GetCoords(c, icurr, vScale);
+					if (g->IsOnCurve(c, icurr))
 					{
-						drawList->PathLineTo(ImVec2(currx, curry) + pos);
+						drawList->PathLineTo(ct::toImVec2(cur) + pos);
 					}
 					else
 					{
-						double nextx = screen.cx(inext);
-						double nexty = screen.cy(inext);
-						if (!screen.onCurve(inext))
+						ct::ivec2 nex = g->GetCoords(c, inext, vScale);
+						if (!g->IsOnCurve(c, inext))
 						{
-							nextx = 0.5 * (currx + nextx);
-							nexty = 0.5 * (curry + nexty);
+							nex.x = (int)(((double)nex.x + (double)cur.x) * 0.5);
+							nex.y = (int)(((double)nex.y + (double)cur.y) * 0.5);
 						}
-						drawList->PathLineTo(ImVec2(currx, curry) + pos);
-						drawList->PathLineTo(ImVec2(nextx, nexty) + pos);
-						/*drawList->PathQuadCurveTo(
-							ImVec2(currx, curry) + ImGui::GetCursorScreenPos(),
-							ImVec2(nextx, nexty) + ImGui::GetCursorScreenPos(), 20);*/
+						drawList->PathQuadCurveTo(
+							ct::toImVec2(cur) + pos,
+							ct::toImVec2(nex) + pos, 20);
 					}
 				}
 
-				drawList->PathStroke(ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), true);
+				if (_stroke)
+				{
+					drawList->PathStroke(ImGui::GetColorU32(ImGuiCol_Text), true);
+				}
+				else
+				{
+					drawList->PathFillConvex(ImGui::GetColorU32(ImGuiCol_Text));
+				}
+
+				// control lines
+				if (vControlLines)
+				{
+					drawList->PathLineTo(ct::toImVec2(g->GetCoords(c, firstOn, vScale)) + pos);
+
+					for (int i = 0; i < pmax; i++)
+					{
+						int icurr = firstOn + i + 1;
+						int inext = firstOn + i + 2;
+						ct::ivec2 cur = g->GetCoords(c, icurr, vScale);
+						if (g->IsOnCurve(c, icurr))
+						{
+							drawList->PathLineTo(ct::toImVec2(cur) + pos);
+						}
+						else
+						{
+							ct::ivec2 nex = g->GetCoords(c, inext, vScale);
+							if (!g->IsOnCurve(c, inext))
+							{
+								nex.x = (int)(((double)nex.x + (double)cur.x) * 0.5);
+								nex.y = (int)(((double)nex.y + (double)cur.y) * 0.5); 
+							}
+							drawList->PathLineTo(ct::toImVec2(cur) + pos);
+							drawList->PathLineTo(ct::toImVec2(nex) + pos);
+						}
+					}
+
+					drawList->PathStroke(ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), true);
+				}
 			}
 		}
 	}

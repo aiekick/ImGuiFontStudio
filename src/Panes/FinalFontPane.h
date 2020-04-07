@@ -61,6 +61,7 @@ public:
 	int DrawCurrentFontPane(ProjectFile *vProjectFile, int vWidgetId);
 	void SetFinalFontPaneMode(FinalFontPaneModeFlags vFinalFontPaneModeFlags);
 	bool IsFinalFontPaneMode(FinalFontPaneModeFlags vFinalFontPaneModeFlags);
+	bool IsCurrentFontPaneMode(CurrentFontPaneModeFlags vCurrentFontPaneModeFlags);
 	void PrepareSelection(ProjectFile *vProjectFile);
 
 private:
