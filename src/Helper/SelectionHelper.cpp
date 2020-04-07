@@ -764,6 +764,7 @@ void SelectionHelper::SelectAllGlyphs(ProjectFile *vProjectFile, FontInfos *vFon
 						}
 
 						// update maps
+						vProjectFile->UpdateCountSelectedGlyphs();
 						PrepareSelection(vProjectFile, vSelectionContainerEnum);
 					}
 				}
@@ -802,6 +803,7 @@ void SelectionHelper::UnSelectAllGlyphs(ProjectFile *vProjectFile, FontInfos *vF
 						}
 
 						// update maps
+						vProjectFile->UpdateCountSelectedGlyphs();
 						PrepareSelection(vProjectFile, vSelectionContainerEnum);
 					}
 				}
@@ -835,10 +837,10 @@ void SelectionHelper::SelectGlyph(ProjectFile *vProjectFile, FontInfos *vFontInf
 						res = "Symbol Name";
 					vFontInfos->m_SelectedGlyphs[vGlyph.Codepoint] = GlyphInfos(vGlyph, res, res);
 					vProjectFile->SetProjectChange();
-					vProjectFile->UpdateCountSelectedGlyphs();
-
+					
 					if (vUpdateMaps)
 					{
+						vProjectFile->UpdateCountSelectedGlyphs();
 						PrepareSelection(vProjectFile, vSelectionContainerEnum);
 					}
 				}
@@ -913,10 +915,10 @@ void SelectionHelper::UnSelectGlyph(ProjectFile *vProjectFile, FontInfos *vFontI
 				{
 					vFontInfos->m_SelectedGlyphs.erase(vCodePoint);
 					vProjectFile->SetProjectChange();
-					vProjectFile->UpdateCountSelectedGlyphs();
-
+					
 					if (vUpdateMaps)
 					{
+						vProjectFile->UpdateCountSelectedGlyphs();
 						PrepareSelection(vProjectFile, vSelectionContainerEnum);
 					}
 				}

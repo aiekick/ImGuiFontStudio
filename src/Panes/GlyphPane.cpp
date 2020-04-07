@@ -63,6 +63,11 @@ GlyphPane::~GlyphPane()
 //// IMGUI PANE ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
+static float _progress = 1.0f;
+static float _scale = 0.5f;
+static bool _stroke = true;
+static bool _controLines = true;
+
 int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
 {
 	GlyphPane_WidgetId = vWidgetId;
@@ -80,16 +85,20 @@ int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
 		{
 			if (vProjectFile && vProjectFile->IsLoaded())
 			{
-				static float _scale = 1.0f;
 				
 				if (ImGui::BeginMenuBar())
 				{
+					ImGui::PushItemWidth(100.0f);
 					ImGui::SliderFloat("Scale", &_scale, 0.01f, 1.0f);
+					ImGui::PopItemWidth();
+
+					ImGui::Checkbox("Stroke or Fill", &_stroke);
+					ImGui::Checkbox("Control Lines", &_controLines);
 
 					ImGui::EndMenuBar();
 				}
 
-				DrawSimpleGlyph(m_SimpleGlyph, _scale);
+				DrawSimpleGlyph(m_SimpleGlyph, vProjectFile->m_CurrentFont, _scale, _progress, _stroke, _controLines);
 			}
 		}
 
@@ -104,6 +113,8 @@ int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
 ///////////////////////////////////////////////////////////////////////////////////
 
 // https://github.com/rillig/sfntly/tree/master/java/src/com/google/typography/font/tools/fontviewer
+
+static int limitContour = 0;
 
 bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, ImWchar vCodepoint)
 {
@@ -139,6 +150,10 @@ bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, ImWc
 						if (g->GlyphType() == sfntly::GlyphType::kSimple)
 						{
 							m_SimpleGlyph = down_cast<sfntly::GlyphTable::SimpleGlyph*>(g);
+							if (m_SimpleGlyph)
+							{
+								limitContour = m_SimpleGlyph->NumberOfContours();
+							}
 						}
 						
 						res = true;
@@ -151,9 +166,11 @@ bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, ImWc
 	return res;
 }
 
-bool GlyphPane::DrawSimpleGlyph(sfntly::Ptr<sfntly::GlyphTable::SimpleGlyph> vSimpleGlyph, float vScale)
+// https://github.com/rillig/sfntly/tree/master/java/src/com/google/typography/font/tools/fontviewer
+bool GlyphPane::DrawSimpleGlyph(sfntly::Ptr<sfntly::GlyphTable::SimpleGlyph> vSimpleGlyph, FontInfos* vFontInfos,
+	float vScale, float vProgress, bool vFill, bool vControlLines)
 {
-	if (vSimpleGlyph)
+	if (vSimpleGlyph && vFontInfos)
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (window->SkipItems)
@@ -164,9 +181,45 @@ bool GlyphPane::DrawSimpleGlyph(sfntly::Ptr<sfntly::GlyphTable::SimpleGlyph> vSi
 
 		int MARGIN = 10;
 
-		for (int c = 0, cmax = vSimpleGlyph->NumberOfContours(); c < cmax; c++)
+		int cmax = vSimpleGlyph->NumberOfContours();
+		
+		ImVec2 contentSize = ImGui::GetContentRegionMax();
+		ImRect glypRect = ImRect(
+			vSimpleGlyph->XMin() * vScale, vSimpleGlyph->YMin() * vScale, 
+			vSimpleGlyph->XMax() * vScale, vSimpleGlyph->YMax() * vScale);
+		ImVec2 glyphCenter = glypRect.GetCenter();
+		ImVec2 pos = ImGui::GetCursorScreenPos() + contentSize * 0.5f - glyphCenter;
+		
+		if (ImGui::BeginMenuBar())
 		{
+			ImGui::PushItemWidth(100.0f);
+			ImGui::SliderInt("Contours", &limitContour, 0, cmax);
+			ImGui::PopItemWidth();
+
+			ImGui::EndMenuBar();
+		}
+
+		for (int c = 0; c < cmax; c++)
+		{
+			if (c >= limitContour) break;
+
 			ScreenCoordinateMapper screen(vSimpleGlyph, c, MARGIN, vScale, vSimpleGlyph->XMin(), vSimpleGlyph->YMax());
+			
+			drawList->AddLine(
+				ImVec2(screen.x(vSimpleGlyph->XMin()), screen.y(vFontInfos->m_Ascent)) + pos,
+				ImVec2(screen.x(vSimpleGlyph->XMax()), screen.y(vFontInfos->m_Ascent)) + pos,
+				ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
+			
+			drawList->AddLine(
+				ImVec2(screen.x(vSimpleGlyph->XMin()), screen.y(0)) + pos,
+				ImVec2(screen.x(vSimpleGlyph->XMax()), screen.y(0)) + pos,
+				ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 1.0f);
+			
+			drawList->AddLine(
+				ImVec2(screen.x(vSimpleGlyph->XMin()), screen.y(vFontInfos->m_Descent)) + pos,
+				ImVec2(screen.x(vSimpleGlyph->XMax()), screen.y(vFontInfos->m_Descent)) + pos,
+				ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
+
 			int pmax = vSimpleGlyph->numberOfPoints(c);
 
 			int firstOn = 0;
@@ -179,16 +232,19 @@ bool GlyphPane::DrawSimpleGlyph(sfntly::Ptr<sfntly::GlyphTable::SimpleGlyph> vSi
 				}
 			}
 
+			// curve
+
+			drawList->PathLineTo(ImVec2(screen.cx(firstOn), screen.cy(firstOn)) + pos);
+
 			for (int i = 0; i < pmax; i++)
 			{
 				int icurr = firstOn + i + 1;
 				int inext = firstOn + i + 2;
-
 				int currx = screen.cx(icurr);
 				int curry = screen.cy(icurr);
 				if (screen.onCurve(icurr))
 				{
-					drawList->PathLineTo(ImVec2(currx, curry) + ImGui::GetCursorScreenPos());
+					drawList->PathLineTo(ImVec2(currx, curry) + pos);
 				}
 				else
 				{
@@ -199,13 +255,55 @@ bool GlyphPane::DrawSimpleGlyph(sfntly::Ptr<sfntly::GlyphTable::SimpleGlyph> vSi
 						nextx = 0.5 * (currx + nextx);
 						nexty = 0.5 * (curry + nexty);
 					}
-					drawList->PathLineTo(ImVec2(currx, curry) + ImGui::GetCursorScreenPos());
-					drawList->PathLineTo(ImVec2(nextx, nexty) + ImGui::GetCursorScreenPos());
-					//path.quadTo(currx, curry, nextx, nexty);
+					drawList->PathQuadCurveTo(
+						ImVec2(currx, curry) + pos,
+						ImVec2(nextx, nexty) + pos, 20);
 				}
 			}
 
-			drawList->PathFillConvex(ImGui::GetColorU32(ImVec4(0, 0, 0, 1)));
+			if (_stroke)
+			{
+				drawList->PathStroke(ImGui::GetColorU32(ImVec4(0, 0, 0, 1)), true);
+			}
+			else
+			{
+				drawList->PathFillConvex(ImGui::GetColorU32(ImVec4(0, 0, 0, 1)));
+			}
+
+			// control lines
+			if (vControlLines)
+			{
+				drawList->PathLineTo(ImVec2(screen.cx(firstOn), screen.cy(firstOn)) + pos);
+
+				for (int i = 0; i < pmax; i++)
+				{
+					int icurr = firstOn + i + 1;
+					int inext = firstOn + i + 2;
+					int currx = screen.cx(icurr);
+					int curry = screen.cy(icurr);
+					if (screen.onCurve(icurr))
+					{
+						drawList->PathLineTo(ImVec2(currx, curry) + pos);
+					}
+					else
+					{
+						double nextx = screen.cx(inext);
+						double nexty = screen.cy(inext);
+						if (!screen.onCurve(inext))
+						{
+							nextx = 0.5 * (currx + nextx);
+							nexty = 0.5 * (curry + nexty);
+						}
+						drawList->PathLineTo(ImVec2(currx, curry) + pos);
+						drawList->PathLineTo(ImVec2(nextx, nexty) + pos);
+						/*drawList->PathQuadCurveTo(
+							ImVec2(currx, curry) + ImGui::GetCursorScreenPos(),
+							ImVec2(nextx, nexty) + ImGui::GetCursorScreenPos(), 20);*/
+					}
+				}
+
+				drawList->PathStroke(ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), true);
+			}
 		}
 	}
 

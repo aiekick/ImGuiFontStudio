@@ -153,5 +153,8 @@ namespace ImGui
 		ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL);
 	IMGUI_API void HelpMarker(const char* desc);
 	IMGUI_API void ShowCustomStyleEditor(bool *vOpen, ImGuiStyle* ref = NULL);
+
+	////////////////////////////////////////////////////////////////////////////
+
 }
 

@@ -101,7 +101,8 @@ public:
 	bool LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, ImWchar vCodepoint);
 
 private:
-	bool DrawSimpleGlyph(sfntly::Ptr<sfntly::GlyphTable::SimpleGlyph> vSimpleGlyph, float vScale);
+	bool DrawSimpleGlyph(sfntly::Ptr<sfntly::GlyphTable::SimpleGlyph> vSimpleGlyph, FontInfos* vFontInfos,
+		float vScale, float vProgress, bool vFill = false, bool vControlLines = true);
 
 public: // singleton
 	static GlyphPane *Instance()
