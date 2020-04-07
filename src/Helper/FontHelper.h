@@ -79,6 +79,7 @@ public: // read
 		std::map<CodePoint, CodePoint> vNewCodePoints);
 	bool GenerateFontFile(const std::string& vFontFilePathName, bool vUsePostTable);
 
+
 private:
 	std::vector<FontInstance> m_Fonts;
 	sfntly::Ptr<sfntly::FontFactory> m_FontFactory;
@@ -98,9 +99,11 @@ private: // post table - version / count / size / offsets
 	std::unordered_map<std::string, int32_t> InvertNameMap();
 	int32_t MergeCharacterMaps();
 
+public:
+	sfntly::Font* LoadFontFile(const char* font_path);
+
 private:
 	// imported/based on/modified from sfntly
-	sfntly::Font* LoadFontFile(const char* font_path);
 	void LoadFontFiles(const char* font_path, sfntly::FontFactory* factory, sfntly::FontArray* fonts);
 	bool SerializeFont(const char* font_path, sfntly::Font* font);
 	bool SerializeFont(const char* font_path, sfntly::FontFactory* factory, sfntly::Font* font);

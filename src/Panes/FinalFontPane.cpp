@@ -356,7 +356,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 		{
 			if (vForceEditMode)
 			{
-				GlyphPane::Instance()->LoadGlyph(vFontInfos, vGlyph->glyph.Codepoint);
+				GlyphPane::Instance()->LoadGlyph(vProjectFile, vFontInfos, vGlyph->glyph.Codepoint);
 			}
 			else
 			{
