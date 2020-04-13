@@ -42,11 +42,18 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 
 	std::string fontFilePathName = FileHelper::Instance()->CorrectFilePathName(vFontFilePathName);
 	
-	if (!FileHelper::Instance()->IsFileExist(fontFilePathName) &&
-		!FileHelper::Instance()->IsAbsolutePath(fontFilePathName))
+	if (!FileHelper::Instance()->IsAbsolutePath(fontFilePathName))
 	{
-		fontFilePathName = vProjectFile->GetAbsolutePath(fontFilePathName);
+		if (!FileHelper::Instance()->IsFileExist(fontFilePathName))
+		{
+			fontFilePathName = vProjectFile->GetAbsolutePath(fontFilePathName);
+		}
+		else
+		{
+			fontFilePathName = vProjectFile->GetAbsolutePath(fontFilePathName);
+		}
 	}
+	
 	if (FileHelper::Instance()->IsFileExist(fontFilePathName))
 	{
 		static const ImWchar ranges[] =

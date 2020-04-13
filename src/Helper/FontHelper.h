@@ -16,6 +16,8 @@
 
 #pragma once
 
+#include "Project/GlyphInfos.h"
+
 #include <string>
 #include <set>
 #include <map>
@@ -57,13 +59,14 @@ public:
 	sfntly::Ptr<sfntly::CMapTable::CMap> m_CMapTable;
 	sfntly::Ptr<sfntly::LocaTable> m_LocaTable;
 	sfntly::Ptr<sfntly::GlyphTable> m_GlyfTable;
-	std::map<int32_t, int32_t> m_CharMap; // codepoint to glyph id
-	std::map<int32_t, int32_t> m_ReversedCharMap; // glyph id to codepoint
+	std::map<CodePoint, int32_t> m_CharMap; // codepoint to glyph id
+	std::map<int32_t, CodePoint> m_ReversedCharMap; // glyph id to codepoint
 	std::set<int32_t> m_ResolvedSet;
 	std::map<int32_t, std::string> m_NewGlyphNames;
 	std::map<CodePoint, CodePoint> m_NewGlyphCodePoints;
 	std::map<int32_t, int32_t> m_OldToNewGlyfId;
 	std::vector<int32_t> m_NewToOldGlyfId;
+	std::map<CodePoint, GlyphInfos> m_NewGlyphInfos;
 };
 
 class FontHelper
@@ -76,7 +79,8 @@ public: // read
 	bool OpenFontFile(
 		const std::string& vFontFilePathName,
 		std::map<CodePoint, std::string> vNewNames,
-		std::map<CodePoint, CodePoint> vNewCodePoints);
+		std::map<CodePoint, CodePoint> vNewCodePoints,
+		std::map<CodePoint, GlyphInfos> vNewGlyphInfos);
 	bool GenerateFontFile(const std::string& vFontFilePathName, bool vUsePostTable);
 
 
@@ -108,14 +112,26 @@ private:
 	bool SerializeFont(const char* font_path, sfntly::Font* font);
 	bool SerializeFont(const char* font_path, sfntly::FontFactory* factory, sfntly::Font* font);
 	sfntly::Font* AssembleFont(bool vUsePostTable);
-	bool Assemble_Glyf_Loca_Maxp_Tables();
-	bool Assemble_CMap_Table();
-	bool Assemble_Hmtx_Hhea_Tables();
-	bool Assemble_Post_Table(std::map<CodePoint, std::string> vSelection);
-	bool Assemble_Meta_Table();
-	bool Assemble_Head_Table();
-	void FillCharacterMap(FontInstance *vFontInstance, std::map<CodePoint, std::string> vSelection);
-	void FillResolvedCompositeGlyphs(FontInstance *vFontInstance, std::map<CodePoint, CodePoint> chars_to_glyph_ids);
 
+private:
+	bool Assemble_Glyf_Loca_Maxp_Tables();
+	void ReScale_Glyph(const int32_t& vGlyphId, FontInstance *vFontInstance, sfntly::WritableFontData *vWritableFontData);
+	void FillResolvedCompositeGlyphs(FontInstance *vFontInstance, std::map<CodePoint, int32_t> chars_to_glyph_ids);
+
+private:
+	bool Assemble_CMap_Table();
+	void FillCharacterMap(FontInstance *vFontInstance, std::map<CodePoint, std::string> vSelection);
+
+private:
+	bool Assemble_Hmtx_Hhea_Tables();
+
+private:
+	bool Assemble_Post_Table(std::map<CodePoint, std::string> vSelection);
+
+private:
+	bool Assemble_Meta_Table();
+
+private:
+	bool Assemble_Head_Table();
 };
 

@@ -32,6 +32,8 @@ public:
 	std::vector<std::vector<ct::ivec2>> coords;
 	std::vector<std::vector<bool>> onCurve;
 	ct::ivec4 rc;
+	ct::ivec2 m_Translation = 0; // translation in first
+	ct::dvec2 m_Scale = 1.0; // scale in second
 
 public:
 	void clear();

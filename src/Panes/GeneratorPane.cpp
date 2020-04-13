@@ -108,16 +108,41 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 			bool btnClick = false;
 			std::string exts;
 
+#ifdef _DEBUG
+			if (ImGui::Button("Quick Font Current"))
+			{
+				vProjectFile->m_GenMode = (GenModeFlags)0;
+				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_CURRENT_FONT_HEADER); // font + header
+				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES);
+				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
+				std::string path = FileHelper::Instance()->GetAppPath() + "/exports";
+				path = FileHelper::Instance()->CorrectFilePathName(path);
+				FileHelper::Instance()->CreateDirectoryIfNotExist(path);
+				Generator::Instance()->Generate(path, "test.ttf", vProjectFile);
+			}
+			if (ImGui::Button("Quick Font Merged"))
+			{
+				vProjectFile->m_GenMode = (GenModeFlags)0;
+				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_MERGED_FONT_HEADER); // font + header
+				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES);
+				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
+				std::string path = FileHelper::Instance()->GetAppPath() + "/exports";
+				path = FileHelper::Instance()->CorrectFilePathName(path);
+				FileHelper::Instance()->CreateDirectoryIfNotExist(path);
+				Generator::Instance()->Generate(path, "test.ttf", vProjectFile);
+			}
+#endif
+			bool change = false;
 			ImGui::Text("Modes : ");
 			ImGui::Indent();
 			{
-				ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Current", "Current Font",
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Current", "Current Font",
 					&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_CURRENT, 50.0f, true, true,
 					GenModeFlags::GENERATOR_MODE_RADIO_CUR_BAT_MER);
 				if (vProjectFile->m_Fonts.size() > 1)
 				{
 					ImGui::SameLine();
-					ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Batch", "Font by Font",
+					change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Batch", "Font by Font",
 						&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_BATCH, 50.0f, true, true,
 						GenModeFlags::GENERATOR_MODE_RADIO_CUR_BAT_MER);
 
@@ -125,7 +150,7 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 						m_GeneratorStatusFlags & GeneratorStatusFlags::GENERATOR_STATUS_FONT_MERGE_ALLOWED)
 					{
 						ImGui::SameLine();
-						ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Merged", "Fonts Merged in one",
+						change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Merged", "Fonts Merged in one",
 							&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_MERGED, 50.0f, true, true,
 							GenModeFlags::GENERATOR_MODE_RADIO_CUR_BAT_MER);
 					}
@@ -149,7 +174,7 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 			{
 				if (m_GeneratorStatusFlags & GeneratorStatusFlags::GENERATOR_STATUS_FONT_HEADER_GENERATION_ALLOWED)
 				{
-					ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Header", "Header File",
+					change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Header", "Header File",
 						&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_HEADER, 50.0f);
 					ImGui::SameLine();
 				}
@@ -157,11 +182,11 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 				{
 					vProjectFile->RemoveGenMode(GenModeFlags::GENERATOR_MODE_HEADER);
 				}
-				ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Font", "Font File",
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Font", "Font File",
 					&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_FONT, 50.0f, false, false,
 					GenModeFlags::GENERATOR_MODE_RADIO_FONT_CPP);
 				ImGui::SameLine();
-				ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Cpp", "Source File for c++\n\twith font as a bytes array",
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Cpp", "Source File for c++\n\twith font as a bytes array",
 					&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_CPP, 50.0f, false, false,
 					GenModeFlags::GENERATOR_MODE_RADIO_FONT_CPP);
 			}
@@ -176,11 +201,11 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 					ImGui::Indent();
 					{
 						ImGui::Text("Order Glyphs by :");
-						ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("CodePoint", "order by glyph CodePoint",
+						change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("CodePoint", "order by glyph CodePoint",
 							&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_CODEPOINT, 50.0f, true, true,
 							GenModeFlags::GENERATOR_MODE_RADIO_CDP_NAMES);
 						ImGui::SameLine();
-						ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Names", "order by glyph Name",
+						change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Names", "order by glyph Name",
 							&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES, 50.0f, true, true,
 							GenModeFlags::GENERATOR_MODE_RADIO_CDP_NAMES);
 					}
@@ -195,7 +220,7 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 					ImGui::Text("Font : ");
 					ImGui::Indent();
 					{
-						ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Export Names", "export glyph names in font file (increase size)",
+						change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Export Names", "export glyph names in font file (increase size)",
 							&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES, 50.0f);
 					}
 					ImGui::Unindent();
@@ -216,6 +241,11 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 				}
 
 				ImGui::Unindent();
+			}
+
+			if (change)
+			{
+				vProjectFile->SetProjectChange();
 			}
 
 			if (btnClick)
@@ -283,6 +313,7 @@ bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
 				SelectionHelper::Instance()->AnalyseSourceSelection(vProjectFile);
 			}
 
+			vProjectFile->m_CountFontWithSelectedGlyphs = 0;
 			for (auto &font : vProjectFile->m_Fonts)
 			{
 				if (font.second.m_CodePointInDoubleFound || font.second.m_NameInDoubleFound)
@@ -307,6 +338,7 @@ bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
 					else
 					{
 						ImGui::TextColored(ImVec4(0.2f, 0.8f, 0.2f, 1.0f), "%zu Glyphs selected", font.second.m_SelectedGlyphs.size());
+						vProjectFile->m_CountFontWithSelectedGlyphs++;
 					}
 					ImGui::Unindent();
 				}

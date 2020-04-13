@@ -22,9 +22,6 @@
 				<glyph orgId="61543" newId="61543" orgName="plus" newName="add"/>
 				<glyph orgId="61544" newId="61544" orgName="minus" newName="remove"/>
 				<glyph orgId="61553" newId="61553" orgName="warning_sign" newName="warning"/>
-				<glyph orgId="61563" newId="61563" orgName="folder_close" newName="folder"/>
-				<glyph orgId="61564" newId="61564" orgName="folder_open" newName="folder_open"/>
-				<glyph orgId="61573" newId="61573" orgName="cogs" newName="generate"/>
 				<glyph orgId="61616" newId="61616" orgName="filter" newName="filter"/>
 				<glyph orgId="61618" newId="61618" orgName="fullscreen" newName="fullscreen"/>
 				<glyph orgId="61636" newId="61636" orgName="cut" newName="cut"/>
@@ -51,9 +48,44 @@
 			<oversample>3</oversample>
 			<fontsize>20</fontsize>
 		</font>
+		<font name="materialdesignicons-webfont.ttf">
+			<glyphs>
+				<glyph orgId="61561" newId="61561" orgName="battery" newName="battery"/>
+				<glyph orgId="61562" newId="61562" orgName="battery-10" newName="battery-10"/>
+				<glyph orgId="61563" newId="61563" orgName="battery-20" newName="battery-20"/>
+				<glyph orgId="61564" newId="61564" orgName="battery-30" newName="battery-30"/>
+				<glyph orgId="61565" newId="61565" orgName="battery-40" newName="battery-40"/>
+				<glyph orgId="61566" newId="61566" orgName="battery-50" newName="battery-50"/>
+				<glyph orgId="61567" newId="61567" orgName="battery-60" newName="battery-60"/>
+				<glyph orgId="61568" newId="61568" orgName="battery-70" newName="battery-70"/>
+				<glyph orgId="61569" newId="61569" orgName="battery-80" newName="battery-80"/>
+				<glyph orgId="61570" newId="61570" orgName="battery-90" newName="battery-90"/>
+				<glyph orgId="61571" newId="61571" orgName="battery-alert" newName="battery-alert"/>
+				<glyph orgId="61572" newId="61572" orgName="battery-charging" newName="battery-charging"/>
+				<glyph orgId="61573" newId="61573" orgName="battery-charging-100" newName="battery-charging-100"/>
+				<glyph orgId="61574" newId="61574" orgName="battery-charging-20" newName="battery-charging-20"/>
+				<glyph orgId="61575" newId="61575" orgName="battery-charging-30" newName="battery-charging-30"/>
+				<glyph orgId="61576" newId="61576" orgName="battery-charging-40" newName="battery-charging-40"/>
+				<glyph orgId="61577" newId="61577" orgName="battery-charging-60" newName="battery-charging-60"/>
+				<glyph orgId="61578" newId="61578" orgName="battery-charging-80" newName="battery-charging-80"/>
+				<glyph orgId="61579" newId="61579" orgName="battery-charging-90" newName="battery-charging-90"/>
+				<glyph orgId="61580" newId="61580" orgName="battery-minus" newName="battery-minus"/>
+				<glyph orgId="61581" newId="61581" orgName="battery-negative" newName="battery-negative"/>
+				<glyph orgId="61582" newId="61582" orgName="battery-outline" newName="battery-outline"/>
+				<glyph orgId="61583" newId="61583" orgName="battery-plus" newName="battery-plus"/>
+				<glyph orgId="61584" newId="61584" orgName="battery-positive" newName="battery-positive"/>
+				<glyph orgId="61585" newId="61585" orgName="battery-unknown" newName="battery-unknown"/>
+			</glyphs>
+			<prefix></prefix>
+			<pathfilename>..\samples_Fonts\materialdesignicons-webfont.ttf</pathfilename>
+			<oversample>1</oversample>
+			<fontsize>28</fontsize>
+		</font>
 		<rangecoloring show="false" hash="42.606;14.789;27.817;0.5"/>
-		<countglyph_x>26</countglyph_x>
+		<countglyph_x>13</countglyph_x>
 		<mergedfontprefix>IGFS</mergedfontprefix>
-		<genmode>333</genmode>
+		<srcglyphtooltip>true</srcglyphtooltip>
+		<dstglyphtooltip>true</dstglyphtooltip>
+		<genmode>347</genmode>
 	</project>
 </config>

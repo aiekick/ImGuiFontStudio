@@ -17,6 +17,26 @@
  * limitations under the License.
  */
 
+ // Writable font data wrapper. Supports reading of data primitives in the
+ // TrueType / OpenType spec.
+ // The data types used are as listed:
+ // BYTE       8-bit unsigned integer.
+ // CHAR       8-bit signed integer.
+ // USHORT     16-bit unsigned integer.
+ // SHORT      16-bit signed integer.
+ // UINT24     24-bit unsigned integer.
+ // ULONG      32-bit unsigned integer.
+ // LONG       32-bit signed integer.
+ // Fixed      32-bit signed fixed-point number (16.16)
+ // FUNIT      Smallest measurable distance in the em space.
+ // FWORD      16-bit signed integer (SHORT) that describes a quantity in FUnits.
+ // UFWORD     16-bit unsigned integer (USHORT) that describes a quantity in
+ //            FUnits.
+ // F2DOT14    16-bit signed fixed number with the low 14 bits of fraction (2.14)
+ // LONGDATETIME  Date represented in number of seconds since 12:00 midnight,
+ //               January 1, 1904. The value is represented as a signed 64-bit
+ //               integer.
+
 #include "FontHelper.h"
 #include <FileHelper.h>
 #include <cTools.h>
@@ -25,10 +45,12 @@
 
 #include <set>
 #include <map>
+#include <sstream>
 
 #include "sfntly/tag.h"
 #include "sfntly/font.h"
 #include "sfntly/font_factory.h"
+#include "sfntly/data/font_data.h" // data type size
 #include "sfntly/data/memory_byte_array.h"
 #include "sfntly/port/memory_output_stream.h"
 #include "sfntly/port/file_input_stream.h"
@@ -63,7 +85,8 @@ FontHelper::~FontHelper()
 bool FontHelper::OpenFontFile(
 	const std::string& vFontFilePathName, 
 	std::map<CodePoint, std::string> vNewNames,
-	std::map<CodePoint, CodePoint> vNewCodePoints)
+	std::map<CodePoint, CodePoint> vNewCodePoints,
+	std::map<CodePoint, GlyphInfos> vNewGlyphInfos)
 {
 	bool res = false;
 
@@ -85,6 +108,7 @@ bool FontHelper::OpenFontFile(
 				{
 					fontInstance.m_NewGlyphNames = vNewNames;
 					fontInstance.m_NewGlyphCodePoints = vNewCodePoints;
+					fontInstance.m_NewGlyphInfos = vNewGlyphInfos;
 
 					FillCharacterMap(&fontInstance, fontInstance.m_NewGlyphNames);
 					FillResolvedCompositeGlyphs(&fontInstance, fontInstance.m_CharMap);
@@ -165,7 +189,7 @@ void FontHelper::FillCharacterMap(FontInstance *vFontInstance, std::map<CodePoin
 }
 
 /* based on https://github.com/rillig/sfntly/blob/master/cpp/src/sample/subtly/font_info.cc*/
-void FontHelper::FillResolvedCompositeGlyphs(FontInstance *vFontInstance, std::map<CodePoint, CodePoint> chars_to_glyph_ids)
+void FontHelper::FillResolvedCompositeGlyphs(FontInstance *vFontInstance, std::map<CodePoint, int32_t> chars_to_glyph_ids)
 {
 	if (vFontInstance)
 	{
@@ -343,13 +367,32 @@ bool FontHelper::Assemble_Glyf_Loca_Maxp_Tables()
 		sfntly::Ptr<sfntly::GlyphTable> glyph_table = down_cast<sfntly::GlyphTable*>(m_Fonts[fontId].m_Font->GetTable(sfntly::Tag::glyf));
 		sfntly::GlyphPtr glyph;
 		glyph.Attach(glyph_table->GetGlyph(offset, length));
-
+		
+		// glyph readable
 		sfntly::Ptr<sfntly::ReadableFontData> data = glyph->ReadFontData();
+
+		// converted in writable
 		sfntly::Ptr<sfntly::WritableFontData> copy_data;
 		copy_data.Attach(sfntly::WritableFontData::CreateWritableFontData(data->Length()));
+
+		// copy of readable glyph to writable
 		data->CopyTo(copy_data);
+
+		////////////////////////////////////////////////////////////////////////////
+		//// maybe i can edit copy_data before write in glyph_builder container ////
+		////////////////////////////////////////////////////////////////////////////
+
+		ReScale_Glyph(resolved_glyph_id, &m_Fonts[fontId], copy_data.p_);
+
+		////////////////////////////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////////////////////////
+		////////////////////////////////////////////////////////////////////////////
+
+		// put in a glyphbuilder
 		sfntly::GlyphBuilderPtr glyph_builder;
 		glyph_builder.Attach(glyph_table_builder->GlyphBuilder(copy_data));
+	
+		// put in total glyphs builder
 		glyph_builders->push_back(glyph_builder);
 	}
 
@@ -366,6 +409,168 @@ bool FontHelper::Assemble_Glyf_Loca_Maxp_Tables()
 	//maxpBuilder->SetNumGlyphs(loca_table_builder->NumGlyphs());
 
 	return true;
+}
+
+void FontHelper::ReScale_Glyph(
+	const int32_t& vGlyphId, FontInstance *vFontInstance,
+	sfntly::WritableFontData *vWritableFontData)
+{
+	// we will not add or remove points
+	// just apply trasnofrmation soe the size will not change
+	// so we will use vWritableFontData for overwrite datas if needed
+	// easier way instead of regenerate glyph
+
+	if (vFontInstance && vWritableFontData)
+	{
+		auto writer = vWritableFontData;
+
+		if (writer)
+		{
+			if (vFontInstance->m_ReversedCharMap.find(vGlyphId) != vFontInstance->m_ReversedCharMap.end()) // found
+			{
+				CodePoint glyphCodePoint = vFontInstance->m_ReversedCharMap[vGlyphId];
+
+				if (vFontInstance->m_NewGlyphInfos.find(glyphCodePoint) != vFontInstance->m_NewGlyphInfos.end()) // found
+				{
+					GlyphInfos glyphInfos = vFontInstance->m_NewGlyphInfos[glyphCodePoint];
+
+					if (glyphInfos.simpleGlyph.isValid)
+					{
+						SimpleGlyph_Solo simpleGlyph = glyphInfos.simpleGlyph;
+
+						sfntly::Ptr<sfntly::LocaTable> loca_table = down_cast<sfntly::LocaTable*>(vFontInstance->m_Font->GetTable(sfntly::Tag::loca));
+						int32_t loc_length = loca_table->GlyphLength(vGlyphId);
+						int32_t loc_offset = loca_table->GlyphOffset(vGlyphId);
+
+						// Get the GLYF table for the current glyph id.
+						sfntly::Ptr<sfntly::GlyphTable> glyph_table = down_cast<sfntly::GlyphTable*>(vFontInstance->m_Font->GetTable(sfntly::Tag::glyf));
+						sfntly::GlyphPtr glyph;
+						glyph.Attach(glyph_table->GetGlyph(loc_offset, loc_length));
+
+						auto sglyph = down_cast<sfntly::GlyphTable::SimpleGlyph*>(glyph.p_);
+						// normalement on va pas modifier la taille de la table
+						// vu que pour le moment on va juster scale ou transofmer les points
+						
+						int32_t offset = 0;
+
+						ct::ivec2 trans = glyphInfos.simpleGlyph.m_Translation; // first apply
+						ct::dvec2 scale = glyphInfos.simpleGlyph.m_Scale; // second apply
+
+						// get rect min/max
+						int countContours = simpleGlyph.GetCountContours();
+						if (countContours == 0)
+						{
+							simpleGlyph.LoadSimpleGlyph(sglyph);
+							countContours = simpleGlyph.GetCountContours();
+						}
+						std::vector<uint16_t> endPtsOfContours;
+						int xMin = (int)1e6, yMin = (int)1e6, xMax = (int)-1e6, yMax = (int)-1e6;
+						int idx = 0;
+						for (auto & points : simpleGlyph.coords)
+						{
+							for (auto & point : points)
+							{
+								int px = point.x;
+								int py = point.y;
+
+								px += trans.x; px *= scale.x;
+								py += trans.y; py *= scale.y;
+
+								xMin = ct::mini(xMin, px);
+								xMax = ct::maxi(xMax, px);
+								yMin = ct::mini(yMin, py);
+								yMax = ct::maxi(yMax, py);
+								idx++;
+							}
+							endPtsOfContours.push_back(idx);
+						}
+
+						// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
+						//int16 	numberOfContours;
+						// no change
+						offset += sfntly::DataSize::kSHORT;
+						//FWord 	xMin 	Minimum x for coordinate data
+						offset += writer->WriteShort(offset, (int16_t)xMin); // xMin
+						//FWord 	yMin 	Minimum y for coordinate data
+						offset += writer->WriteShort(offset, (int16_t)yMin); // yMin
+						//FWord 	xMax 	Maximum x for coordinate data
+						offset += writer->WriteShort(offset, (int16_t)xMax); // xMax
+						//FWord 	yMax 	Maximum y for coordinate data
+						offset += writer->WriteShort(offset, (int16_t)yMax); // yMax
+
+						//Simple glyphs
+
+						//uint16 	endPtsOfContours[n] 	Array of last points of each contour; n is the number of contours; array entries are point indices
+						// no change
+						//uint16 	instructionLength 	Total number of bytes needed for instructions
+						int32_t instSize = glyph->InstructionSize();
+						if (instSize > 0)
+							int i = 0;
+						// no change
+						//uint8 	instructions[instructionLength] 	Array of instructions for this glyph
+						// no change
+						//uint8 	flags[variable] 	Array of flags
+						// no change
+
+						int32_t xOrgBytes = sglyph->xByteCount();
+						int32_t yOrgBytes = sglyph->yByteCount();
+						int32_t xOffset = sglyph->xCoordOffset();
+						int32_t yOffset = sglyph->yCoordOffset();
+						auto xDatas = sglyph->xOrginalCoordDatas();
+						auto yDatas = sglyph->yOrginalCoordDatas();
+
+						//////////////////////////////////////////////////
+						//uint8 or int16 	xCoordinates[] 	Array of x - coordinates; the first is relative to(0, 0), others are relative to previous point
+						
+						int32_t xNewBytes = 0;
+						for (auto &it : xDatas)
+						{
+							int32_t countBytes = it.first;
+							int32_t xCoord = it.second;
+
+							xCoord = xCoord + trans.x; // trans
+							xCoord = (int32_t)((double)xCoord * scale.x); // scale
+
+							if (countBytes == 1)
+								xOffset += writer->WriteByte(xOffset, (uint8_t)xCoord);
+							else if (countBytes == 2) 
+								xOffset += writer->WriteShort(xOffset, (int16_t)xCoord);
+							xNewBytes += countBytes;
+						}
+
+						assert(xNewBytes == xOrgBytes); // verification index == xBytes after loop
+						// because we just apply tranformations on points, no change on table size
+						assert(xOffset == yOffset); // must be equals after first xcoord loop
+
+						//uint8 or int16 	yCoordinates[] 	Array of y - coordinates; the first is relative to(0, 0), others are relative to previous point
+						
+						int32_t yNewBytes = 0;
+						for (auto &it : yDatas)
+						{
+							auto countBytes = it.first;
+							auto yCoord = it.second;
+
+							yCoord = yCoord + trans.y; // trans
+							yCoord = (int32_t)((double)yCoord * scale.y); // scale
+							
+							if (countBytes == 1)
+								yOffset += writer->WriteChar(yOffset, (uint8_t)yCoord);
+							else if (countBytes == 2) 
+								yOffset += writer->WriteShort(yOffset, (int16_t)yCoord);
+							yNewBytes += countBytes;
+						}
+
+						assert(yNewBytes == yOrgBytes); // verification index == yBytes after loop
+						// because we just apply tranformations on points, no change on table size
+
+						//////////////////////////////////////////////////
+
+						//we will not do Component glyph for the moment
+					}
+				}
+			}
+		}
+	}
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -633,7 +838,7 @@ bool FontHelper::Assemble_Meta_Table()
 
 bool FontHelper::Assemble_Head_Table()
 {
-	//todo: la table Meta contient les infos sur les font, comme la license , l'auteur etc..
+	//todo: la table Meta contient les infos sur le type de font etc..
 	return true;
 }
 

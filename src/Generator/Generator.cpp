@@ -428,16 +428,18 @@ void Generator::GenerateFontFile_One(
 
 		std::map<int32_t, std::string> newHeaderNames;
 		std::map<int32_t, int32_t> newCodePoints;
+		std::map<CodePoint, GlyphInfos> newGlyphInfos;
 		for (const auto &glyph : vFontInfos->m_SelectedGlyphs)
 		{
 			newHeaderNames[glyph.first] = glyph.second.newHeaderName;
 			newCodePoints[glyph.first] = glyph.second.newCodePoint;
+			newGlyphInfos[glyph.first] = glyph.second;
 		}
 
 		if (!newHeaderNames.empty() && !newCodePoints.empty())
 		{
 			std::string absPath = vProjectFile->GetAbsolutePath(vFontInfos->m_FontFilePathName);
-			res = fontHelper.OpenFontFile(absPath, newHeaderNames, newCodePoints);
+			res = fontHelper.OpenFontFile(absPath, newHeaderNames, newCodePoints, newGlyphInfos);
 		}
 
 		if (res)
@@ -508,25 +510,54 @@ void Generator::GenerateFontFile_Merged(
 
 		bool res = true;
 
+		ct::ivec2 baseSize = 0;
+		int idx = 0;
 		for (auto &it : vProjectFile->m_Fonts)
 		{
+			bool scaleChanged = false;
+			ct::dvec2 scale = 1.0;
+			if (idx == 0)
+			{
+				baseSize = it.second.m_BoundingBox.zw() - it.second.m_BoundingBox.xy();
+			}
+			else
+			{
+				scaleChanged = true;
+				ct::ivec2 newSize = it.second.m_BoundingBox.zw() - it.second.m_BoundingBox.xy();
+				scale.x = (double)baseSize.x / (double)newSize.x;
+				scale.y = (double)baseSize.y / (double)newSize.y;
+			}
+
 			std::map<int32_t, std::string> newHeaderNames;
 			std::map<int32_t, int32_t> newCodePoints;
+			std::map<CodePoint, GlyphInfos> newGlyphInfos;
 			for (const auto &glyph : it.second.m_SelectedGlyphs)
 			{
-				newHeaderNames[glyph.first] = glyph.second.newHeaderName;
-				newCodePoints[glyph.first] = glyph.second.newCodePoint;
+				GlyphInfos gInfos = glyph.second;
+
+				newHeaderNames[glyph.first] = gInfos.newHeaderName;
+				newCodePoints[glyph.first] = gInfos.newCodePoint;
+
+				if (scaleChanged)
+				{
+					gInfos.simpleGlyph.isValid = true;
+					gInfos.simpleGlyph.m_Scale = scale;
+				}
+				
+				newGlyphInfos[glyph.first] = gInfos;
 			}
 
 			if (!newHeaderNames.empty())
 			{
 				std::string absPath = vProjectFile->GetAbsolutePath(it.second.m_FontFilePathName);
-				res &= fontHelper.OpenFontFile(absPath, newHeaderNames, newCodePoints);
+				res &= fontHelper.OpenFontFile(absPath, newHeaderNames, newCodePoints, newGlyphInfos);
 			}
 			else
 			{
 				res = false;
 			}
+
+			idx++;
 		}
 		
 		if (res)

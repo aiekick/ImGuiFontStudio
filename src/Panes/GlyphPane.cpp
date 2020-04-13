@@ -67,6 +67,10 @@ static float _progress = 1.0f;
 static float _scale = 0.5f;
 static bool _stroke = true;
 static bool _controLines = true;
+static int _tx = 0;
+static int _ty = 0;
+static float _sx = 1.0f;
+static float _sy = 1.0f;
 
 int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
 {
@@ -91,7 +95,7 @@ int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
 					ImGui::SliderFloat("Scale", &_scale, 0.01f, 1.0f);
 					ImGui::PopItemWidth();
 
-					ImGui::Checkbox("Stroke or Fill", &_stroke);
+					//ImGui::Checkbox("Stroke or Fill", &_stroke);
 					ImGui::Checkbox("Control Lines", &_controLines);
 
 					ImGui::EndMenuBar();
@@ -190,6 +194,21 @@ bool GlyphPane::DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
 			ImRect glypRect = ImRect(
 				rc.x * vScale, rc.y * vScale,
 				rc.z * vScale, rc.w * vScale);
+
+			bool change = false;
+			ImGui::PushItemWidth(200.0f);
+			change |= ImGui::SliderInt("tx", &_tx, -rc.z, rc.z); ImGui::SameLine();
+			change |= ImGui::SliderFloat("sx", &_sx, 0.01f, 10.0f);
+			change |= ImGui::SliderInt("ty", &_ty, -rc.w, rc.w); ImGui::SameLine();
+			change |= ImGui::SliderFloat("sy", &_sy, 0.01f, 10.0f);
+			ImGui::PopItemWidth();
+
+			if (change)
+			{
+				g->m_Translation = ct::ivec2(_tx, _ty);
+				g->m_Scale = ct::dvec2((double)_sx, (double)_sy);
+			}
+
 			ImVec2 glyphCenter = glypRect.GetCenter();
 			ImVec2 pos = ImGui::GetCursorScreenPos() + contentSize * 0.5f - glyphCenter;
 
@@ -251,6 +270,7 @@ bool GlyphPane::DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
 					int icurr = firstOn + i + 1;
 					int inext = firstOn + i + 2;
 					ct::ivec2 cur = g->GetCoords(c, icurr, vScale);
+
 					if (g->IsOnCurve(c, icurr))
 					{
 						drawList->PathLineTo(ct::toImVec2(cur) + pos);
@@ -278,8 +298,7 @@ bool GlyphPane::DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
 					drawList->PathFillConvex(ImGui::GetColorU32(ImGuiCol_Text));
 				}
 
-				// control lines
-				if (vControlLines)
+				if (vControlLines) // control lines
 				{
 					drawList->PathLineTo(ct::toImVec2(g->GetCoords(c, firstOn, vScale)) + pos);
 
