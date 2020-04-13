@@ -331,7 +331,6 @@ sfntly::Font* FontHelper::AssembleFont(bool vUsePostTable)
 	return nullptr;
 }
 
-
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
@@ -382,7 +381,7 @@ bool FontHelper::Assemble_Glyf_Loca_Maxp_Tables()
 		//// maybe i can edit copy_data before write in glyph_builder container ////
 		////////////////////////////////////////////////////////////////////////////
 
-		ReScale_Glyph(resolved_glyph_id, &m_Fonts[fontId], copy_data.p_);
+		ReScale_Glyph(fontId, resolved_glyph_id, copy_data.p_);
 
 		////////////////////////////////////////////////////////////////////////////
 		////////////////////////////////////////////////////////////////////////////
@@ -412,7 +411,7 @@ bool FontHelper::Assemble_Glyf_Loca_Maxp_Tables()
 }
 
 void FontHelper::ReScale_Glyph(
-	const int32_t& vGlyphId, FontInstance *vFontInstance,
+	const int32_t& vFontId, const int32_t& vGlyphId,
 	sfntly::WritableFontData *vWritableFontData)
 {
 	// we will not add or remove points
@@ -420,153 +419,146 @@ void FontHelper::ReScale_Glyph(
 	// so we will use vWritableFontData for overwrite datas if needed
 	// easier way instead of regenerate glyph
 
-	if (vFontInstance && vWritableFontData)
+	if (vWritableFontData)
 	{
 		auto writer = vWritableFontData;
 
 		if (writer)
 		{
-			if (vFontInstance->m_ReversedCharMap.find(vGlyphId) != vFontInstance->m_ReversedCharMap.end()) // found
+			auto glyphInfos = GetGlyphInfosFromGlyphId(vFontId, vGlyphId);
+
+			if (glyphInfos)
 			{
-				CodePoint glyphCodePoint = vFontInstance->m_ReversedCharMap[vGlyphId];
-
-				if (vFontInstance->m_NewGlyphInfos.find(glyphCodePoint) != vFontInstance->m_NewGlyphInfos.end()) // found
+				if (glyphInfos->simpleGlyph.isValid)
 				{
-					GlyphInfos glyphInfos = vFontInstance->m_NewGlyphInfos[glyphCodePoint];
+					SimpleGlyph_Solo simpleGlyph = glyphInfos->simpleGlyph;
 
-					if (glyphInfos.simpleGlyph.isValid)
+					sfntly::Ptr<sfntly::LocaTable> loca_table = down_cast<sfntly::LocaTable*>(m_Fonts[vFontId].m_Font->GetTable(sfntly::Tag::loca));
+					int32_t loc_length = loca_table->GlyphLength(vGlyphId);
+					int32_t loc_offset = loca_table->GlyphOffset(vGlyphId);
+
+					// Get the GLYF table for the current glyph id.
+					sfntly::Ptr<sfntly::GlyphTable> glyph_table = down_cast<sfntly::GlyphTable*>(m_Fonts[vFontId].m_Font->GetTable(sfntly::Tag::glyf));
+					sfntly::GlyphPtr glyph;
+					glyph.Attach(glyph_table->GetGlyph(loc_offset, loc_length));
+
+					auto sglyph = down_cast<sfntly::GlyphTable::SimpleGlyph*>(glyph.p_);
+
+					// normalement on va pas modifier la taille de la table
+					// vu que pour le moment on va juster scale ou transofmer les points
+
+					int32_t offset = 0;
+
+					ct::ivec2 trans = glyphInfos->simpleGlyph.m_Translation; // first apply
+					ct::dvec2 scale = glyphInfos->simpleGlyph.m_Scale; // second apply
+
+					// get rect min/max
+					int countContours = simpleGlyph.GetCountContours();
+					if (countContours == 0)
 					{
-						SimpleGlyph_Solo simpleGlyph = glyphInfos.simpleGlyph;
-
-						sfntly::Ptr<sfntly::LocaTable> loca_table = down_cast<sfntly::LocaTable*>(vFontInstance->m_Font->GetTable(sfntly::Tag::loca));
-						int32_t loc_length = loca_table->GlyphLength(vGlyphId);
-						int32_t loc_offset = loca_table->GlyphOffset(vGlyphId);
-
-						// Get the GLYF table for the current glyph id.
-						sfntly::Ptr<sfntly::GlyphTable> glyph_table = down_cast<sfntly::GlyphTable*>(vFontInstance->m_Font->GetTable(sfntly::Tag::glyf));
-						sfntly::GlyphPtr glyph;
-						glyph.Attach(glyph_table->GetGlyph(loc_offset, loc_length));
-
-						auto sglyph = down_cast<sfntly::GlyphTable::SimpleGlyph*>(glyph.p_);
-						// normalement on va pas modifier la taille de la table
-						// vu que pour le moment on va juster scale ou transofmer les points
-						
-						int32_t offset = 0;
-
-						ct::ivec2 trans = glyphInfos.simpleGlyph.m_Translation; // first apply
-						ct::dvec2 scale = glyphInfos.simpleGlyph.m_Scale; // second apply
-
-						// get rect min/max
-						int countContours = simpleGlyph.GetCountContours();
-						if (countContours == 0)
-						{
-							simpleGlyph.LoadSimpleGlyph(sglyph);
-							countContours = simpleGlyph.GetCountContours();
-						}
-						std::vector<uint16_t> endPtsOfContours;
-						int xMin = (int)1e6, yMin = (int)1e6, xMax = (int)-1e6, yMax = (int)-1e6;
-						int idx = 0;
-						for (auto & points : simpleGlyph.coords)
-						{
-							for (auto & point : points)
-							{
-								int px = point.x;
-								int py = point.y;
-
-								px += trans.x; px *= scale.x;
-								py += trans.y; py *= scale.y;
-
-								xMin = ct::mini(xMin, px);
-								xMax = ct::maxi(xMax, px);
-								yMin = ct::mini(yMin, py);
-								yMax = ct::maxi(yMax, py);
-								idx++;
-							}
-							endPtsOfContours.push_back(idx);
-						}
-
-						// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
-						//int16 	numberOfContours;
-						// no change
-						offset += sfntly::DataSize::kSHORT;
-						//FWord 	xMin 	Minimum x for coordinate data
-						offset += writer->WriteShort(offset, (int16_t)xMin); // xMin
-						//FWord 	yMin 	Minimum y for coordinate data
-						offset += writer->WriteShort(offset, (int16_t)yMin); // yMin
-						//FWord 	xMax 	Maximum x for coordinate data
-						offset += writer->WriteShort(offset, (int16_t)xMax); // xMax
-						//FWord 	yMax 	Maximum y for coordinate data
-						offset += writer->WriteShort(offset, (int16_t)yMax); // yMax
-
-						//Simple glyphs
-
-						//uint16 	endPtsOfContours[n] 	Array of last points of each contour; n is the number of contours; array entries are point indices
-						// no change
-						//uint16 	instructionLength 	Total number of bytes needed for instructions
-						int32_t instSize = glyph->InstructionSize();
-						if (instSize > 0)
-							int i = 0;
-						// no change
-						//uint8 	instructions[instructionLength] 	Array of instructions for this glyph
-						// no change
-						//uint8 	flags[variable] 	Array of flags
-						// no change
-
-						int32_t xOrgBytes = sglyph->xByteCount();
-						int32_t yOrgBytes = sglyph->yByteCount();
-						int32_t xOffset = sglyph->xCoordOffset();
-						int32_t yOffset = sglyph->yCoordOffset();
-						auto xDatas = sglyph->xOrginalCoordDatas();
-						auto yDatas = sglyph->yOrginalCoordDatas();
-
-						//////////////////////////////////////////////////
-						//uint8 or int16 	xCoordinates[] 	Array of x - coordinates; the first is relative to(0, 0), others are relative to previous point
-						
-						int32_t xNewBytes = 0;
-						for (auto &it : xDatas)
-						{
-							int32_t countBytes = it.first;
-							int32_t xCoord = it.second;
-
-							xCoord = xCoord + trans.x; // trans
-							xCoord = (int32_t)((double)xCoord * scale.x); // scale
-
-							if (countBytes == 1)
-								xOffset += writer->WriteByte(xOffset, (uint8_t)xCoord);
-							else if (countBytes == 2) 
-								xOffset += writer->WriteShort(xOffset, (int16_t)xCoord);
-							xNewBytes += countBytes;
-						}
-
-						assert(xNewBytes == xOrgBytes); // verification index == xBytes after loop
-						// because we just apply tranformations on points, no change on table size
-						assert(xOffset == yOffset); // must be equals after first xcoord loop
-
-						//uint8 or int16 	yCoordinates[] 	Array of y - coordinates; the first is relative to(0, 0), others are relative to previous point
-						
-						int32_t yNewBytes = 0;
-						for (auto &it : yDatas)
-						{
-							auto countBytes = it.first;
-							auto yCoord = it.second;
-
-							yCoord = yCoord + trans.y; // trans
-							yCoord = (int32_t)((double)yCoord * scale.y); // scale
-							
-							if (countBytes == 1)
-								yOffset += writer->WriteChar(yOffset, (uint8_t)yCoord);
-							else if (countBytes == 2) 
-								yOffset += writer->WriteShort(yOffset, (int16_t)yCoord);
-							yNewBytes += countBytes;
-						}
-
-						assert(yNewBytes == yOrgBytes); // verification index == yBytes after loop
-						// because we just apply tranformations on points, no change on table size
-
-						//////////////////////////////////////////////////
-
-						//we will not do Component glyph for the moment
+						simpleGlyph.LoadSimpleGlyph(sglyph);
+						countContours = simpleGlyph.GetCountContours();
 					}
+					std::vector<uint16_t> endPtsOfContours;
+					int xMin = (int)1e6, yMin = (int)1e6, xMax = (int)-1e6, yMax = (int)-1e6;
+					int idx = 0;
+					for (auto & points : simpleGlyph.coords)
+					{
+						for (auto & point : points)
+						{
+							int px = point.x;
+							int py = point.y;
+
+							px += trans.x; px *= scale.x;
+							py += trans.y; py *= scale.y;
+
+							xMin = ct::mini(xMin, px);
+							xMax = ct::maxi(xMax, px);
+							yMin = ct::mini(yMin, py);
+							yMax = ct::maxi(yMax, py);
+							idx++;
+						}
+						endPtsOfContours.push_back(idx);
+					}
+
+					// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
+					//int16 	numberOfContours;
+					// no change
+					offset += sfntly::DataSize::kSHORT;
+					//FWord 	xMin 	Minimum x for coordinate data
+					offset += writer->WriteShort(offset, (int16_t)xMin); // xMin
+					//FWord 	yMin 	Minimum y for coordinate data
+					offset += writer->WriteShort(offset, (int16_t)yMin); // yMin
+					//FWord 	xMax 	Maximum x for coordinate data
+					offset += writer->WriteShort(offset, (int16_t)xMax); // xMax
+					//FWord 	yMax 	Maximum y for coordinate data
+					offset += writer->WriteShort(offset, (int16_t)yMax); // yMax
+
+					//Simple glyphs
+
+					//uint16 	endPtsOfContours[n] 	Array of last points of each contour; n is the number of contours; array entries are point indices
+					// no change
+					//uint16 	instructionLength 	Total number of bytes needed for instructions
+					// no change
+					//uint8 	instructions[instructionLength] 	Array of instructions for this glyph
+					// no change
+					//uint8 	flags[variable] 	Array of flags
+					// no change
+
+					int32_t xOrgBytes = sglyph->xByteCount();
+					int32_t yOrgBytes = sglyph->yByteCount();
+					int32_t xOffset = sglyph->xCoordOffset();
+					int32_t yOffset = sglyph->yCoordOffset();
+					auto xDatas = sglyph->xOrginalCoordDatas();
+					auto yDatas = sglyph->yOrginalCoordDatas();
+
+					//////////////////////////////////////////////////
+					//uint8 or int16 	xCoordinates[] 	Array of x - coordinates; the first is relative to(0, 0), others are relative to previous point
+
+					int32_t xNewBytes = 0;
+					for (auto &it : xDatas)
+					{
+						int32_t countBytes = it.first;
+						int32_t xCoord = it.second;
+
+						xCoord = xCoord + trans.x; // trans
+						xCoord = (int32_t)((double)xCoord * scale.x); // scale
+
+						if (countBytes == 1)
+							xOffset += writer->WriteByte(xOffset, (uint8_t)xCoord);
+						else if (countBytes == 2)
+							xOffset += writer->WriteShort(xOffset, (int16_t)xCoord);
+						xNewBytes += countBytes;
+					}
+
+					assert(xNewBytes == xOrgBytes); // verification index == xBytes after loop
+					// because we just apply tranformations on points, no change on table size
+					assert(xOffset == yOffset); // must be equals after first xcoord loop
+
+					//uint8 or int16 	yCoordinates[] 	Array of y - coordinates; the first is relative to(0, 0), others are relative to previous point
+
+					int32_t yNewBytes = 0;
+					for (auto &it : yDatas)
+					{
+						auto countBytes = it.first;
+						auto yCoord = it.second;
+
+						yCoord = yCoord + trans.y; // trans
+						yCoord = (int32_t)((double)yCoord * scale.y); // scale
+
+						if (countBytes == 1)
+							yOffset += writer->WriteChar(yOffset, (uint8_t)yCoord);
+						else if (countBytes == 2)
+							yOffset += writer->WriteShort(yOffset, (int16_t)yCoord);
+						yNewBytes += countBytes;
+					}
+
+					assert(yNewBytes == yOrgBytes); // verification index == yBytes after loop
+					// because we just apply tranformations on points, no change on table size
+
+					//////////////////////////////////////////////////
+
+					//we will not do Component glyph for the moment
 				}
 			}
 		}
@@ -691,6 +683,17 @@ bool FontHelper::Assemble_Hmtx_Hhea_Tables()
 				int32_t origGlyphId = m_NewToOldGlyfId[fontId][i];
 				int32_t advanceWidth = origMetrics->AdvanceWidth(origGlyphId);
 				int32_t lsb = origMetrics->LeftSideBearing(origGlyphId);
+
+				auto glyphInfos = GetGlyphInfosFromGlyphId(fontId, origGlyphId);
+				if (glyphInfos)
+				{
+					if (glyphInfos->simpleGlyph.isValid)
+					{
+						advanceWidth *= glyphInfos->simpleGlyph.m_Scale.x;
+						lsb *= glyphInfos->simpleGlyph.m_Scale.x;
+					}
+				}
+
 				metrics.push_back(LongHorMetric{ advanceWidth, lsb });
 			}
 		}
@@ -907,4 +910,26 @@ bool FontHelper::SerializeFont(const char* font_path, sfntly::FontFactory* facto
 	fflush(output_file);
 	fclose(output_file);
 	return true;
+}
+
+GlyphInfos* FontHelper::GetGlyphInfosFromGlyphId(int32_t vFontId, int32_t vGlyphId)
+{
+	GlyphInfos *res = 0;
+
+	if (vFontId >= 0 && m_Fonts.size() > vFontId)
+	{
+		auto inst = &m_Fonts[vFontId];
+
+		if (inst->m_ReversedCharMap.find(vGlyphId) != inst->m_ReversedCharMap.end()) // found
+		{
+			CodePoint glyphCodePoint = inst->m_ReversedCharMap[vGlyphId];
+
+			if (inst->m_NewGlyphInfos.find(glyphCodePoint) != inst->m_NewGlyphInfos.end()) // found
+			{
+				res = &inst->m_NewGlyphInfos[glyphCodePoint];
+			}
+		}
+	}
+
+	return res;
 }

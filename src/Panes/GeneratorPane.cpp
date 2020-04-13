@@ -112,8 +112,7 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 			if (ImGui::Button("Quick Font Current"))
 			{
 				vProjectFile->m_GenMode = (GenModeFlags)0;
-				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_CURRENT_FONT_HEADER); // font + header
-				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES);
+				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_CURRENT_FONT); // font + header
 				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
 				std::string path = FileHelper::Instance()->GetAppPath() + "/exports";
 				path = FileHelper::Instance()->CorrectFilePathName(path);
@@ -123,8 +122,7 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 			if (ImGui::Button("Quick Font Merged"))
 			{
 				vProjectFile->m_GenMode = (GenModeFlags)0;
-				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_MERGED_FONT_HEADER); // font + header
-				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES);
+				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_MERGED_FONT); // font + header
 				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
 				std::string path = FileHelper::Instance()->GetAppPath() + "/exports";
 				path = FileHelper::Instance()->CorrectFilePathName(path);

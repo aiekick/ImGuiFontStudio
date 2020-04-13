@@ -75,14 +75,13 @@ public:
 	FontHelper();
 	~FontHelper();
 
-public: // read
+public:
 	bool OpenFontFile(
 		const std::string& vFontFilePathName,
 		std::map<CodePoint, std::string> vNewNames,
 		std::map<CodePoint, CodePoint> vNewCodePoints,
 		std::map<CodePoint, GlyphInfos> vNewGlyphInfos);
 	bool GenerateFontFile(const std::string& vFontFilePathName, bool vUsePostTable);
-
 
 private:
 	std::vector<FontInstance> m_Fonts;
@@ -106,8 +105,7 @@ private: // post table - version / count / size / offsets
 public:
 	sfntly::Font* LoadFontFile(const char* font_path);
 
-private:
-	// imported/based on/modified from sfntly
+private: // imported/based or/modified from sfntly
 	void LoadFontFiles(const char* font_path, sfntly::FontFactory* factory, sfntly::FontArray* fonts);
 	bool SerializeFont(const char* font_path, sfntly::Font* font);
 	bool SerializeFont(const char* font_path, sfntly::FontFactory* factory, sfntly::Font* font);
@@ -115,7 +113,7 @@ private:
 
 private:
 	bool Assemble_Glyf_Loca_Maxp_Tables();
-	void ReScale_Glyph(const int32_t& vGlyphId, FontInstance *vFontInstance, sfntly::WritableFontData *vWritableFontData);
+	void ReScale_Glyph(const int32_t& vFontId, const int32_t& vGlyphId,	sfntly::WritableFontData *vWritableFontData);
 	void FillResolvedCompositeGlyphs(FontInstance *vFontInstance, std::map<CodePoint, int32_t> chars_to_glyph_ids);
 
 private:
@@ -133,5 +131,8 @@ private:
 
 private:
 	bool Assemble_Head_Table();
+
+private:
+	GlyphInfos* GetGlyphInfosFromGlyphId(int32_t vFontId, int32_t vGlyphId);
 };
 
