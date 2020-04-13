@@ -3,45 +3,6 @@
 		<font name="fontawesome-webfont.ttf">
 			<glyphs>
 				<glyph orgId="61442" newId="61442" orgName="search" newName="search"/>
-				<glyph orgId="61450" newId="61443" orgName="th" newName="glyphs"/>
-				<glyph orgId="61452" newId="61452" orgName="ok" newName="ok"/>
-				<glyph orgId="61453" newId="61453" orgName="remove" newName="cancel"/>
-				<glyph orgId="61459" newId="61459" orgName="cog" newName="settings"/>
-				<glyph orgId="61460" newId="61460" orgName="trash" newName="destroy"/>
-				<glyph orgId="61462" newId="61462" orgName="file_alt" newName="link"/>
-				<glyph orgId="61470" newId="61470" orgName="repeat" newName="redo"/>
-				<glyph orgId="61473" newId="61473" orgName="refresh" newName="refresh"/>
-				<glyph orgId="61485" newId="61485" orgName="book" newName="project"/>
-				<glyph orgId="61489" newId="61489" orgName="font" newName="by_font"/>
-				<glyph orgId="61502" newId="61502" orgName="picture" newName="texture"/>
-				<glyph orgId="61504" newId="61504" orgName="pencil" newName="edit"/>
-				<glyph orgId="61527" newId="61527" orgName="remove_sign" newName="error"/>
-				<glyph orgId="61530" newId="61530" orgName="info_sign" newName="infos"/>
-				<glyph orgId="61531" newId="61531" orgName="screenshot" newName="target"/>
-				<glyph orgId="61540" newId="61540" orgName="share_alt" newName="reset"/>
-				<glyph orgId="61543" newId="61543" orgName="plus" newName="add"/>
-				<glyph orgId="61544" newId="61544" orgName="minus" newName="remove"/>
-				<glyph orgId="61553" newId="61553" orgName="warning_sign" newName="warning"/>
-				<glyph orgId="61616" newId="61616" orgName="filter" newName="filter"/>
-				<glyph orgId="61618" newId="61618" orgName="fullscreen" newName="fullscreen"/>
-				<glyph orgId="61636" newId="61636" orgName="cut" newName="cut"/>
-				<glyph orgId="61637" newId="61637" orgName="copy" newName="copy"/>
-				<glyph orgId="61639" newId="61639" orgName="save" newName="save"/>
-				<glyph orgId="61640" newId="61640" orgName="sign_blank" newName="icon_view"/>
-				<glyph orgId="61648" newId="61648" orgName="magic" newName="select_path"/>
-				<glyph orgId="61656" newId="61656" orgName="caret_up" newName="menu_up"/>
-				<glyph orgId="61657" newId="61657" orgName="caret_left" newName="menu_left"/>
-				<glyph orgId="61658" newId="61658" orgName="caret_right" newName="menu_right"/>
-				<glyph orgId="61666" newId="61666" orgName="undo" newName="undo"/>
-				<glyph orgId="61674" newId="61674" orgName="paste" newName="paste"/>
-				<glyph orgId="61736" newId="61736" orgName="question" newName="help"/>
-				<glyph orgId="61737" newId="61737" orgName="_279" newName="about"/>
-				<glyph orgId="61738" newId="61738" orgName="exclamation" newName="exclamation"/>
-				<glyph orgId="61771" newId="61771" orgName="edit_sign" newName="icon_edit"/>
-				<glyph orgId="61787" newId="61787" orgName="file" newName="file"/>
-				<glyph orgId="62003" newId="62003" orgName="_528" newName="drives"/>
-				<glyph orgId="62021" newId="62021" orgName="_545" newName="select"/>
-				<glyph orgId="62060" newId="62060" orgName="_582" newName="layout"/>
 			</glyphs>
 			<prefix>IGFS</prefix>
 			<pathfilename>..\samples_Fonts\fontawesome-webfont.ttf</pathfilename>
@@ -50,31 +11,7 @@
 		</font>
 		<font name="materialdesignicons-webfont.ttf">
 			<glyphs>
-				<glyph orgId="61561" newId="61561" orgName="battery" newName="battery"/>
 				<glyph orgId="61562" newId="61562" orgName="battery-10" newName="battery-10"/>
-				<glyph orgId="61563" newId="61563" orgName="battery-20" newName="battery-20"/>
-				<glyph orgId="61564" newId="61564" orgName="battery-30" newName="battery-30"/>
-				<glyph orgId="61565" newId="61565" orgName="battery-40" newName="battery-40"/>
-				<glyph orgId="61566" newId="61566" orgName="battery-50" newName="battery-50"/>
-				<glyph orgId="61567" newId="61567" orgName="battery-60" newName="battery-60"/>
-				<glyph orgId="61568" newId="61568" orgName="battery-70" newName="battery-70"/>
-				<glyph orgId="61569" newId="61569" orgName="battery-80" newName="battery-80"/>
-				<glyph orgId="61570" newId="61570" orgName="battery-90" newName="battery-90"/>
-				<glyph orgId="61571" newId="61571" orgName="battery-alert" newName="battery-alert"/>
-				<glyph orgId="61572" newId="61572" orgName="battery-charging" newName="battery-charging"/>
-				<glyph orgId="61573" newId="61573" orgName="battery-charging-100" newName="battery-charging-100"/>
-				<glyph orgId="61574" newId="61574" orgName="battery-charging-20" newName="battery-charging-20"/>
-				<glyph orgId="61575" newId="61575" orgName="battery-charging-30" newName="battery-charging-30"/>
-				<glyph orgId="61576" newId="61576" orgName="battery-charging-40" newName="battery-charging-40"/>
-				<glyph orgId="61577" newId="61577" orgName="battery-charging-60" newName="battery-charging-60"/>
-				<glyph orgId="61578" newId="61578" orgName="battery-charging-80" newName="battery-charging-80"/>
-				<glyph orgId="61579" newId="61579" orgName="battery-charging-90" newName="battery-charging-90"/>
-				<glyph orgId="61580" newId="61580" orgName="battery-minus" newName="battery-minus"/>
-				<glyph orgId="61581" newId="61581" orgName="battery-negative" newName="battery-negative"/>
-				<glyph orgId="61582" newId="61582" orgName="battery-outline" newName="battery-outline"/>
-				<glyph orgId="61583" newId="61583" orgName="battery-plus" newName="battery-plus"/>
-				<glyph orgId="61584" newId="61584" orgName="battery-positive" newName="battery-positive"/>
-				<glyph orgId="61585" newId="61585" orgName="battery-unknown" newName="battery-unknown"/>
 			</glyphs>
 			<prefix></prefix>
 			<pathfilename>..\samples_Fonts\materialdesignicons-webfont.ttf</pathfilename>
@@ -86,6 +23,6 @@
 		<mergedfontprefix>IGFS</mergedfontprefix>
 		<srcglyphtooltip>true</srcglyphtooltip>
 		<dstglyphtooltip>true</dstglyphtooltip>
-		<genmode>347</genmode>
+		<genmode>274</genmode>
 	</project>
 </config>

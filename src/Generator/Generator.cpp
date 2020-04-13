@@ -526,6 +526,9 @@ void Generator::GenerateFontFile_Merged(
 				ct::ivec2 newSize = it.second.m_BoundingBox.zw() - it.second.m_BoundingBox.xy();
 				scale.x = (double)baseSize.x / (double)newSize.x;
 				scale.y = (double)baseSize.y / (double)newSize.y;
+				double v = ct::mini(scale.x, scale.y);
+				scale.x = v;
+				scale.y = v;
 			}
 
 			std::map<int32_t, std::string> newHeaderNames;

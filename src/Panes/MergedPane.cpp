@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-#include "GlyphPane.h"
+#include "MergedPane.h"
 
 #include "MainFrame.h"
 
@@ -49,12 +49,12 @@
 
 static int GlyphPane_WidgetId = 0;
 
-GlyphPane::GlyphPane()
+MergedPane::MergedPane()
 {
 	
 }
 
-GlyphPane::~GlyphPane()
+MergedPane::~MergedPane()
 {
 	
 }
@@ -72,14 +72,14 @@ static int _ty = 0;
 static float _sx = 1.0f;
 static float _sy = 1.0f;
 
-int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
+int MergedPane::DrawMergedPane(ProjectFile *vProjectFile, int vWidgetId)
 {
 	GlyphPane_WidgetId = vWidgetId;
 
-	if (GuiLayout::m_Pane_Shown & PaneFlags::PANE_GLYPH)
+	if (GuiLayout::m_Pane_Shown & PaneFlags::PANE_MERGED)
 	{
-		if (ImGui::Begin<PaneFlags>(GLYPH_PANE,
-			&GuiLayout::m_Pane_Shown, PaneFlags::PANE_GLYPH,
+		if (ImGui::Begin<PaneFlags>(MERGED_PANE,
+			&GuiLayout::m_Pane_Shown, PaneFlags::PANE_MERGED,
 			//ImGuiWindowFlags_NoTitleBar |
 			ImGuiWindowFlags_MenuBar |
 			//ImGuiWindowFlags_NoMove |
@@ -119,7 +119,7 @@ int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
 
 static int limitContour = 0;
 
-bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, GlyphInfos *vGlyphInfos)
+bool MergedPane::LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, GlyphInfos *vGlyphInfos)
 {
 	bool res = false;
 
@@ -172,7 +172,7 @@ bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, Glyp
 }
 
 // https://github.com/rillig/sfntly/tree/master/java/src/com/google/typography/font/tools/fontviewer
-bool GlyphPane::DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
+bool MergedPane::DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
 	double vScale, double vProgress, bool vFill, bool vControlLines)
 {
 	if (vGlyph && vFontInfos)
@@ -221,29 +221,28 @@ bool GlyphPane::DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
 				ImGui::EndMenuBar();
 			}
 
-
 			// x 0
 			drawList->AddLine(
-				ct::toImVec2(g->Scale(ct::ivec2(0, rc.y * g->m_Scale.x), vScale)) + pos,
-				ct::toImVec2(g->Scale(ct::ivec2(0, rc.w * g->m_Scale.y), vScale)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2(0, rc.y), vScale)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2(0, rc.w), vScale)) + pos,
 				ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), 2.0f);
 
 			// Ascent
 			drawList->AddLine(
-				ct::toImVec2(g->Scale(ct::ivec2(rc.x * g->m_Scale.x, vFontInfos->m_Ascent), vScale)) + pos,
-				ct::toImVec2(g->Scale(ct::ivec2(rc.z * g->m_Scale.x, vFontInfos->m_Ascent), vScale)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2(rc.x, vFontInfos->m_Ascent), vScale)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2(rc.z, vFontInfos->m_Ascent), vScale)) + pos,
 				ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
 
 			// y 0
 			drawList->AddLine(
-				ct::toImVec2(g->Scale(ct::ivec2(rc.x * g->m_Scale.x, 0), vScale)) + pos,
-				ct::toImVec2(g->Scale(ct::ivec2(rc.z * g->m_Scale.x, 0), vScale)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2(rc.x, 0), vScale)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2(rc.z, 0), vScale)) + pos,
 				ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 1.0f);
 
 			// Descent
 			drawList->AddLine(
-				ct::toImVec2(g->Scale(ct::ivec2(rc.x * g->m_Scale.x, vFontInfos->m_Descent), vScale)) + pos,
-				ct::toImVec2(g->Scale(ct::ivec2(rc.z * g->m_Scale.x, vFontInfos->m_Descent), vScale)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2(rc.x, vFontInfos->m_Descent), vScale)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2(rc.z, vFontInfos->m_Descent), vScale)) + pos,
 				ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
 
 			for (int c = 0; c < cmax; c++)
@@ -327,12 +326,6 @@ bool GlyphPane::DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
 
 					drawList->PathStroke(ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), true);
 				}
-
-				/*for (auto &it : g->originalCoords)
-				{
-					drawList->PathLineTo(ct::toImVec2(it * vScale) + pos);
-				}
-				drawList->PathStroke(ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), true);*/
 			}
 		}
 	}

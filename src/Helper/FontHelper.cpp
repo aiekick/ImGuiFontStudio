@@ -451,6 +451,13 @@ void FontHelper::ReScale_Glyph(
 
 					ct::ivec2 trans = glyphInfos->simpleGlyph.m_Translation; // first apply
 					ct::dvec2 scale = glyphInfos->simpleGlyph.m_Scale; // second apply
+					
+					int32_t xOrgBytes = sglyph->xByteCount();
+					int32_t yOrgBytes = sglyph->yByteCount();
+					int32_t xOffset = sglyph->xCoordOffset();
+					int32_t yOffset = sglyph->yCoordOffset();
+					auto xDatas = sglyph->xOrginalCoordDatas();
+					auto yDatas = sglyph->yOrginalCoordDatas();
 
 					// get rect min/max
 					int countContours = simpleGlyph.GetCountContours();
@@ -462,37 +469,48 @@ void FontHelper::ReScale_Glyph(
 					std::vector<uint16_t> endPtsOfContours;
 					int xMin = (int)1e6, yMin = (int)1e6, xMax = (int)-1e6, yMax = (int)-1e6;
 					int idx = 0;
-					for (auto & points : simpleGlyph.coords)
+					/*for (auto & points : simpleGlyph.coords)
 					{
+						int firstPoint = 0;
 						for (auto & point : points)
 						{
 							int px = point.x;
 							int py = point.y;
 
-							px += trans.x; px *= scale.x;
-							py += trans.y; py *= scale.y;
+							if (firstPoint == 0)
+							{
+								px += trans.x;
+								py += trans.y;
+							}
+							px *= scale.x;
+							py *= scale.y;
 
 							xMin = ct::mini(xMin, px);
 							xMax = ct::maxi(xMax, px);
 							yMin = ct::mini(yMin, py);
 							yMax = ct::maxi(yMax, py);
 							idx++;
+							firstPoint++;
 						}
 						endPtsOfContours.push_back(idx);
-					}
+					}*/
 
 					// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
 					//int16 	numberOfContours;
 					// no change
 					offset += sfntly::DataSize::kSHORT;
 					//FWord 	xMin 	Minimum x for coordinate data
-					offset += writer->WriteShort(offset, (int16_t)xMin); // xMin
+					xMin = writer->ReadShort(offset);
+					offset += writer->WriteShort(offset, (int16_t)(xMin * scale.x)); // xMin
 					//FWord 	yMin 	Minimum y for coordinate data
-					offset += writer->WriteShort(offset, (int16_t)yMin); // yMin
+					yMin = writer->ReadShort(offset);
+					offset += writer->WriteShort(offset, (int16_t)(yMin * scale.y)); // yMin
 					//FWord 	xMax 	Maximum x for coordinate data
-					offset += writer->WriteShort(offset, (int16_t)xMax); // xMax
+					xMax = writer->ReadShort(offset);
+					offset += writer->WriteShort(offset, (int16_t)(xMax * scale.x)); // xMax
 					//FWord 	yMax 	Maximum y for coordinate data
-					offset += writer->WriteShort(offset, (int16_t)yMax); // yMax
+					yMax = writer->ReadShort(offset);
+					offset += writer->WriteShort(offset, (int16_t)(yMax * scale.y)); // yMax
 
 					//Simple glyphs
 
@@ -505,13 +523,6 @@ void FontHelper::ReScale_Glyph(
 					//uint8 	flags[variable] 	Array of flags
 					// no change
 
-					int32_t xOrgBytes = sglyph->xByteCount();
-					int32_t yOrgBytes = sglyph->yByteCount();
-					int32_t xOffset = sglyph->xCoordOffset();
-					int32_t yOffset = sglyph->yCoordOffset();
-					auto xDatas = sglyph->xOrginalCoordDatas();
-					auto yDatas = sglyph->yOrginalCoordDatas();
-
 					//////////////////////////////////////////////////
 					//uint8 or int16 	xCoordinates[] 	Array of x - coordinates; the first is relative to(0, 0), others are relative to previous point
 
@@ -521,11 +532,18 @@ void FontHelper::ReScale_Glyph(
 						int32_t countBytes = it.first;
 						int32_t xCoord = it.second;
 
-						xCoord = xCoord + trans.x; // trans
-						xCoord = (int32_t)((double)xCoord * scale.x); // scale
+						if (xNewBytes == 0) // tout est and offset apr rapport au precedena,t suffit dont juste de decaler le 1er
+							xCoord += trans.x; // trans
+						xCoord *= scale.x; // scale
+						// en fait l'erreur vient du fait que xCoord etait sur 1 byte donc de 0 à 255
+						// et en le scalant on doit le coder ur 2 bytes car on a bougé au dela de 255
+						// du coup pou avoir un bon scale, il faut je re ecrive les flag et les coords
+						// donc je dois changer la taille de la table du glyph
 
 						if (countBytes == 1)
+						{
 							xOffset += writer->WriteByte(xOffset, (uint8_t)xCoord);
+						}
 						else if (countBytes == 2)
 							xOffset += writer->WriteShort(xOffset, (int16_t)xCoord);
 						xNewBytes += countBytes;
@@ -543,8 +561,9 @@ void FontHelper::ReScale_Glyph(
 						auto countBytes = it.first;
 						auto yCoord = it.second;
 
-						yCoord = yCoord + trans.y; // trans
-						yCoord = (int32_t)((double)yCoord * scale.y); // scale
+						if (xNewBytes == 0) // tout est and offset apr rapport au precedena,t suffit dont juste de decaler le 1er
+							yCoord += trans.y; // trans
+						yCoord *= scale.y; // scale
 
 						if (countBytes == 1)
 							yOffset += writer->WriteChar(yOffset, (uint8_t)yCoord);

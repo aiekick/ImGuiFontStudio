@@ -23,6 +23,12 @@
 #include "MainFrame.h"
 #include "Res/CustomFont.h"
 #include "Gui/ImGuiWidgets.h"
+#include "Project/ProjectFile.h"
+#include "Panes/SourceFontPane.h"
+#include "Panes/FinalFontPane.h"
+#include "Panes/GlyphPane.h"
+#include "Panes/MergedPane.h"
+#include "Panes/GeneratorPane.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui_internal.h"
@@ -92,6 +98,7 @@ void GuiLayout::ApplyInitialDockingLayout(ImVec2 vSize)
 	ImGui::DockBuilderDockWindow(GENERATOR_PANE, dockRightID); // dockGeneratorID
 	ImGui::DockBuilderDockWindow(CURRENT_FONT_PANE, dockRightID); // dockSelectionID
 	ImGui::DockBuilderDockWindow(GLYPH_PANE, dockMainID);
+	ImGui::DockBuilderDockWindow(MERGED_PANE, dockMainID);
 
 	ImGui::DockBuilderFinish(m_DockSpaceID);
 
@@ -115,11 +122,24 @@ void GuiLayout::DisplayMenu(ImVec2 vSize)
 		ImGui::MenuItem<PaneFlags>("Show/Hide Final Pane", "", &m_Pane_Shown, PaneFlags::PANE_FINAL);
 		ImGui::MenuItem<PaneFlags>("Show/Hide Generator Pane", "", &m_Pane_Shown, PaneFlags::PANE_GENERATOR);
 		ImGui::MenuItem<PaneFlags>("Show/Hide Glyph Pane", "", &m_Pane_Shown, PaneFlags::PANE_GLYPH);
+		ImGui::MenuItem<PaneFlags>("Show/Hide Merged Pane", "", &m_Pane_Shown, PaneFlags::PANE_MERGED);
 
 		ImGui::EndMenu();
 	}
 }
 
+int GuiLayout::DisplayPanes(ProjectFile *vProjectFile, int vWidgetId)
+{
+	vWidgetId = SourceFontPane::Instance()->DrawParamsPane(vProjectFile, vWidgetId);
+	vWidgetId = SourceFontPane::Instance()->DrawSourceFontPane(vProjectFile, vWidgetId);
+	vWidgetId = FinalFontPane::Instance()->DrawFinalFontPane(vProjectFile, vWidgetId);
+	vWidgetId = FinalFontPane::Instance()->DrawCurrentFontPane(vProjectFile, vWidgetId);
+	vWidgetId = GeneratorPane::Instance()->DrawGeneratorPane(vProjectFile, vWidgetId);
+	vWidgetId = GlyphPane::Instance()->DrawGlyphPane(vProjectFile, vWidgetId);
+	vWidgetId = MergedPane::Instance()->DrawMergedPane(vProjectFile, vWidgetId);
+
+	return vWidgetId;
+}
 ///////////////////////////////////////////////////////
 //// CONFIGURATION ////////////////////////////////////
 ///////////////////////////////////////////////////////

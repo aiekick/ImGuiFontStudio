@@ -28,7 +28,7 @@
 class ProjectFile;
 class FontInfos;
 class GlyphInfos;
-class GlyphPane
+class MergedPane
 {
 private:
 	//sfntly::Ptr<sfntly::GlyphTable::SimpleGlyph> m_SimpleGlyph;
@@ -37,7 +37,7 @@ private:
 	GlyphInfos *m_Glyph2 = 0;
 
 public:
-	int DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId);
+	int DrawMergedPane(ProjectFile *vProjectFile, int vWidgetId);
 	bool LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, GlyphInfos *vGlyphInfos);
 
 private:
@@ -45,16 +45,16 @@ private:
 		double vScale, double vProgress, bool vFill = false, bool vControlLines = true);
 
 public: // singleton
-	static GlyphPane *Instance()
+	static MergedPane *Instance()
 	{
-		static GlyphPane *_instance = new GlyphPane();
+		static MergedPane *_instance = new MergedPane();
 		return _instance;
 	}
 
 protected:
-	GlyphPane(); // Prevent construction
-	GlyphPane(const GlyphPane&) {}; // Prevent construction by copying
-	GlyphPane& operator =(const GlyphPane&) { return *this; }; // Prevent assignment
-	~GlyphPane(); // Prevent unwanted destruction};
+	MergedPane(); // Prevent construction
+	MergedPane(const MergedPane&) {}; // Prevent construction by copying
+	MergedPane& operator =(const MergedPane&) { return *this; }; // Prevent assignment
+	~MergedPane(); // Prevent unwanted destruction};
 };
 
