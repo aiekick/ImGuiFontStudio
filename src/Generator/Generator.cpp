@@ -527,8 +527,8 @@ void Generator::GenerateFontFile_Merged(
 				scale.x = (double)baseSize.x / (double)newSize.x;
 				scale.y = (double)baseSize.y / (double)newSize.y;
 				double v = ct::mini(scale.x, scale.y);
-				scale.x = v;
-				scale.y = v;
+				scale.x = 1.0;
+				scale.y = 1.0;
 			}
 
 			std::map<int32_t, std::string> newHeaderNames;
