@@ -49,27 +49,17 @@ public:
 			m_Datas.insert(m_Datas.end(), buffer->begin(), buffer->end());
 		}
 	}
-	void WriteShort(int16_t i)
+	void WriteShort(int32_t i)
 	{
-		uint8_t b0 = (i >> 8) & 0xFF;
-		WriteByte(b0);
-		uint8_t b1 = i & 0xFF;
-		WriteByte(b1);
-		//int16_t r = 0 | b0 | b1;
-		//int t = 0;
+		WriteByte((uint8_t)((i >> 8) & 0xff));
+		WriteByte((uint8_t)(i & 0xff));
 	}
 	void WriteInt(int32_t i)
 	{
-		uint8_t b0 = (i >> 24) & 0xFF;
-		WriteByte(b0);
-		uint8_t b1 = (i >> 16) & 0xFF;
-		WriteByte(b1);
-		uint8_t b2 = (i >> 8) & 0xFF;
-		WriteByte(b2);
-		uint8_t b3 = i & 0xFF;
-		WriteByte(b3);
-		//int32_t r = 0 | b0 | b1 | b2 | b3;
-		//int t = 0;
+		WriteByte((uint8_t)((i >> 24) & 0xff));
+		WriteByte((uint8_t)((i >> 16) & 0xff));
+		WriteByte((uint8_t)((i >> 8) & 0xff));
+		WriteByte((uint8_t)(i & 0xff));
 	}
 	uint8_t* Get()
 	{

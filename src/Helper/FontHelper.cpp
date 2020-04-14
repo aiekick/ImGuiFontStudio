@@ -412,11 +412,7 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 	// so we will use vWritableFontData for overwrite datas if needed
 	// easier way instead of regenerate glyph
 
-	sfntly::Ptr<sfntly::WritableFontData> writer;
-	writer.Attach(sfntly::WritableFontData::CreateWritableFontData(vReadableFontData->Length()));
-	vReadableFontData->CopyTo(writer);
-	
-	if (writer->Length() > 0)
+	if (vReadableFontData->Length() > 0)
 	{
 		auto glyphInfos = GetGlyphInfosFromGlyphId(vFontId, vGlyphId);
 
@@ -424,6 +420,10 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 		{
 			if (glyphInfos->simpleGlyph.isValid)
 			{
+				MemoryStream str;
+				str.WriteShort(341);
+				str.WriteInt(4578);
+
 				SimpleGlyph_Solo simpleGlyph = glyphInfos->simpleGlyph;
 
 				sfntly::Ptr<sfntly::LocaTable> loca_table = down_cast<sfntly::LocaTable*>(m_Fonts[vFontId].m_Font->GetTable(sfntly::Tag::loca));
@@ -437,10 +437,6 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 
 				auto sglyph = down_cast<sfntly::GlyphTable::SimpleGlyph*>(glyph.p_);
 
-				// normalement on va pas modifier la taille de la table
-				// vu que pour le moment on va juster scale ou transofmer les points
-
-				// get rect min/max
 				int countContours = simpleGlyph.GetCountContours();
 				if (countContours == 0)
 				{
@@ -450,233 +446,123 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 
 				ct::ivec2 trans = glyphInfos->simpleGlyph.m_Translation; // first apply
 				ct::dvec2 scale = glyphInfos->simpleGlyph.m_Scale; // second apply
-				
+				trans = 0;
 				/////////////////////////////////////////////////////////////////////////////////////////////
-				/////////////////////////////////////////////////////////////////////////////////////////////
-				/////////////////////////////////////////////////////////////////////////////////////////////
-				/////////////////////////////////////////////////////////////////////////////////////////////
-				
-				MemoryStream stream;
-
-				int32_t size = 0;
-				int32_t boundsOffset = 0;
 				// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
-				//int16 numberOfContours;
-				// no change
-				stream.WriteShort(countContours);
-				boundsOffset += sfntly::DataSize::kSHORT;
-				//FWord xMin Minimum x for coordinate data
-				int32_t xMin = writer->ReadShort(boundsOffset) * scale.x;
-				stream.WriteShort((int16_t)xMin);
-				boundsOffset += sfntly::DataSize::kSHORT;
-				//offset += writer->WriteShort(offset, (int16_t)(xMin)); // xMin
-				//FWord yMin Minimum y for coordinate data
-				int32_t yMin = writer->ReadShort(boundsOffset) * scale.y;
-				stream.WriteShort((int16_t)yMin);
-				boundsOffset += sfntly::DataSize::kSHORT;
-				//offset += writer->WriteShort(offset, (int16_t)(yMin)); // yMin
-				//FWord xMax Maximum x for coordinate data
-				int32_t xMax = writer->ReadShort(boundsOffset) * scale.x;
-				stream.WriteShort((int16_t)xMax);
-				boundsOffset += sfntly::DataSize::kSHORT;
-				//offset += writer->WriteShort(offset, (int16_t)(xMax)); // xMax
-				//FWord yMax Maximum y for coordinate data
-				int32_t yMax = writer->ReadShort(boundsOffset) * scale.y;
-				stream.WriteShort((int16_t)yMax);
-				boundsOffset += sfntly::DataSize::kSHORT;
-				//offset += writer->WriteShort(offset, (int16_t)(yMax)); // yMax
-
-				//Simple glyphs
-				//uint16 endPtsOfContours[n] Array of last points of each contour; n is the number of contours; array entries are point indices
-				// no change
-				//uint16 instructionLength Total number of bytes needed for instructions
-				// no change
-				//uint8 instructions[instructionLength] Array of instructions for this glyph
-				// no change
+				/////////////////////////////////////////////////////////////////////////////////////////////
 				
-				int32_t flagOffset = sglyph->flagOffset();
+				MemoryStream headerStream;
+				MemoryStream flagStream;
+				MemoryStream xCoordStream;
+				MemoryStream yCoordStream;
 
-				// on va mettre dans un tableau de byte tout depuis apres yMax a debut de xCoordinates
-				int32_t off = boundsOffset;
-				int32_t siz = flagOffset - boundsOffset;
-				std::vector<uint8_t> da; da.resize(siz);
-				writer->ReadBytes(off, &(da[0]), 0, siz);
-				stream.WriteBytes(&da);
+				std::vector<ct::ivec2> coords;
 
-				// stream est validé => OK
+				ct::iAABB boundingBox(1e6, -1e6);
+				int c = 0;
+				ct::ivec2 last;
+				size_t numContours = simpleGlyph.coords.size();
+				for (auto &contour : simpleGlyph.coords)
+				{
+					size_t numPoints = contour.size();
+					int p = 0;
+					for (auto &pt : contour)
+					{
+						ct::ivec2 dv = pt - last;
+						bool isConCurve = simpleGlyph.IsOnCurve(c, p);
+						int32_t flag = 0;
+						if (simpleGlyph.onCurve[c][p])
+							flag = flag | (1 << 0);
+						flagStream.WriteByte(flag);
 
-				/////////////////////////////////////////////////////////////////////////////////////////////
-				/////////////////////////////////////////////////////////////////////////////////////////////
-				/////////////////////////////////////////////////////////////////////////////////////////////
-				/////////////////////////////////////////////////////////////////////////////////////////////
+						// relative points
+						int32_t x = (dv.x * scale.x) + trans.x;
+						int32_t y = (dv.y * scale.y) + trans.y;
+						coords.push_back(ct::ivec2(x, y));
 
-				// en fait l'erreur vient du fait que xCoord etait sur 1 byte donc de 0 à 255
-				// et en le scalant on doit le coder ur 2 bytes car on a bougé au dela de 255
-				// du coup pou avoir un bon scale, il faut je re ecrive les flag et les coords
-				// donc je dois changer la taille de la table du glyph
+						// conbine absolute points
+						int32_t px = (pt.x * scale.x) + trans.x;
+						int32_t py = (pt.y * scale.y) + trans.y;
+						boundingBox.Combine(ct::ivec2(px, py));
 
-				int32_t numPoints = sglyph->ContourEndPoint(sglyph->NumberOfContours() - 1) + 1;
+						last = pt;
+						p++;
+					}
+					c++;
+				}
 
-				auto xDatas = sglyph->xOrginalCoordDatas();
-				auto yDatas = sglyph->yOrginalCoordDatas();
+				//int fontDescent = m_Fonts[vFontId].
+
+				ct::ivec2 inf = boundingBox.lowerBound;
+				ct::ivec2 sup = boundingBox.upperBound;
+
+				inf.x = ct::mini(inf.x, 0);
+				inf.y = ct::mini(inf.y, 0);
+
+				int deltaY = 0;
+				if (inf.y < glyphInfos->m_FontBoundingBox.y)
+					deltaY = glyphInfos->m_FontBoundingBox.y - inf.y;
+				inf.y += deltaY;
+				sup.y += deltaY;
+
+				deltaY = 0;
+				if (sup.y > glyphInfos->m_FontBoundingBox.w)
+					deltaY = sup.y - glyphInfos->m_FontBoundingBox.w;
+				sup.y -= deltaY;
 				
-				if (xDatas.size() != numPoints)
-					int i = 0;
-				if (yDatas.size() != numPoints)
-					int i = 0;
-
-				// on va calculer les transformation et modifier le nombre de bytes des entrées
-				for (auto &it : xDatas)
-				{
-					//if (idx++ == 0) it.second += trans.x; ca va merder car si plusoieurs contours alors ya aps que idx == 1
-					// pour le moment on s'occupe de regler le scale, on verra apres quand le rewrite aura fonctionné
-					// on pourra regler ca avec un tuple qui donnera une indication si c'est le debut d'un nouvea contour
-					it.second *= scale.x;
-					if (it.first == 1 && it.second > 255) // for unsigned values superior to 2^8 (256), need 2 bytes instead of just one 
-						it.first = 2;
-				}
-
-				for (auto &it : yDatas)
-				{
-					//if (idx++ == 0) it.second += trans.y; ca va merder car si plusoieurs contours alors ya aps que idx == 1
-					// pour le moment on s'occupe de regler le scale, on verra apres quand le rewrite aura fonctionné
-					// on pourra regler ca avec un tuple qui donnera une indication si c'est le debut d'un nouvea contour
-					it.second *= scale.y;
-					if (it.first == 1 && it.second > 255) // for unsigned values superior to 2^8 (256), need 2 bytes instead of just one
-						it.first = 2;
-				}
-
-				/////////////////////////////////////////////////////////////////////////////////////////////
-				/////////////////////////////////////////////////////////////////////////////////////////////
-				/////////////////////////////////////////////////////////////////////////////////////////////
-				/////////////////////////////////////////////////////////////////////////////////////////////
-
-				//on va ecrire flags
-				//uint8 	flags[variable] 	Array of flags
-
-				//MemoryStream flagStream;
+				int deltaX = 0;
+				if (inf.x < glyphInfos->m_FontBoundingBox.x)
+					deltaX = glyphInfos->m_FontBoundingBox.x - inf.x;
+				inf.x += deltaX;
+				sup.x += deltaX;
 				
-				auto flags = sglyph->OriginalFlags();
+				deltaX = 0;
+				if (sup.x > glyphInfos->m_FontBoundingBox.z)
+					deltaX = sup.x - glyphInfos->m_FontBoundingBox.z;
+				sup.x -= deltaX;
 
-				for (auto &it : flags)
+				for (auto &pt : coords)
 				{
-					int32_t flag = it.first;
-					int32_t idx = it.second;
-
-					if (flag  & (1 << 0))
-						bool onCurve = true;
-					if (flag  & (1 << 1))
-						bool x1Byte = true;
-					if (flag  & (1 << 2))
-						bool y1Byte = true;
-					if (flag  & (1 << 3))
-						bool repeat = true;
-					if (flag  & (1 << 4))
-						bool positiveX = true;
-					if (flag  & (1 << 5))
-						bool positiveY = true;
-
-					if (idx > -1)
-					{
-						if (xDatas[idx].first == 2)  // it set its 1 byte long, so the name is weird, so we remove this flag here since 2 bytes long
-							flag = flag & ~sfntly::GlyphTable::SimpleGlyph::kFLAG_XSHORT;
-						else if (xDatas[idx].first == 1)
-							flag = flag | sfntly::GlyphTable::SimpleGlyph::kFLAG_XSHORT;
-
-						if (yDatas[idx].first == 2)   // it set its 1 byte long, so the name is weird, so we remove this flag here since 2 bytes long
-							flag = flag & ~sfntly::GlyphTable::SimpleGlyph::kFLAG_YSHORT;
-						else if (yDatas[idx].first == 1)
-							flag = flag | sfntly::GlyphTable::SimpleGlyph::kFLAG_YSHORT;
-					}
-
-					stream.WriteByte((uint8_t)flag);
+					xCoordStream.WriteShort(pt.x);
+					yCoordStream.WriteShort(pt.y);
 				}
 
-				/*off = flagOffset;
-				siz = flags.size();
-				da.clear();
-				da.resize(siz);
-				writer->ReadBytes(off, &(da[0]), 0, siz);
-				stream.WriteBytes(&da);*/
+				headerStream.WriteShort(countContours);
+				headerStream.WriteShort(inf.x);
+				headerStream.WriteShort(inf.y);
+				headerStream.WriteShort(sup.x);
+				headerStream.WriteShort(sup.y);
+				for (int c = 0; c < countContours; c++)
+					headerStream.WriteShort((uint16_t)sglyph->ContourEndPoint(c));
+				headerStream.WriteShort((uint16_t)0);
 
-				// no change
-
-				/////////////////////////////////////////////////////////////////////////////////////////////
-				/////////////////////////////////////////////////////////////////////////////////////////////
-				/////////////////////////////////////////////////////////////////////////////////////////////
-				/////////////////////////////////////////////////////////////////////////////////////////////
-
-				//uint8 or int16 	yCoordinates[] 	Array of y - coordinates; the first is relative to(0, 0), others are relative to previous point
-				
-				int32_t xOrgBytes = sglyph->xByteCount();
-				int32_t yOrgBytes = sglyph->yByteCount();
-				int32_t xOffset = sglyph->xCoordOffset();
-				int32_t yOffset = sglyph->yCoordOffset();
-
-				//MemoryStream coordXStream;
-				for (auto &it : xDatas)
-				{
-					if (it.first == 1)
-					{
-						stream.WriteByte((uint8_t)it.second);
-					}
-					else if (it.first == 2)
-					{
-						stream.WriteShort((int16_t)it.second);
-					}
-				}
-
-				//MemoryStream coordYStream;
-				for (auto &it : yDatas)
-				{
-					if (it.first == 1)
-					{
-						stream.WriteByte((uint8_t)it.second);
-					}
-					else if (it.first == 2)
-					{
-						stream.WriteShort((int16_t)it.second);
-					}
-				}
-
-				//assert(yNewBytes == yOrgBytes); // verification index == yBytes after loop
-				// because we just apply tranformations on points, no change on table size
-
-				/////////////////////////////////////////////////////////////////////////////////////////////
-				/////////////////////////////////////////////////////////////////////////////////////////////
 				/////////////////////////////////////////////////////////////////////////////////////////////
 				/////////////////////////////////////////////////////////////////////////////////////////////
 				
 				sfntly::Ptr<sfntly::WritableFontData> finalStream;
-				size_t org_lengthInBytes = writer->Length();
-				size_t new_lengthInBytes = stream.Size();// headerStream.Size() + flagStream.Size() + coordXStream.Size() + coordYStream.Size();
+				size_t new_lengthInBytes = headerStream.Size() + flagStream.Size() + xCoordStream.Size() + yCoordStream.Size();
 				finalStream.Attach(sfntly::WritableFontData::CreateWritableFontData(new_lengthInBytes));
 				
-				// on va ecrire dans un WritableFontData tout ces streams
-				// headerStream, flagStream, coordXStream, coordYStream;
-
-				finalStream->WriteBytes(0, stream.Get(), 0, stream.Size());
-				//finalStream->WriteBytes(headerStream.Size(), flagStream.Get(), 0, flagStream.Size());
-				//finalStream->WriteBytes(flagStream.Size(), coordXStream.Get(), 0, coordXStream.Size());
-				//finalStream->WriteBytes(coordXStream.Size(), coordYStream.Get(), 0, coordYStream.Size());
-
-				// suivant ce schema
-				//writer->WriteBytes(0, headerStream.Get(), 0, headerStream.Size());
+				int32_t offset = 0;
+				finalStream->WriteBytes(offset, headerStream.Get(), 0, headerStream.Size()); offset += (int32_t)headerStream.Size();
+				finalStream->WriteBytes(offset, flagStream.Get(), 0, flagStream.Size()); offset += (int32_t)flagStream.Size();
+				finalStream->WriteBytes(offset, xCoordStream.Get(), 0, xCoordStream.Size()); offset += (int32_t)xCoordStream.Size();
+				finalStream->WriteBytes(offset, yCoordStream.Get(), 0, yCoordStream.Size());
 
 				/////////////////////////////////////////////////////////////////////////////////////////////
 				/////////////////////////////////////////////////////////////////////////////////////////////
-				/////////////////////////////////////////////////////////////////////////////////////////////
-				/////////////////////////////////////////////////////////////////////////////////////////////
-
+				
 				//we will not do Component glyph for the moment
 
 				return finalStream;
 			}
 		}
-
-		return writer;
 	}
 		
+	sfntly::Ptr<sfntly::WritableFontData> writer;
+	writer.Attach(sfntly::WritableFontData::CreateWritableFontData(vReadableFontData->Length()));
+	vReadableFontData->CopyTo(writer);
+
 	return writer;
 }
 

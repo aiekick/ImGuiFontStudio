@@ -221,8 +221,9 @@ bool GlyphPane::DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
 				ImGui::EndMenuBar();
 			}
 
+			ImGui::Text("rc %i %i %i %i", rc.x, rc.y, rc.z, rc.w);
 
-			// x 0
+			// x 0 + blue
 			drawList->AddLine(
 				ct::toImVec2(g->Scale(ct::ivec2(0, rc.y * g->m_Scale.x), vScale)) + pos,
 				ct::toImVec2(g->Scale(ct::ivec2(0, rc.w * g->m_Scale.y), vScale)) + pos,

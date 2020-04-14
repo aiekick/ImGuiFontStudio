@@ -61,6 +61,9 @@ public:
 	ImWchar newCodePoint = 0;
 	FontInfos *fontAtlas = 0;
 	SimpleGlyph_Solo simpleGlyph;
+	ct::ivec4 m_FontBoundingBox;
+	int m_FontAscent = 0;
+	int m_FontDescent = 0;
 
 public: // for interaction only
 	bool m_editingName = false;

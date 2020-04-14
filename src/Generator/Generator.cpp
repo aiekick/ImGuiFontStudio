@@ -511,6 +511,10 @@ void Generator::GenerateFontFile_Merged(
 		bool res = true;
 
 		ct::ivec2 baseSize = 0;
+		ct::ivec4 baseFontBoundingBox;
+		int baseFontAscent = 0;
+		int baseFontDescent = 0;
+
 		int idx = 0;
 		for (auto &it : vProjectFile->m_Fonts)
 		{
@@ -518,6 +522,9 @@ void Generator::GenerateFontFile_Merged(
 			ct::dvec2 scale = 1.0;
 			if (idx == 0)
 			{
+				baseFontBoundingBox = it.second.m_BoundingBox;
+				baseFontAscent = it.second.m_Ascent;
+				baseFontDescent = it.second.m_Descent;
 				baseSize = it.second.m_BoundingBox.zw() - it.second.m_BoundingBox.xy();
 			}
 			else
@@ -527,8 +534,8 @@ void Generator::GenerateFontFile_Merged(
 				scale.x = (double)baseSize.x / (double)newSize.x;
 				scale.y = (double)baseSize.y / (double)newSize.y;
 				double v = ct::mini(scale.x, scale.y);
-				scale.x = 1.0;
-				scale.y = 1.0;
+				scale.x = v; // same value for keep glyph ratio
+				scale.y = v; // same value for keep glyph ratio
 			}
 
 			std::map<int32_t, std::string> newHeaderNames;
@@ -545,6 +552,11 @@ void Generator::GenerateFontFile_Merged(
 				{
 					gInfos.simpleGlyph.isValid = true;
 					gInfos.simpleGlyph.m_Scale = scale;
+
+					gInfos.m_FontBoundingBox = baseFontBoundingBox;
+					gInfos.m_FontAscent = baseFontAscent;
+					gInfos.m_FontDescent = baseFontDescent;
+
 				}
 				
 				newGlyphInfos[glyph.first] = gInfos;
