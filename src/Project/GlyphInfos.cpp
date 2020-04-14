@@ -56,22 +56,6 @@ void SimpleGlyph_Solo::LoadSimpleGlyph(sfntly::GlyphTable::SimpleGlyph *vGlyph)
 		rc.y = vGlyph->YMin();
 		rc.z = vGlyph->XMax();
 		rc.w = vGlyph->YMax();
-
-		// countbytes, value
-		auto x_OrginalCoordDatas = vGlyph->xOrginalCoordDatas();
-		originalCoords.resize(x_OrginalCoordDatas.size());
-		int idx = 0;
-		for (auto &it : x_OrginalCoordDatas)
-		{
-			originalCoords[idx++].x = (double)it.second;
-		}
-		auto y_OrginalCoordDatas = vGlyph->yOrginalCoordDatas();
-		originalCoords.resize(y_OrginalCoordDatas.size());
-		idx = 0;
-		for (auto &it : y_OrginalCoordDatas)
-		{
-			originalCoords[idx++].y = (double)it.second;
-		}
 	}
 }
 

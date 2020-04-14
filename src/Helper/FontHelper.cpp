@@ -438,147 +438,147 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 
 	if (vReadableFontData->Length() > 0)
 	{
-		auto glyphInfos = GetGlyphInfosFromGlyphId(vFontId, vGlyphId);
+		sfntly::Ptr<sfntly::LocaTable> loca_table = down_cast<sfntly::LocaTable*>(m_Fonts[vFontId].m_Font->GetTable(sfntly::Tag::loca));
+		int32_t loc_length = loca_table->GlyphLength(vGlyphId);
+		int32_t loc_offset = loca_table->GlyphOffset(vGlyphId);
 
-		if (glyphInfos)
+		// Get the GLYF table for the current glyph id.
+		sfntly::Ptr<sfntly::GlyphTable> glyph_table = down_cast<sfntly::GlyphTable*>(m_Fonts[vFontId].m_Font->GetTable(sfntly::Tag::glyf));
+		sfntly::GlyphPtr glyph;
+		glyph.Attach(glyph_table->GetGlyph(loc_offset, loc_length));
+
+		if (glyph->GlyphType() == sfntly::GlyphType::kSimple)
 		{
-			if (glyphInfos->simpleGlyph.isValid)
+			auto glyphInfos = GetGlyphInfosFromGlyphId(vFontId, vGlyphId);
+
+			if (glyphInfos)
 			{
-				MemoryStream str;
-				str.WriteShort(341);
-				str.WriteInt(4578);
-
-				SimpleGlyph_Solo simpleGlyph = glyphInfos->simpleGlyph;
-
-				sfntly::Ptr<sfntly::LocaTable> loca_table = down_cast<sfntly::LocaTable*>(m_Fonts[vFontId].m_Font->GetTable(sfntly::Tag::loca));
-				int32_t loc_length = loca_table->GlyphLength(vGlyphId);
-				int32_t loc_offset = loca_table->GlyphOffset(vGlyphId);
-
-				// Get the GLYF table for the current glyph id.
-				sfntly::Ptr<sfntly::GlyphTable> glyph_table = down_cast<sfntly::GlyphTable*>(m_Fonts[vFontId].m_Font->GetTable(sfntly::Tag::glyf));
-				sfntly::GlyphPtr glyph;
-				glyph.Attach(glyph_table->GetGlyph(loc_offset, loc_length));
-
-				auto sglyph = down_cast<sfntly::GlyphTable::SimpleGlyph*>(glyph.p_);
-
-				int countContours = simpleGlyph.GetCountContours();
-				if (countContours == 0)
+				if (glyphInfos->simpleGlyph.isValid)
 				{
-					simpleGlyph.LoadSimpleGlyph(sglyph);
-					countContours = simpleGlyph.GetCountContours();
-				}
+					MemoryStream str;
+					str.WriteShort(341);
+					str.WriteInt(4578);
 
-				ct::ivec2 trans = glyphInfos->simpleGlyph.m_Translation; // first apply
-				ct::dvec2 scale = glyphInfos->simpleGlyph.m_Scale; // second apply
-				
-				/////////////////////////////////////////////////////////////////////////////////////////////
-				// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
-				/////////////////////////////////////////////////////////////////////////////////////////////
-				
-				MemoryStream headerStream;
-				MemoryStream flagStream;
-				MemoryStream xCoordStream;
-				MemoryStream yCoordStream;
+					SimpleGlyph_Solo simpleGlyph = glyphInfos->simpleGlyph;
 
-				std::vector<ct::ivec2> coords;
+					auto sglyph = down_cast<sfntly::GlyphTable::SimpleGlyph*>(glyph.p_);
 
-				ct::iAABB boundingBox((int32_t)1e6, (int32_t)-1e6);
-				int contourIdx = 0;
-				ct::ivec2 last;
-				for (auto &contour : simpleGlyph.coords)
-				{
-					int ppointIdx = 0;
-					for (auto &pt : contour)
+					int countContours = simpleGlyph.GetCountContours();
+					if (countContours == 0)
 					{
-						if (ppointIdx == 0 && contourIdx == 0)
-						{
-							// need to found the good translation system
-							//pt.x += trans.x;
-							//pt.y += trans.y;
-						}
-
-						ct::ivec2 dv = pt - last;
-
-						int8_t flag = 0;
-						if (simpleGlyph.onCurve[contourIdx][ppointIdx])
-							flag = flag | (1 << 0);
-						flagStream.WriteByte(flag);
-
-						// relative points
-						int32_t dx = (int32_t)ct::floor(dv.x * scale.x);
-						int32_t dy = (int32_t)ct::floor(dv.y * scale.y);
-						coords.push_back(ct::ivec2(dx, dy));
-						xCoordStream.WriteShort(pt.x);
-						yCoordStream.WriteShort(pt.y);
-
-						// conbine absolute points
-						int32_t px = (int32_t)ct::floor(pt.x * scale.x);
-						int32_t py = (int32_t)ct::floor(pt.y * scale.y);
-						boundingBox.Combine(ct::ivec2(px, py));
-
-						last = pt;
-						ppointIdx++;
+						simpleGlyph.LoadSimpleGlyph(sglyph);
+						countContours = simpleGlyph.GetCountContours();
 					}
-					contourIdx++;
+
+					ct::ivec2 trans = glyphInfos->simpleGlyph.m_Translation; // first apply
+					ct::dvec2 scale = glyphInfos->simpleGlyph.m_Scale; // second apply
+
+					/////////////////////////////////////////////////////////////////////////////////////////////
+					// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
+					/////////////////////////////////////////////////////////////////////////////////////////////
+
+					MemoryStream headerStream;
+					MemoryStream flagStream;
+					MemoryStream xCoordStream;
+					MemoryStream yCoordStream;
+
+					ct::iAABB boundingBox((int32_t)1e6, (int32_t)-1e6);
+					int contourIdx = 0;
+					ct::ivec2 last;
+					for (auto &contour : simpleGlyph.coords)
+					{
+						int pointIdx = 0;
+						for (auto &pt : contour)
+						{
+							if (pointIdx == 0 && contourIdx == 0)
+							{
+								// need to found the good translation system
+								//pt.x += trans.x;
+								//pt.y += trans.y;
+							}
+
+							ct::ivec2 dv = pt - last;
+
+							int8_t flag = 0;
+							if (simpleGlyph.onCurve[contourIdx][pointIdx])
+								flag = flag | (1 << 0);
+							flagStream.WriteByte(flag);
+
+							// relative points
+							int32_t dx = (int32_t)ct::floor(dv.x * scale.x);
+							int32_t dy = (int32_t)ct::floor(dv.y * scale.y);
+							xCoordStream.WriteShort(dx);
+							yCoordStream.WriteShort(dy);
+
+							// conbine absolute points
+							int32_t px = (int32_t)ct::floor(pt.x * scale.x);
+							int32_t py = (int32_t)ct::floor(pt.y * scale.y);
+							boundingBox.Combine(ct::ivec2(px, py));
+
+							last = pt;
+							pointIdx++;
+						}
+						contourIdx++;
+					}
+
+					// arrange bounding box
+					ct::ivec2 inf = boundingBox.lowerBound;
+					ct::ivec2 sup = boundingBox.upperBound;
+
+					inf.x = ct::mini(inf.x, 0);
+					inf.y = ct::mini(inf.y, 0);
+
+					int deltaY = 0;
+					if (inf.y < glyphInfos->m_FontBoundingBox.y)
+						deltaY = glyphInfos->m_FontBoundingBox.y - inf.y;
+					inf.y += deltaY;
+					sup.y += deltaY;
+
+					deltaY = 0;
+					if (sup.y > glyphInfos->m_FontBoundingBox.w)
+						deltaY = sup.y - glyphInfos->m_FontBoundingBox.w;
+					sup.y -= deltaY;
+
+					int deltaX = 0;
+					if (inf.x < glyphInfos->m_FontBoundingBox.x)
+						deltaX = glyphInfos->m_FontBoundingBox.x - inf.x;
+					inf.x += deltaX;
+					sup.x += deltaX;
+
+					deltaX = 0;
+					if (sup.x > glyphInfos->m_FontBoundingBox.z)
+						deltaX = sup.x - glyphInfos->m_FontBoundingBox.z;
+					sup.x -= deltaX;
+
+					headerStream.WriteShort(countContours);
+					headerStream.WriteShort(inf.x);
+					headerStream.WriteShort(inf.y);
+					headerStream.WriteShort(sup.x);
+					headerStream.WriteShort(sup.y);
+					for (int contour = 0; contour < countContours; contour++)
+						headerStream.WriteShort(sglyph->ContourEndPoint(contour));
+					headerStream.WriteShort(0);
+
+					/////////////////////////////////////////////////////////////////////////////////////////////
+					/////////////////////////////////////////////////////////////////////////////////////////////
+
+					sfntly::Ptr<sfntly::WritableFontData> finalStream;
+					size_t new_lengthInBytes = headerStream.Size() + flagStream.Size() + xCoordStream.Size() + yCoordStream.Size();
+					finalStream.Attach(sfntly::WritableFontData::CreateWritableFontData(new_lengthInBytes));
+
+					int32_t offset = 0;
+					finalStream->WriteBytes(offset, headerStream.Get(), 0, headerStream.Size()); offset += (int32_t)headerStream.Size();
+					finalStream->WriteBytes(offset, flagStream.Get(), 0, flagStream.Size()); offset += (int32_t)flagStream.Size();
+					finalStream->WriteBytes(offset, xCoordStream.Get(), 0, xCoordStream.Size()); offset += (int32_t)xCoordStream.Size();
+					finalStream->WriteBytes(offset, yCoordStream.Get(), 0, yCoordStream.Size());
+
+					/////////////////////////////////////////////////////////////////////////////////////////////
+					/////////////////////////////////////////////////////////////////////////////////////////////
+
+					//we will not do Component glyph for the moment
+
+					return finalStream;
 				}
-
-				// arrange bounding box
-				ct::ivec2 inf = boundingBox.lowerBound;
-				ct::ivec2 sup = boundingBox.upperBound;
-
-				inf.x = ct::mini(inf.x, 0);
-				inf.y = ct::mini(inf.y, 0);
-
-				int deltaY = 0;
-				if (inf.y < glyphInfos->m_FontBoundingBox.y)
-					deltaY = glyphInfos->m_FontBoundingBox.y - inf.y;
-				inf.y += deltaY;
-				sup.y += deltaY;
-
-				deltaY = 0;
-				if (sup.y > glyphInfos->m_FontBoundingBox.w)
-					deltaY = sup.y - glyphInfos->m_FontBoundingBox.w;
-				sup.y -= deltaY;
-				
-				int deltaX = 0;
-				if (inf.x < glyphInfos->m_FontBoundingBox.x)
-					deltaX = glyphInfos->m_FontBoundingBox.x - inf.x;
-				inf.x += deltaX;
-				sup.x += deltaX;
-				
-				deltaX = 0;
-				if (sup.x > glyphInfos->m_FontBoundingBox.z)
-					deltaX = sup.x - glyphInfos->m_FontBoundingBox.z;
-				sup.x -= deltaX;
-
-				headerStream.WriteShort(countContours);
-				headerStream.WriteShort(inf.x);
-				headerStream.WriteShort(inf.y);
-				headerStream.WriteShort(sup.x);
-				headerStream.WriteShort(sup.y);
-				for (int contour = 0; contour < countContours; contour++)
-					headerStream.WriteShort(sglyph->ContourEndPoint(contour));
-				headerStream.WriteShort(0);
-
-				/////////////////////////////////////////////////////////////////////////////////////////////
-				/////////////////////////////////////////////////////////////////////////////////////////////
-				
-				sfntly::Ptr<sfntly::WritableFontData> finalStream;
-				size_t new_lengthInBytes = headerStream.Size() + flagStream.Size() + xCoordStream.Size() + yCoordStream.Size();
-				finalStream.Attach(sfntly::WritableFontData::CreateWritableFontData(new_lengthInBytes));
-				
-				int32_t offset = 0;
-				finalStream->WriteBytes(offset, headerStream.Get(), 0, headerStream.Size()); offset += (int32_t)headerStream.Size();
-				finalStream->WriteBytes(offset, flagStream.Get(), 0, flagStream.Size()); offset += (int32_t)flagStream.Size();
-				finalStream->WriteBytes(offset, xCoordStream.Get(), 0, xCoordStream.Size()); offset += (int32_t)xCoordStream.Size();
-				finalStream->WriteBytes(offset, yCoordStream.Get(), 0, yCoordStream.Size());
-
-				/////////////////////////////////////////////////////////////////////////////////////////////
-				/////////////////////////////////////////////////////////////////////////////////////////////
-				
-				//we will not do Component glyph for the moment
-
-				return finalStream;
 			}
 		}
 	}

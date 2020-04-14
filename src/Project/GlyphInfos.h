@@ -36,12 +36,6 @@ public:
 	ct::dvec2 m_Scale = 1.0; // scale in second
 
 public:
-	// countbytes, value
-	//std::vector<std::pair<int32_t, int32_t>> x_OrginalCoordDatas;
-	//std::vector<std::pair<int32_t, int32_t>> y_OrginalCoordDatas;
-	std::vector<ct::dvec2> originalCoords;
-
-public:
 	void clear();
 	void LoadSimpleGlyph(sfntly::GlyphTable::SimpleGlyph *vGlyph);
 	int GetCountContours();
