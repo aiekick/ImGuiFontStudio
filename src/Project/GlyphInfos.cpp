@@ -87,10 +87,10 @@ ct::ivec2 SimpleGlyph_Solo::GetCoords(int32_t vContour, int32_t vPoint)
 	ct::ivec2 p = coords[vContour][vPoint % count];
 
 	// apply transformation
+	p += m_Translation;
 	p.x = (int)(p.x * m_Scale.x);
 	p.y = (int)(p.y * m_Scale.y);
-	p += m_Translation;
-
+	
 	return p;
 }
 

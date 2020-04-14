@@ -122,8 +122,13 @@ public:
 		const std::string& vFontFilePathName,
 		std::map<CodePoint, std::string> vNewNames,
 		std::map<CodePoint, CodePoint> vNewCodePoints,
-		std::map<CodePoint, GlyphInfos> vNewGlyphInfos);
+		std::map<CodePoint, GlyphInfos> vNewGlyphInfos,
+		bool vBaseFontFileToMergeIn);
 	bool GenerateFontFile(const std::string& vFontFilePathName, bool vUsePostTable);
+
+private:
+	size_t m_BaseFontIdx = 0;
+	FontInstance* GetBaseFontInstance();
 
 private:
 	std::vector<FontInstance> m_Fonts;

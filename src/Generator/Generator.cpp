@@ -439,7 +439,7 @@ void Generator::GenerateFontFile_One(
 		if (!newHeaderNames.empty() && !newCodePoints.empty())
 		{
 			std::string absPath = vProjectFile->GetAbsolutePath(vFontInfos->m_FontFilePathName);
-			res = fontHelper.OpenFontFile(absPath, newHeaderNames, newCodePoints, newGlyphInfos);
+			res = fontHelper.OpenFontFile(absPath, newHeaderNames, newCodePoints, newGlyphInfos, true);
 		}
 
 		if (res)
@@ -464,7 +464,8 @@ void Generator::GenerateFontFile_One(
 			if (ps.isOk)
 			{
 				filePathName = ps.path + FileHelper::Instance()->m_SlashType + ps.name + ".ttf";
-				if (filePathName[0] == '\\') filePathName = filePathName.substr(1);
+				if (filePathName[0] == FileHelper::Instance()->m_SlashType[0]) 
+					filePathName = filePathName.substr(1);
 
 				if (fontHelper.GenerateFontFile(filePathName, vFlags & GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES))
 				{
@@ -504,7 +505,8 @@ void Generator::GenerateFontFile_Merged(
 	if (vProjectFile &&
 		vProjectFile->IsLoaded() &&
 		!vFilePathName.empty() &&
-		!vProjectFile->m_Fonts.empty())
+		!vProjectFile->m_Fonts.empty() &&
+		!vProjectFile->m_FontToMergeIn.empty())
 	{
 		FontHelper fontHelper;
 
@@ -515,19 +517,23 @@ void Generator::GenerateFontFile_Merged(
 		int baseFontAscent = 0;
 		int baseFontDescent = 0;
 
-		int idx = 0;
+		// abse infos for merge all toher fonts in this one
 		for (auto &it : vProjectFile->m_Fonts)
 		{
-			bool scaleChanged = false;
-			ct::dvec2 scale = 1.0;
-			if (idx == 0)
+			if (vProjectFile->m_FontToMergeIn == it.second.m_FontFileName)
 			{
 				baseFontBoundingBox = it.second.m_BoundingBox;
 				baseFontAscent = it.second.m_Ascent;
 				baseFontDescent = it.second.m_Descent;
 				baseSize = it.second.m_BoundingBox.zw() - it.second.m_BoundingBox.xy();
 			}
-			else
+		}
+
+		for (auto &it : vProjectFile->m_Fonts)
+		{
+			bool scaleChanged = false;
+			ct::dvec2 scale = 1.0;
+			if (vProjectFile->m_FontToMergeIn != it.second.m_FontFileName)
 			{
 				scaleChanged = true;
 				ct::ivec2 newSize = it.second.m_BoundingBox.zw() - it.second.m_BoundingBox.xy();
@@ -565,14 +571,12 @@ void Generator::GenerateFontFile_Merged(
 			if (!newHeaderNames.empty())
 			{
 				std::string absPath = vProjectFile->GetAbsolutePath(it.second.m_FontFilePathName);
-				res &= fontHelper.OpenFontFile(absPath, newHeaderNames, newCodePoints, newGlyphInfos);
+				res &= fontHelper.OpenFontFile(absPath, newHeaderNames, newCodePoints, newGlyphInfos, !scaleChanged);
 			}
 			else
 			{
 				res = false;
 			}
-
-			idx++;
 		}
 		
 		if (res)
@@ -598,7 +602,8 @@ void Generator::GenerateFontFile_Merged(
 			if (ps.isOk)
 			{
 				filePathName = ps.path + FileHelper::Instance()->m_SlashType + ps.name + ".ttf";
-				if (filePathName[0] == '\\') filePathName = filePathName.substr(1);
+				if (filePathName[0] == FileHelper::Instance()->m_SlashType[0]) 
+					filePathName = filePathName.substr(1);
 
 				if (fontHelper.GenerateFontFile(vFilePathName, vFlags & GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES))
 				{

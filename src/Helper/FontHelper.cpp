@@ -86,7 +86,8 @@ bool FontHelper::OpenFontFile(
 	const std::string& vFontFilePathName, 
 	std::map<CodePoint, std::string> vNewNames,
 	std::map<CodePoint, CodePoint> vNewCodePoints,
-	std::map<CodePoint, GlyphInfos> vNewGlyphInfos)
+	std::map<CodePoint, GlyphInfos> vNewGlyphInfos,
+	bool vBaseFontFileToMergeIn)
 {
 	bool res = false;
 
@@ -113,6 +114,9 @@ bool FontHelper::OpenFontFile(
 					FillCharacterMap(&fontInstance, fontInstance.m_NewGlyphNames);
 					FillResolvedCompositeGlyphs(&fontInstance, fontInstance.m_CharMap);
 
+					if (vBaseFontFileToMergeIn)
+						m_BaseFontIdx = m_Fonts.size();
+
 					m_Fonts.push_back(fontInstance);
 
 					res = true;
@@ -124,8 +128,9 @@ bool FontHelper::OpenFontFile(
 	return res;
 }
 
-bool FontHelper::GenerateFontFile(const std::string& vFontFilePathName, 
-	bool vUsePostTable)
+bool FontHelper::GenerateFontFile(
+	const std::string& vFontFilePathName, 
+	bool vUsePostTable) // when merge mode, will deinf what is the basis font
 {
 	bool res = false;
 
@@ -159,6 +164,15 @@ bool FontHelper::GenerateFontFile(const std::string& vFontFilePathName,
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
+
+FontInstance* FontHelper::GetBaseFontInstance() // in merge mode the baseFontInstance car be other than first font
+{
+	if (m_Fonts.size() > m_BaseFontIdx)
+	{
+		return &m_Fonts[m_BaseFontIdx];
+	}
+	return 0;
+}
 
 /* based on https://github.com/rillig/sfntly/blob/master/cpp/src/sample/subtly/font_info.cc*/
 void FontHelper::FillCharacterMap(FontInstance *vFontInstance, std::map<CodePoint, std::string> vSelection)
@@ -297,34 +311,38 @@ int32_t FontHelper::MergeCharacterMaps()
 sfntly::Font* FontHelper::AssembleFont(bool vUsePostTable)
 //sfntly::Font* FontHelper::AssembleFont(std::set<int32_t> vTableBlackList) old signature
 {
-	if (m_Fonts.size() > 0)
+	auto fontInstance = GetBaseFontInstance();
+	if (fontInstance)
 	{
-		m_FontFactory.Attach(sfntly::FontFactory::GetInstance());
-		m_FontBuilder.Attach(m_FontFactory->NewFontBuilder());
-
-		// Assemble tables
-		bool CanWeGo = true;
-		CanWeGo &= Assemble_Glyf_Loca_Maxp_Tables();
-		CanWeGo &= Assemble_CMap_Table();
-		CanWeGo &= Assemble_Hmtx_Hhea_Tables();
-		CanWeGo &= Assemble_Meta_Table(); // not made for the moment
-		CanWeGo &= Assemble_Head_Table(); // not made for the moment
-		if (vUsePostTable)
-			CanWeGo &= Assemble_Post_Table(m_GlyphNames);
-		if (CanWeGo)
+		if (m_Fonts.size() > 0)
 		{
-			// include for the moment only head, before generate it
-			// head table is needed else it will be a not loadable font
-			const sfntly::TableMap* common_table_map = m_Fonts[0].m_Font->GetTableMap();
-			for (sfntly::TableMap::const_iterator it = common_table_map->begin(), e = common_table_map->end(); it != e; ++it)
-			{
-				//if (vTableBlackList.find(it->first) != vTableBlackList.end()) // found
-				//	continue;
-				if (it->second->header_tag() == sfntly::Tag::head) // a terme il faudra generer head
-					m_FontBuilder->NewTableBuilder(it->first, it->second->ReadFontData());
-			}
+			m_FontFactory.Attach(sfntly::FontFactory::GetInstance());
+			m_FontBuilder.Attach(m_FontFactory->NewFontBuilder());
 
-			return m_FontBuilder->Build();
+			// Assemble tables
+			bool CanWeGo = true;
+			CanWeGo &= Assemble_Glyf_Loca_Maxp_Tables();
+			CanWeGo &= Assemble_CMap_Table();
+			CanWeGo &= Assemble_Hmtx_Hhea_Tables();
+			CanWeGo &= Assemble_Meta_Table(); // not made for the moment
+			CanWeGo &= Assemble_Head_Table(); // not made for the moment
+			if (vUsePostTable)
+				CanWeGo &= Assemble_Post_Table(m_GlyphNames);
+			if (CanWeGo)
+			{
+				// include for the moment only head, before generate it
+				// head table is needed else it will be a not loadable font
+				const sfntly::TableMap* common_table_map = fontInstance->m_Font->GetTableMap();
+				for (sfntly::TableMap::const_iterator it = common_table_map->begin(), e = common_table_map->end(); it != e; ++it)
+				{
+					//if (vTableBlackList.find(it->first) != vTableBlackList.end()) // found
+					//	continue;
+					if (it->second->header_tag() == sfntly::Tag::head) // a terme il faudra generer head
+						m_FontBuilder->NewTableBuilder(it->first, it->second->ReadFontData());
+				}
+
+				return m_FontBuilder->Build();
+			}
 		}
 	}
 
@@ -337,70 +355,76 @@ sfntly::Font* FontHelper::AssembleFont(bool vUsePostTable)
 /* based on https://github.com/rillig/sfntly/blob/master/cpp/src/sample/subtly/font_assembler.cc*/
 bool FontHelper::Assemble_Glyf_Loca_Maxp_Tables()
 {
-	m_OldToNewGlyfId.clear();
-	m_NewToOldGlyfId.clear();
-
-	sfntly::Ptr<sfntly::LocaTable::Builder> loca_table_builder = down_cast<sfntly::LocaTable::Builder*>(m_FontBuilder->NewTableBuilder(sfntly::Tag::loca));
-	sfntly::Ptr<sfntly::GlyphTable::Builder> glyph_table_builder = down_cast<sfntly::GlyphTable::Builder*>(m_FontBuilder->NewTableBuilder(sfntly::Tag::glyf));
-	sfntly::GlyphTable::GlyphBuilderList* glyph_builders = glyph_table_builder->GlyphBuilders();
-
-	int32_t fontId = 0;
-	int32_t new_glyphid = 0;
-	for (auto it = m_ResolvedSet.begin(), e = m_ResolvedSet.end(); it != e; ++it)
+	auto baseFontInstance = GetBaseFontInstance();
+	if (baseFontInstance)
 	{
-		// Get the glyph for this resolved_glyph_id.
-		fontId = it->first;
-		int32_t resolved_glyph_id = it->second;
-		m_OldToNewGlyfId[*it] = new_glyphid++;
-		m_NewToOldGlyfId[fontId].push_back(resolved_glyph_id);
+		m_OldToNewGlyfId.clear();
+		m_NewToOldGlyfId.clear();
 
-		// we will need to scale the glyph contours here or somewhere for merging mode
-		// bounding box cant be the sames between fonts
+		sfntly::Ptr<sfntly::LocaTable::Builder> loca_table_builder = down_cast<sfntly::LocaTable::Builder*>(m_FontBuilder->NewTableBuilder(sfntly::Tag::loca));
+		sfntly::Ptr<sfntly::GlyphTable::Builder> glyph_table_builder = down_cast<sfntly::GlyphTable::Builder*>(m_FontBuilder->NewTableBuilder(sfntly::Tag::glyf));
+		sfntly::GlyphTable::GlyphBuilderList* glyph_builders = glyph_table_builder->GlyphBuilders();
 
-		// Get the LOCA table for the current glyph id.
-		sfntly::Ptr<sfntly::LocaTable> loca_table = down_cast<sfntly::LocaTable*>(m_Fonts[fontId].m_Font->GetTable(sfntly::Tag::loca));
-		int32_t length = loca_table->GlyphLength(resolved_glyph_id);
-		int32_t offset = loca_table->GlyphOffset(resolved_glyph_id);
+		int32_t fontId = 0;
+		int32_t new_glyphid = 0;
+		for (auto it = m_ResolvedSet.begin(), e = m_ResolvedSet.end(); it != e; ++it)
+		{
+			// Get the glyph for this resolved_glyph_id.
+			fontId = it->first;
+			int32_t resolved_glyph_id = it->second;
+			m_OldToNewGlyfId[*it] = new_glyphid++;
+			m_NewToOldGlyfId[fontId].push_back(resolved_glyph_id);
 
-		// Get the GLYF table for the current glyph id.
-		sfntly::Ptr<sfntly::GlyphTable> glyph_table = down_cast<sfntly::GlyphTable*>(m_Fonts[fontId].m_Font->GetTable(sfntly::Tag::glyf));
-		sfntly::GlyphPtr glyph;
-		glyph.Attach(glyph_table->GetGlyph(offset, length));
-		
-		// glyph readable
-		sfntly::Ptr<sfntly::ReadableFontData> actualGlyfData = glyph->ReadFontData();
+			// we will need to scale the glyph contours here or somewhere for merging mode
+			// bounding box cant be the sames between fonts
 
-		////////////////////////////////////////////////////////////////////////////
-		//// maybe i can edit copy_data before write in glyph_builder container ////
-		////////////////////////////////////////////////////////////////////////////
+			// Get the LOCA table for the current glyph id.
+			sfntly::Ptr<sfntly::LocaTable> loca_table = down_cast<sfntly::LocaTable*>(m_Fonts[fontId].m_Font->GetTable(sfntly::Tag::loca));
+			int32_t length = loca_table->GlyphLength(resolved_glyph_id);
+			int32_t offset = loca_table->GlyphOffset(resolved_glyph_id);
 
-		sfntly::Ptr<sfntly::WritableFontData> newGlyfTable = ReScale_Glyph(fontId, resolved_glyph_id, actualGlyfData);
+			// Get the GLYF table for the current glyph id.
+			sfntly::Ptr<sfntly::GlyphTable> glyph_table = down_cast<sfntly::GlyphTable*>(m_Fonts[fontId].m_Font->GetTable(sfntly::Tag::glyf));
+			sfntly::GlyphPtr glyph;
+			glyph.Attach(glyph_table->GetGlyph(offset, length));
 
-		////////////////////////////////////////////////////////////////////////////
-		////////////////////////////////////////////////////////////////////////////
-		////////////////////////////////////////////////////////////////////////////
+			// glyph readable
+			sfntly::Ptr<sfntly::ReadableFontData> actualGlyfData = glyph->ReadFontData();
 
-		// put in a glyphbuilder
-		sfntly::GlyphBuilderPtr glyph_builder;
-		glyph_builder.Attach(glyph_table_builder->GlyphBuilder(newGlyfTable));
-	
-		// put in total glyphs builder
-		glyph_builders->push_back(glyph_builder);
+			////////////////////////////////////////////////////////////////////////////
+			//// maybe i can edit copy_data before write in glyph_builder container ////
+			////////////////////////////////////////////////////////////////////////////
+
+			sfntly::Ptr<sfntly::WritableFontData> newGlyfTable = ReScale_Glyph(fontId, resolved_glyph_id, actualGlyfData);
+
+			////////////////////////////////////////////////////////////////////////////
+			////////////////////////////////////////////////////////////////////////////
+			////////////////////////////////////////////////////////////////////////////
+
+			// put in a glyphbuilder
+			sfntly::GlyphBuilderPtr glyph_builder;
+			glyph_builder.Attach(glyph_table_builder->GlyphBuilder(newGlyfTable));
+
+			// put in total glyphs builder
+			glyph_builders->push_back(glyph_builder);
+		}
+
+		sfntly::IntegerList loca_list;
+		glyph_table_builder->GenerateLocaList(&loca_list);
+		loca_table_builder->SetLocaList(&loca_list);
+
+		sfntly::Ptr<sfntly::ReadableFontData> rFontData = baseFontInstance->m_Font->GetTable(sfntly::Tag::maxp)->ReadFontData();
+		sfntly::Ptr<sfntly::MaximumProfileTable::Builder> maxpBuilder =
+			down_cast<sfntly::MaximumProfileTable::Builder*>(m_FontBuilder->NewTableBuilder(sfntly::Tag::maxp, rFontData));
+
+		maxpBuilder->SetNumGlyphs(loca_list.size() - 1);
+		//maxpBuilder->SetNumGlyphs(m_ResolvedSet.size());
+		//maxpBuilder->SetNumGlyphs(loca_table_builder->NumGlyphs());
+
+		return true;
 	}
 
-	sfntly::IntegerList loca_list;
-	glyph_table_builder->GenerateLocaList(&loca_list);
-	loca_table_builder->SetLocaList(&loca_list);
-
-	sfntly::Ptr<sfntly::ReadableFontData> rFontData = m_Fonts[0].m_Font->GetTable(sfntly::Tag::maxp)->ReadFontData();
-	sfntly::Ptr<sfntly::MaximumProfileTable::Builder> maxpBuilder =
-		down_cast<sfntly::MaximumProfileTable::Builder*>(m_FontBuilder->NewTableBuilder(sfntly::Tag::maxp, rFontData));
-
-	maxpBuilder->SetNumGlyphs(loca_list.size() - 1);
-	//maxpBuilder->SetNumGlyphs(m_ResolvedSet.size());
-	//maxpBuilder->SetNumGlyphs(loca_table_builder->NumGlyphs());
-
-	return true;
+	return false;
 }
 
 sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
@@ -446,7 +470,7 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 
 				ct::ivec2 trans = glyphInfos->simpleGlyph.m_Translation; // first apply
 				ct::dvec2 scale = glyphInfos->simpleGlyph.m_Scale; // second apply
-				trans = 0;
+				
 				/////////////////////////////////////////////////////////////////////////////////////////////
 				// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
 				/////////////////////////////////////////////////////////////////////////////////////////////
@@ -458,41 +482,47 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 
 				std::vector<ct::ivec2> coords;
 
-				ct::iAABB boundingBox(1e6, -1e6);
-				int c = 0;
+				ct::iAABB boundingBox((int32_t)1e6, (int32_t)-1e6);
+				int contourIdx = 0;
 				ct::ivec2 last;
-				size_t numContours = simpleGlyph.coords.size();
 				for (auto &contour : simpleGlyph.coords)
 				{
-					size_t numPoints = contour.size();
-					int p = 0;
+					int ppointIdx = 0;
 					for (auto &pt : contour)
 					{
+						if (ppointIdx == 0 && contourIdx == 0)
+						{
+							// need to found the good translation system
+							//pt.x += trans.x;
+							//pt.y += trans.y;
+						}
+
 						ct::ivec2 dv = pt - last;
-						bool isConCurve = simpleGlyph.IsOnCurve(c, p);
-						int32_t flag = 0;
-						if (simpleGlyph.onCurve[c][p])
+
+						int8_t flag = 0;
+						if (simpleGlyph.onCurve[contourIdx][ppointIdx])
 							flag = flag | (1 << 0);
 						flagStream.WriteByte(flag);
 
 						// relative points
-						int32_t x = (dv.x * scale.x) + trans.x;
-						int32_t y = (dv.y * scale.y) + trans.y;
-						coords.push_back(ct::ivec2(x, y));
+						int32_t dx = (int32_t)ct::floor(dv.x * scale.x);
+						int32_t dy = (int32_t)ct::floor(dv.y * scale.y);
+						coords.push_back(ct::ivec2(dx, dy));
+						xCoordStream.WriteShort(pt.x);
+						yCoordStream.WriteShort(pt.y);
 
 						// conbine absolute points
-						int32_t px = (pt.x * scale.x) + trans.x;
-						int32_t py = (pt.y * scale.y) + trans.y;
+						int32_t px = (int32_t)ct::floor(pt.x * scale.x);
+						int32_t py = (int32_t)ct::floor(pt.y * scale.y);
 						boundingBox.Combine(ct::ivec2(px, py));
 
 						last = pt;
-						p++;
+						ppointIdx++;
 					}
-					c++;
+					contourIdx++;
 				}
 
-				//int fontDescent = m_Fonts[vFontId].
-
+				// arrange bounding box
 				ct::ivec2 inf = boundingBox.lowerBound;
 				ct::ivec2 sup = boundingBox.upperBound;
 
@@ -521,20 +551,14 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 					deltaX = sup.x - glyphInfos->m_FontBoundingBox.z;
 				sup.x -= deltaX;
 
-				for (auto &pt : coords)
-				{
-					xCoordStream.WriteShort(pt.x);
-					yCoordStream.WriteShort(pt.y);
-				}
-
 				headerStream.WriteShort(countContours);
 				headerStream.WriteShort(inf.x);
 				headerStream.WriteShort(inf.y);
 				headerStream.WriteShort(sup.x);
 				headerStream.WriteShort(sup.y);
-				for (int c = 0; c < countContours; c++)
-					headerStream.WriteShort((uint16_t)sglyph->ContourEndPoint(c));
-				headerStream.WriteShort((uint16_t)0);
+				for (int contour = 0; contour < countContours; contour++)
+					headerStream.WriteShort(sglyph->ContourEndPoint(contour));
+				headerStream.WriteShort(0);
 
 				/////////////////////////////////////////////////////////////////////////////////////////////
 				/////////////////////////////////////////////////////////////////////////////////////////////
@@ -665,74 +689,80 @@ struct LongHorMetric
 /* based on https://github.com/rillig/sfntly/blob/master/cpp/src/sample/subtly/font_assembler.cc*/
 bool FontHelper::Assemble_Hmtx_Hhea_Tables()
 {
-	std::vector<LongHorMetric> metrics;
-	
-	size_t fontId = 0;
-	for (auto &font : m_Fonts)
+	auto baseFontInstance = GetBaseFontInstance();
+	if (baseFontInstance)
 	{
-		if (m_NewToOldGlyfId.find(fontId) != m_NewToOldGlyfId.end())
+		std::vector<LongHorMetric> metrics;
+
+		size_t fontId = 0;
+		for (auto &font : m_Fonts)
 		{
-			sfntly::HorizontalMetricsTablePtr origMetrics =
-				down_cast<sfntly::HorizontalMetricsTable*>(font.m_Font->GetTable(sfntly::Tag::hmtx));
-			if (origMetrics == NULL)
+			if (m_NewToOldGlyfId.find(fontId) != m_NewToOldGlyfId.end())
 			{
-				return false;
-			}
-
-			for (size_t i = 0; i < m_NewToOldGlyfId[fontId].size(); ++i)
-			{
-				int32_t origGlyphId = m_NewToOldGlyfId[fontId][i];
-				int32_t advanceWidth = origMetrics->AdvanceWidth(origGlyphId);
-				int32_t lsb = origMetrics->LeftSideBearing(origGlyphId);
-
-				auto glyphInfos = GetGlyphInfosFromGlyphId(fontId, origGlyphId);
-				if (glyphInfos)
+				sfntly::HorizontalMetricsTablePtr origMetrics =
+					down_cast<sfntly::HorizontalMetricsTable*>(font.m_Font->GetTable(sfntly::Tag::hmtx));
+				if (origMetrics == NULL)
 				{
-					if (glyphInfos->simpleGlyph.isValid)
-					{
-						advanceWidth *= glyphInfos->simpleGlyph.m_Scale.x;
-						lsb *= glyphInfos->simpleGlyph.m_Scale.x;
-					}
+					return false;
 				}
 
-				metrics.push_back(LongHorMetric{ advanceWidth, lsb });
+				for (size_t i = 0; i < m_NewToOldGlyfId[fontId].size(); ++i)
+				{
+					int32_t origGlyphId = m_NewToOldGlyfId[fontId][i];
+					int32_t advanceWidth = origMetrics->AdvanceWidth(origGlyphId);
+					int32_t lsb = origMetrics->LeftSideBearing(origGlyphId);
+
+					auto glyphInfos = GetGlyphInfosFromGlyphId(fontId, origGlyphId);
+					if (glyphInfos)
+					{
+						if (glyphInfos->simpleGlyph.isValid)
+						{
+							advanceWidth = (int32_t)ct::floor(advanceWidth * glyphInfos->simpleGlyph.m_Scale.x);
+							lsb = (int32_t)ct::floor(lsb * glyphInfos->simpleGlyph.m_Scale.x);
+						}
+					}
+
+					metrics.push_back(LongHorMetric{ advanceWidth, lsb });
+				}
 			}
+
+			fontId++;
 		}
 
-		fontId++;
+		int32_t lastWidth = metrics.back().advanceWidth;
+		int32_t numberOfHMetrics = (int32_t)metrics.size();
+		while (numberOfHMetrics > 1 && metrics[numberOfHMetrics - 2].advanceWidth == lastWidth)
+		{
+			numberOfHMetrics--;
+		}
+		int32_t size = 4 * numberOfHMetrics + 2 * ((int32_t)metrics.size() - numberOfHMetrics);
+		sfntly::WritableFontDataPtr data;
+		data.Attach(sfntly::WritableFontData::CreateWritableFontData(size));
+		int32_t index = 0;
+		int32_t advanceWidthMax = 0;
+		for (int32_t i = 0; i < numberOfHMetrics; ++i)
+		{
+			int32_t adw = metrics[i].advanceWidth;
+			advanceWidthMax = max(adw, advanceWidthMax);
+			index += data->WriteUShort(index, adw);
+			index += data->WriteShort(index, metrics[i].lsb);
+		}
+		int32_t nMetric = (int32_t)metrics.size();
+		for (int32_t j = numberOfHMetrics; j < nMetric; ++j)
+		{
+			index += data->WriteShort(index, metrics[j].lsb);
+		}
+		m_FontBuilder->NewTableBuilder(sfntly::Tag::hmtx, data);
+		m_FontBuilder->NewTableBuilder(sfntly::Tag::hhea, baseFontInstance->m_Font->GetTable(sfntly::Tag::hhea)->ReadFontData());
+		sfntly::HorizontalHeaderTableBuilderPtr hheaBuilder =
+			down_cast<sfntly::HorizontalHeaderTable::Builder*>(m_FontBuilder->GetTableBuilder(sfntly::Tag::hhea));
+		hheaBuilder->SetNumberOfHMetrics(numberOfHMetrics);
+		hheaBuilder->SetAdvanceWidthMax(advanceWidthMax);
+
+		return true;
 	}
 
-	int32_t lastWidth = metrics.back().advanceWidth;
-	int32_t numberOfHMetrics = (int32_t)metrics.size();
-	while (numberOfHMetrics > 1 && metrics[numberOfHMetrics - 2].advanceWidth == lastWidth)
-	{
-		numberOfHMetrics--;
-	}
-	int32_t size = 4 * numberOfHMetrics + 2 * ((int32_t)metrics.size() - numberOfHMetrics);
-	sfntly::WritableFontDataPtr data;
-	data.Attach(sfntly::WritableFontData::CreateWritableFontData(size));
-	int32_t index = 0;
-	int32_t advanceWidthMax = 0;
-	for (int32_t i = 0; i < numberOfHMetrics; ++i)
-	{
-		int32_t adw = metrics[i].advanceWidth;
-		advanceWidthMax = max(adw, advanceWidthMax);
-		index += data->WriteUShort(index, adw);
-		index += data->WriteShort(index, metrics[i].lsb);
-	}
-	int32_t nMetric = (int32_t)metrics.size();
-	for (int32_t j = numberOfHMetrics; j < nMetric; ++j)
-	{
-		index += data->WriteShort(index, metrics[j].lsb);
-	}
-	m_FontBuilder->NewTableBuilder(sfntly::Tag::hmtx, data);
-	m_FontBuilder->NewTableBuilder(sfntly::Tag::hhea, m_Fonts[0].m_Font->GetTable(sfntly::Tag::hhea)->ReadFontData());
-	sfntly::HorizontalHeaderTableBuilderPtr hheaBuilder =
-		down_cast<sfntly::HorizontalHeaderTable::Builder*>(m_FontBuilder->GetTableBuilder(sfntly::Tag::hhea));
-	hheaBuilder->SetNumberOfHMetrics(numberOfHMetrics);
-	hheaBuilder->SetAdvanceWidthMax(advanceWidthMax);
-
-	return true;
+	return false;
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -917,7 +947,7 @@ GlyphInfos* FontHelper::GetGlyphInfosFromGlyphId(int32_t vFontId, int32_t vGlyph
 {
 	GlyphInfos *res = 0;
 
-	if (vFontId >= 0 && m_Fonts.size() > vFontId)
+	if (vFontId >= 0 && (int32_t)m_Fonts.size() > vFontId)
 	{
 		auto inst = &m_Fonts[vFontId];
 

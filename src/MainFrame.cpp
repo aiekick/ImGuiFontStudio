@@ -143,7 +143,7 @@ void MainFrame::Display(ImVec2 vSize)
 
 	if (ImGui::BeginMainStatusBar())
 	{
-		Messaging::Instance()->Draw();
+		Messaging::Instance()->Draw(&m_ProjectFile);
 
 		ImGui::EndMainStatusBar();
 	}

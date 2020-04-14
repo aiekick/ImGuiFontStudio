@@ -162,6 +162,10 @@ void ImGuiThemeHelper::ApplyStyleColorsDefault(ImGuiStyle* dst)
 	m_FileTypeColors[".h"] = ImVec4(0.25f, 0.9f, 0.1f, 1.0f); // yellow high
 	m_FileTypeColors[".ifs"] = ImVec4(0.9f, 0.1f, 0.9f, 1.0f); // purple high
 
+	// dark theme so high color
+	goodColor = ImVec4(0.2f, 0.8f, 0.2f, 1.0f);
+	badColor = ImVec4(0.8f, 0.2f, 0.2f, 1.0f);
+
 	ApplyFileTypeColors();
 }
 
@@ -170,8 +174,7 @@ void ImGuiThemeHelper::ApplyStyleColorsClassic(ImGuiStyle* dst)
 	ImGui::StyleColorsClassic(dst);
 
 	ImGuiStyle* style = dst ? dst : &ImGui::GetStyle();
-	ImVec4* colors = style->Colors;
-
+	
 	style->WindowPadding = ImVec2(4, 4);
 	style->FramePadding = ImVec2(4, 4);
 	style->ItemSpacing = ImVec2(4, 4);
@@ -199,6 +202,10 @@ void ImGuiThemeHelper::ApplyStyleColorsClassic(ImGuiStyle* dst)
 	m_FileTypeColors[".cpp"] = ImVec4(0.5f, 0.9f, 0.1f, 1.0f); // yellow high
 	m_FileTypeColors[".h"] = ImVec4(0.25f, 0.9f, 0.1f, 1.0f); // yellow high
 	m_FileTypeColors[".ifs"] = ImVec4(0.9f, 0.1f, 0.9f, 1.0f); // purple high
+
+	// dark theme so high color
+	goodColor = ImVec4(0.2f, 0.8f, 0.2f, 1.0f);
+	badColor = ImVec4(0.8f, 0.2f, 0.2f, 1.0f);
 
 	ApplyFileTypeColors();
 }
@@ -208,8 +215,7 @@ void ImGuiThemeHelper::ApplyStyleColorsDark(ImGuiStyle* dst)
 	ImGui::StyleColorsDark(dst);
 
 	ImGuiStyle* style = dst ? dst : &ImGui::GetStyle();
-	ImVec4* colors = style->Colors;
-
+	
 	style->WindowPadding = ImVec2(4, 4);
 	style->FramePadding = ImVec2(4, 4);
 	style->ItemSpacing = ImVec2(4, 4);
@@ -238,6 +244,10 @@ void ImGuiThemeHelper::ApplyStyleColorsDark(ImGuiStyle* dst)
 	m_FileTypeColors[".h"] = ImVec4(0.25f, 0.9f, 0.1f, 1.0f); // yellow high
 	m_FileTypeColors[".ifs"] = ImVec4(0.9f, 0.1f, 0.9f, 1.0f); // purple high
 
+	// dark theme so high color
+	goodColor = ImVec4(0.2f, 0.8f, 0.2f, 1.0f);
+	badColor = ImVec4(0.8f, 0.2f, 0.2f, 1.0f);
+
 	ApplyFileTypeColors();
 }
 
@@ -246,8 +256,7 @@ void ImGuiThemeHelper::ApplyStyleColorsLight(ImGuiStyle* dst)
 	ImGui::StyleColorsLight(dst);
 	
 	ImGuiStyle* style = dst ? dst : &ImGui::GetStyle();
-	ImVec4* colors = style->Colors;
-
+	
 	style->WindowPadding = ImVec2(4, 4);
 	style->FramePadding = ImVec2(4, 4);
 	style->ItemSpacing = ImVec2(4, 4);
@@ -275,6 +284,10 @@ void ImGuiThemeHelper::ApplyStyleColorsLight(ImGuiStyle* dst)
 	m_FileTypeColors[".cpp"] = ImVec4(0.5f, 0.5f, 0.1f, 1.0f); // yellow low
 	m_FileTypeColors[".h"] = ImVec4(0.25f, 0.5f, 0.1f, 1.0f); // yellow low
 	m_FileTypeColors[".ifs"] = ImVec4(0.5f, 0.1f, 0.5f, 1.0f); // purple low
+
+	// light theme so low color
+	goodColor = ImVec4(0.2f, 0.5f, 0.2f, 1.0f);
+	badColor = ImVec4(0.5f, 0.2f, 0.2f, 1.0f);
 
 	ApplyFileTypeColors();
 }
@@ -360,6 +373,10 @@ void ImGuiThemeHelper::ApplyStyleColorsDarcula(ImGuiStyle* dst)
 	m_FileTypeColors[".cpp"] = ImVec4(0.5f, 0.9f, 0.1f, 1.0f); // yellow high
 	m_FileTypeColors[".h"] = ImVec4(0.25f, 0.9f, 0.1f, 1.0f); // yellow high
 	m_FileTypeColors[".ifs"] = ImVec4(0.9f, 0.1f, 0.9f, 1.0f); // purple high
+
+	// dark theme so high color
+	goodColor = ImVec4(0.2f, 0.8f, 0.2f, 1.0f);
+	badColor = ImVec4(0.8f, 0.2f, 0.2f, 1.0f);
 
 	ApplyFileTypeColors();
 }

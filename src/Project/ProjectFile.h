@@ -37,8 +37,12 @@ public: // to save
 		GenModeFlags::GENERATOR_MODE_CURRENT_HEADER | 
 		GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES | 
 		GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
+	bool m_CurrentPane_ShowGlyphTooltip = true;
 	bool m_SourcePane_ShowGlyphTooltip = true;
 	bool m_FinalPane_ShowGlyphTooltip = true;
+	std::string m_FontToMergeIn;
+	float m_GlyphPreview_Scale = 1.0f;
+	bool m_GlyphPreview_ShowControlLines = false;
 
 public: // dont save
 	FontInfos *m_CurrentFont = 0;

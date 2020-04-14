@@ -252,9 +252,9 @@ void FontInfos::DrawInfos()
 			ImGui::Text("Count Selected Glyphs : %lu", m_SelectedGlyphs.size());
 			ImGui::Text("Texture Size : %i x %i", m_ImFontAtlas.TexWidth, m_ImFontAtlas.TexHeight);
 			ImGui::Text("Ascent / Descent : %i / %i", m_Ascent, m_Descent);
-			ImGui::Text("Line gap : %i", m_LineGap);
-			ImGui::Text("Scale pixel height : %.4f", m_Point);
-			ImGui::Text("Glyph Bounding Box :\n\tx:%i, y:%i, z:%i, w:%i", 
+			//ImGui::Text("Line gap : %i", m_LineGap); // dont know what is it haha
+			//ImGui::Text("Scale pixel height : %.4f", m_Point); // same.., its used internally by ImGui but dont know what is it
+			ImGui::Text("Glyph Bounding Box :\n\tinf x : %i, inf y : %i\n\tsup x : %i, sup y : %i", 
 				m_BoundingBox.x, m_BoundingBox.y, m_BoundingBox.z, m_BoundingBox.w);
 
 			ImGui::EndFramedGroup(true);
@@ -380,7 +380,7 @@ std::string FontInfos::getXml(const std::string& vOffset)
 	res += vOffset + "\t<pathfilename>" + m_FontFilePathName + "</pathfilename>\n";
 	res += vOffset + "\t<oversample>" + ct::toStr(m_Oversample) + "</oversample>\n";
 	res += vOffset + "\t<fontsize>" + ct::toStr(m_FontSize) + "</fontsize>\n";
-
+	
 	if (!m_Filters.empty())
 	{
 		res += vOffset + "\t<filters>\n";

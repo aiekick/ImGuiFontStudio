@@ -30,6 +30,7 @@
 #include "Gui/ImGuiWidgets.h"
 #include "Helper/Messaging.h"
 #include "Helper/SelectionHelper.h"
+#include "Helper/ImGuiThemeHelper.h"
 #include "Panes/FinalFontPane.h"
 #include "Panes/SourceFontPane.h"
 #include "Project/ProjectFile.h"
@@ -287,7 +288,7 @@ bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
 	else
 	{
 		res = false;
-		ImGui::TextColored(ImVec4(0.8f, 0.2f, 0.2f, 1.0f), "Can't generate.\n\tSelect one feature at least");
+		ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "Can't generate.\n\tSelect one feature at least");
 	}
 
 	if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_MERGED) &&
@@ -295,7 +296,7 @@ bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
 			vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_CPP)))
 	{
 		res = false;
-		ImGui::TextColored(ImVec4(0.8f, 0.2f, 0.2f, 1.0f), "Merged mode require the\ngeneration of font or cpp.\nPlease Select one of\nthese two at least");
+		ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "Merged mode require the\ngeneration of font or cpp.\nPlease Select one of\nthese two at least");
 	}
 
 	if (res)
@@ -305,37 +306,31 @@ bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
 		ImGui::Text("Font Status :");
 		ImGui::Indent();
 		{
-			if (ImGui::Button("Refresh", "Will analyse font(s) and\n\tmaybe unlock generation tools"))
-			{
-				Messaging::Instance()->Clear();
-				SelectionHelper::Instance()->AnalyseSourceSelection(vProjectFile);
-			}
-
 			vProjectFile->m_CountFontWithSelectedGlyphs = 0;
 			for (auto &font : vProjectFile->m_Fonts)
 			{
 				if (font.second.m_CodePointInDoubleFound || font.second.m_NameInDoubleFound)
 				{
-					ImGui::TextColored(ImVec4(0.8f, 0.2f, 0.2f, 1.0f), "%s : NOK", font.second.m_FontFileName.c_str());
+					ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "%s : NOK", font.second.m_FontFileName.c_str());
 					errorsCount++;
 				}
 				else if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_MERGED) && font.second.m_SelectedGlyphs.size() == 0)
 				{
-					ImGui::TextColored(ImVec4(0.8f, 0.2f, 0.2f, 1.0f), "%s : NOK", font.second.m_FontFileName.c_str());
-					ImGui::TextColored(ImVec4(0.2f, 0.8f, 0.2f, 1.0f), "No Glyphs are selected.\n\tYou need it in Merged mode");
+					ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "%s : NOK", font.second.m_FontFileName.c_str());
+					ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "No Glyphs are selected.\n\tYou need it in Merged mode");
 					errorsCount++;
 				}
 				else
 				{
-					ImGui::TextColored(ImVec4(0.2f, 0.8f, 0.2f, 1.0f), "%s : OK", font.second.m_FontFileName.c_str());
+					ImGui::TextColored(ImGuiThemeHelper::Instance()->goodColor, "%s : OK", font.second.m_FontFileName.c_str());
 					ImGui::Indent();
 					if (font.second.m_SelectedGlyphs.size() == 0) // no glyphs to extract, we wille extract alls, current and batch only
 					{
-						ImGui::TextColored(ImVec4(0.2f, 0.8f, 0.2f, 1.0f), "No Glyphs are selected.\n\tAll font glyphs will be exported");
+						ImGui::TextColored(ImGuiThemeHelper::Instance()->goodColor, "No Glyphs are selected.\n\tAll font glyphs will be exported");
 					}
 					else
 					{
-						ImGui::TextColored(ImVec4(0.2f, 0.8f, 0.2f, 1.0f), "%zu Glyphs selected", font.second.m_SelectedGlyphs.size());
+						ImGui::TextColored(ImGuiThemeHelper::Instance()->goodColor, "%zu Glyphs selected", font.second.m_SelectedGlyphs.size());
 						vProjectFile->m_CountFontWithSelectedGlyphs++;
 					}
 					ImGui::Unindent();
@@ -356,16 +351,22 @@ bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
 		{
 			if (errorsCount > 0)
 			{
-				ImGui::TextColored(ImVec4(0.8f, 0.2f, 0.2f, 1.0f), "Can partially generate\n\tCheck status bar");
+				ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "Can partially generate\n\tCheck status bar");
 			}
 			else
 			{
-				ImGui::TextColored(ImVec4(0.2f, 0.8f, 0.2f, 1.0f), "Can fully generate");
+				ImGui::TextColored(ImGuiThemeHelper::Instance()->goodColor, "Can fully generate");
+			}
+
+			if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_MERGED))
+			{
+				ImGui::TextColored(ImGuiThemeHelper::Instance()->goodColor,
+					"The selected font\n\tscale / bounding box\n\twill be used for merge in\n\tall other font glyphs");
 			}
 		}
 		else
 		{
-			ImGui::TextColored(ImVec4(0.8f, 0.2f, 0.2f, 1.0f), "Can't generate\n\tCheck status bar");
+			ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "Can't generate\n\tCheck status bar");
 			res = false;
 		}
 

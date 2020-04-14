@@ -25,7 +25,6 @@
 #define GENERATOR_PANE "Generator"
 #define CURRENT_FONT_PANE "Current Font"
 #define GLYPH_PANE "Glyph Edition"
-#define MERGED_PANE "Merged Edition"
 
 enum PaneFlags
 {
@@ -36,7 +35,6 @@ enum PaneFlags
 	PANE_PARAM = (1 << 4),
 	PANE_GENERATOR = (1 << 5),
 	PANE_GLYPH = (1 << 6),
-	PANE_MERGED = (1 << 7),
 	PANE_ALLS = PANE_SELECTED_FONT | PANE_SOURCE | PANE_FINAL | PANE_PARAM | PANE_GENERATOR// | PANE_GLYPH
 };
 
@@ -60,11 +58,14 @@ public:
 	void InitAfterFirstDisplay(ImVec2 vSize);
 	void DisplayMenu(ImVec2 vSize);
 	int DisplayPanes(ProjectFile *vProjectFile, int vWidgetId);
+	void ShowAndFocusPane(PaneFlags vPane);
+
+private:
+	void ActivePane(const char *vlabel);
 
 public: // configuration
 	std::string getXml(const std::string& vOffset);
 	void setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent);
-
 
 public: // singleton
 	static GuiLayout *Instance()

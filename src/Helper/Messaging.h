@@ -24,6 +24,7 @@
 #include <list>
 #include <vector>
 
+class ProjectFile;
 class Messaging
 {
 private:
@@ -37,13 +38,19 @@ private:
 		MESSAGE_TYPE_ERROR,
 		MESSAGE_TYPE_WARNING
 	};
+
+	enum MessageExistFlags
+	{
+		MESSAGE_EXIST_NONE = 0,
+		MESSAGE_EXIST_INFOS = (1<<0),
+		MESSAGE_EXIST_ERROR = (1<<1),
+		MESSAGE_EXIST_WARNING = (1<<2)
+	} m_MessageExistFlags = MESSAGE_EXIST_NONE;
+
 	size_t currentMsgIdx = 0;
 	typedef std::function<void(void*)> MessageFunc;
 	typedef std::tuple<std::string, MessageTypeEnum, void*, MessageFunc> Messagekey;
 	std::vector<Messagekey> m_Messages;
-	bool m_HasInfos = false;
-	bool m_HasWarnings = false;
-	bool m_HasErrors = false;
 
 private:
 	void AddMessage(std::string vMsg, MessageTypeEnum vType, bool vSelect, void* vDatas, MessageFunc vFunction);
@@ -52,7 +59,7 @@ private:
 	bool DrawMessage(const Messagekey& vMsg);
 
 public:
-	void Draw();
+	void Draw(ProjectFile *vProjectFile);
 	void AddInfos(bool vSelect, void* vDatas, MessageFunc vFunction, const char* fmt, ...); // select => set currentMsgIdx to this msg idx
 	void AddWarning(bool vSelect, void* vDatas, MessageFunc vFunction, const char* fmt, ...); // select => set currentMsgIdx to this msg idx
 	void AddError(bool vSelect, void* vDatas, MessageFunc vFunction, const char* fmt, ...); // select => set currentMsgIdx to this msg idx

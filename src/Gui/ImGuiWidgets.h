@@ -155,6 +155,5 @@ namespace ImGui
 	IMGUI_API void ShowCustomStyleEditor(bool *vOpen, ImGuiStyle* ref = NULL);
 
 	////////////////////////////////////////////////////////////////////////////
-
 }
 

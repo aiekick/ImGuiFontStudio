@@ -27,7 +27,6 @@
 #include "Panes/SourceFontPane.h"
 #include "Panes/FinalFontPane.h"
 #include "Panes/GlyphPane.h"
-#include "Panes/MergedPane.h"
 #include "Panes/GeneratorPane.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -98,9 +97,11 @@ void GuiLayout::ApplyInitialDockingLayout(ImVec2 vSize)
 	ImGui::DockBuilderDockWindow(GENERATOR_PANE, dockRightID); // dockGeneratorID
 	ImGui::DockBuilderDockWindow(CURRENT_FONT_PANE, dockRightID); // dockSelectionID
 	ImGui::DockBuilderDockWindow(GLYPH_PANE, dockMainID);
-	ImGui::DockBuilderDockWindow(MERGED_PANE, dockMainID);
 
 	ImGui::DockBuilderFinish(m_DockSpaceID);
+
+	ShowAndFocusPane(PaneFlags::PANE_SOURCE);
+	ShowAndFocusPane(PaneFlags::PANE_GENERATOR);
 
 	m_Pane_Shown = PaneFlags::PANE_ALLS;
 }
@@ -122,8 +123,7 @@ void GuiLayout::DisplayMenu(ImVec2 vSize)
 		ImGui::MenuItem<PaneFlags>("Show/Hide Final Pane", "", &m_Pane_Shown, PaneFlags::PANE_FINAL);
 		ImGui::MenuItem<PaneFlags>("Show/Hide Generator Pane", "", &m_Pane_Shown, PaneFlags::PANE_GENERATOR);
 		ImGui::MenuItem<PaneFlags>("Show/Hide Glyph Pane", "", &m_Pane_Shown, PaneFlags::PANE_GLYPH);
-		ImGui::MenuItem<PaneFlags>("Show/Hide Merged Pane", "", &m_Pane_Shown, PaneFlags::PANE_MERGED);
-
+		
 		ImGui::EndMenu();
 	}
 }
@@ -136,10 +136,32 @@ int GuiLayout::DisplayPanes(ProjectFile *vProjectFile, int vWidgetId)
 	vWidgetId = FinalFontPane::Instance()->DrawCurrentFontPane(vProjectFile, vWidgetId);
 	vWidgetId = GeneratorPane::Instance()->DrawGeneratorPane(vProjectFile, vWidgetId);
 	vWidgetId = GlyphPane::Instance()->DrawGlyphPane(vProjectFile, vWidgetId);
-	vWidgetId = MergedPane::Instance()->DrawMergedPane(vProjectFile, vWidgetId);
-
+	
 	return vWidgetId;
 }
+
+void GuiLayout::ShowAndFocusPane(PaneFlags vPane)
+{
+	m_Pane_Shown = (PaneFlags)(m_Pane_Shown | vPane);
+
+	if (vPane == PaneFlags::PANE_FINAL)	ActivePane(FINAL_PANE);
+	else if (vPane == PaneFlags::PANE_SELECTED_FONT) ActivePane(CURRENT_FONT_PANE);
+	else if (vPane == PaneFlags::PANE_SOURCE) ActivePane(SOURCE_PANE);
+	else if (vPane == PaneFlags::PANE_PARAM) ActivePane(PARAM_PANE);
+	else if (vPane == PaneFlags::PANE_GENERATOR) ActivePane(GENERATOR_PANE);
+	else if (vPane == PaneFlags::PANE_GLYPH) ActivePane(GLYPH_PANE);
+}
+
+void GuiLayout::ActivePane(const char *vlabel)
+{
+	ImGuiWindow* window = ImGui::FindWindowByName(vlabel);
+	if (window)
+	{
+		if(!window->DockTabIsVisible)
+			ImGui::FocusWindow(window);
+	}
+}
+
 ///////////////////////////////////////////////////////
 //// CONFIGURATION ////////////////////////////////////
 ///////////////////////////////////////////////////////
