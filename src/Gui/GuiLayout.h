@@ -38,6 +38,7 @@ enum PaneFlags
 	PANE_ALLS = PANE_SELECTED_FONT | PANE_SOURCE | PANE_FINAL | PANE_PARAM | PANE_GENERATOR// | PANE_GLYPH
 };
 
+class ProjectFile;
 class GuiLayout : public conf::ConfigAbstract
 {
 private:
@@ -56,11 +57,15 @@ public:
 	void Init();
 	void InitAfterFirstDisplay(ImVec2 vSize);
 	void DisplayMenu(ImVec2 vSize);
+	int DisplayPanes(ProjectFile *vProjectFile, int vWidgetId);
+	void ShowAndFocusPane(PaneFlags vPane);
+
+private:
+	void ActivePane(const char *vlabel);
 
 public: // configuration
 	std::string getXml(const std::string& vOffset);
 	void setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent);
-
 
 public: // singleton
 	static GuiLayout *Instance()

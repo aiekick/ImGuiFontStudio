@@ -32,6 +32,14 @@ public:
 	std::vector<std::vector<ct::ivec2>> coords;
 	std::vector<std::vector<bool>> onCurve;
 	ct::ivec4 rc;
+	ct::ivec2 m_Translation = 0; // translation in first
+	ct::dvec2 m_Scale = 1.0; // scale in second
+
+public:
+	// countbytes, value
+	//std::vector<std::pair<int32_t, int32_t>> x_OrginalCoordDatas;
+	//std::vector<std::pair<int32_t, int32_t>> y_OrginalCoordDatas;
+	std::vector<ct::dvec2> originalCoords;
 
 public:
 	void clear();
@@ -53,6 +61,9 @@ public:
 	ImWchar newCodePoint = 0;
 	FontInfos *fontAtlas = 0;
 	SimpleGlyph_Solo simpleGlyph;
+	ct::ivec4 m_FontBoundingBox;
+	int m_FontAscent = 0;
+	int m_FontDescent = 0;
 
 public: // for interaction only
 	bool m_editingName = false;

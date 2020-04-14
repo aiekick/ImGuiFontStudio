@@ -21,6 +21,7 @@
 
 #include "Res/CustomFont.h"
 #include "Gui/ImGuiWidgets.h"
+#include "Helper/SelectionHelper.h"
 
 #include "imgui/imgui.h"
 
@@ -61,7 +62,7 @@ bool Messaging::DrawMessage(const size_t& vMsgIdx)
 {
 	bool res = false;
 
-	if (/*vMsgIdx >= 0 (always true) && */vMsgIdx < m_Messages.size())
+	if (vMsgIdx < m_Messages.size())
 	{
 		auto pa = m_Messages[vMsgIdx];
 		res |= DrawMessage(pa);
@@ -106,24 +107,43 @@ bool Messaging::DrawMessage(const Messagekey& vMsg)
 ///// PUBLIC //////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-void Messaging::Draw()
+void Messaging::Draw(ProjectFile *vProjectFile)
 {
 	ImGui::Text("Messages :");
 
+	if (ImGui::MenuItem(ICON_IGFS_REFRESH "##Refresh"))
+	{
+		Messaging::Instance()->Clear();
+		SelectionHelper::Instance()->AnalyseSourceSelection(vProjectFile);
+	}
+
 	if (!m_Messages.empty())
 	{
-		if (ImGui::BeginMenu(ICON_IGFS_DESTROY "##clear"))
+		// on type of message only
+		if (m_MessageExistFlags == MessageExistFlags::MESSAGE_EXIST_INFOS ||
+			m_MessageExistFlags == MessageExistFlags::MESSAGE_EXIST_WARNING ||
+			m_MessageExistFlags == MessageExistFlags::MESSAGE_EXIST_ERROR)
 		{
-			if (ImGui::MenuItem("All")) Clear();
-			ImGui::Separator();
-			if (m_HasInfos)
-				if (ImGui::MenuItem("Infos")) ClearInfos();
-			if (m_HasWarnings)
-				if (ImGui::MenuItem("Warnings")) ClearWarnings();
-			if (m_HasErrors)
-				if (ImGui::MenuItem("Errors")) ClearErrors();
+			if (ImGui::MenuItem(ICON_IGFS_DESTROY "##clear"))
+			{
+				Clear();
+			}
+		}
+		else
+		{
+			if (ImGui::BeginMenu(ICON_IGFS_DESTROY "##clear"))
+			{
+				if (ImGui::MenuItem("All")) Clear();
+				ImGui::Separator();
+				if (m_MessageExistFlags & MessageExistFlags::MESSAGE_EXIST_INFOS)
+					if (ImGui::MenuItem("Infos")) ClearInfos();
+				if (m_MessageExistFlags & MessageExistFlags::MESSAGE_EXIST_WARNING)
+					if (ImGui::MenuItem("Warnings")) ClearWarnings();
+				if (m_MessageExistFlags & MessageExistFlags::MESSAGE_EXIST_ERROR)
+					if (ImGui::MenuItem("Errors")) ClearErrors();
 
-			ImGui::EndMenu();
+				ImGui::EndMenu();
+			}
 		}
 	}
 	if (!m_Messages.empty())
@@ -159,7 +179,7 @@ void Messaging::AddInfos(bool vSelect, void* vDatas, MessageFunc vFunction, cons
 	va_start(args, fmt);
 	AddMessage(MessageTypeEnum::MESSAGE_TYPE_INFOS, vSelect, vDatas, vFunction, fmt, args);
 	va_end(args);
-	m_HasInfos = true;
+	m_MessageExistFlags = (MessageExistFlags)(m_MessageExistFlags | MessageExistFlags::MESSAGE_EXIST_INFOS);
 }
 
 void Messaging::AddWarning(bool vSelect, void* vDatas, MessageFunc vFunction, const char* fmt, ...)
@@ -168,7 +188,7 @@ void Messaging::AddWarning(bool vSelect, void* vDatas, MessageFunc vFunction, co
 	va_start(args, fmt);
 	AddMessage(MessageTypeEnum::MESSAGE_TYPE_WARNING, vSelect, vDatas, vFunction, fmt, args);
 	va_end(args);
-	m_HasWarnings = true;
+	m_MessageExistFlags = (MessageExistFlags)(m_MessageExistFlags | MessageExistFlags::MESSAGE_EXIST_WARNING);
 }
 
 void Messaging::AddError(bool vSelect, void* vDatas, MessageFunc vFunction, const char* fmt, ...)
@@ -177,7 +197,7 @@ void Messaging::AddError(bool vSelect, void* vDatas, MessageFunc vFunction, cons
 	va_start(args, fmt);
 	AddMessage(MessageTypeEnum::MESSAGE_TYPE_ERROR, vSelect, vDatas, vFunction, fmt, args);
 	va_end(args);
-	m_HasErrors = true;
+	m_MessageExistFlags = (MessageExistFlags)(m_MessageExistFlags | MessageExistFlags::MESSAGE_EXIST_ERROR);
 }
 
 void Messaging::ClearErrors()
@@ -195,7 +215,8 @@ void Messaging::ClearErrors()
 	{
 		m_Messages.erase(m_Messages.begin() + id);
 	}
-	m_HasErrors = false;
+
+	m_MessageExistFlags = (MessageExistFlags)(m_MessageExistFlags & ~MessageExistFlags::MESSAGE_EXIST_ERROR);
 }
 
 void Messaging::ClearWarnings()
@@ -213,7 +234,8 @@ void Messaging::ClearWarnings()
 	{
 		m_Messages.erase(m_Messages.begin() + id);
 	}
-	m_HasWarnings = false;
+	
+	m_MessageExistFlags = (MessageExistFlags)(m_MessageExistFlags & ~MessageExistFlags::MESSAGE_EXIST_WARNING);
 }
 
 void Messaging::ClearInfos()
@@ -231,13 +253,12 @@ void Messaging::ClearInfos()
 	{
 		m_Messages.erase(m_Messages.begin() + id);
 	}
-	m_HasInfos = false;
+	
+	m_MessageExistFlags = (MessageExistFlags)(m_MessageExistFlags & ~MessageExistFlags::MESSAGE_EXIST_INFOS);
 }
 
 void Messaging::Clear()
 {
 	m_Messages.clear();
-	m_HasInfos = false;
-	m_HasWarnings = false;
-	m_HasErrors = false;
+	m_MessageExistFlags = MessageExistFlags::MESSAGE_EXIST_NONE;
 }

@@ -1,5 +1,19 @@
 <config>
 	<project>
+		<font name="SentyWEN2017.ttf">
+			<glyphs>
+				<glyph orgId="20129" newId="20129" orgName="uni4EA1" newName="uni4EA1"/>
+				<glyph orgId="20149" newId="20149" orgName="uni4EB5" newName="uni4EB5"/>
+				<glyph orgId="20150" newId="20150" orgName="uni4EB6" newName="uni4EB6"/>
+				<glyph orgId="20151" newId="20151" orgName="uni4EB7" newName="uni4EB7"/>
+				<glyph orgId="30511" newId="30511" orgName="uni772F" newName="uni772F"/>
+				<glyph orgId="30513" newId="30513" orgName="uni7731" newName="uni7731"/>
+			</glyphs>
+			<prefix>SWEN</prefix>
+			<pathfilename>..\samples_Fonts\SentyWEN2017.ttf</pathfilename>
+			<oversample>1</oversample>
+			<fontsize>29</fontsize>
+		</font>
 		<font name="fontawesome-webfont.ttf">
 			<glyphs>
 				<glyph orgId="61442" newId="61442" orgName="search" newName="search"/>
@@ -49,11 +63,17 @@
 			<prefix>IGFS</prefix>
 			<pathfilename>..\samples_Fonts\fontawesome-webfont.ttf</pathfilename>
 			<oversample>3</oversample>
-			<fontsize>20</fontsize>
+			<fontsize>26</fontsize>
 		</font>
 		<rangecoloring show="false" hash="42.606;14.789;27.817;0.5"/>
-		<countglyph_x>26</countglyph_x>
+		<previewcountglyph_x>20</previewcountglyph_x>
 		<mergedfontprefix>IGFS</mergedfontprefix>
-		<genmode>333</genmode>
+		<curglyphtooltip>true</curglyphtooltip>
+		<srcglyphtooltip>true</srcglyphtooltip>
+		<dstglyphtooltip>true</dstglyphtooltip>
+		<glyphpreviewscale>0.193</glyphpreviewscale>
+		<glyphpreviewshowcontrollines>false</glyphpreviewshowcontrollines>
+		<genmode>274</genmode>
+		<fonttomergein>fontawesome-webfont.ttf</fonttomergein>
 	</project>
 </config>

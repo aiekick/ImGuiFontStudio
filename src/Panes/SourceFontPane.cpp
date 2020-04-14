@@ -189,6 +189,7 @@ int SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId)
 									if (!itFont.second.m_NeedFilePathResolve)
 									{
 										vProjectFile->m_CurrentFont = &itFont.second;
+										vProjectFile->m_FontToMergeIn = itFont.second.m_FontFileName;
 									}
 								}
 							}
@@ -458,7 +459,16 @@ void SourceFontPane::OpenFont(ProjectFile *vProjectFile, std::string vFontFilePa
 			FontInfos *font = &vProjectFile->m_Fonts[fontName];
 			if (font->LoadFont(vProjectFile, vFontFilePathName))
 			{
-				vProjectFile->m_CurrentFont = font;
+				if (vProjectFile->m_FontToMergeIn.empty())
+				{
+					vProjectFile->m_FontToMergeIn = font->m_FontFileName;
+					vProjectFile->m_CurrentFont = font;
+				}
+				else if (vProjectFile->m_FontToMergeIn == font->m_FontFileName)
+				{
+					vProjectFile->m_CurrentFont = font;
+				}
+				
 				if (vUpdateCount)
 					vProjectFile->UpdateCountSelectedGlyphs();
 			}

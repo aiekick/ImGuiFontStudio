@@ -135,20 +135,15 @@ void MainFrame::Display(ImVec2 vSize)
 
 	DrawDockPane(vSize);
 
-	widgetId = SourceFontPane::Instance()->DrawParamsPane(&m_ProjectFile, widgetId);
-	widgetId = SourceFontPane::Instance()->DrawSourceFontPane(&m_ProjectFile, widgetId);
-	widgetId = FinalFontPane::Instance()->DrawFinalFontPane(&m_ProjectFile, widgetId);
-	widgetId = FinalFontPane::Instance()->DrawCurrentFontPane(&m_ProjectFile, widgetId);
-	widgetId = GeneratorPane::Instance()->DrawGeneratorPane(&m_ProjectFile, widgetId);
-	widgetId = GlyphPane::Instance()->DrawGlyphPane(&m_ProjectFile, widgetId);
-
+	widgetId = GuiLayout::Instance()->DisplayPanes(&m_ProjectFile, widgetId);
+	
 	DisplayDialogsAndPopups();
 
 	GuiLayout::Instance()->InitAfterFirstDisplay(vSize);
 
 	if (ImGui::BeginMainStatusBar())
 	{
-		Messaging::Instance()->Draw();
+		Messaging::Instance()->Draw(&m_ProjectFile);
 
 		ImGui::EndMainStatusBar();
 	}

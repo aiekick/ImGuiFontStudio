@@ -30,6 +30,7 @@
 #include "Gui/ImGuiWidgets.h"
 #include "Helper/Messaging.h"
 #include "Helper/SelectionHelper.h"
+#include "Helper/ImGuiThemeHelper.h"
 #include "Panes/FinalFontPane.h"
 #include "Panes/SourceFontPane.h"
 #include "Project/ProjectFile.h"
@@ -108,16 +109,39 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 			bool btnClick = false;
 			std::string exts;
 
+#ifdef _DEBUG
+			if (ImGui::Button("Quick Font Current"))
+			{
+				vProjectFile->m_GenMode = (GenModeFlags)0;
+				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_CURRENT_FONT); // font + header
+				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
+				std::string path = FileHelper::Instance()->GetAppPath() + "/exports";
+				path = FileHelper::Instance()->CorrectFilePathName(path);
+				FileHelper::Instance()->CreateDirectoryIfNotExist(path);
+				Generator::Instance()->Generate(path, "test.ttf", vProjectFile);
+			}
+			if (ImGui::Button("Quick Font Merged"))
+			{
+				vProjectFile->m_GenMode = (GenModeFlags)0;
+				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_MERGED_FONT); // font + header
+				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
+				std::string path = FileHelper::Instance()->GetAppPath() + "/exports";
+				path = FileHelper::Instance()->CorrectFilePathName(path);
+				FileHelper::Instance()->CreateDirectoryIfNotExist(path);
+				Generator::Instance()->Generate(path, "test.ttf", vProjectFile);
+			}
+#endif
+			bool change = false;
 			ImGui::Text("Modes : ");
 			ImGui::Indent();
 			{
-				ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Current", "Current Font",
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Current", "Current Font",
 					&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_CURRENT, 50.0f, true, true,
 					GenModeFlags::GENERATOR_MODE_RADIO_CUR_BAT_MER);
 				if (vProjectFile->m_Fonts.size() > 1)
 				{
 					ImGui::SameLine();
-					ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Batch", "Font by Font",
+					change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Batch", "Font by Font",
 						&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_BATCH, 50.0f, true, true,
 						GenModeFlags::GENERATOR_MODE_RADIO_CUR_BAT_MER);
 
@@ -125,7 +149,7 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 						m_GeneratorStatusFlags & GeneratorStatusFlags::GENERATOR_STATUS_FONT_MERGE_ALLOWED)
 					{
 						ImGui::SameLine();
-						ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Merged", "Fonts Merged in one",
+						change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Merged", "Fonts Merged in one",
 							&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_MERGED, 50.0f, true, true,
 							GenModeFlags::GENERATOR_MODE_RADIO_CUR_BAT_MER);
 					}
@@ -149,7 +173,7 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 			{
 				if (m_GeneratorStatusFlags & GeneratorStatusFlags::GENERATOR_STATUS_FONT_HEADER_GENERATION_ALLOWED)
 				{
-					ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Header", "Header File",
+					change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Header", "Header File",
 						&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_HEADER, 50.0f);
 					ImGui::SameLine();
 				}
@@ -157,11 +181,11 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 				{
 					vProjectFile->RemoveGenMode(GenModeFlags::GENERATOR_MODE_HEADER);
 				}
-				ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Font", "Font File",
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Font", "Font File",
 					&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_FONT, 50.0f, false, false,
 					GenModeFlags::GENERATOR_MODE_RADIO_FONT_CPP);
 				ImGui::SameLine();
-				ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Cpp", "Source File for c++\n\twith font as a bytes array",
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Cpp", "Source File for c++\n\twith font as a bytes array",
 					&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_CPP, 50.0f, false, false,
 					GenModeFlags::GENERATOR_MODE_RADIO_FONT_CPP);
 			}
@@ -176,11 +200,11 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 					ImGui::Indent();
 					{
 						ImGui::Text("Order Glyphs by :");
-						ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("CodePoint", "order by glyph CodePoint",
+						change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("CodePoint", "order by glyph CodePoint",
 							&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_CODEPOINT, 50.0f, true, true,
 							GenModeFlags::GENERATOR_MODE_RADIO_CDP_NAMES);
 						ImGui::SameLine();
-						ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Names", "order by glyph Name",
+						change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Names", "order by glyph Name",
 							&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES, 50.0f, true, true,
 							GenModeFlags::GENERATOR_MODE_RADIO_CDP_NAMES);
 					}
@@ -195,7 +219,7 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 					ImGui::Text("Font : ");
 					ImGui::Indent();
 					{
-						ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Export Names", "export glyph names in font file (increase size)",
+						change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Export Names", "export glyph names in font file (increase size)",
 							&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES, 50.0f);
 					}
 					ImGui::Unindent();
@@ -216,6 +240,11 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 				}
 
 				ImGui::Unindent();
+			}
+
+			if (change)
+			{
+				vProjectFile->SetProjectChange();
 			}
 
 			if (btnClick)
@@ -259,7 +288,7 @@ bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
 	else
 	{
 		res = false;
-		ImGui::TextColored(ImVec4(0.8f, 0.2f, 0.2f, 1.0f), "Can't generate.\n\tSelect one feature at least");
+		ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "Can't generate.\n\tSelect one feature at least");
 	}
 
 	if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_MERGED) &&
@@ -267,7 +296,7 @@ bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
 			vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_CPP)))
 	{
 		res = false;
-		ImGui::TextColored(ImVec4(0.8f, 0.2f, 0.2f, 1.0f), "Merged mode require the\ngeneration of font or cpp.\nPlease Select one of\nthese two at least");
+		ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "Merged mode require the\ngeneration of font or cpp.\nPlease Select one of\nthese two at least");
 	}
 
 	if (res)
@@ -277,36 +306,32 @@ bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
 		ImGui::Text("Font Status :");
 		ImGui::Indent();
 		{
-			if (ImGui::Button("Refresh", "Will analyse font(s) and\n\tmaybe unlock generation tools"))
-			{
-				Messaging::Instance()->Clear();
-				SelectionHelper::Instance()->AnalyseSourceSelection(vProjectFile);
-			}
-
+			vProjectFile->m_CountFontWithSelectedGlyphs = 0;
 			for (auto &font : vProjectFile->m_Fonts)
 			{
 				if (font.second.m_CodePointInDoubleFound || font.second.m_NameInDoubleFound)
 				{
-					ImGui::TextColored(ImVec4(0.8f, 0.2f, 0.2f, 1.0f), "%s : NOK", font.second.m_FontFileName.c_str());
+					ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "%s : NOK", font.second.m_FontFileName.c_str());
 					errorsCount++;
 				}
 				else if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_MERGED) && font.second.m_SelectedGlyphs.size() == 0)
 				{
-					ImGui::TextColored(ImVec4(0.8f, 0.2f, 0.2f, 1.0f), "%s : NOK", font.second.m_FontFileName.c_str());
-					ImGui::TextColored(ImVec4(0.2f, 0.8f, 0.2f, 1.0f), "No Glyphs are selected.\n\tYou need it in Merged mode");
+					ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "%s : NOK", font.second.m_FontFileName.c_str());
+					ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "No Glyphs are selected.\n\tYou need it in Merged mode");
 					errorsCount++;
 				}
 				else
 				{
-					ImGui::TextColored(ImVec4(0.2f, 0.8f, 0.2f, 1.0f), "%s : OK", font.second.m_FontFileName.c_str());
+					ImGui::TextColored(ImGuiThemeHelper::Instance()->goodColor, "%s : OK", font.second.m_FontFileName.c_str());
 					ImGui::Indent();
 					if (font.second.m_SelectedGlyphs.size() == 0) // no glyphs to extract, we wille extract alls, current and batch only
 					{
-						ImGui::TextColored(ImVec4(0.2f, 0.8f, 0.2f, 1.0f), "No Glyphs are selected.\n\tAll font glyphs will be exported");
+						ImGui::TextColored(ImGuiThemeHelper::Instance()->goodColor, "No Glyphs are selected.\n\tAll font glyphs will be exported");
 					}
 					else
 					{
-						ImGui::TextColored(ImVec4(0.2f, 0.8f, 0.2f, 1.0f), "%zu Glyphs selected", font.second.m_SelectedGlyphs.size());
+						ImGui::TextColored(ImGuiThemeHelper::Instance()->goodColor, "%zu Glyphs selected", font.second.m_SelectedGlyphs.size());
+						vProjectFile->m_CountFontWithSelectedGlyphs++;
 					}
 					ImGui::Unindent();
 				}
@@ -326,16 +351,22 @@ bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
 		{
 			if (errorsCount > 0)
 			{
-				ImGui::TextColored(ImVec4(0.8f, 0.2f, 0.2f, 1.0f), "Can partially generate\n\tCheck status bar");
+				ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "Can partially generate\n\tCheck status bar");
 			}
 			else
 			{
-				ImGui::TextColored(ImVec4(0.2f, 0.8f, 0.2f, 1.0f), "Can fully generate");
+				ImGui::TextColored(ImGuiThemeHelper::Instance()->goodColor, "Can fully generate");
+			}
+
+			if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_MERGED))
+			{
+				ImGui::TextColored(ImGuiThemeHelper::Instance()->goodColor,
+					"The selected font\n\tscale / bounding box\n\twill be used for merge in\n\tall other font glyphs");
 			}
 		}
 		else
 		{
-			ImGui::TextColored(ImVec4(0.8f, 0.2f, 0.2f, 1.0f), "Can't generate\n\tCheck status bar");
+			ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "Can't generate\n\tCheck status bar");
 			res = false;
 		}
 

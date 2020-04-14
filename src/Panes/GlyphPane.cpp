@@ -67,6 +67,10 @@ static float _progress = 1.0f;
 static float _scale = 0.5f;
 static bool _stroke = true;
 static bool _controLines = true;
+static int _tx = 0;
+static int _ty = 0;
+static float _sx = 1.0f;
+static float _sy = 1.0f;
 
 int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
 {
@@ -88,16 +92,28 @@ int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
 				if (ImGui::BeginMenuBar())
 				{
 					ImGui::PushItemWidth(100.0f);
-					ImGui::SliderFloat("Scale", &_scale, 0.01f, 1.0f);
+					if (ImGui::SliderFloat("Scale", &vProjectFile->m_GlyphPreview_Scale, 0.01f, 1.0f))
+					{
+						vProjectFile->SetProjectChange();
+					}
 					ImGui::PopItemWidth();
 
-					ImGui::Checkbox("Stroke or Fill", &_stroke);
-					ImGui::Checkbox("Control Lines", &_controLines);
+					//ImGui::Checkbox("Stroke or Fill", &_stroke);
+					if (ImGui::Checkbox("Control Lines", &vProjectFile->m_GlyphPreview_ShowControlLines))
+					{
+						vProjectFile->SetProjectChange();
+					}
 
 					ImGui::EndMenuBar();
 				}
 
-				DrawSimpleGlyph(m_Glyph, vProjectFile->m_CurrentFont, _scale, _progress, _stroke, _controLines);
+				DrawSimpleGlyph(
+					&m_GlyphToDisplay, 
+					vProjectFile->m_CurrentFont, 
+					vProjectFile->m_GlyphPreview_Scale, 
+					_progress, 
+					_stroke,
+					vProjectFile->m_GlyphPreview_ShowControlLines);
 			}
 		}
 
@@ -152,9 +168,13 @@ bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, Glyp
 							auto glyph = down_cast<sfntly::GlyphTable::SimpleGlyph*>(g);
 							if (glyph)
 							{
-								vGlyphInfos->simpleGlyph.LoadSimpleGlyph(glyph);
-								limitContour = vGlyphInfos->simpleGlyph.GetCountContours();
-								m_Glyph = vGlyphInfos;
+								m_GlyphToDisplay = *vGlyphInfos;
+								m_GlyphToDisplay.simpleGlyph.LoadSimpleGlyph(glyph);
+								limitContour = m_GlyphToDisplay.simpleGlyph.GetCountContours();
+
+								// show and active the glyph pane
+								GuiLayout::Instance()->ShowAndFocusPane(PaneFlags::PANE_GLYPH);
+								
 								res = true;
 							}
 						}
@@ -169,7 +189,7 @@ bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, Glyp
 
 // https://github.com/rillig/sfntly/tree/master/java/src/com/google/typography/font/tools/fontviewer
 bool GlyphPane::DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
-	double vScale, double vProgress, bool vFill, bool vControlLines)
+	float vScale, float /*vProgress*/, bool /*vFill*/, bool vControlLines)
 {
 	if (vGlyph && vFontInfos)
 	{
@@ -187,9 +207,23 @@ bool GlyphPane::DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
 			ct::ivec4 rc = g->rc;
 
 			ImVec2 contentSize = ImGui::GetContentRegionMax();
-			ImRect glypRect = ImRect(
-				rc.x * vScale, rc.y * vScale,
-				rc.z * vScale, rc.w * vScale);
+			ImRect glypRect = ImRect(((float)rc.x) * vScale, ((float)rc.y) * vScale, ((float)(rc.z - rc.x)) * vScale, ((float)(rc.w - rc.y)) * vScale);
+
+			bool change = false;
+			ImGui::PushItemWidth(200.0f);
+			//change |= ImGui::SliderInt("tx", &_tx, -rc.z, rc.z); ImGui::SameLine();
+			//change |= ImGui::SliderFloat("sx", &_sx, 0.01f, 10.0f);
+			//change |= ImGui::SliderInt("ty", &_ty, -rc.w, rc.w); ImGui::SameLine();
+			//change |= ImGui::SliderFloat("sy", &_sy, 0.01f, 10.0f);
+			ImGui::PopItemWidth();
+
+			if (change)
+			{
+				// will come back with svg or/and glyph edition
+				//g->m_Translation = ct::ivec2(_tx, _ty); not functionnal for the moment
+				//g->m_Scale = ct::dvec2((double)_sx, (double)_sy); for the moment scale is overwrite by merged system
+			}
+
 			ImVec2 glyphCenter = glypRect.GetCenter();
 			ImVec2 pos = ImGui::GetCursorScreenPos() + contentSize * 0.5f - glyphCenter;
 
@@ -202,28 +236,31 @@ bool GlyphPane::DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
 				ImGui::EndMenuBar();
 			}
 
-			// x 0
+			ImGui::Text("You can select glyph in Current Font Pane");
+			ImGui::Text("rc %i %i %i %i", rc.x, rc.y, rc.z, rc.w);
+			
+			// x 0 + blue
 			drawList->AddLine(
-				ct::toImVec2(g->Scale(ct::ivec2(0, rc.y), vScale)) + pos,
-				ct::toImVec2(g->Scale(ct::ivec2(0, rc.w), vScale)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2(0, (int32_t)ct::floor(rc.y * g->m_Scale.x)), vScale)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2(0, (int32_t)ct::floor(rc.w * g->m_Scale.y)), vScale)) + pos,
 				ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), 2.0f);
 
 			// Ascent
 			drawList->AddLine(
-				ct::toImVec2(g->Scale(ct::ivec2(rc.x, vFontInfos->m_Ascent), vScale)) + pos,
-				ct::toImVec2(g->Scale(ct::ivec2(rc.z, vFontInfos->m_Ascent), vScale)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.x * g->m_Scale.x), vFontInfos->m_Ascent), vScale)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.z * g->m_Scale.x), vFontInfos->m_Ascent), vScale)) + pos,
 				ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
 
 			// y 0
 			drawList->AddLine(
-				ct::toImVec2(g->Scale(ct::ivec2(rc.x, 0), vScale)) + pos,
-				ct::toImVec2(g->Scale(ct::ivec2(rc.z, 0), vScale)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.x * g->m_Scale.x), 0), vScale)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.z * g->m_Scale.x), 0), vScale)) + pos,
 				ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 1.0f);
 
 			// Descent
 			drawList->AddLine(
-				ct::toImVec2(g->Scale(ct::ivec2(rc.x, vFontInfos->m_Descent), vScale)) + pos,
-				ct::toImVec2(g->Scale(ct::ivec2(rc.z, vFontInfos->m_Descent), vScale)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.x * g->m_Scale.x), vFontInfos->m_Descent), vScale)) + pos,
+				ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.z * g->m_Scale.x), vFontInfos->m_Descent), vScale)) + pos,
 				ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
 
 			for (int c = 0; c < cmax; c++)
@@ -251,6 +288,7 @@ bool GlyphPane::DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
 					int icurr = firstOn + i + 1;
 					int inext = firstOn + i + 2;
 					ct::ivec2 cur = g->GetCoords(c, icurr, vScale);
+
 					if (g->IsOnCurve(c, icurr))
 					{
 						drawList->PathLineTo(ct::toImVec2(cur) + pos);
@@ -278,8 +316,7 @@ bool GlyphPane::DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
 					drawList->PathFillConvex(ImGui::GetColorU32(ImGuiCol_Text));
 				}
 
-				// control lines
-				if (vControlLines)
+				if (vControlLines) // control lines
 				{
 					drawList->PathLineTo(ct::toImVec2(g->GetCoords(c, firstOn, vScale)) + pos);
 
@@ -307,6 +344,12 @@ bool GlyphPane::DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
 
 					drawList->PathStroke(ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), true);
 				}
+
+				/*for (auto &it : g->originalCoords)
+				{
+					drawList->PathLineTo(ct::toImVec2(it * vScale) + pos);
+				}
+				drawList->PathStroke(ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), true);*/
 			}
 		}
 	}

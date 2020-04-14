@@ -22,6 +22,10 @@
 
 class ImGuiThemeHelper : public conf::ConfigAbstract
 {
+public:
+	ImVec4 goodColor = ImVec4(0.2f, 0.8f, 0.2f, 1.0f);
+	ImVec4 badColor = ImVec4(0.8f, 0.2f, 0.2f, 1.0f);
+
 private:
 	std::map<std::string, ImVec4> m_FileTypeColors;
 

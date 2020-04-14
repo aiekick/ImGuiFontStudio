@@ -31,17 +31,16 @@ class GlyphInfos;
 class GlyphPane
 {
 private:
-	//sfntly::Ptr<sfntly::GlyphTable::SimpleGlyph> m_SimpleGlyph;
 	FontInstance m_fontInstance;
-	GlyphInfos *m_Glyph = 0;
-
+	GlyphInfos m_GlyphToDisplay;
+	
 public:
 	int DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId);
 	bool LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, GlyphInfos *vGlyphInfos);
 
 private:
 	bool DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
-		double vScale, double vProgress, bool vFill = false, bool vControlLines = true);
+		float vScale, float vProgress, bool vFill = false, bool vControlLines = true);
 
 public: // singleton
 	static GlyphPane *Instance()

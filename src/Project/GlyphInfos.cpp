@@ -56,6 +56,22 @@ void SimpleGlyph_Solo::LoadSimpleGlyph(sfntly::GlyphTable::SimpleGlyph *vGlyph)
 		rc.y = vGlyph->YMin();
 		rc.z = vGlyph->XMax();
 		rc.w = vGlyph->YMax();
+
+		// countbytes, value
+		auto x_OrginalCoordDatas = vGlyph->xOrginalCoordDatas();
+		originalCoords.resize(x_OrginalCoordDatas.size());
+		int idx = 0;
+		for (auto &it : x_OrginalCoordDatas)
+		{
+			originalCoords[idx++].x = (double)it.second;
+		}
+		auto y_OrginalCoordDatas = vGlyph->yOrginalCoordDatas();
+		originalCoords.resize(y_OrginalCoordDatas.size());
+		idx = 0;
+		for (auto &it : y_OrginalCoordDatas)
+		{
+			originalCoords[idx++].y = (double)it.second;
+		}
 	}
 }
 
@@ -67,7 +83,15 @@ int SimpleGlyph_Solo::GetCountContours()
 ct::ivec2 SimpleGlyph_Solo::GetCoords(int32_t vContour, int32_t vPoint)
 {
 	int count = (int)coords[vContour].size();
-	return coords[vContour][vPoint % count];
+
+	ct::ivec2 p = coords[vContour][vPoint % count];
+
+	// apply transformation
+	p += m_Translation;
+	p.x = (int)(p.x * m_Scale.x);
+	p.y = (int)(p.y * m_Scale.y);
+	
+	return p;
 }
 
 bool SimpleGlyph_Solo::IsOnCurve(int32_t vContour, int32_t vPoint)

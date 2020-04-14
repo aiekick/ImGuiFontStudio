@@ -79,7 +79,7 @@ int FinalFontPane::DrawFinalFontPane(ProjectFile *vProjectFile, int vWidgetId)
 
 							if (ImGui::MenuItem<FinalFontPaneModeFlags>("by Font, ordered by CodePoint", "",
 								&m_FinalFontPaneModeFlags , 
-								FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_CODEPOINT))
+								FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_CODEPOINT, true))
 							{
 								PrepareSelectionByFontOrderedByCodePoint(vProjectFile);
 							}
@@ -217,6 +217,16 @@ int FinalFontPane::DrawCurrentFontPane(ProjectFile *vProjectFile, int vWidgetId)
 							ImGui::EndMenu();
 						}
 
+						if (ImGui::BeginMenu("Infos"))
+						{
+							if (ImGui::MenuItem("Show Tooltip", "", &vProjectFile->m_CurrentPane_ShowGlyphTooltip))
+							{
+								vProjectFile->SetProjectChange();
+							}
+
+							ImGui::EndMenu();
+						}
+
 						if (ImGui::BeginMenu("Edition"))
 						{
 							ImGui::MenuItem("Auto Update codePoint during Edition", "",
@@ -224,7 +234,7 @@ int FinalFontPane::DrawCurrentFontPane(ProjectFile *vProjectFile, int vWidgetId)
 
 							ImGui::EndMenu();
 						}
-
+						
 						ImGui::EndMenuBar();
 					}
 

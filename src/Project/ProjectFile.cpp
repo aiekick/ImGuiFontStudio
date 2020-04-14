@@ -62,6 +62,7 @@ void ProjectFile::Clear()
 		GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
 	m_SourcePane_ShowGlyphTooltip = true;
 	m_FinalPane_ShowGlyphTooltip = true;
+	m_CurrentPane_ShowGlyphTooltip = true;
 
 	Messaging::Instance()->Clear();
 }
@@ -225,14 +226,19 @@ std::string ProjectFile::getXml(const std::string& vOffset)
 		(m_ShowRangeColoring ? "true" : "false") + "\" hash=\"" + 
 		ct::fvec4(m_RangeColoringHash).string() + "\"/>\n";
 
-	str += vOffset + "\t<countglyph_x>" + ct::toStr(m_Preview_Glyph_CountX) + "</countglyph_x>\n";
+	str += vOffset + "\t<previewcountglyph_x>" + ct::toStr(m_Preview_Glyph_CountX) + "</previewcountglyph_x>\n";
 	str += vOffset + "\t<mergedfontprefix>" + m_MergedFontPrefix + "</mergedfontprefix>\n";
 
+	str += vOffset + "\t<curglyphtooltip>" + (m_CurrentPane_ShowGlyphTooltip ? "true" : "false") + "</curglyphtooltip>\n";
 	str += vOffset + "\t<srcglyphtooltip>" + (m_SourcePane_ShowGlyphTooltip ? "true" : "false") +"</srcglyphtooltip>\n";
 	str += vOffset + "\t<dstglyphtooltip>" + (m_FinalPane_ShowGlyphTooltip ? "true" : "false") +"</dstglyphtooltip>\n";
 
+	str += vOffset + "\t<glyphpreviewscale>" + ct::toStr(m_GlyphPreview_Scale) + "</glyphpreviewscale>\n";
+	str += vOffset + "\t<glyphpreviewshowcontrollines>" + (m_GlyphPreview_ShowControlLines ? "true" : "false") + "</glyphpreviewshowcontrollines>\n";
+
 	str += vOffset + "\t<genmode>" + ct::toStr(m_GenMode) + "</genmode>\n";
-	
+	str += vOffset + "\t<fonttomergein>" + m_FontToMergeIn + "</fonttomergein>\n";
+
 	str += vOffset + "</project>\n";
 
 	return str;
@@ -283,16 +289,24 @@ void ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 					m_RangeColoringHash = ct::toImVec4(ct::fvariant(attValue).getV4());
 			}
 		}
-		else if (strName == "countglyph_x")
+		else if (strName == "previewcountglyph_x")
 			m_Preview_Glyph_CountX = ct::ivariant(strValue).getI();
 		else if (strName == "mergedfontprefix")
 			m_MergedFontPrefix = strValue;
 		else if (strName == "genmode")
 			m_GenMode = (GenModeFlags)ct::ivariant(strValue).getI();
+		else if (strName == "fonttomergein")
+			m_FontToMergeIn = strValue;
+		else if (strName == "curglyphtooltip")
+			m_CurrentPane_ShowGlyphTooltip = ct::ivariant(strValue).getB();
 		else if (strName == "srcglyphtooltip")
 			m_SourcePane_ShowGlyphTooltip = ct::ivariant(strValue).getB();
 		else if (strName == "dstglyphtooltip")
 			m_FinalPane_ShowGlyphTooltip = ct::ivariant(strValue).getB();
+		else if (strName == "glyphpreviewscale")
+			m_GlyphPreview_Scale = ct::fvariant(strValue).getF();
+		else if (strName == "glyphpreviewshowcontrollines")
+			m_GlyphPreview_ShowControlLines = ct::ivariant(strValue).getB();
 	}
 }
 
