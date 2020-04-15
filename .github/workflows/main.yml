@@ -23,7 +23,7 @@ jobs:
     - name: install
       run: cmake --install
     - name: create package as artifact
-      uses: actions/upload-artifact@master
-        with:
-          name: ImGuiFontStudio_Linux
-          path: .
+      uses: actions/upload-artifact@v1
+      with:
+        name: ImGuiFontStudio_Linux
+        path: ImGuiFontStudio_Linux
