@@ -9,7 +9,7 @@ jobs:
   build_Osx_Catalina:
     runs-on: macos-latest
     steps:
-    - uses: actions/checkout@v1
+    - uses actions/checkout@v1
     - name: checkout submodules
       run : git submodule update --init --recursive 
     - name: Install OpenGL lib  / Requirement for Glfw3
