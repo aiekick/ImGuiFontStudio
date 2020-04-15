@@ -21,6 +21,3 @@ jobs:
       with:
         name: ImGuiFontStudio_Linux
         path: build/ImGuiFontStudio_Linux
-      run: |
-        echo Add other actions to build,
-        echo test, and deploy your project.
