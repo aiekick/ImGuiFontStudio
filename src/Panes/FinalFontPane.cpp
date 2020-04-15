@@ -566,7 +566,7 @@ void FinalFontPane::DrawSelectionsByFontNoOrder_OneFontOnly(
 				int startCodePoint = vFontInfos->m_SelectedGlyphs.begin()->second.glyph.Codepoint;
 
 				char buffer[1024] = "\0";
-				snprintf(buffer, 1023, "Font %s / Start CodePoint %i / Count %zu",
+				snprintf(buffer, 1023, "Font %s / Start CodePoint %i / Count %u",
 					vFontInfos->m_FontFileName.c_str(), startCodePoint,
 					vFontInfos->m_SelectedGlyphs.size());
 				bool frm = true;
@@ -725,7 +725,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
 					int startCodePoint = vFontInfos->m_GlyphsOrderedByCodePoints.begin()->second[0]->newCodePoint;
 
 					char buffer[1024] = "\0";
-					snprintf(buffer, 1023, "Font %s / Start CodePoint %i / Count %zu",
+					snprintf(buffer, 1023, "Font %s / Start CodePoint %i / Count %u",
 						vFontInfos->m_FontFileName.c_str(), startCodePoint,
 						vFontInfos->m_GlyphsOrderedByCodePoints.size());
 					bool frm = true;
@@ -887,7 +887,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(
 					std::string name = vFontInfos->m_GlyphsOrderedByGlyphName.begin()->second[0]->newHeaderName;
 
 					char buffer[1024] = "\0";
-					snprintf(buffer, 1023, "Font %s / Start Name %s / Count Names %zu",
+					snprintf(buffer, 1023, "Font %s / Start Name %s / Count Names %u",
 						vFontInfos->m_FontFileName.c_str(), name.c_str(),
 						vFontInfos->m_GlyphsOrderedByGlyphName.size());
 					bool frm = true;

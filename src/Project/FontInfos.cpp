@@ -249,7 +249,7 @@ void FontInfos::DrawInfos()
 			}
 
 			ImGui::Text("Count Glyphs : %i", m_ImFontAtlas.Fonts[0]->Glyphs.size());
-			ImGui::Text("Count Selected Glyphs : %lu", m_SelectedGlyphs.size());
+			ImGui::Text("Count Selected Glyphs : %u", m_SelectedGlyphs.size());
 			ImGui::Text("Texture Size : %i x %i", m_ImFontAtlas.TexWidth, m_ImFontAtlas.TexHeight);
 			ImGui::Text("Ascent / Descent : %i / %i", m_Ascent, m_Descent);
 			//ImGui::Text("Line gap : %i", m_LineGap); // dont know what is it haha

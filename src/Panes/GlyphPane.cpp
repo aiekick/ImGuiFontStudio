@@ -64,13 +64,13 @@ GlyphPane::~GlyphPane()
 ///////////////////////////////////////////////////////////////////////////////////
 
 static float _progress = 1.0f;
-static float _scale = 0.5f;
+//static float _scale = 0.5f;
 static bool _stroke = true;
-static bool _controLines = true;
-static int _tx = 0;
-static int _ty = 0;
-static float _sx = 1.0f;
-static float _sy = 1.0f;
+//static bool _controLines = true;
+//static int _tx = 0;
+//static int _ty = 0;
+//static float _sx = 1.0f;
+//static float _sy = 1.0f;
 
 int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
 {

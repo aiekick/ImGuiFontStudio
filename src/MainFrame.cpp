@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-#define IMGUIFONTSTUDIO_VERSION "Beta 0.5"
+#define IMGUIFONTSTUDIO_VERSION "Beta 0.6"
 
 #include "MainFrame.h"
 

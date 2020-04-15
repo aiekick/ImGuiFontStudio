@@ -160,7 +160,7 @@ void SelectionHelper::DrawMenu(ProjectFile *vProjectFile)
 	{
 		if (ImGui::BeginFramedGroup("Selection Operations"))
 		{
-			ImGui::Text("Selection : %zu Glyphs", m_SelectionForOperation.size());
+			ImGui::Text("Selection : %u Glyphs", m_SelectionForOperation.size());
 
 			if (ImGui::Button("Remove From Final"))
 			{

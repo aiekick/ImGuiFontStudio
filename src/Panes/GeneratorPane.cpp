@@ -330,14 +330,14 @@ bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
 					}
 					else
 					{
-						ImGui::TextColored(ImGuiThemeHelper::Instance()->goodColor, "%zu Glyphs selected", font.second.m_SelectedGlyphs.size());
+						ImGui::TextColored(ImGuiThemeHelper::Instance()->goodColor, "%u Glyphs selected", font.second.m_SelectedGlyphs.size());
 						vProjectFile->m_CountFontWithSelectedGlyphs++;
 					}
 					ImGui::Unindent();
 				}
 			}
 
-			ImGui::Text("%zu Glyphs selected\n\tin %zu fonts",
+			ImGui::Text("%u Glyphs selected\n\tin %u fonts",
 				vProjectFile->m_CountSelectedGlyphs,
 				vProjectFile->m_CountFontWithSelectedGlyphs);
 		}

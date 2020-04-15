@@ -470,7 +470,7 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 						countContours = simpleGlyph.GetCountContours();
 					}
 
-					ct::ivec2 trans = glyphInfos->simpleGlyph.m_Translation; // first apply
+					//ct::ivec2 trans = glyphInfos->simpleGlyph.m_Translation; // first apply
 					ct::dvec2 scale = glyphInfos->simpleGlyph.m_Scale; // second apply
 
 					/////////////////////////////////////////////////////////////////////////////////////////////
