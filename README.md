@@ -1,4 +1,4 @@
-![Win](https://github.com/aiekick/ImGuiFontStudio/workflows/Win/badge.svg) ![Linux (Ubuntu)](https://github.com/aiekick/ImGuiFontStudio/workflows/Linux%20(Ubuntu)/badge.svg) ![Osx](https://github.com/aiekick/ImGuiFontStudio/workflows/Osx/badge.svg)
+![Win](https://github.com/aiekick/ImGuiFontStudio/workflows/Win/badge.svg) ![Linux](https://github.com/aiekick/ImGuiFontStudio/workflows/Linux%20(Ubuntu)/badge.svg) ![Osx](https://github.com/aiekick/ImGuiFontStudio/workflows/Osx/badge.svg)
 
 # ImGuiFontStudio
 
