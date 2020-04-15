@@ -21,7 +21,7 @@ jobs:
     - name: build
       run: cmake --build build --config Release
     - name: install
-      run: cmake --install
+      run: cmake --install .
     - name: create package as artifact
       uses: actions/upload-artifact@v1
       with:
