@@ -1,4 +1,4 @@
-name: Linux (Ubuntu)
+name: Linux
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
     - master
 
 jobs:
-  build-ubuntu:
+  build_Linux_Ubuntu:
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v1
