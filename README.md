@@ -1,3 +1,5 @@
+![Linux (Ubuntu)](https://github.com/aiekick/ImGuiFontStudio/workflows/Linux%20(Ubuntu)/badge.svg)
+
 # ImGuiFontStudio
 
 ImGuiFontStudio is a tool for Subset font and extract glyph names for use embbeded or not in a software, especially for use with ImGui for embedded way.
