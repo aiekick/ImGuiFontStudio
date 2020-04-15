@@ -13,7 +13,7 @@
 [submodule "3rdparty/dirent"]
 	path = 3rdparty/dirent
 	url = https://github.com/tronkko/dirent.git
-	branch = master
+	branch = 1.23
 [submodule "3rdparty/sfntly"]
 	path = 3rdparty/sfntly
 	url = https://github.com/aiekick/sfntly.git

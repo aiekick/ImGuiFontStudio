@@ -94,34 +94,28 @@ add_executable(${PROJECT}
 		${IMGUIFONTSTUDIO_PANES}
 )
 
-if(UNIX)
-	if (APPLE)
-		set_target_properties(${PROJECT}
+if (APPLE)
+	set_target_properties(${PROJECT}
 			PROPERTIES
-			OUTPUT_NAME "ImGuiFontStudio_Gcc_Osx"
-			MACOSX_BUNDLE_EXECUTABLE_NAME "ImGuiFontStudio_Gcc_Osx"
-			MACOSX_BUNDLE_BUNDLE_NAME "ImGuiFontStudio_Gcc_Osx"
-			FOLDER "ImGuiFontStudio_Gcc_Osx"
+			OUTPUT_NAME "ImGuiFontStudio_Osx"
+			MACOSX_BUNDLE_EXECUTABLE_NAME "ImGuiFontStudio_Osx"
+			MACOSX_BUNDLE_BUNDLE_NAME "ImGuiFontStudio_Osx"
+			FOLDER "ImGuiFontStudio_Osx"
 			##RESOURCE icon.icns
 			MACOSX_BUNDLE_SHORT_VERSION_STRING "0.5"
 			MACOSX_BUNDLE_LONG_VERSION_STRING "Beta 0.5"
 			##MACOSX_BUNDLE_ICON_FILE icon.icns
 			MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/MacOSXBundleInfo.plist.in")
-	else()
-		set_target_properties(${PROJECT}
-			PROPERTIES
-			OUTPUT_NAME "ImGuiFontStudio_Gcc_Linux")
-	endif()
 elseif(WIN32)
-	if(MINGW)
-		set_target_properties(${PROJECT}
-			PROPERTIES
-			OUTPUT_NAME "ImGuiFontStudio_Gcc_Win32")
+	if (MINGW)
+		set_target_properties(${PROJECT} PROPERTIES	OUTPUT_NAME "ImGuiFontStudio_Mingw32_Win32")
+	elseif (CYGWIN)
+		set_target_properties(${PROJECT} PROPERTIES	OUTPUT_NAME "ImGuiFontStudio_Cygwin_Win32")
 	elseif(MSVC)
-		set_target_properties(${PROJECT}
-			PROPERTIES
-			OUTPUT_NAME "ImGuiFontStudio_Msvc_Win32")
+		set_target_properties(${PROJECT} PROPERTIES	OUTPUT_NAME "ImGuiFontStudio_Msvc_Win32")
 	endif()
+elseif(UNIX)
+	set_target_properties(${PROJECT} PROPERTIES	OUTPUT_NAME "ImGuiFontStudio_Linux")
 endif()
 
 set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}")
