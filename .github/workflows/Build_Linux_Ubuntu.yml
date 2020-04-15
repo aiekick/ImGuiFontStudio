@@ -1,4 +1,4 @@
-name: Master Branch build (Linux)
+name: Linux (Ubuntu)
 
 on:
   push:
@@ -7,9 +7,7 @@ on:
 
 jobs:
   build-ubuntu:
-
     runs-on: ubuntu-latest
-    
     steps:
     - uses: actions/checkout@v1
     - name: checkout submodules
