@@ -19,8 +19,8 @@ jobs:
     - name: configure
       run: mkdir build && cd build && cmake ..
     - name: build
-      run: cmake --build build --target INSTALL --config Release
-    - name: create package as artifact
+      run: cmake --build build --target intall --config Release
+    - name: upload artifact
       uses: actions/upload-artifact@v1
       with:
         name: ImGuiFontStudio_Linux
