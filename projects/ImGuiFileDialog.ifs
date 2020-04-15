@@ -1,0 +1,27 @@
+<config>
+	<project>
+		<font name="fontawesome-webfont.ttf">
+			<glyphs>
+				<glyph id="61442" nid="61442" name="search"/>
+				<glyph id="61452" nid="61452" name="ok"/>
+				<glyph id="61453" nid="61453" name="cancel"/>
+				<glyph id="61462" nid="61462" name="link"/>
+				<glyph id="61473" nid="61473" name="refresh"/>
+				<glyph id="61540" nid="61540" name="reset"/>
+				<glyph id="61543" nid="61543" name="add"/>
+				<glyph id="61563" nid="61563" name="folder"/>
+				<glyph id="61564" nid="61564" name="folder_open"/>
+				<glyph id="61639" nid="61639" name="save"/>
+				<glyph id="61787" nid="61787" name="file"/>
+				<glyph id="62003" nid="62003" name="drives"/>
+			</glyphs>
+			<prefix></prefix>
+			<pathfilename>..\samples_Fonts\fontawesome-webfont.ttf</pathfilename>
+			<oversample>3</oversample>
+			<fontsize>27</fontsize>
+		</font>
+		<rangecoloring show="false" hash="42.606;14.789;27.817;0.5"/>
+		<countglyph_x>22</countglyph_x>
+		<mergedfontprefix></mergedfontprefix>
+	</project>
+</config>
