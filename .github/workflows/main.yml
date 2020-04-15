@@ -19,6 +19,11 @@ jobs:
     - name: configure
       run: mkdir build && cd build && cmake ..
     - name: build
-      run: cmake --build build
-    - name: test
-      run: cd build && ctest
+      run: cmake --build build --config Release
+    - name: install
+      run: cmake --install
+    - name: create package as artifact
+      uses: actions/upload-artifact@master
+        with:
+          name: ImGuiFontStudio_Linux
+          path: .
