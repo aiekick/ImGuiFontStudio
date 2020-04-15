@@ -1,0 +1,26 @@
+name: Win
+
+on:
+  push:
+    branches:
+    - master
+
+jobs:
+  build_Win:
+    runs-on: windows-latest
+    steps:
+    - uses: actions/checkout@v1
+    - name: checkout submodules
+      run : git submodule update --init --recursive 
+    - name: configure
+      run: mkdir build && cd build && cmake ..
+    - name: build
+      run: cmake --build build --config Release
+    - name: upload artifact
+      uses: actions/upload-artifact@v1
+      with:
+        name: ImGuiFontStudio_Linux
+        path: build/ImGuiFontStudio_Linux
+      run: |
+        echo Add other actions to build,
+        echo test, and deploy your project.
