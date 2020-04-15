@@ -15,9 +15,9 @@ jobs:
     - name: Install OpenGL lib  / Requirement for Glfw3
       run : brew update
     - name: configure
-      run: mkdir build && cd build && cmake ..
+      run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release
     - name: build
-      run: cmake --build build --config Release
+      run: cmake --build build
     - name: upload artifact
       uses: actions/upload-artifact@v1
       with:
