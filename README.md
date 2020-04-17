@@ -1,5 +1,7 @@
 [<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Win/badge.svg" width="150"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3AWin) [<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Linux/badge.svg" width="165"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3ALinux) [<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Osx/badge.svg" width="150"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3AOsx)
 
+https://github.com/aiekick/ImGuiFontStudio
+
 # ImGuiFontStudio
 
 ImGuiFontStudio is a tool for Subset font and extract glyph names for use embbeded or not in a software, especially for use with ImGui for embedded way.
@@ -15,8 +17,6 @@ bad optimization, or others bullshits :)
 
 Please send me your feedback.
 I enjoy all constructive comments and help is welcome.
-
-ImGuiFontStudio url : https://github.com/aiekick/ImGuiFontStudio
 
 Succesfully tested on my side :
 
