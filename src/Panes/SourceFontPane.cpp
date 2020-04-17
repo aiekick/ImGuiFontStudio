@@ -63,7 +63,7 @@ int SourceFontPane::DrawSourceFontPane(ProjectFile *vProjectFile, int vWidgetId)
 			//ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoBringToFrontOnFocus))
 		{
-			if (vProjectFile->IsLoaded())
+			if (vProjectFile && vProjectFile->IsLoaded())
 			{
 				if (vProjectFile->m_CurrentFont)
 				{
@@ -115,7 +115,7 @@ int SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId)
 			//ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoBringToFrontOnFocus))
 		{
-			if (vProjectFile->IsLoaded())
+			if (vProjectFile && vProjectFile->IsLoaded())
 			{
 				if (ImGui::BeginFramedGroup("Font File"))
 				{
@@ -188,8 +188,7 @@ int SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId)
 								{
 									if (!itFont.second.m_NeedFilePathResolve)
 									{
-										vProjectFile->m_CurrentFont = &itFont.second;
-										vProjectFile->m_FontToMergeIn = itFont.second.m_FontFileName;
+										SelectFont(vProjectFile, &itFont.second);
 									}
 								}
 							}
@@ -276,7 +275,7 @@ int SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId)
 
 void SourceFontPane::DrawFilterBar(ProjectFile *vProjectFile, FontInfos *vFontInfos)
 {
-	if (vFontInfos)
+	if (vProjectFile && vProjectFile->IsLoaded() && vFontInfos)
 	{
 		if (ImGui::BeginMenuBar())
 		{
@@ -324,10 +323,8 @@ bool SourceFontPane::IfCatchedByFilters(FontInfos *vFontInfos, const std::string
 
 void SourceFontPane::DrawFontAtlas(ProjectFile *vProjectFile, FontInfos *vFontInfos)
 {
-	if (vProjectFile && 
-		vProjectFile->IsLoaded() &&
-		vFontInfos && 
-		vProjectFile->m_Preview_Glyph_CountX)
+	if (vProjectFile && vProjectFile->IsLoaded() &&
+		vFontInfos && vProjectFile->m_Preview_Glyph_CountX)
 	{
 		DrawFilterBar(vProjectFile, vFontInfos);
 
@@ -441,16 +438,19 @@ void SourceFontPane::DrawFontTexture(FontInfos *vFontInfos)
 
 void SourceFontPane::OpenFonts(ProjectFile *vProjectFile, std::map<std::string, std::string> vFontFilePathNames)
 {
-	for (auto & it : vFontFilePathNames)
+	if (vProjectFile && vProjectFile->IsLoaded())
 	{
-		OpenFont(vProjectFile, it.second, false);
+		for (auto & it : vFontFilePathNames)
+		{
+			OpenFont(vProjectFile, it.second, false);
+		}
+		vProjectFile->UpdateCountSelectedGlyphs();
 	}
-	vProjectFile->UpdateCountSelectedGlyphs();
 }
 
 void SourceFontPane::OpenFont(ProjectFile *vProjectFile, std::string vFontFilePathName, bool vUpdateCount)
 {
-	if (vProjectFile->IsLoaded())
+	if (vProjectFile && vProjectFile->IsLoaded())
 	{
 		auto ps = FileHelper::Instance()->ParsePathFileName(vFontFilePathName);
 		if (ps.isOk)
@@ -478,7 +478,7 @@ void SourceFontPane::OpenFont(ProjectFile *vProjectFile, std::string vFontFilePa
 
 void SourceFontPane::CloseCurrentFont(ProjectFile *vProjectFile)
 {
-	if (vProjectFile->IsLoaded())
+	if (vProjectFile && vProjectFile->IsLoaded())
 	{
 		if (vProjectFile->m_CurrentFont)
 		{
@@ -497,9 +497,19 @@ void SourceFontPane::CloseCurrentFont(ProjectFile *vProjectFile)
 	}
 }
 
+void SourceFontPane::SelectFont(ProjectFile *vProjectFile, FontInfos *vFontInfos)
+{
+	if (vProjectFile && vProjectFile->IsLoaded() && vFontInfos)
+	{
+		vProjectFile->m_CurrentFont = vFontInfos;
+		vProjectFile->m_FontToMergeIn = vFontInfos->m_FontFileName;
+		vProjectFile->SetProjectChange();
+	}
+}
+
 void SourceFontPane::DrawDialosAndPopups(ProjectFile *vProjectFile)
 {
-	if (vProjectFile->IsLoaded())
+	if (vProjectFile && vProjectFile->IsLoaded())
 	{
 		ImVec2 min = MainFrame::Instance()->m_DisplaySize * 0.5f;
 		ImVec2 max = MainFrame::Instance()->m_DisplaySize;

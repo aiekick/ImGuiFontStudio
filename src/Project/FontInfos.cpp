@@ -37,7 +37,7 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 {
 	bool res = false;
 
-	if (!vProjectFile->IsLoaded())
+	if (!vProjectFile && vProjectFile->IsLoaded())
 		return res;
 
 	std::string fontFilePathName = FileHelper::Instance()->CorrectFilePathName(vFontFilePathName);

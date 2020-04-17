@@ -640,7 +640,7 @@ bool SelectionHelper::DrawGlyphSelectionByZone(
 void SelectionHelper::ApplySelection(ProjectFile *vProjectFile, 
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	if (vProjectFile && vProjectFile->IsLoaded())
+	if (vProjectFile &&  vProjectFile->IsLoaded())
 	{
 		if (CanWeApplySelection(vSelectionContainerEnum))
 		{
@@ -746,7 +746,7 @@ void SelectionHelper::ApplySelection(ProjectFile *vProjectFile,
 void SelectionHelper::SelectAllGlyphs(ProjectFile *vProjectFile, FontInfos *vFontInfos,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	if (vProjectFile && vProjectFile->IsLoaded())
+	if (vProjectFile &&  vProjectFile->IsLoaded())
 	{
 		if (vFontInfos)
 		{
@@ -785,7 +785,7 @@ void SelectionHelper::SelectAllGlyphs(ProjectFile *vProjectFile, FontInfos *vFon
 void SelectionHelper::UnSelectAllGlyphs(ProjectFile *vProjectFile, FontInfos *vFontInfos,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	if (vProjectFile && vProjectFile->IsLoaded())
+	if (vProjectFile &&  vProjectFile->IsLoaded())
 	{
 		if (vFontInfos)
 		{
@@ -824,7 +824,7 @@ void SelectionHelper::UnSelectAllGlyphs(ProjectFile *vProjectFile, FontInfos *vF
 void SelectionHelper::SelectGlyph(ProjectFile *vProjectFile, FontInfos *vFontInfos, ImFontGlyph vGlyph, bool vUpdateMaps,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	if (vProjectFile && vProjectFile->IsLoaded())
+	if (vProjectFile &&  vProjectFile->IsLoaded())
 	{
 		if (vFontInfos)
 		{
@@ -866,7 +866,7 @@ void SelectionHelper::SelectGlyph(ProjectFile *vProjectFile, FontInfosCodePoint 
 void SelectionHelper::SelectGlyph(ProjectFile *vProjectFile, FontInfos *vFontInfos, ImWchar vCodePoint, bool /*vUpdateMaps*/,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	if (vProjectFile && vProjectFile->IsLoaded())
+	if (vProjectFile &&  vProjectFile->IsLoaded())
 	{
 		if (vFontInfos)
 		{
@@ -905,7 +905,7 @@ void SelectionHelper::UnSelectGlyph(ProjectFile *vProjectFile, FontInfosCodePoin
 void SelectionHelper::UnSelectGlyph(ProjectFile *vProjectFile, FontInfos *vFontInfos, ImWchar vCodePoint, bool vUpdateMaps,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	if (vProjectFile && vProjectFile->IsLoaded())
+	if (vProjectFile &&  vProjectFile->IsLoaded())
 	{
 		if (vFontInfos)
 		{
@@ -1041,7 +1041,7 @@ void SelectionHelper::SelectGlyphByRangeFromStartCodePoint(
 	bool vUpdateMaps,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	if (vProjectFile && vProjectFile->IsLoaded())
+	if (vProjectFile &&  vProjectFile->IsLoaded())
 	{
 		if (vFontInfos)
 		{
@@ -1177,7 +1177,7 @@ void SelectionHelper::UnSelectGlyphByRangeFromStartCodePoint(
 	bool vUpdateMaps,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	if (vProjectFile && vProjectFile->IsLoaded())
+	if (vProjectFile &&  vProjectFile->IsLoaded())
 	{
 		if (vFontInfos)
 		{
@@ -1229,7 +1229,7 @@ void SelectionHelper::UnSelectGlyphByRangeFromStartCodePoint(
 	bool vUpdateMaps,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	if (vProjectFile && vProjectFile->IsLoaded())
+	if (vProjectFile &&  vProjectFile->IsLoaded())
 	{
 		if (vFontInfos)
 		{
@@ -1369,7 +1369,7 @@ void SelectionHelper::PrepareSelection(
 
 void SelectionHelper::AnalyseSourceSelection(ProjectFile *vProjectFile)
 {
-	if (vProjectFile && vProjectFile->IsLoaded())
+	if (vProjectFile &&  vProjectFile->IsLoaded())
 	{
 		// search for codepoint and names in double => an generate an error
 		std::set<std::string> namesGlobal; bool nameGlobalInDoubleFound = false;

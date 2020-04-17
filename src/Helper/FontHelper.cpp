@@ -483,13 +483,16 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 					MemoryStream yCoordStream;
 
 					ct::iAABB boundingBox((int32_t)1e6, (int32_t)-1e6);
-					int contourIdx = 0;
 					ct::ivec2 last;
+					int contourIdx = 0;
 					for (auto &contour : simpleGlyph.coords)
 					{
 						int pointIdx = 0;
 						for (auto &pt : contour)
 						{
+							pt.x = (int32_t)ct::round((double)pt.x * scale.x);
+							pt.y = (int32_t)ct::round((double)pt.y * scale.y);
+
 							if (pointIdx == 0 && contourIdx == 0)
 							{
 								// need to found the good translation system
@@ -505,16 +508,12 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 							flagStream.WriteByte(flag);
 
 							// relative points
-							int32_t dx = (int32_t)ct::floor(dv.x * scale.x);
-							int32_t dy = (int32_t)ct::floor(dv.y * scale.y);
-							xCoordStream.WriteShort(dx);
-							yCoordStream.WriteShort(dy);
+							xCoordStream.WriteShort(dv.x);
+							yCoordStream.WriteShort(dv.y);
 
 							// conbine absolute points
-							int32_t px = (int32_t)ct::floor(pt.x * scale.x);
-							int32_t py = (int32_t)ct::floor(pt.y * scale.y);
-							boundingBox.Combine(ct::ivec2(px, py));
-
+							boundingBox.Combine(pt);
+							
 							last = pt;
 							pointIdx++;
 						}

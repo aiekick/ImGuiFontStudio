@@ -44,6 +44,7 @@ public:
 	
 	void DrawDialosAndPopups(ProjectFile * vProjectFile);
 	void CloseCurrentFont(ProjectFile *vProjectFile);
+	void SelectFont(ProjectFile *vProjectFile, FontInfos *vFontInfos);
 
 private:
 	void DrawFilterBar(ProjectFile *vProjectFile, FontInfos *vFontInfos);

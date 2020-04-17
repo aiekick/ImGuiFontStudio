@@ -25,6 +25,9 @@
 #define GENERATOR_PANE "Generator"
 #define CURRENT_FONT_PANE "Current Font"
 #define GLYPH_PANE "Glyph Edition"
+#ifdef _DEBUG
+#define DEBUG_PANE "Debug"
+#endif
 
 enum PaneFlags
 {
@@ -35,6 +38,9 @@ enum PaneFlags
 	PANE_PARAM = (1 << 4),
 	PANE_GENERATOR = (1 << 5),
 	PANE_GLYPH = (1 << 6),
+#ifdef _DEBUG
+	PANE_DEBUG = (1 << 7),
+#endif
 	PANE_ALLS = PANE_SELECTED_FONT | PANE_SOURCE | PANE_FINAL | PANE_PARAM | PANE_GENERATOR// | PANE_GLYPH
 };
 
@@ -59,9 +65,11 @@ public:
 	void DisplayMenu(ImVec2 vSize);
 	int DisplayPanes(ProjectFile *vProjectFile, int vWidgetId);
 	void ShowAndFocusPane(PaneFlags vPane);
+	bool IsPaneActive(PaneFlags vPane);
 
 private:
 	void ActivePane(const char *vlabel);
+	bool IsPaneActive(const char *vlabel);
 
 public: // configuration
 	std::string getXml(const std::string& vOffset);

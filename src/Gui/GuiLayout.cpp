@@ -29,6 +29,10 @@
 #include "Panes/GlyphPane.h"
 #include "Panes/GeneratorPane.h"
 
+#ifdef _DEBUG
+#include "Panes/DebugPane.h"
+#endif
+
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui_internal.h"
 
@@ -97,7 +101,9 @@ void GuiLayout::ApplyInitialDockingLayout(ImVec2 vSize)
 	ImGui::DockBuilderDockWindow(GENERATOR_PANE, dockRightID); // dockGeneratorID
 	ImGui::DockBuilderDockWindow(CURRENT_FONT_PANE, dockRightID); // dockSelectionID
 	ImGui::DockBuilderDockWindow(GLYPH_PANE, dockMainID);
-
+#ifdef _DEBUG
+	ImGui::DockBuilderDockWindow(DEBUG_PANE, dockRightID);
+#endif
 	ImGui::DockBuilderFinish(m_DockSpaceID);
 
 	ShowAndFocusPane(PaneFlags::PANE_SOURCE);
@@ -123,7 +129,9 @@ void GuiLayout::DisplayMenu(ImVec2 vSize)
 		ImGui::MenuItem<PaneFlags>("Show/Hide Final Pane", "", &m_Pane_Shown, PaneFlags::PANE_FINAL);
 		ImGui::MenuItem<PaneFlags>("Show/Hide Generator Pane", "", &m_Pane_Shown, PaneFlags::PANE_GENERATOR);
 		ImGui::MenuItem<PaneFlags>("Show/Hide Glyph Pane", "", &m_Pane_Shown, PaneFlags::PANE_GLYPH);
-		
+#ifdef _DEBUG
+		ImGui::MenuItem<PaneFlags>("Show/Hide Debug Pane", "", &m_Pane_Shown, PaneFlags::PANE_DEBUG);
+#endif
 		ImGui::EndMenu();
 	}
 }
@@ -136,7 +144,10 @@ int GuiLayout::DisplayPanes(ProjectFile *vProjectFile, int vWidgetId)
 	vWidgetId = FinalFontPane::Instance()->DrawCurrentFontPane(vProjectFile, vWidgetId);
 	vWidgetId = GeneratorPane::Instance()->DrawGeneratorPane(vProjectFile, vWidgetId);
 	vWidgetId = GlyphPane::Instance()->DrawGlyphPane(vProjectFile, vWidgetId);
-	
+#ifdef _DEBUG
+	vWidgetId = DebugPane::Instance()->DrawDebugPane(vProjectFile, vWidgetId);
+#endif
+
 	return vWidgetId;
 }
 
@@ -150,6 +161,33 @@ void GuiLayout::ShowAndFocusPane(PaneFlags vPane)
 	else if (vPane == PaneFlags::PANE_PARAM) ActivePane(PARAM_PANE);
 	else if (vPane == PaneFlags::PANE_GENERATOR) ActivePane(GENERATOR_PANE);
 	else if (vPane == PaneFlags::PANE_GLYPH) ActivePane(GLYPH_PANE);
+#ifdef _DEBUG
+	else if (vPane == PaneFlags::PANE_DEBUG) ActivePane(DEBUG_PANE);
+#endif
+}
+
+bool GuiLayout::IsPaneActive(PaneFlags vPane)
+{
+	if (vPane == PaneFlags::PANE_FINAL)	return IsPaneActive(FINAL_PANE);
+	else if (vPane == PaneFlags::PANE_SELECTED_FONT) return IsPaneActive(CURRENT_FONT_PANE);
+	else if (vPane == PaneFlags::PANE_SOURCE) return IsPaneActive(SOURCE_PANE);
+	else if (vPane == PaneFlags::PANE_PARAM) return IsPaneActive(PARAM_PANE);
+	else if (vPane == PaneFlags::PANE_GENERATOR) return IsPaneActive(GENERATOR_PANE);
+	else if (vPane == PaneFlags::PANE_GLYPH) return IsPaneActive(GLYPH_PANE);
+#ifdef _DEBUG
+	else if (vPane == PaneFlags::PANE_DEBUG) return IsPaneActive(DEBUG_PANE);
+#endif
+	return false;
+}
+
+bool GuiLayout::IsPaneActive(const char *vlabel)
+{
+	ImGuiWindow* window = ImGui::FindWindowByName(vlabel);
+	if (window)
+	{
+		return window->DockTabIsVisible;
+	}
+	return false;
 }
 
 void GuiLayout::ActivePane(const char *vlabel)

@@ -502,8 +502,7 @@ void Generator::GenerateFontFile_Merged(
 	ProjectFile* vProjectFile,
 	const GenModeFlags& vFlags)
 {
-	if (vProjectFile &&
-		vProjectFile->IsLoaded() &&
+	if (vProjectFile && vProjectFile->IsLoaded() &&
 		!vFilePathName.empty() &&
 		!vProjectFile->m_Fonts.empty() &&
 		!vProjectFile->m_FontToMergeIn.empty())

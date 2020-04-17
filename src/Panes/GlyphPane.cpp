@@ -23,6 +23,9 @@
 
 #include "Gui/GuiLayout.h"
 #include "Gui/ImGuiWidgets.h"
+#ifdef _DEBUG
+#include "Panes/DebugPane.h"
+#endif
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui_internal.h"
@@ -87,12 +90,12 @@ int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
 			//ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoBringToFrontOnFocus))
 		{
-			if (vProjectFile && vProjectFile->IsLoaded())
+			if (vProjectFile &&  vProjectFile->IsLoaded())
 			{
 				if (ImGui::BeginMenuBar())
 				{
 					ImGui::PushItemWidth(100.0f);
-					if (ImGui::SliderFloat("Scale", &vProjectFile->m_GlyphPreview_Scale, 0.01f, 1.0f))
+					if (ImGui::SliderFloat("Scale", &vProjectFile->m_GlyphPreview_Scale, 0.01f, 2.0f))
 					{
 						vProjectFile->SetProjectChange();
 					}
@@ -171,7 +174,9 @@ bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, Glyp
 								m_GlyphToDisplay = *vGlyphInfos;
 								m_GlyphToDisplay.simpleGlyph.LoadSimpleGlyph(glyph);
 								limitContour = m_GlyphToDisplay.simpleGlyph.GetCountContours();
-
+#ifdef _DEBUG
+								DebugPane::Instance()->SetGlyphToDebug(m_GlyphToDisplay);
+#endif
 								// show and active the glyph pane
 								GuiLayout::Instance()->ShowAndFocusPane(PaneFlags::PANE_GLYPH);
 								
@@ -315,6 +320,10 @@ bool GlyphPane::DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
 				{
 					drawList->PathFillConvex(ImGui::GetColorU32(ImGuiCol_Text));
 				}
+
+#ifdef _DEBUG
+				DebugPane::Instance()->DrawGlyphCurrentPoint(vScale, pos, drawList);
+#endif
 
 				if (vControlLines) // control lines
 				{

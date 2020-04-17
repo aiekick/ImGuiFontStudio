@@ -192,7 +192,7 @@ int FinalFontPane::DrawCurrentFontPane(ProjectFile *vProjectFile, int vWidgetId)
 			//ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoBringToFrontOnFocus))
 		{
-			if (vProjectFile && vProjectFile->IsLoaded())
+			if (vProjectFile &&  vProjectFile->IsLoaded())
 			{
 				if (vProjectFile->m_CurrentFont)
 				{
