@@ -20,19 +20,63 @@ I enjoy all constructive comments and help is welcome.
 
 ImGuiFontStudio url : https://github.com/aiekick/ImGuiFontStudio
 
+Succesfully tested on my side :
+
+* on Win 7 x64 (in exe version x86/x64)
+* On Linux Debian/Ubuntu (in exe version x86)
+* MacOs Mojave (in exe version x86)
+ 
 ## The features :
 
 * can open ttf or otf font file
 * can subset font file (one file same time or by batch)
 * can generate header with corresponding glyph names and codepoint
 * can generate cpp file with compressed data o=foir embedded use
-* can merge many font file in one (WIP, there is some pending issues #1 about this last)
+* can merge many font file in one (the glyphs will be resized)
 * can edit codepoint and glyph names
 * have a project file
 * many tool available for select glyphs (by zone, by line, by codepoint range)
 * Cross Platform, tested on Win/Osx/Linux 
 * Change / define ImGui app Theme
 * No lib, one executable only
+
+## How to Build :
+
+You need to use cMake.
+For the 3 Os (Win, Linux, MacOs), the cMake usage is exactly the same, 
+
+
+1) Choose a build directory. (called here my_build_directory for instance)
+2) Choose a Build Mode : "Release" / "MinSizeRel" / "RelWithDebInfo" / "Debug" (called here BuildMode for instance)
+3) Run cMake in In console : (the first for generate cmake build files, the second for build the binary)
+```cpp
+cmake my_build_directory -DCMAKE_BUILD_TYPE=BuildMode
+cmake --build my_build_directory --config BuildMode
+```
+
+Some cMake version need Build mode define via the directive CMAKE_BUILD_TYPE or via --Config when we launch the build. 
+This is why i put the boths possibilities
+
+By the way you need before, to make sure, you have needed dependencies.
+
+### On Windows x86/x64 :
+
+You need to have the opengl library installed
+
+### Linux :
+
+You need many lib : (X11, xrandr, xinerama, xcursor, mesa)
+
+If you are on debian you can run :  
+
+```cpp
+sudo apt-get update 
+sudo apt-get install libgl1-mesa-dev libx11-dev libxi-dev libxrandr-dev libxinerama-dev libxcursor-dev
+```
+
+### MacOs :
+
+you need many lib : opengl and cocoa framework
 
 ## Screenshots (with the default theme)
 
