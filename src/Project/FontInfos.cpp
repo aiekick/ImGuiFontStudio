@@ -66,6 +66,7 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 		m_FontConfig.OversampleH = m_Oversample;
 		m_FontConfig.OversampleV = m_Oversample;
 		m_ImFontAtlas.Clear();
+		m_ImFontAtlas.Flags = m_ImFontAtlas.Flags | ImFontAtlasFlags_NoMouseCursors;
 
 		auto ps = FileHelper::Instance()->ParsePathFileName(fontFilePathName);
 		if (ps.isOk)

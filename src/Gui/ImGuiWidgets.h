@@ -28,21 +28,23 @@ namespace ImGui
 	IMGUI_API bool BeginFramedGroup(const char *vLabel, bool vSpacing = false, ImVec4 vCol = ImVec4(0.0f, 0.0f, 0.0f, 0.5f), ImVec4 vHoveredCol = ImVec4(0.15f, 0.15f, 0.15f, 0.5f));
 	IMGUI_API void EndFramedGroup(bool vSpacing = false);
 	IMGUI_API bool CollapsingHeader_SmallHeight(const char *vName, float vHeightRatio, float vWidth, bool vDefaulExpanded, bool *vIsOpen = 0);
-	IMGUI_API bool RadioButtonLabeled(const char* label, bool active);
-	IMGUI_API bool RadioButtonLabeled(const char* label, const char* help, bool active);
-	IMGUI_API bool RadioButtonLabeled(const char* label, const char* help, bool *active);
+	IMGUI_API bool RadioButtonLabeled(const char* label, bool active, bool disabled);
+	IMGUI_API bool RadioButtonLabeled(const char* label, const char* help, bool active, bool disabled = false);
+	IMGUI_API bool RadioButtonLabeled(const char* label, const char* help, bool *active, bool disabled = false);
 	template<typename T> 
 	IMGUI_API bool RadioButtonLabeled_BitWize(
 		const char *vLabel, const char *vHelp, T *vContainer, T vFlag,
 		float vWidth = 0.0f,
 		bool vOneOrZeroAtTime = false, //only one selcted at a time
 		bool vAlwaysOne = true, // radio behavior, always one selected
-		T vFlagsToTakeIntoAccount = (T)0) // radio witl use only theses flags
+		T vFlagsToTakeIntoAccount = (T)0,
+		T vFlagToApproveSelection = (T)0) // radio witl use only theses flags
 	{
+		bool disabled = *vContainer & vFlagToApproveSelection;
 		bool selected = *vContainer & vFlag;
 		//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
 		ImGui::PushItemWidth(vWidth);
-		bool res = RadioButtonLabeled(vLabel, vHelp, &selected);
+		bool res = RadioButtonLabeled(vLabel, vHelp, &selected, disabled);
 		ImGui::PopItemWidth();
 		//ImGui::PopStyleVar();
 		if (res)

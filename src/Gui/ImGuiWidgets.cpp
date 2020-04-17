@@ -331,7 +331,7 @@ void ImGui::EndFramedGroup(bool vSpacing)
     draw_list->ChannelsMerge(); // merge layers
 }
 
-bool ImGui::RadioButtonLabeled(const char* label, bool active)
+bool ImGui::RadioButtonLabeled(const char* label, bool active, bool disabled)
 {
     using namespace ImGui;
 
@@ -359,14 +359,17 @@ bool ImGui::RadioButtonLabeled(const char* label, bool active)
     bool hovered, held;
     bool pressed = ButtonBehavior(check_bb, id, &hovered, &held);
 
-    // circle check
-    window->DrawList->AddRectFilled(check_bb.Min, check_bb.Max, GetColorU32((held && hovered) ? ImGuiCol_FrameBgActive : hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg), style.FrameRounding);
-    if (active)
-    {
-        const ImU32 col = GetColorU32((hovered && held) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
-        window->DrawList->AddRectFilled(check_bb.Min, check_bb.Max, col, style.FrameRounding);
-    }
-
+    // check
+	if (!disabled)
+	{
+		window->DrawList->AddRectFilled(check_bb.Min, check_bb.Max, GetColorU32((held && hovered) ? ImGuiCol_FrameBgActive : hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg), style.FrameRounding);
+		if (active)
+		{
+			const ImU32 col = GetColorU32((hovered && held) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+			window->DrawList->AddRectFilled(check_bb.Min, check_bb.Max, col, style.FrameRounding);
+		}
+	}
+    
     // circle shadow + bg
     if (style.FrameBorderSize > 0.0f)
     {
@@ -382,18 +385,18 @@ bool ImGui::RadioButtonLabeled(const char* label, bool active)
     return pressed;
 }
 
-bool ImGui::RadioButtonLabeled(const char* label, const char* help, bool active)
+bool ImGui::RadioButtonLabeled(const char* label, const char* help, bool active, bool disabled)
 {
-    bool change = RadioButtonLabeled(label, active);
+    bool change = RadioButtonLabeled(label, active, disabled);
     if (help)
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("%s", help);
     return change;
 }
 
-bool ImGui::RadioButtonLabeled(const char* label, const char* help, bool *active)
+bool ImGui::RadioButtonLabeled(const char* label, const char* help, bool *active, bool disabled)
 {
-    bool change = RadioButtonLabeled(label, *active);
+    bool change = RadioButtonLabeled(label, *active, disabled);
     if (change)
         *active = !*active;
     if (help)

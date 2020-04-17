@@ -115,7 +115,6 @@ void DebugPane::DrawGlyphCurrentPoint(float vPreviewScale, ImVec2 vScreenPos, Im
 			}
 
 			int icurr = firstOn + cp.y + 1;
-			int inext = firstOn + cp.y + 2;
 			ct::ivec2 cur = g->GetCoords(cp.x, icurr, vPreviewScale);
 			ImVec2 posCircle = ct::toImVec2(cur) + vScreenPos;
 			vImDrawList->AddCircleFilled(posCircle, 5.0f, ImGui::GetColorU32(ImVec4(1, 1, 0, 1)));
@@ -123,7 +122,7 @@ void DebugPane::DrawGlyphCurrentPoint(float vPreviewScale, ImVec2 vScreenPos, Im
 	}
 }
 
-int DebugPane::DrawDebugGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
+int DebugPane::DrawDebugGlyphPane(ProjectFile* /*vProjectFile*/, int vWidgetId)
 {
 	auto g = &(m_GlyphToDisplay.simpleGlyph);
 	if (g->isValid)
