@@ -31,7 +31,7 @@ Succesfully tested on my side :
 * can open ttf or otf font file
 * can subset font file (one file same time or by batch)
 * can generate header with corresponding glyph names and codepoint
-* can generate cpp file with compressed data o=foir embedded use
+* can generate cpp file with compressed data or for embedded use
 * can merge many font file in one (the glyphs will be resized)
 * can edit codepoint and glyph names
 * have a project file
