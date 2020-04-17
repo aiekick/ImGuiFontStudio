@@ -170,118 +170,122 @@ void Generator::GenerateHeader_One(
 		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
 		if (ps.isOk)
 		{
-			filePathName = ps.path + FileHelper::Instance()->m_SlashType + ps.name + ".h";
-		}
+			std::string header;
+			header += "//Header Generated with https://github.com/aiekick/ImGuiFontStudio\n";
+			header += "//Based on https://github.com/juliettef/IconFontCppHeaders\n";
+			header += "\n#pragma once\n\n";
 
-		std::string header;
-		header += "//Header Generated with https://github.com/aiekick/ImGuiFontStudio\n";
-		header += "//Based on https://github.com/juliettef/IconFontCppHeaders\n";
-		header += "\n#pragma once\n\n";
+			std::string prefix = "";
+			if (!vFontInfos->m_FontPrefix.empty())
+				prefix = "_" + vFontInfos->m_FontPrefix;
+			if (vFontBufferSize > 0)
+			{
+				header += "#define FONT_ICON_BUFFER_NAME" + prefix + " " + vFontBufferName + "\n";
+				header += "#define FONT_ICON_BUFFER_SIZE" + prefix + " 0x" + ct::toHexStr(vFontBufferSize) + "\n\n";
+			}
+			else
+			{
+				header += "#define FONT_ICON_FILE_NAME" + prefix + " \"" + vFontInfos->m_FontFileName + "\"\n\n";
+			}
 
-		std::string prefix = "";
-		if (!vFontInfos->m_FontPrefix.empty())
-			prefix = "_" + vFontInfos->m_FontPrefix;
-		if (vFontBufferSize > 0)
-		{
-			header += "#define FONT_ICON_BUFFER_NAME" + prefix + " " + vFontBufferName + "\n";
-			header += "#define FONT_ICON_BUFFER_SIZE" + prefix + " 0x" + ct::toHexStr(vFontBufferSize) + "\n\n";
+			ImWchar minCodePoint = 65535;
+			ImWchar maxCodePoint = 0;
+			std::string glyphs;
+
+			if (vFlags & GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES)
+			{
+				std::map<std::string, ImWchar> glyphNames;
+
+				if (vFontInfos->m_SelectedGlyphs.empty()) // no glyph selected so generate for whole font
+				{
+					for (auto &it : vFontInfos->m_GlyphCodePointNames)
+					{
+						glyphNames[it.second] = it.first;
+					}
+				}
+				else
+				{
+					for (auto &it : vFontInfos->m_SelectedGlyphs)
+					{
+						glyphNames[it.second.newHeaderName] = it.second.newCodePoint;
+					}
+				}
+
+				for (const auto &it : glyphNames)
+				{
+					std::string glyphName = it.first;
+					ct::replaceString(glyphName, " ", "_");
+					ct::replaceString(glyphName, "-", "_");
+
+					ImWchar codePoint = it.second;
+					minCodePoint = ct::mini(minCodePoint, codePoint);
+					maxCodePoint = ct::maxi(maxCodePoint, codePoint);
+
+					// by ex .notdef will become DOT_notdef
+					// because a define with '.' is a problem for the compiler
+					ct::replaceString(glyphName, ".", "DOT_");
+
+					for (auto & c : glyphName)
+						c = (char)toupper((int)c);
+
+					glyphs += "#define ICON" + prefix + "_" + glyphName + " u8\"\\u" + ct::toHexStr(codePoint) + "\"\n";
+				}
+			}
+			else if (vFlags & GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_CODEPOINT)
+			{
+				std::map<ImWchar, std::string> glyphCodePoints;
+
+				if (vFontInfos->m_SelectedGlyphs.empty()) // no glyph selected so generate for whole font
+				{
+					for (auto &it : vFontInfos->m_GlyphCodePointNames)
+					{
+						glyphCodePoints[it.first] = it.second;
+					}
+				}
+				else
+				{
+					for (auto &it : vFontInfos->m_SelectedGlyphs)
+					{
+						glyphCodePoints[it.second.newCodePoint] = it.second.newHeaderName;
+					}
+				}
+
+				for (const auto &it : glyphCodePoints)
+				{
+					ImWchar codePoint = it.first;
+					minCodePoint = ct::mini(minCodePoint, codePoint);
+					maxCodePoint = ct::maxi(maxCodePoint, codePoint);
+
+					std::string glyphName = it.second;
+					ct::replaceString(glyphName, " ", "_");
+					ct::replaceString(glyphName, "-", "_");
+
+					// by ex .notdef will become DOT_notdef
+					// because a define with '.' is a problem for the compiler
+					ct::replaceString(glyphName, ".", "DOT_");
+
+					for (auto & c : glyphName)
+						c = (char)toupper((int)c);
+
+					glyphs += "#define ICON" + prefix + "_" + glyphName + " u8\"\\u" + ct::toHexStr(codePoint) + "\"\n";
+				}
+			}
+
+			// code point range
+			header += "#define ICON_MIN" + prefix + " 0x" + ct::toHexStr(minCodePoint) + "\n";
+			header += "#define ICON_MAX" + prefix + " 0x" + ct::toHexStr(maxCodePoint) + "\n\n";
+
+			std::string name = ps.name;
+			ct::replaceString(name, "-", "_");
+			filePathName = ps.GetFilePathWithNameExt(name, ".h");
+
+			FileHelper::Instance()->SaveStringToFile(header + glyphs, filePathName);
+			FileHelper::Instance()->OpenFile(filePathName);
 		}
 		else
 		{
-			header += "#define FONT_ICON_FILE_NAME" + prefix + " \"" + vFontInfos->m_FontFileName + "\"\n\n";
+			Messaging::Instance()->AddError(true, 0, 0, "Invalid path : %s", vFilePathName.c_str());
 		}
-		
-		ImWchar minCodePoint = 65535;
-		ImWchar maxCodePoint = 0;
-		std::string glyphs;
-
-		if (vFlags & GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES)
-		{
-			std::map<std::string, ImWchar> glyphNames;
-
-			if (vFontInfos->m_SelectedGlyphs.empty()) // no glyph selected so generate for whole font
-			{
-				for (auto &it : vFontInfos->m_GlyphCodePointNames)
-				{
-					glyphNames[it.second] = it.first;
-				}
-			}
-			else
-			{
-				for (auto &it : vFontInfos->m_SelectedGlyphs)
-				{
-					glyphNames[it.second.newHeaderName] = it.second.newCodePoint;
-				}
-			}
-			
-			for (const auto &it : glyphNames)
-			{
-				std::string glyphName = it.first;
-				ct::replaceString(glyphName, " ", "_");
-				ct::replaceString(glyphName, "-", "_");
-				
-				ImWchar codePoint = it.second;
-				minCodePoint = ct::mini(minCodePoint, codePoint);
-				maxCodePoint = ct::maxi(maxCodePoint, codePoint);
-
-				// by ex .notdef will become DOT_notdef
-				// because a define with '.' is a problem for the compiler
-				ct::replaceString(glyphName, ".", "DOT_");
-
-				for (auto & c : glyphName) 
-					c = (char)toupper((int)c);
-
-				glyphs += "#define ICON" + prefix + "_" + glyphName + " u8\"\\u" + ct::toHexStr(codePoint) + "\"\n";
-			}
-		}
-		else if (vFlags & GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_CODEPOINT)
-		{
-			std::map<ImWchar, std::string> glyphCodePoints;
-
-			if (vFontInfos->m_SelectedGlyphs.empty()) // no glyph selected so generate for whole font
-			{
-				for (auto &it : vFontInfos->m_GlyphCodePointNames)
-				{
-					glyphCodePoints[it.first] = it.second;
-				}
-			}
-			else
-			{
-				for (auto &it : vFontInfos->m_SelectedGlyphs)
-				{
-					glyphCodePoints[it.second.newCodePoint] = it.second.newHeaderName;
-				}
-			}
-
-			for (const auto &it : glyphCodePoints)
-			{
-				ImWchar codePoint = it.first;
-				minCodePoint = ct::mini(minCodePoint, codePoint);
-				maxCodePoint = ct::maxi(maxCodePoint, codePoint);
-
-				std::string glyphName = it.second;
-				ct::replaceString(glyphName, " ", "_");
-				ct::replaceString(glyphName, "-", "_");
-
-				// by ex .notdef will become DOT_notdef
-				// because a define with '.' is a problem for the compiler
-				ct::replaceString(glyphName, ".", "DOT_");
-
-				for (auto & c : glyphName)
-					c = (char)toupper((int)c);
-
-				glyphs += "#define ICON" + prefix + "_" + glyphName + " u8\"\\u" + ct::toHexStr(codePoint) + "\"\n";
-			}
-		}
-
-		// code point range
-		header += "#define ICON_MIN" + prefix + " 0x" + ct::toHexStr(minCodePoint) + "\n";
-		header += "#define ICON_MAX" + prefix + " 0x" + ct::toHexStr(maxCodePoint) + "\n\n";
-
-		ct::replaceString(filePathName, "-", "_");
-
-		FileHelper::Instance()->SaveStringToFile(header + glyphs, filePathName);
-		FileHelper::Instance()->OpenFile(filePathName);
 	}
 }
 
@@ -300,106 +304,110 @@ void Generator::GenerateHeader_Merged(
 		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
 		if (ps.isOk)
 		{
-			filePathName = ps.path + FileHelper::Instance()->m_SlashType + ps.name + ".h";
-		}
+			std::string header;
+			header += "//Header Generated with https://github.com/aiekick/ImGuiFontStudio\n";
+			header += "//Based on https://github.com/juliettef/IconFontCppHeaders\n";
+			header += "\n#pragma once\n\n";
 
-		std::string header;
-		header += "//Header Generated with https://github.com/aiekick/ImGuiFontStudio\n";
-		header += "//Based on https://github.com/juliettef/IconFontCppHeaders\n";
-		header += "\n#pragma once\n\n";
+			std::string prefix = "";
+			if (!vProjectFile->m_MergedFontPrefix.empty())
+				prefix = "_" + vProjectFile->m_MergedFontPrefix;
+			if (vFontBufferSize > 0)
+			{
+				header += "#define FONT_ICON_BUFFER_NAME" + prefix + " " + vFontBufferName + "\n";
+				header += "#define FONT_ICON_BUFFER_SIZE" + prefix + " 0x" + ct::toHexStr(vFontBufferSize) + "\n\n";
+			}
+			else
+			{
+				header += "#define FONT_ICON_FILE_NAME" + prefix + " \"" + ps.name + "." + ps.ext + "\"\n\n";
+			}
 
-		std::string prefix = "";
-		if (!vProjectFile->m_MergedFontPrefix.empty())
-			prefix = "_" + vProjectFile->m_MergedFontPrefix;
-		if (vFontBufferSize > 0)
-		{
-			header += "#define FONT_ICON_BUFFER_NAME" + prefix + " " + vFontBufferName + "\n";
-			header += "#define FONT_ICON_BUFFER_SIZE" + prefix + " 0x" + ct::toHexStr(vFontBufferSize) + "\n\n";
+			ImWchar minCodePoint = 65535;
+			ImWchar maxCodePoint = 0;
+			std::string glyphs;
+
+			if (vFlags & GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES)
+			{
+				std::map<std::string, ImWchar> glyphNames;
+
+				// we take only selected glyphs of all fonts
+				for (const auto &font : vProjectFile->m_Fonts)
+				{
+					for (const auto &glyph : font.second.m_SelectedGlyphs)
+					{
+						glyphNames[glyph.second.newHeaderName] = glyph.second.newCodePoint;
+					}
+				}
+
+				for (const auto &it : glyphNames)
+				{
+					std::string glyphName = it.first;
+					ct::replaceString(glyphName, " ", "_");
+					ct::replaceString(glyphName, "-", "_");
+
+					ImWchar codePoint = it.second;
+					minCodePoint = ct::mini(minCodePoint, codePoint);
+					maxCodePoint = ct::maxi(maxCodePoint, codePoint);
+
+					// by ex .notdef will become DOT_notdef
+					// because a define with '.' is a problem for the compiler
+					ct::replaceString(glyphName, ".", "DOT_");
+
+					for (auto & c : glyphName)
+						c = (char)toupper((int)c);
+
+					glyphs += "#define ICON" + prefix + "_" + glyphName + " u8\"\\u" + ct::toHexStr(codePoint) + "\"\n";
+				}
+			}
+			else if (vFlags & GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_CODEPOINT)
+			{
+				std::map<ImWchar, std::string> glyphCodePoints;
+
+				// we take only selected glyphs of all fonts
+				for (const auto &font : vProjectFile->m_Fonts)
+				{
+					for (const auto &glyph : font.second.m_SelectedGlyphs)
+					{
+						glyphCodePoints[glyph.second.newCodePoint] = glyph.second.newHeaderName;
+					}
+				}
+
+				for (const auto &it : glyphCodePoints)
+				{
+					ImWchar codePoint = it.first;
+					minCodePoint = ct::mini(minCodePoint, codePoint);
+					maxCodePoint = ct::maxi(maxCodePoint, codePoint);
+
+					std::string glyphName = it.second;
+					ct::replaceString(glyphName, " ", "_");
+					ct::replaceString(glyphName, "-", "_");
+
+					// by ex .notdef will become DOT_notdef
+					// because a define with '.' is a problem for the compiler
+					ct::replaceString(glyphName, ".", "DOT_");
+
+					for (auto & c : glyphName)
+						c = (char)toupper((int)c);
+
+					glyphs += "#define ICON" + prefix + "_" + glyphName + " u8\"\\u" + ct::toHexStr(codePoint) + "\"\n";
+				}
+			}
+
+			// code point range
+			header += "#define ICON_MIN" + prefix + " 0x" + ct::toHexStr(minCodePoint) + "\n";
+			header += "#define ICON_MAX" + prefix + " 0x" + ct::toHexStr(maxCodePoint) + "\n\n";
+
+			std::string name = ps.name;
+			ct::replaceString(name, "-", "_");
+			filePathName = ps.GetFilePathWithNameExt(name, ".h");
+			
+			FileHelper::Instance()->SaveStringToFile(header + glyphs, filePathName);
+			FileHelper::Instance()->OpenFile(filePathName);
 		}
 		else
 		{
-			header += "#define FONT_ICON_FILE_NAME" + prefix + " \"" + ps.name + "." + ps.ext + "\"\n\n";
+			Messaging::Instance()->AddError(true, 0, 0, "Invalid path : %s", vFilePathName.c_str());
 		}
-
-		ImWchar minCodePoint = 65535;
-		ImWchar maxCodePoint = 0;
-		std::string glyphs;
-
-		if (vFlags & GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES)
-		{
-			std::map<std::string, ImWchar> glyphNames;
-
-			// we take only selected glyphs of all fonts
-			for (const auto &font : vProjectFile->m_Fonts)
-			{
-				for (const auto &glyph : font.second.m_SelectedGlyphs)
-				{
-					glyphNames[glyph.second.newHeaderName] = glyph.second.newCodePoint;
-				}
-			}
-
-			for (const auto &it : glyphNames)
-			{
-				std::string glyphName = it.first;
-				ct::replaceString(glyphName, " ", "_");
-				ct::replaceString(glyphName, "-", "_");
-
-				ImWchar codePoint = it.second;
-				minCodePoint = ct::mini(minCodePoint, codePoint);
-				maxCodePoint = ct::maxi(maxCodePoint, codePoint);
-
-				// by ex .notdef will become DOT_notdef
-				// because a define with '.' is a problem for the compiler
-				ct::replaceString(glyphName, ".", "DOT_");
-
-				for (auto & c : glyphName)
-					c = (char)toupper((int)c);
-
-				glyphs += "#define ICON" + prefix + "_" + glyphName + " u8\"\\u" + ct::toHexStr(codePoint) + "\"\n";
-			}
-		}
-		else if (vFlags & GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_CODEPOINT)
-		{
-			std::map<ImWchar, std::string> glyphCodePoints;
-
-			// we take only selected glyphs of all fonts
-			for (const auto &font : vProjectFile->m_Fonts)
-			{
-				for (const auto &glyph : font.second.m_SelectedGlyphs)
-				{
-					glyphCodePoints[glyph.second.newCodePoint] = glyph.second.newHeaderName;
-				}
-			}
-
-			for (const auto &it : glyphCodePoints)
-			{
-				ImWchar codePoint = it.first;
-				minCodePoint = ct::mini(minCodePoint, codePoint);
-				maxCodePoint = ct::maxi(maxCodePoint, codePoint);
-
-				std::string glyphName = it.second;
-				ct::replaceString(glyphName, " ", "_");
-				ct::replaceString(glyphName, "-", "_");
-
-				// by ex .notdef will become DOT_notdef
-				// because a define with '.' is a problem for the compiler
-				ct::replaceString(glyphName, ".", "DOT_");
-
-				for (auto & c : glyphName)
-					c = (char)toupper((int)c);
-
-				glyphs += "#define ICON" + prefix + "_" + glyphName + " u8\"\\u" + ct::toHexStr(codePoint) + "\"\n";
-			}
-		}
-
-		// code point range
-		header += "#define ICON_MIN" + prefix + " 0x" + ct::toHexStr(minCodePoint) + "\n";
-		header += "#define ICON_MAX" + prefix + " 0x" + ct::toHexStr(maxCodePoint) + "\n\n";
-
-		ct::replaceString(filePathName, "-", "_");
-
-		FileHelper::Instance()->SaveStringToFile(header + glyphs, filePathName);
-		FileHelper::Instance()->OpenFile(filePathName);
 	}
 }
 
@@ -463,21 +471,10 @@ void Generator::GenerateFontFile_One(
 			auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
 			if (ps.isOk)
 			{
-				filePathName = ps.path + FileHelper::Instance()->m_SlashType + ps.name + ".ttf";
-
-				if (filePathName[0] == FileHelper::Instance()->m_SlashType[0])
-                {
-#ifdef WIN32
-                    filePathName = filePathName.substr(1);
-#endif
-                }
-                else
-                {
-#ifdef UNIX
-                    filePathName = "/" + filePathName;
-#endif
-                }
-
+				std::string name = ps.name;
+				ct::replaceString(name, "-", "_");
+				filePathName = ps.GetFilePathWithNameExt(name, ".ttf");
+				
 				if (fontHelper.GenerateFontFile(filePathName, vFlags & GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES))
 				{
 					if (vFlags & GenModeFlags::GENERATOR_MODE_HEADER)
@@ -487,13 +484,13 @@ void Generator::GenerateFontFile_One(
 				}
 				else
 				{
-					Messaging::Instance()->AddError(true, 0, 0, "Cannot create font file.\n");
+					Messaging::Instance()->AddError(true, 0, 0, "Cannot create font file %s", filePathName.c_str());
 					return;
 				}
 			}
 			else
 			{
-				Messaging::Instance()->AddError(true, 0, 0, "FilePathName is wrong : %s", vFilePathName.c_str());
+				Messaging::Instance()->AddError(true, 0, 0, "File Path Name is wrong : %s", vFilePathName.c_str());
 				return;
 			}
 			
@@ -611,9 +608,9 @@ void Generator::GenerateFontFile_Merged(
 			auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
 			if (ps.isOk)
 			{
-				filePathName = ps.path + FileHelper::Instance()->m_SlashType + ps.name + ".ttf";
-				if (filePathName[0] == FileHelper::Instance()->m_SlashType[0]) 
-					filePathName = filePathName.substr(1);
+				std::string name = ps.name;
+				ct::replaceString(name, "-", "_");
+				filePathName = ps.GetFilePathWithNameExt(name, ".ttf");
 
 				if (fontHelper.GenerateFontFile(vFilePathName, vFlags & GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES))
 				{
@@ -624,13 +621,13 @@ void Generator::GenerateFontFile_Merged(
 				}
 				else
 				{
-					Messaging::Instance()->AddError(true, 0, 0, "Cannot create font file.\n");
+					Messaging::Instance()->AddError(true, 0, 0, "Cannot create font file %s", filePathName.c_str());
 					return;
 				}
 			}
 			else
 			{
-				Messaging::Instance()->AddError(true, 0, 0, "FilePathName is wrong : %s", vFilePathName.c_str());
+				Messaging::Instance()->AddError(true, 0, 0, "File Path Name is wrong : %s", vFilePathName.c_str());
 				return;
 			}
 		}
@@ -690,7 +687,11 @@ void Generator::GenerateCpp_One(
 			{
 				// generate temporary font file first
 				generateTemporaryFontFile = true;
-				filePathName = ps.path + "\\temporary_" + ps.name + ".ttf";
+				
+				std::string name = ps.name;
+				ct::replaceString(name, "-", "_");
+				filePathName = ps.GetFilePathWithNameExt("temporary_" + name, ".ttf");
+
 				GenerateFontFile_One(filePathName, vProjectFile, vFontInfos,
 					(GenModeFlags)(vFlags & ~GenModeFlags::GENERATOR_MODE_HEADER)); // no header to generate
 			}
@@ -740,13 +741,13 @@ void Generator::GenerateCpp_One(
 			else
 			{
 				Messaging::Instance()->AddError(true, 0, 0,
-					"Cant found file %s", filePathName.c_str());
+					"Cant open file %s", filePathName.c_str());
 			}
 		}
 		else
 		{
 			Messaging::Instance()->AddError(true, 0, 0,
-				"Bad FilepathName %s", filePathName.c_str());
+				"Bad File path Name %s", filePathName.c_str());
 		}
 	}
 }
@@ -764,7 +765,9 @@ void Generator::GenerateCpp_Merged(
 		{
 			std::string res;
 
-			filePathName = ps.path + "\\temporary_" + ps.name + ".ttf";
+			ct::replaceString(ps.name, "-", "_");
+			filePathName = ps.GetFilePathWithNameExt("temporary_" + ps.name, ".ttf");
+
 			GenerateFontFile_Merged(filePathName, vProjectFile,
 				(GenModeFlags)(vFlags & ~GenModeFlags::GENERATOR_MODE_HEADER)); // no header to generate
 
@@ -784,7 +787,7 @@ void Generator::GenerateCpp_Merged(
 				// if ok, serialization
 				if (!res.empty() && !bufferName.empty() && bufferSize > 0)
 				{
-					filePathName = ps.path + FileHelper::Instance()->m_SlashType + ps.name + ".cpp";
+					filePathName = ps.GetFilePathWithNameExt(ps.name, ".cpp");
 
 					if (vFlags & GenModeFlags::GENERATOR_MODE_HEADER)
 					{
@@ -810,13 +813,13 @@ void Generator::GenerateCpp_Merged(
 			else
 			{
 				Messaging::Instance()->AddError(true, 0, 0,
-					"Cant found file %s", filePathName.c_str());
+					"Cant open file %s", filePathName.c_str());
 			}
 		}
 		else
 		{
 			Messaging::Instance()->AddError(true, 0, 0,
-				"Bad FilepathName %s", filePathName.c_str());
+				"Bad File path Name %s", filePathName.c_str());
 		}
 	}
 }

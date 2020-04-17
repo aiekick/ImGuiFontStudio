@@ -461,12 +461,11 @@ void SourceFontPane::OpenFont(ProjectFile *vProjectFile, std::string vFontFilePa
 			{
 				if (vProjectFile->m_FontToMergeIn.empty())
 				{
-					vProjectFile->m_FontToMergeIn = font->m_FontFileName;
-					vProjectFile->m_CurrentFont = font;
+					SelectFont(vProjectFile, font);
 				}
 				else if (vProjectFile->m_FontToMergeIn == font->m_FontFileName)
 				{
-					vProjectFile->m_CurrentFont = font;
+					SelectFont(vProjectFile, font);
 				}
 				
 				if (vUpdateCount)
@@ -486,11 +485,11 @@ void SourceFontPane::CloseCurrentFont(ProjectFile *vProjectFile)
 			vProjectFile->m_Fonts.erase(vProjectFile->m_CurrentFont->m_FontFileName);
 			if (!vProjectFile->m_Fonts.empty())
 			{
-				vProjectFile->m_CurrentFont = &vProjectFile->m_Fonts.begin()->second;
+				SelectFont(vProjectFile, &vProjectFile->m_Fonts.begin()->second);
 			}
 			else
 			{
-				vProjectFile->m_CurrentFont = 0;
+				SelectFont(vProjectFile, 0);
 			}
 			vProjectFile->SetProjectChange();
 		}
@@ -499,10 +498,13 @@ void SourceFontPane::CloseCurrentFont(ProjectFile *vProjectFile)
 
 void SourceFontPane::SelectFont(ProjectFile *vProjectFile, FontInfos *vFontInfos)
 {
-	if (vProjectFile && vProjectFile->IsLoaded() && vFontInfos)
+	if (vProjectFile && vProjectFile->IsLoaded())
 	{
 		vProjectFile->m_CurrentFont = vFontInfos;
-		vProjectFile->m_FontToMergeIn = vFontInfos->m_FontFileName;
+		if (vFontInfos)
+		{
+			vProjectFile->m_FontToMergeIn = vFontInfos->m_FontFileName;
+		}
 		vProjectFile->SetProjectChange();
 	}
 }

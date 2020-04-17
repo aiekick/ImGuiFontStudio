@@ -135,28 +135,25 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 			ImGui::Text("Modes : ");
 			ImGui::Indent();
 			{
-				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Current", "Current Font",
-					&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_CURRENT, 50.0f, true, true,
-					GenModeFlags::GENERATOR_MODE_RADIO_CUR_BAT_MER);
+				bool batchModeDisabled = true;
+				bool mergeModeDisabled = true;
 				if (vProjectFile->m_Fonts.size() > 1)
 				{
-					ImGui::SameLine();
-					change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Batch", "Font by Font",
-						&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_BATCH, 50.0f, true, true,
-						GenModeFlags::GENERATOR_MODE_RADIO_CUR_BAT_MER);
+					batchModeDisabled = false;
 
 					if (vProjectFile->m_CountFontWithSelectedGlyphs > 1 &&
 						m_GeneratorStatusFlags & GeneratorStatusFlags::GENERATOR_STATUS_FONT_MERGE_ALLOWED)
 					{
-						ImGui::SameLine();
-						change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Merged", "Fonts Merged in one",
-							&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_MERGED, 50.0f, true, true,
-							GenModeFlags::GENERATOR_MODE_RADIO_CUR_BAT_MER);
+						mergeModeDisabled = false;
 					}
-					else // select batch only
+					else // unselect merge mode
 					{
 						vProjectFile->RemoveGenMode(GenModeFlags::GENERATOR_MODE_MERGED);
-						vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_BATCH);
+						if (!vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_BATCH) &&
+							!vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_CURRENT))
+						{
+							vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_BATCH);
+						}
 					}
 				}
 				else // select current only
@@ -165,22 +162,37 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 					vProjectFile->RemoveGenMode(GenModeFlags::GENERATOR_MODE_BATCH);
 					vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_CURRENT);
 				}
+
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Current", "Current Font",
+					&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_CURRENT, 50.0f, true, true,
+					GenModeFlags::GENERATOR_MODE_RADIO_CUR_BAT_MER);
+				ImGui::SameLine();
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Batch", "Font by Font",
+					&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_BATCH, 50.0f, true, true,
+					GenModeFlags::GENERATOR_MODE_RADIO_CUR_BAT_MER, batchModeDisabled);
+				ImGui::SameLine();
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Merged", "Fonts Merged in one",
+					&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_MERGED, 50.0f, true, true,
+					GenModeFlags::GENERATOR_MODE_RADIO_CUR_BAT_MER, mergeModeDisabled);
 			}
 			ImGui::Unindent();
 
 			ImGui::Text("Features : ");
 			ImGui::Indent();
 			{
+				bool headerModeDisabled = true;
 				if (m_GeneratorStatusFlags & GeneratorStatusFlags::GENERATOR_STATUS_FONT_HEADER_GENERATION_ALLOWED)
 				{
-					change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Header", "Header File",
-						&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_HEADER, 50.0f);
-					ImGui::SameLine();
+					headerModeDisabled = false;
 				}
 				else
 				{
 					vProjectFile->RemoveGenMode(GenModeFlags::GENERATOR_MODE_HEADER);
 				}
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Header", "Header File",
+					&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_HEADER, 50.0f, false, false,
+					GenModeFlags::GENERATOR_MODE_NONE, headerModeDisabled);
+				ImGui::SameLine();
 				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Font", "Font File",
 					&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_FONT, 50.0f, false, false,
 					GenModeFlags::GENERATOR_MODE_RADIO_FONT_CPP);

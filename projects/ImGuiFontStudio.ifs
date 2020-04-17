@@ -2,6 +2,16 @@
 	<project>
 		<font name="SentyWEN2017.ttf">
 			<glyphs>
+				<glyph orgId="48" newId="48" orgName="zero" newName="zero"/>
+				<glyph orgId="49" newId="49" orgName="one" newName="one"/>
+				<glyph orgId="50" newId="50" orgName="two" newName="two"/>
+				<glyph orgId="51" newId="51" orgName="three" newName="three"/>
+				<glyph orgId="52" newId="52" orgName="four" newName="four"/>
+				<glyph orgId="53" newId="53" orgName="five" newName="five"/>
+				<glyph orgId="54" newId="54" orgName="six" newName="six"/>
+				<glyph orgId="55" newId="55" orgName="seven" newName="seven"/>
+				<glyph orgId="56" newId="56" orgName="eight" newName="eight"/>
+				<glyph orgId="57" newId="57" orgName="nine" newName="nine"/>
 				<glyph orgId="20129" newId="20129" orgName="uni4EA1" newName="uni4EA1"/>
 				<glyph orgId="20149" newId="20149" orgName="uni4EB5" newName="uni4EB5"/>
 				<glyph orgId="20150" newId="20150" orgName="uni4EB6" newName="uni4EB6"/>
@@ -73,8 +83,7 @@
 		<dstglyphtooltip>true</dstglyphtooltip>
 		<glyphpreviewscale>0.193</glyphpreviewscale>
 		<glyphpreviewshowcontrollines>false</glyphpreviewshowcontrollines>
-		<genmode>274</genmode>
-		<fonttomergein>fontawesome-webfont.ttf</fonttomergein>
+		<genmode>331</genmode>
+		<fonttomergein>SentyWEN2017.ttf</fonttomergein>
 	</project>
 </config>
-

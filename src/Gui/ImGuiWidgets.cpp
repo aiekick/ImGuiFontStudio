@@ -356,12 +356,13 @@ bool ImGui::RadioButtonLabeled(const char* label, bool active, bool disabled)
     if (!ItemAdd(check_bb, id))
         return false;
 
-    bool hovered, held;
-    bool pressed = ButtonBehavior(check_bb, id, &hovered, &held);
-
     // check
+	bool pressed = false;
 	if (!disabled)
 	{
+		bool hovered, held;
+		pressed = ButtonBehavior(check_bb, id, &hovered, &held);
+
 		window->DrawList->AddRectFilled(check_bb.Min, check_bb.Max, GetColorU32((held && hovered) ? ImGuiCol_FrameBgActive : hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg), style.FrameRounding);
 		if (active)
 		{

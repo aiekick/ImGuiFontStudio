@@ -928,35 +928,25 @@ bool FontHelper::SerializeFont(const char* font_path, sfntly::FontFactory* facto
 	// Serializing the font to a stream.
 	sfntly::MemoryOutputStream output_stream;
 	factory->SerializeFont(font, &output_stream);
-
-    size_t bufferLen = output_stream.Size();
-    if (bufferLen > 0)
-    {
-        std::ofstream file(font_path);
-        if (file.is_open())
-        {
-            file.write((char*)output_stream.Get(), bufferLen);
-            file.close();
-            res = true;
-        }
-    }
-
-    /*
-	// Serializing the stream to a file.
-	FILE* output_file = NULL;
+    
+	size_t bufferLen = output_stream.Size();
+	if (bufferLen > 0)
+	{
+		FILE* output_file = NULL;
 #if defined(MSVC)
-	fopen_s(&output_file, font_path, "wb");
+		fopen_s(&output_file, font_path, "wb");
 #else
-	output_file = fopen(font_path, "wb");
+		output_file = fopen(font_path, "wb");
 #endif
-	if (output_file == reinterpret_cast<FILE*>(NULL))
-		return false;
-	for (size_t i = 0; i < output_stream.Size(); ++i) {
-		fwrite(&(output_stream.Get()[i]), 1, 1, output_file);
+		if (output_file != reinterpret_cast<FILE*>(NULL))
+		{
+			fwrite(output_stream.Get(), 1, bufferLen, output_file);
+			fflush(output_file);
+			fclose(output_file);
+			res = true;
+		}
 	}
-	fflush(output_file);
-	fclose(output_file);
-     */
+ 
 	return res;
 }
 
