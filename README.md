@@ -1,6 +1,4 @@
-![Win](https://github.com/aiekick/ImGuiFontStudio/workflows/Win/badge.svg) ![Linux](https://github.com/aiekick/ImGuiFontStudio/workflows/Linux/badge.svg) ![Osx](https://github.com/aiekick/ImGuiFontStudio/workflows/Osx/badge.svg)
-
-Last Github Actions Builds : [Win](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3AWin) / [Linux](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3ALinux) / [Osx](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3AOsx)
+[<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Win/badge.svg" width="100"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3AWin) [<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Linux/badge.svg" width="100"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3ALinux) [<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Osx/badge.svg" width="100"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3AOsx)
 
 # ImGuiFontStudio
 
