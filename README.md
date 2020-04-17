@@ -40,7 +40,8 @@ Succesfully tested on my side :
 * Change / define ImGui app Theme
 * No lib, one executable only
 
-for more information how to use the generated files, see this project : https://github.com/aiekick/IconFontCppHeaders
+For more information how to use the generated files, see this project : https://github.com/aiekick/IconFontCppHeaders
+
 My soft do the same job and more but easier for user :)
 
 ## How to Build :
