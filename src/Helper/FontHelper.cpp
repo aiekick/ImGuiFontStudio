@@ -920,11 +920,28 @@ bool FontHelper::SerializeFont(const char* font_path, sfntly::Font* font)
 /* based on https://github.com/rillig/sfntly/blob/master/cpp/src/sample/subtly/utils.cc*/
 bool FontHelper::SerializeFont(const char* font_path, sfntly::FontFactory* factory, sfntly::Font* font)
 {
+    bool res = false;
+
 	if (!font_path || !factory || !font)
-		return false;
+		return res;
+
 	// Serializing the font to a stream.
 	sfntly::MemoryOutputStream output_stream;
 	factory->SerializeFont(font, &output_stream);
+
+    size_t bufferLen = output_stream.Size();
+    if (bufferLen > 0)
+    {
+        std::ofstream file(font_path);
+        if (file.is_open())
+        {
+            file.write((char*)output_stream.Get(), bufferLen);
+            file.close();
+            res = true;
+        }
+    }
+
+    /*
 	// Serializing the stream to a file.
 	FILE* output_file = NULL;
 #if defined(MSVC)
@@ -939,7 +956,8 @@ bool FontHelper::SerializeFont(const char* font_path, sfntly::FontFactory* facto
 	}
 	fflush(output_file);
 	fclose(output_file);
-	return true;
+     */
+	return res;
 }
 
 GlyphInfos* FontHelper::GetGlyphInfosFromGlyphId(int32_t vFontId, int32_t vGlyphId)

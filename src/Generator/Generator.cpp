@@ -464,8 +464,19 @@ void Generator::GenerateFontFile_One(
 			if (ps.isOk)
 			{
 				filePathName = ps.path + FileHelper::Instance()->m_SlashType + ps.name + ".ttf";
-				if (filePathName[0] == FileHelper::Instance()->m_SlashType[0]) 
-					filePathName = filePathName.substr(1);
+
+				if (filePathName[0] == FileHelper::Instance()->m_SlashType[0])
+                {
+#ifdef WIN32
+                    filePathName = filePathName.substr(1);
+#endif
+                }
+                else
+                {
+#ifdef UNIX
+                    filePathName = "/" + filePathName;
+#endif
+                }
 
 				if (fontHelper.GenerateFontFile(filePathName, vFlags & GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES))
 				{
