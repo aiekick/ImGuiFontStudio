@@ -12,6 +12,9 @@ project(${PROJECT} CXX)
 
 include(cmake/3rdparty.cmake)
 
+## some defines for debug mode
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG)
+
 if(UNIX)
     if(APPLE)
         add_definitions(-DAPPLE)
