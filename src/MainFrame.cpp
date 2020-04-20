@@ -69,7 +69,8 @@ void MainFrame::Init()
 	LoadConfigFile("config.xml");
 
 #ifdef _DEBUG
-	LoadProject(FileHelper::Instance()->GetAppPath() + "\\..\\..\\projects\\ImGuiFontStudio.ifs"); // directly open this project file
+	std::string projectPath = PROJECT_PATH;
+	LoadProject(projectPath + "\\projects\\ImGuiFontStudio.ifs"); // directly open this project file
 #endif
 
 	GuiLayout::Instance()->Init();

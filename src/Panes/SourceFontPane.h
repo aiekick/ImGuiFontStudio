@@ -51,9 +51,13 @@ private:
 	bool IfCatchedByFilters(FontInfos *vFontInfos, const std::string& vSymbolName);
 
 private:
-	void DrawFontAtlas(ProjectFile *vProjectFile, FontInfos *vFontInfos);
+	//void DrawFontAtlas(ProjectFile *vProjectFile, FontInfos *vFontInfos);
 	void DrawFontTexture(FontInfos *vFontInfos);
-	
+
+private: // experimental => virtual list
+    void DrawFontAtlas_Virtual(ProjectFile *vProjectFile, FontInfos *vFontInfos);
+
+
 public: // singleton
 	static SourceFontPane *Instance()
 	{
