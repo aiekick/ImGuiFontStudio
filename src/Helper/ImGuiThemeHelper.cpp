@@ -385,7 +385,7 @@ void ImGuiThemeHelper::ApplyFileTypeColors()
 {
 	for (auto &it : m_FileTypeColors)
 	{
-		ImGuiFileDialog::Instance()->SetFilterColor(it.first, it.second);
+		igfd::ImGuiFileDialog::Instance()->SetFilterColor(it.first, it.second);
 	}
 }
 
@@ -469,7 +469,7 @@ void ImGuiThemeHelper::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElem
 		}
 
 		m_FileTypeColors[fileType] = ct::toImVec4(ct::fvariant(color).getV4());
-		ImGuiFileDialog::Instance()->SetFilterColor(fileType, m_FileTypeColors[fileType]);
+		igfd::ImGuiFileDialog::Instance()->SetFilterColor(fileType, m_FileTypeColors[fileType]);
 	}
 
 	if (strParentName == "ImGui_Styles")

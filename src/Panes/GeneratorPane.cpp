@@ -267,7 +267,7 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 #else
 				strncpy(extTypes, exts.c_str(), exts.size());
 #endif
-				ImGuiFileDialog::Instance()->OpenModal(
+				igfd::ImGuiFileDialog::Instance()->OpenModal(
 					"GenerateFileDlg",
 					"Location and name where create the file", extTypes, ".",
 					vProjectFile->m_CurrentFont->m_FontFileName,
@@ -389,7 +389,7 @@ bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
 }
 
 // file dialog pane
-void GeneratorPane::GeneratorFileDialogPane(std::string /*vFilter*/, UserDatas vUserDatas, 
+void GeneratorPane::GeneratorFileDialogPane(std::string /*vFilter*/, igfd::UserDatas vUserDatas,
 	bool *vCantContinue) // if vCantContinue is false, the user cant validate the dialog
 {
 	cAssert(vCantContinue != 0, "ImGuiFileDialog Pane param vCantContinue is NULL");
@@ -488,16 +488,16 @@ void GeneratorPane::DrawDialosAndPopups(ProjectFile *vProjectFile)
 	ImVec2 min = MainFrame::Instance()->m_DisplaySize * 0.5f;
 	ImVec2 max = MainFrame::Instance()->m_DisplaySize;
 
-	if (ImGuiFileDialog::Instance()->FileDialog("GenerateFileDlg", ImGuiWindowFlags_NoDocking, min, max))
+	if (igfd::ImGuiFileDialog::Instance()->FileDialog("GenerateFileDlg", ImGuiWindowFlags_NoDocking, min, max))
 	{
-		if (ImGuiFileDialog::Instance()->IsOk)
+		if (igfd::ImGuiFileDialog::Instance()->IsOk)
 		{
-			std::string filePath = ImGuiFileDialog::Instance()->GetCurrentPath();
-			std::string fileName = ImGuiFileDialog::Instance()->GetCurrentFileName();
+			std::string filePath = igfd::ImGuiFileDialog::Instance()->GetCurrentPath();
+			std::string fileName = igfd::ImGuiFileDialog::Instance()->GetCurrentFileName();
 			Generator::Instance()->Generate(filePath, fileName, vProjectFile);
 		}
 
-		ImGuiFileDialog::Instance()->CloseDialog("GenerateFileDlg");
+		igfd::ImGuiFileDialog::Instance()->CloseDialog("GenerateFileDlg");
 	}
 }
 

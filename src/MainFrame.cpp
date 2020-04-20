@@ -186,13 +186,13 @@ void MainFrame::DrawDockPane(ImVec2 vSize)
 					m_SaveDialogIfRequired = true;
 					m_SaveChangeDialogActions.push_front([this]()
 					{
-						ImGuiFileDialog::Instance()->OpenModal("OpenProjectDlg", "Open Project File", ".ifs\0\0", ".");
+						igfd::ImGuiFileDialog::Instance()->OpenModal("OpenProjectDlg", "Open Project File", ".ifs\0\0", ".");
 						m_SaveDialogIfRequired = false;
 					});
 				}
 				else
 				{
-					ImGuiFileDialog::Instance()->OpenModal("OpenProjectDlg", "Open Project File", ".ifs\0\0", ".");
+					igfd::ImGuiFileDialog::Instance()->OpenModal("OpenProjectDlg", "Open Project File", ".ifs\0\0", ".");
 				}
 			}
 
@@ -204,13 +204,13 @@ void MainFrame::DrawDockPane(ImVec2 vSize)
 				{
 					if (!m_ProjectFile.Save())
 					{
-						ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", ".ifs\0\0", ".");
+						igfd::ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", ".ifs\0\0", ".");
 					}
 				}
 
 				if (ImGui::MenuItem(ICON_IGFS_SAVE " Save As"))
 				{
-					ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", ".ifs\0\0", ".");
+					igfd::ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", ".ifs\0\0", ".");
 				}
 
 				ImGui::Separator();
@@ -280,7 +280,7 @@ void MainFrame::DrawDockPane(ImVec2 vSize)
 			{
 				if (!m_ProjectFile.Save())
 				{
-					ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", ".ifs\0\0", ".", 0);
+					igfd::ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", ".ifs\0\0", ".", 0);
 				}
 			}
 		}
@@ -307,13 +307,13 @@ void MainFrame::DisplayDialogsAndPopups()
 
 		GeneratorPane::Instance()->DrawDialosAndPopups(&m_ProjectFile);
 
-		if (ImGuiFileDialog::Instance()->FileDialog("SolveBadFilePathName", 
+		if (igfd::ImGuiFileDialog::Instance()->FileDialog("SolveBadFilePathName",
 			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking, min, max))
 		{
-			if (ImGuiFileDialog::Instance()->IsOk)
+			if (igfd::ImGuiFileDialog::Instance()->IsOk)
 			{
-				auto GoodFilePathName = ImGuiFileDialog::Instance()->GetFilepathName();
-				auto UserDatas = std::string((const char*)ImGuiFileDialog::Instance()->GetUserDatas());
+				auto GoodFilePathName = igfd::ImGuiFileDialog::Instance()->GetFilepathName();
+				auto UserDatas = std::string((const char*)igfd::ImGuiFileDialog::Instance()->GetUserDatas());
 
 				if (FileHelper::Instance()->IsFileExist(GoodFilePathName))
 				{
@@ -324,41 +324,41 @@ void MainFrame::DisplayDialogsAndPopups()
 				}
 			}
 
-			ImGuiFileDialog::Instance()->CloseDialog("SolveBadFilePathName");
+			igfd::ImGuiFileDialog::Instance()->CloseDialog("SolveBadFilePathName");
 		}
 	}
 
-	if (ImGuiFileDialog::Instance()->FileDialog("NewProjectDlg",
+	if (igfd::ImGuiFileDialog::Instance()->FileDialog("NewProjectDlg",
 		ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking, min, max))
 	{
-		if (ImGuiFileDialog::Instance()->IsOk)
+		if (igfd::ImGuiFileDialog::Instance()->IsOk)
 		{
-			NewProject(ImGuiFileDialog::Instance()->GetFilepathName());
+			NewProject(igfd::ImGuiFileDialog::Instance()->GetFilepathName());
 		}
 
-		ImGuiFileDialog::Instance()->CloseDialog("NewProjectDlg");
+		igfd::ImGuiFileDialog::Instance()->CloseDialog("NewProjectDlg");
 	}
 
-	if (ImGuiFileDialog::Instance()->FileDialog("OpenProjectDlg",
+	if (igfd::ImGuiFileDialog::Instance()->FileDialog("OpenProjectDlg",
 		ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking, min, max))
 	{
-		if (ImGuiFileDialog::Instance()->IsOk)
+		if (igfd::ImGuiFileDialog::Instance()->IsOk)
 		{
-			LoadProject(ImGuiFileDialog::Instance()->GetFilepathName());
+			LoadProject(igfd::ImGuiFileDialog::Instance()->GetFilepathName());
 		}
 
-		ImGuiFileDialog::Instance()->CloseDialog("OpenProjectDlg");
+		igfd::ImGuiFileDialog::Instance()->CloseDialog("OpenProjectDlg");
 	}
 
-	if (ImGuiFileDialog::Instance()->FileDialog("SaveProjectDlg", 
+	if (igfd::ImGuiFileDialog::Instance()->FileDialog("SaveProjectDlg",
 		ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking, min, max))
 	{
-		if (ImGuiFileDialog::Instance()->IsOk)
+		if (igfd::ImGuiFileDialog::Instance()->IsOk)
 		{
-			SaveAsProject(ImGuiFileDialog::Instance()->GetFilepathName());
+			SaveAsProject(igfd::ImGuiFileDialog::Instance()->GetFilepathName());
 		}
 
-		ImGuiFileDialog::Instance()->CloseDialog("SaveProjectDlg");
+		igfd::ImGuiFileDialog::Instance()->CloseDialog("SaveProjectDlg");
 	}
 
 	if (m_ShowAboutDialog)
@@ -511,7 +511,7 @@ void MainFrame::ShowSaveDialogIfRequired()
 					choiceMade = true;
 					m_SaveChangeDialogActions.push_front([this]()
 					{
-						ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", ".ifs\0\0", ".");
+						igfd::ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", ".ifs\0\0", ".");
 						m_SaveDialogIfRequired = false;
 					});
 				}

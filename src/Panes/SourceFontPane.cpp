@@ -121,7 +121,7 @@ int SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId)
 				{
 					if (ImGui::Button(ICON_IGFS_FOLDER_OPEN " Open Font"))
 					{
-						ImGuiFileDialog::Instance()->OpenModal("OpenFontDlg", "Open Font File", ".ttf\0.otf\0\0", ".", 0);
+						igfd::ImGuiFileDialog::Instance()->OpenModal("OpenFontDlg", "Open Font File", ".ttf\0.otf\0\0", ".", 0);
 					}
 
 					if (vProjectFile->m_Fonts.size() > 0)
@@ -158,10 +158,10 @@ int SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId)
 									{
 										std::string label = "Search good file for Font " + itFont.first;
 
-										ImGuiFileDialog::Instance()->OpenModal(
+										igfd::ImGuiFileDialog::Instance()->OpenModal(
 											"SolveBadFilePathName",
 											label.c_str(), ".ttf\0\0", ".",
-											itFont.first, 1, (UserDatas)itFont.first.c_str());
+											itFont.first, 1, (igfd::UserDatas)itFont.first.c_str());
 									}
 								}
 								else
@@ -178,10 +178,10 @@ int SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId)
 									{
 										std::string label = "Search an alternative file for Font " + itFont.first;
 
-										ImGuiFileDialog::Instance()->OpenModal(
+										igfd::ImGuiFileDialog::Instance()->OpenModal(
 											"SolveBadFilePathName",
 											label.c_str(), ".ttf\0\0", ".",
-											itFont.first, 1, (UserDatas)itFont.first.c_str());
+											itFont.first, 1, (igfd::UserDatas)itFont.first.c_str());
 									}
 								}
 								if (sel)
@@ -516,14 +516,14 @@ void SourceFontPane::DrawDialosAndPopups(ProjectFile *vProjectFile)
 		ImVec2 min = MainFrame::Instance()->m_DisplaySize * 0.5f;
 		ImVec2 max = MainFrame::Instance()->m_DisplaySize;
 
-		if (ImGuiFileDialog::Instance()->FileDialog("OpenFontDlg", ImGuiWindowFlags_NoDocking, min, max))
+		if (igfd::ImGuiFileDialog::Instance()->FileDialog("OpenFontDlg", ImGuiWindowFlags_NoDocking, min, max))
 		{
-			if (ImGuiFileDialog::Instance()->IsOk)
+			if (igfd::ImGuiFileDialog::Instance()->IsOk)
 			{
-				OpenFonts(vProjectFile, ImGuiFileDialog::Instance()->GetSelection());
+				OpenFonts(vProjectFile, igfd::ImGuiFileDialog::Instance()->GetSelection());
 			}
 
-			ImGuiFileDialog::Instance()->CloseDialog("OpenFontDlg");
+			igfd::ImGuiFileDialog::Instance()->CloseDialog("OpenFontDlg");
 		}
 	}
 }

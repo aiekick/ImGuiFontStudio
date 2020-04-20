@@ -53,7 +53,7 @@ public:
 	void DrawDialosAndPopups(ProjectFile *vProjectFile);
 
 private:
-	void GeneratorFileDialogPane(std::string vFilter, UserDatas vUserDatas, bool *vCantContinue);
+	void GeneratorFileDialogPane(std::string vFilter, igfd::UserDatas vUserDatas, bool *vCantContinue);
 
 public: // singleton
 	static GeneratorPane *Instance()
