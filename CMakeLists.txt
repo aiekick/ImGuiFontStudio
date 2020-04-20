@@ -13,7 +13,10 @@ project(${PROJECT} CXX)
 include(cmake/3rdparty.cmake)
 
 ## some defines for debug mode
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG)
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
+add_definitions(-DPROJECT_PATH="${CMAKE_SOURCE_DIR}")
+
+message(${CMAKE_CXX_FLAGS_DEBUG})
 
 if(UNIX)
     if(APPLE)
@@ -42,7 +45,7 @@ endif ()
 
 add_definitions(${GLFW_DEFINITIONS})
 add_definitions(-DCUSTOM_IMGUIFILEDIALOG_CONFIG="../../../src/Gui/CustomImGuiFileDialogConfig.h")
-   
+
 file(GLOB IMGUIFONTSTUDIO_SOURCES ${CMAKE_SOURCE_DIR}/*.cpp)
 file(GLOB IMGUIFONTSTUDIO_SRC 
 		${CMAKE_SOURCE_DIR}/src/*.cpp 
