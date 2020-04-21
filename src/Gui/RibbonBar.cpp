@@ -20,4 +20,3 @@
 
 RibbonBar::RibbonBar() = default;
 RibbonBar::~RibbonBar() = default;
-

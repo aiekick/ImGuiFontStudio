@@ -304,9 +304,8 @@ void MainFrame::DisplayDialogsAndPopups()
 
 	if (m_ProjectFile.IsLoaded())
 	{
-		SourceFontPane::Instance()->DrawDialosAndPopups(&m_ProjectFile);
-
-		GeneratorPane::Instance()->DrawDialosAndPopups(&m_ProjectFile);
+		SourceFontPane::DrawDialosAndPopups(&m_ProjectFile);
+		GeneratorPane::DrawDialosAndPopups(&m_ProjectFile);
 
 		if (igfd::ImGuiFileDialog::Instance()->FileDialog("SolveBadFilePathName",
 			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking, min, max))
