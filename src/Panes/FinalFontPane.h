@@ -44,7 +44,7 @@ class FinalFontPane
 {
 private:
 	std::vector<GlyphInfos*> m_GlyphsMergedNoOrder;
-	std::map<ImWchar, std::vector<GlyphInfos*>> m_GlyphsMergedOrderedByCodePoints;
+	std::map<uint32_t, std::vector<GlyphInfos*>> m_GlyphsMergedOrderedByCodePoints;
 	std::map<std::string, std::vector<GlyphInfos*>> m_GlyphsMergedOrderedByGlyphName;
 
 private:

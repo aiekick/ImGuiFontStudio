@@ -26,7 +26,7 @@
 
 struct GlyphsRange
 {
-//	std::set<ImWchar> datas;
+//	std::set<uint32_t> datas;
 	int rangeStart = 0;
 	int rangeEnd = 0;
 };
@@ -37,13 +37,13 @@ class FontInfos : public conf::ConfigAbstract
 public: // not to save
 	ImFontAtlas m_ImFontAtlas;
 	std::vector<std::string> m_GlyphNames;
-	std::map<ImWchar, std::string> m_GlyphCodePointNames;
+	std::map<uint32_t, std::string> m_GlyphCodePointNames;
 	char m_SearchBuffer[1024] = "\0";
 	ImFontConfig m_FontConfig;
 	bool m_NeedFilePathResolve = false; // the path is not found, need resolve for not lost glyphs datas
 	bool m_NameInDoubleFound = false;
 	bool m_CodePointInDoubleFound = false;
-	std::map<ImWchar, std::vector<GlyphInfos*>> m_GlyphsOrderedByCodePoints;
+	std::map<uint32_t, std::vector<GlyphInfos*>> m_GlyphsOrderedByCodePoints;
 	std::map<std::string, std::vector<GlyphInfos*>> m_GlyphsOrderedByGlyphName;
 	int m_Ascent = 0;
 	int m_Descent = 0;
@@ -53,7 +53,7 @@ public: // not to save
 	std::string m_FontFileName;
 	
 public: // to save
-	std::map<ImWchar, GlyphInfos> m_SelectedGlyphs;
+	std::map<uint32_t, GlyphInfos> m_SelectedGlyphs;
 	std::string m_FontPrefix; // peut servir pour la generation par lot
 	std::string m_FontFilePathName;
 	int m_Oversample = 1;
@@ -63,7 +63,7 @@ public: // to save
 public: // callable
 	bool LoadFont(ProjectFile *vProjectFile, const std::string& vFontFilePathName);
 	void Clear();
-	std::string GetGlyphName(ImWchar vCodePoint);
+	std::string GetGlyphName(uint32_t vCodePoint);
 	void DrawInfos();
 
 private: // Glyph Names Extraction / DB

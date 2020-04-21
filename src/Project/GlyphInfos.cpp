@@ -119,7 +119,7 @@ GlyphInfos::GlyphInfos()
 
 GlyphInfos::GlyphInfos(
 	ImFontGlyph vGlyph, std::string vOldName, 
-	std::string vNewName, ImWchar vNewCodePoint)
+	std::string vNewName, uint32_t vNewCodePoint)
 {
 	glyph = vGlyph;
 	oldHeaderName = std::move(vOldName);

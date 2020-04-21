@@ -91,7 +91,7 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 						// update glyph ptrs
 						for (auto &it : m_SelectedGlyphs)
 						{
-							ImWchar codePoint = it.first;
+							uint32_t codePoint = it.first;
 
 							auto glyph = font->FindGlyphNoFallback(codePoint);
 							if (glyph)
@@ -221,7 +221,7 @@ void FontInfos::FillGlyphNames()
 	}
 }
 
-std::string FontInfos::GetGlyphName(ImWchar vCodePoint)
+std::string FontInfos::GetGlyphName(uint32_t vCodePoint)
 {
 	if (m_GlyphCodePointNames.find(vCodePoint) != m_GlyphCodePointNames.end())
 	{

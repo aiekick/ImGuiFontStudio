@@ -45,20 +45,20 @@ enum SelectionContainerEnum
 struct ReRangeLimitStruct
 {
 	bool valid = true; // for imgui color
-	int codePoint = 0;
+    uint32_t codePoint = 0;
 };
 
 struct ReRangeStruct
 {
 	ReRangeLimitStruct startCodePoint;
 	ReRangeLimitStruct endCodePoint;
-	const int MinCodePoint = 0;
-	const int MaxCodePoint = 65535;
+	const uint32_t MinCodePoint = 0;
+	const uint32_t MaxCodePoint = 65535;
 };
 
 class FontInfos;
 struct ImGuiWindow;
-typedef std::pair<ImWchar, FontInfos*> FontInfosCodePoint;
+typedef std::pair<uint32_t, FontInfos*> FontInfosCodePoint;
 struct TemporarySelectionStruct
 {
 	// for avoid selection apply if seletion ended outside of start window
@@ -67,30 +67,30 @@ struct TemporarySelectionStruct
 	std::set<FontInfosCodePoint> tmpSel;
 	std::set<FontInfosCodePoint> tmpUnSel;
 
-	bool isSelected(ImWchar c, FontInfos* f)
+	bool isSelected(uint32_t c, FontInfos* f)
 	{
 		auto p = FontInfosCodePoint(c, f);
 		return (tmpSel.find(p) != tmpSel.end()); // found
 	}
 	
-	bool isUnSelected(ImWchar c, FontInfos* f)
+	bool isUnSelected(uint32_t c, FontInfos* f)
 	{
 		auto p = FontInfosCodePoint(c, f);
 		return (tmpUnSel.find(p) != tmpUnSel.end()); // found
 	}
-	void Select(ImWchar c, FontInfos* f)
+	void Select(uint32_t c, FontInfos* f)
 	{
 		auto p = FontInfosCodePoint(c, f);
 		tmpSel.emplace(p);
 		tmpUnSel.erase(p);
 	}
-	void UnSelect(ImWchar c, FontInfos* f)
+	void UnSelect(uint32_t c, FontInfos* f)
 	{
 		auto p = FontInfosCodePoint(c, f);
 		tmpSel.erase(p);
 		tmpUnSel.emplace(p);
 	}
-	void Clear(ImWchar c, FontInfos* f)
+	void Clear(uint32_t c, FontInfos* f)
 	{
 		auto p = FontInfosCodePoint(c, f);
 		tmpSel.erase(p);
@@ -130,14 +130,14 @@ private:
 	bool IsGlyphSelected(
 		FontInfos *vFontInfos,
 		SelectionContainerEnum vSelectionContainerEnum,
-		ImWchar vCodePoint);
+		uint32_t vCodePoint);
 	void StartSelection(SelectionContainerEnum vSelectionContainerEnum);
 	bool CanWeApplySelection(SelectionContainerEnum vSelectionContainerEnum);
 	
 private:
-	void DrawRect(ImVec2 vPos, ImVec2 vSize);
-	void DrawCircle(ImVec2 vPos, float vRadius);
-	void DrawLine(ImVec2 vStart, ImVec2 vEnd);
+	static void DrawRect(ImVec2 vPos, ImVec2 vSize);
+	static void DrawCircle(ImVec2 vPos, float vRadius);
+	static void DrawLine(ImVec2 vStart, ImVec2 vEnd);
 
 public:
 	void DrawMenu(ProjectFile *vProjectFile);
@@ -151,14 +151,14 @@ public:
 		ProjectFile *vProjectFile, 
 		FontInfos *vFontInfos, 
 		ImFontGlyph vGlyph,
-		int vGlyphIdx,
+        uint32_t vGlyphIdx,
 		bool vGlypSelected,
 		bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 	bool IsGlyphIntersectedAndSelected(
 		FontInfos *vFontInfos,
 		ImVec2 vCellSize, 
-		ImWchar vCodePoint, 
+		uint32_t vCodePoint,
 		bool *vSelected,
 		SelectionContainerEnum vSelectionContainerEnum);
 	bool IsSelectionMode(GlyphSelectionModeFlags vGlyphSelectionModeFlags);
@@ -172,7 +172,7 @@ private:
 		SelectionContainerEnum vSelectionContainerEnum);
 	void SelectGlyph(ProjectFile *vProjectFile, FontInfosCodePoint vFontInfosCodePoint, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
-	void SelectGlyph(ProjectFile *vProjectFile, FontInfos *vFontInfos, ImWchar vCodePoint, bool vUpdateMaps,
+	void SelectGlyph(ProjectFile *vProjectFile, FontInfos *vFontInfos, uint32_t vCodePoint, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 	
 	void UnSelectAllGlyphs(ProjectFile *vProjectFile, FontInfos *vFontInfos,
@@ -181,13 +181,13 @@ private:
 		SelectionContainerEnum vSelectionContainerEnum);
 	void UnSelectGlyph(ProjectFile *vProjectFile, FontInfosCodePoint vFontInfosCodePoint, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
-	void UnSelectGlyph(ProjectFile *vProjectFile, FontInfos *vFontInfos, ImWchar vCodePoint, bool vUpdateMaps,
+	void UnSelectGlyph(ProjectFile *vProjectFile, FontInfos *vFontInfos, uint32_t vCodePoint, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 
 private:
 	void RemoveSelectionFromFinal(ProjectFile *vProjectFile);
-	void ReRange_Offset_After_Start(ProjectFile *vProjectFile, ImWchar vOffsetCodePoint);
-	void ReRange_Offset_Before_End(ProjectFile *vProjectFile, ImWchar vOffsetCodePoint);
+	void ReRange_Offset_After_Start(ProjectFile *vProjectFile, uint32_t vOffsetCodePoint);
+	void ReRange_Offset_Before_End(ProjectFile *vProjectFile, uint32_t vOffsetCodePoint);
 	
 private: // selection for view modes
 	void PrepareSelection(ProjectFile *vProjectFile,
@@ -199,7 +199,7 @@ private: // ReRange
 private: // selections mode common
 	void GlyphSelectionIfIntersected(
 		FontInfos *vFontInfos,
-		ImVec2 vCaseSize, ImWchar vCodePoint,
+		ImVec2 vCaseSize, uint32_t vCodePoint,
 		bool *vSelected,
 		SelectionContainerEnum vSelectionContainerEnum);
 	void ApplySelection(ProjectFile *vProjectFile,
@@ -210,7 +210,7 @@ private: // selection by line
 		SelectionContainerEnum vSelectionContainerEnum);
 	bool DrawGlyphSelectionByLine(
 		FontInfos *vFontInfos,
-		ImVec2 vCaseSize, ImWchar vCodePoint,
+		ImVec2 vCaseSize, uint32_t vCodePoint,
 		bool *vSelected,
 		SelectionContainerEnum vSelectionContainerEnum);
 	
@@ -219,7 +219,7 @@ private: // selection by zone
 		SelectionContainerEnum vSelectionContainerEnum);
 	bool DrawGlyphSelectionByZone(
 		FontInfos *vFontInfos,
-		ImVec2 vCaseSize, ImWchar vCodePoint,
+		ImVec2 vCaseSize, uint32_t vCodePoint,
 		bool *vSelected,
 		SelectionContainerEnum vSelectionContainerEnum);
 	
@@ -228,14 +228,14 @@ private: // selection by range
 		ProjectFile *vProjectFile,
 		FontInfos *vFontInfos, 
 		ImFontGlyph vGlyph,
-		int vFontGlyphIndex, 
+        uint32_t vFontGlyphIndex,
 		bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 	void UnSelectGlyphByRangeFromStartCodePoint(
 		ProjectFile *vProjectFile,
 		FontInfos *vFontInfos, 
 		ImFontGlyph vGlyph,
-		int vFontGlyphIndex, 
+        uint32_t vFontGlyphIndex,
 		bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 	void UnSelectGlyphByRangeFromStartCodePoint(

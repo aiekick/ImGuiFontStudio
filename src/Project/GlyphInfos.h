@@ -69,6 +69,6 @@ public:
 	GlyphInfos();
 	GlyphInfos(
 		ImFontGlyph vGlyph, std::string vOldName, 
-		std::string vNewName, ImWchar vNewCodePoint = 0);
+		std::string vNewName, uint32_t vNewCodePoint = 0);
 	~GlyphInfos();
 };

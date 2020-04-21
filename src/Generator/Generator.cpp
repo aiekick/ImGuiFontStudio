@@ -188,13 +188,13 @@ void Generator::GenerateHeader_One(
 				header += "#define FONT_ICON_FILE_NAME" + prefix + " \"" + vFontInfos->m_FontFileName + "\"\n\n";
 			}
 
-			ImWchar minCodePoint = 65535;
-			ImWchar maxCodePoint = 0;
+			uint32_t minCodePoint = 65535;
+			uint32_t maxCodePoint = 0;
 			std::string glyphs;
 
 			if (vFlags & GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES)
 			{
-				std::map<std::string, ImWchar> glyphNames;
+				std::map<std::string, uint32_t> glyphNames;
 
 				if (vFontInfos->m_SelectedGlyphs.empty()) // no glyph selected so generate for whole font
 				{
@@ -217,7 +217,7 @@ void Generator::GenerateHeader_One(
 					ct::replaceString(glyphName, " ", "_");
 					ct::replaceString(glyphName, "-", "_");
 
-					ImWchar codePoint = it.second;
+					uint32_t codePoint = it.second;
 					minCodePoint = ct::mini(minCodePoint, codePoint);
 					maxCodePoint = ct::maxi(maxCodePoint, codePoint);
 
@@ -233,7 +233,7 @@ void Generator::GenerateHeader_One(
 			}
 			else if (vFlags & GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_CODEPOINT)
 			{
-				std::map<ImWchar, std::string> glyphCodePoints;
+				std::map<uint32_t, std::string> glyphCodePoints;
 
 				if (vFontInfos->m_SelectedGlyphs.empty()) // no glyph selected so generate for whole font
 				{
@@ -252,7 +252,7 @@ void Generator::GenerateHeader_One(
 
 				for (const auto &it : glyphCodePoints)
 				{
-					ImWchar codePoint = it.first;
+					uint32_t codePoint = it.first;
 					minCodePoint = ct::mini(minCodePoint, codePoint);
 					maxCodePoint = ct::maxi(maxCodePoint, codePoint);
 
@@ -322,13 +322,13 @@ void Generator::GenerateHeader_Merged(
 				header += "#define FONT_ICON_FILE_NAME" + prefix + " \"" + ps.name + "." + ps.ext + "\"\n\n";
 			}
 
-			ImWchar minCodePoint = 65535;
-			ImWchar maxCodePoint = 0;
+			uint32_t minCodePoint = 65535;
+			uint32_t maxCodePoint = 0;
 			std::string glyphs;
 
 			if (vFlags & GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES)
 			{
-				std::map<std::string, ImWchar> glyphNames;
+				std::map<std::string, uint32_t> glyphNames;
 
 				// we take only selected glyphs of all fonts
 				for (const auto &font : vProjectFile->m_Fonts)
@@ -345,7 +345,7 @@ void Generator::GenerateHeader_Merged(
 					ct::replaceString(glyphName, " ", "_");
 					ct::replaceString(glyphName, "-", "_");
 
-					ImWchar codePoint = it.second;
+					uint32_t codePoint = it.second;
 					minCodePoint = ct::mini(minCodePoint, codePoint);
 					maxCodePoint = ct::maxi(maxCodePoint, codePoint);
 
@@ -361,7 +361,7 @@ void Generator::GenerateHeader_Merged(
 			}
 			else if (vFlags & GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_CODEPOINT)
 			{
-				std::map<ImWchar, std::string> glyphCodePoints;
+				std::map<uint32_t, std::string> glyphCodePoints;
 
 				// we take only selected glyphs of all fonts
 				for (const auto &font : vProjectFile->m_Fonts)
@@ -374,7 +374,7 @@ void Generator::GenerateHeader_Merged(
 
 				for (const auto &it : glyphCodePoints)
 				{
-					ImWchar codePoint = it.first;
+					uint32_t codePoint = it.first;
 					minCodePoint = ct::mini(minCodePoint, codePoint);
 					maxCodePoint = ct::maxi(maxCodePoint, codePoint);
 

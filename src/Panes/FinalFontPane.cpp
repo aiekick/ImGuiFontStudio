@@ -466,7 +466,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 				{
 					if (vCodePointUpdated)
 						*vCodePointUpdated = true;
-					vGlyph->newCodePoint = (ImWchar)vGlyph->editCodePoint;// range 0 => 2^16;
+					vGlyph->newCodePoint = (uint32_t)vGlyph->editCodePoint;// range 0 => 2^16;
 					SelectionHelper::Instance()->AnalyseSourceSelection(vProjectFile);
 					vProjectFile->SetProjectChange();
 					vGlyph->m_editingCodePoint = false;
@@ -568,14 +568,14 @@ void FinalFontPane::DrawSelectionsByFontNoOrder_OneFontOnly(
 					frm = ImGui::BeginFramedGroup(buffer);
 				if (frm)
 				{
-					int glyphCountX = vProjectFile->m_Preview_Glyph_CountX;
+                    uint32_t glyphCountX = vProjectFile->m_Preview_Glyph_CountX;
 					bool showRangeColoring = vProjectFile->IsRangeColorignShown();
 
 					ImVec2 cell_size;
 					CalcGlyphsCountAndSize(&cell_size, &glyphCountX, vForceEditMode, vForceEditModeOneColumn);
 
-					int idx = 0;
-					int lastGlyphCodePoint = 0;
+                    uint32_t idx = 0;
+                    uint32_t lastGlyphCodePoint = 0;
 					ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
 
 					bool nameUpdated = false;
@@ -583,9 +583,9 @@ void FinalFontPane::DrawSelectionsByFontNoOrder_OneFontOnly(
 
 					for (auto &it : vFontInfos->m_SelectedGlyphs)
 					{
-						int x = idx % glyphCountX;
+                        uint32_t x = idx % glyphCountX;
 
-						ImWchar codePoint = it.first;
+						uint32_t codePoint = it.first;
 						auto glyphInfo = &it.second;
 
 						if (x) ImGui::SameLine();
@@ -666,7 +666,7 @@ void FinalFontPane::PrepareSelectionByFontOrderedByCodePoint(ProjectFile *vProje
 			auto glyphs = &itFont.second;
 			for (auto &itGlyph : glyphs->m_SelectedGlyphs)
 			{
-				ImWchar codePoint = itGlyph.second.newCodePoint;
+				uint32_t codePoint = itGlyph.second.newCodePoint;
 				auto glyphInfo = &itGlyph.second;
 
 				glyphInfo->fontAtlas = &itFont.second;
@@ -716,7 +716,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
 				}
 				else
 				{
-					int startCodePoint = vFontInfos->m_GlyphsOrderedByCodePoints.begin()->second[0]->newCodePoint;
+                    uint32_t startCodePoint = vFontInfos->m_GlyphsOrderedByCodePoints.begin()->second[0]->newCodePoint;
 
 					char buffer[1024] = "\0";
 					snprintf(buffer, 1023, "Font %s / Start CodePoint %i / Count %u",
@@ -727,7 +727,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
 						frm = ImGui::BeginFramedGroup(buffer);
 					if (frm)
 					{
-						int glyphCountX = vProjectFile->m_Preview_Glyph_CountX;
+                        uint32_t glyphCountX = vProjectFile->m_Preview_Glyph_CountX;
 						if (glyphCountX)
 						{
 							bool showRangeColoring = vProjectFile->IsRangeColorignShown();
@@ -735,8 +735,8 @@ void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
 							ImVec2 cell_size;
 							CalcGlyphsCountAndSize(&cell_size, &glyphCountX, vForceEditMode, vForceEditModeOneColumn);
 
-							int idx = 0;
-							int lastGlyphCodePoint = 0;
+                            uint32_t idx = 0;
+                            uint32_t lastGlyphCodePoint = 0;
 							ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
 
 							bool nameUpdated = false;
@@ -744,7 +744,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
 
 							for (auto &itGlyph : vFontInfos->m_GlyphsOrderedByCodePoints)
 							{
-								ImWchar codePoint = itGlyph.first;
+								uint32_t codePoint = itGlyph.first;
 								auto glyphVector = itGlyph.second;
 
 								// si plus d'un glyph ici, alors deux glyph partagent le meme codepoint
@@ -752,7 +752,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
 								// un rerange sera necesaire
 								for (auto & glyphInfo : glyphVector)
 								{
-									int x = idx++ % glyphCountX;
+                                    uint32_t x = idx++ % glyphCountX;
 
 									if (x) ImGui::SameLine();
 
@@ -889,7 +889,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(
 						frm = ImGui::BeginFramedGroup(buffer);
 					if (frm)
 					{
-						int glyphCountX = vProjectFile->m_Preview_Glyph_CountX;
+                        uint32_t glyphCountX = vProjectFile->m_Preview_Glyph_CountX;
 						if (glyphCountX)
 						{
 							bool showRangeColoring = vProjectFile->IsRangeColorignShown();
@@ -898,7 +898,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(
 							CalcGlyphsCountAndSize(&cell_size, &glyphCountX, vForceEditMode, vForceEditModeOneColumn);
 
 							int idx = 0;
-							int lastGlyphCodePoint = 0;
+                            uint32_t lastGlyphCodePoint = 0;
 
 							ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
 
@@ -914,7 +914,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(
 								// un rerange sera necesaire
 								for (auto & glyphInfo : glyphVector)
 								{
-									int x = idx++ % glyphCountX;
+                                    uint32_t x = idx++ % glyphCountX;
 
 									if (x) ImGui::SameLine();
 
@@ -1008,14 +1008,14 @@ void FinalFontPane::DrawSelectionMergedNoOrder(ProjectFile *vProjectFile)
 
 	if (vProjectFile)
 	{
-		int glyphCountX = vProjectFile->m_Preview_Glyph_CountX;
+        uint32_t glyphCountX = vProjectFile->m_Preview_Glyph_CountX;
 		bool showRangeColoring = vProjectFile->IsRangeColorignShown();
 
 		ImVec2 cell_size;
 		CalcGlyphsCountAndSize(&cell_size, &glyphCountX);
 
-		int idx = 0;
-		int lastGlyphCodePoint = 0;
+        uint32_t idx = 0;
+        uint32_t lastGlyphCodePoint = 0;
 		ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
 
 		bool nameUpdated = false;
@@ -1031,7 +1031,7 @@ void FinalFontPane::DrawSelectionMergedNoOrder(ProjectFile *vProjectFile)
 				{
 					if (vFontInfos->m_ImFontAtlas.TexID)
 					{
-						int x = idx++ % glyphCountX;
+                        uint32_t x = idx++ % glyphCountX;
 
 						if (x) ImGui::SameLine();
 
@@ -1105,7 +1105,7 @@ void FinalFontPane::PrepareSelectionMergedOrderedByCodePoint(ProjectFile *vProje
 			auto glyphs = &itFont.second;
 			for (auto &itGlyph : glyphs->m_SelectedGlyphs)
 			{
-				ImWchar codePoint = itGlyph.second.newCodePoint;
+				uint32_t codePoint = itGlyph.second.newCodePoint;
 				auto glyphInfo = &itGlyph.second;
 
 				glyphInfo->fontAtlas = &itFont.second;
@@ -1123,14 +1123,14 @@ void FinalFontPane::DrawSelectionMergedOrderedByCodePoint(ProjectFile *vProjectF
 
 	if (vProjectFile)
 	{
-		int glyphCountX = vProjectFile->m_Preview_Glyph_CountX;
+        uint32_t glyphCountX = vProjectFile->m_Preview_Glyph_CountX;
 		bool showRangeColoring = vProjectFile->IsRangeColorignShown();
 
 		ImVec2 cell_size;
 		CalcGlyphsCountAndSize(&cell_size, &glyphCountX);
 
-		int idx = 0;
-		int lastGlyphCodePoint = 0;
+        uint32_t idx = 0;
+        uint32_t lastGlyphCodePoint = 0;
 		ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
 
 		bool nameUpdated = false;
@@ -1138,7 +1138,7 @@ void FinalFontPane::DrawSelectionMergedOrderedByCodePoint(ProjectFile *vProjectF
 
 		for (auto &itGlyph : m_GlyphsMergedOrderedByCodePoints)
 		{
-			ImWchar codePoint = itGlyph.first;
+			uint32_t codePoint = itGlyph.first;
 			auto glyphVector = itGlyph.second;
 
 			// si plus d'un glyph ici, alors deux glyph partagent le meme codepoint
@@ -1154,7 +1154,7 @@ void FinalFontPane::DrawSelectionMergedOrderedByCodePoint(ProjectFile *vProjectF
 					{
 						if (vFontInfos->m_ImFontAtlas.TexID)
 						{
-							int x = idx++ % glyphCountX;
+                            uint32_t x = idx++ % glyphCountX;
 
 							if (x) ImGui::SameLine();
 							
@@ -1276,7 +1276,7 @@ void FinalFontPane::DrawSelectionMergedOrderedByGlyphNames(ProjectFile *vProject
 					{
 						if (vFontInfos->m_ImFontAtlas.TexID)
 						{
-							int x = idx++ % glyphCountX;
+                            uint32_t x = idx++ % glyphCountX;
 
 							if (x) ImGui::SameLine();
 							
