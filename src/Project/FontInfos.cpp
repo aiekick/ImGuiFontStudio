@@ -340,7 +340,7 @@ void FontInfos::DestroyFontTexture()
     // use (size_t) instead of (Gluint) for avoid error : 
 	// << Cast from pointer to smaller type 'int' loses information >> on MAcOs mojave..
     // it weird than this trick work...
-	auto id = (GLuint)m_ImFontAtlas.TexID;
+	auto id = (size_t)m_ImFontAtlas.TexID;
 	if (id)
 	{
 		glDeleteTextures(1, &id);
