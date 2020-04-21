@@ -340,7 +340,7 @@ void FontInfos::DestroyFontTexture()
     // use (size_t) instead of (Gluint) for avoid error : 
 	// << Cast from pointer to smaller type 'int' loses information >> on MAcOs mojave..
     // it weird than this trick work...
-	auto id = (size_t)m_ImFontAtlas.TexID;
+    GLuint id = (size_t)m_ImFontAtlas.TexID;
 	if (id)
 	{
 		glDeleteTextures(1, &id);
@@ -437,8 +437,8 @@ void FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 	}
 	else if (strParentName == "glyphs" &&  strName == "glyph")
 	{
-		ImWchar oldcodepoint = 0;
-		ImWchar newcodepoint = 0;
+		uint32_t oldcodepoint = 0;
+        uint32_t newcodepoint = 0;
 		std::string oldName;
 		std::string newName;
 
@@ -449,10 +449,10 @@ void FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 
 			if (attName == "orgId" || 
 				attName == "id") // for compatibility with first format, will be removed in few versions
-				oldcodepoint = (ImWchar)ct::ivariant(attValue).getI();
+				oldcodepoint = (uint32_t)ct::ivariant(attValue).getI();
 			else if (attName == "newId" || 
 				attName == "nid")  // for compatibility with first format, will be removed in few versions
-				newcodepoint = (ImWchar)ct::ivariant(attValue).getI();
+				newcodepoint = (uint32_t)ct::ivariant(attValue).getI();
 			else if (attName == "orgName") oldName = attValue;
 			else if (attName == "newName" || 
 				attName == "name")  // for compatibility with first format, will be removed in few versions
