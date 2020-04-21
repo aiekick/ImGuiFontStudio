@@ -1170,7 +1170,8 @@ static int stb_compress_inner(stb_uchar *input, stb_uint length)
 
 	stb__running_adler = 1;
 
-    assert(stb_compress_chunk(input, input, input + length, length, &literals, chash, stb__hashsize - 1) == length);
+    stb_uint len = stb_compress_chunk(input, input, input + length, length, &literals, chash, stb__hashsize - 1);
+    assert(len == length);
 
 	outliterals(input + length - literals, literals);
 

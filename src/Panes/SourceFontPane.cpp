@@ -23,11 +23,8 @@
 #include "MainFrame.h"
 
 #include "Gui/GuiLayout.h"
-#include "Gui/ImGuiWidgets.h"
-#include "Project/ProjectFile.h"
 #include "Panes/FinalFontPane.h"
 #include "Helper/SelectionHelper.h"
-#include "Generator/Generator.h"
 
 #include <cinttypes> // printf zu
 
@@ -39,16 +36,10 @@
 static int SourceFontPane_WidgetId = 0;
 #define NEW_ID ++SourceFontPane_WidgetId
 
-SourceFontPane::SourceFontPane()
-{
+SourceFontPane::SourceFontPane() = default;
+SourceFontPane::~SourceFontPane() = default;
 
-}
-
-SourceFontPane::~SourceFontPane()
-{
-	
-}
-int SourceFontPane::DrawSourceFontPane(ProjectFile *vProjectFile, int vWidgetId)
+int SourceFontPane::DrawSourceFontPane(ProjectFile *vProjectFile, int vWidgetId) const
 {
 	SourceFontPane_WidgetId = vWidgetId;
 
@@ -125,7 +116,7 @@ int SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId)
 						igfd::ImGuiFileDialog::Instance()->OpenModal("OpenFontDlg", "Open Font File", ".ttf\0.otf\0\0", ".", 0);
 					}
 
-					if (vProjectFile->m_Fonts.size() > 0)
+					if (!vProjectFile->m_Fonts.empty())
 					{
 						ImGui::SameLine();
 
@@ -439,7 +430,7 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, FontInfos 
                 ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
                 if (!font->Glyphs.empty())
                 {
-                    size_t countGlyphs = (size_t)font->Glyphs.size();
+                    size_t countGlyphs = font->Glyphs.size();
                     int rowCount = (int)ct::ceil((double)countGlyphs / (double)countGlyphX);
                     // ImGuiListClipper infos, found in https://github.com/ocornut/imgui/issues/150 // for virtual list display
                     ImGuiListClipper clipper(rowCount, glyphSize);
@@ -501,8 +492,8 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, FontInfos 
                                         {
                                             if (ImGui::IsItemHovered())
                                             {
-                                                ImGui::SetTooltip("name : %s\ncodepoint : %u\nadv x : %.2f\nuv0 : (%.3f,%.3f)\nuv1 : (%.3f,%.3f)",
-                                                                  name.c_str(), glyph.Codepoint, glyph.AdvanceX, glyph.U0, glyph.V0, glyph.U1, glyph.V1);
+                                                ImGui::SetTooltip("name : %s\ncodepoint : %i\nadv x : %.2f\nuv0 : (%.3f,%.3f)\nuv1 : (%.3f,%.3f)",
+                                                                  name.c_str(), (int)glyph.Codepoint, glyph.AdvanceX, glyph.U0, glyph.V0, glyph.U1, glyph.V1);
                                             }
                                         }
 
@@ -532,9 +523,9 @@ void SourceFontPane::DrawFontTexture(FontInfos *vFontInfos)
 			if (vFontInfos->m_ImFontAtlas.TexID)
 			{
 				float w = ImGui::GetContentRegionAvailWidth();
-				float h = w * vFontInfos->m_ImFontAtlas.TexHeight;
-				if (vFontInfos->m_ImFontAtlas.TexWidth)
-					h /= vFontInfos->m_ImFontAtlas.TexWidth;
+				float h = w * (float)vFontInfos->m_ImFontAtlas.TexHeight;
+				if (vFontInfos->m_ImFontAtlas.TexWidth > 0)
+					h /= (float)vFontInfos->m_ImFontAtlas.TexWidth;
 				ImGui::Image(vFontInfos->m_ImFontAtlas.TexID, 
 					ImVec2(w, h), ImVec2(0, 0), ImVec2(1, 1), 
 					ImGui::GetStyleColorVec4(ImGuiCol_Text));
@@ -547,7 +538,7 @@ void SourceFontPane::DrawFontTexture(FontInfos *vFontInfos)
 //// FONT ////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-void SourceFontPane::OpenFonts(ProjectFile *vProjectFile, std::map<std::string, std::string> vFontFilePathNames)
+void SourceFontPane::OpenFonts(ProjectFile *vProjectFile, const std::map<std::string, std::string>& vFontFilePathNames)
 {
 	if (vProjectFile && vProjectFile->IsLoaded())
 	{
@@ -559,7 +550,7 @@ void SourceFontPane::OpenFonts(ProjectFile *vProjectFile, std::map<std::string, 
 	}
 }
 
-void SourceFontPane::OpenFont(ProjectFile *vProjectFile, std::string vFontFilePathName, bool vUpdateCount)
+void SourceFontPane::OpenFont(ProjectFile *vProjectFile, const std::string& vFontFilePathName, bool vUpdateCount)
 {
 	if (vProjectFile && vProjectFile->IsLoaded())
 	{
@@ -570,15 +561,12 @@ void SourceFontPane::OpenFont(ProjectFile *vProjectFile, std::string vFontFilePa
 			FontInfos *font = &vProjectFile->m_Fonts[fontName];
 			if (font->LoadFont(vProjectFile, vFontFilePathName))
 			{
-				if (vProjectFile->m_FontToMergeIn.empty())
+				if (vProjectFile->m_FontToMergeIn.empty() ||
+				    vProjectFile->m_FontToMergeIn == font->m_FontFileName)
 				{
 					SelectFont(vProjectFile, font);
 				}
-				else if (vProjectFile->m_FontToMergeIn == font->m_FontFileName)
-				{
-					SelectFont(vProjectFile, font);
-				}
-				
+
 				if (vUpdateCount)
 					vProjectFile->UpdateCountSelectedGlyphs();
 			}
@@ -600,7 +588,7 @@ void SourceFontPane::CloseCurrentFont(ProjectFile *vProjectFile)
 			}
 			else
 			{
-				SelectFont(vProjectFile, 0);
+				SelectFont(vProjectFile, nullptr);
 			}
 			vProjectFile->SetProjectChange();
 		}

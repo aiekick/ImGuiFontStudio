@@ -40,15 +40,8 @@
 
 static int GeneratorPane_WidgetId = 0;
 
-GeneratorPane::GeneratorPane()
-{
-	
-}
-
-GeneratorPane::~GeneratorPane()
-{
-	
-}
+GeneratorPane::GeneratorPane() = default;
+GeneratorPane::~GeneratorPane() = default;
 
 ///////////////////////////////////////////////////////////////////////////////////
 //// STATUS FLAGS /////////////////////////////////////////////////////////////////
@@ -326,7 +319,7 @@ bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
 					ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "%s : NOK", font.second.m_FontFileName.c_str());
 					errorsCount++;
 				}
-				else if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_MERGED) && font.second.m_SelectedGlyphs.size() == 0)
+				else if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_MERGED) && font.second.m_SelectedGlyphs.empty())
 				{
 					ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "%s : NOK", font.second.m_FontFileName.c_str());
 					ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "No Glyphs are selected.\n\tYou need it in Merged mode");
@@ -336,7 +329,7 @@ bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
 				{
 					ImGui::TextColored(ImGuiThemeHelper::Instance()->goodColor, "%s : OK", font.second.m_FontFileName.c_str());
 					ImGui::Indent();
-					if (font.second.m_SelectedGlyphs.size() == 0) // no glyphs to extract, we wille extract alls, current and batch only
+					if (font.second.m_SelectedGlyphs.empty()) // no glyphs to extract, we wille extract alls, current and batch only
 					{
 						ImGui::TextColored(ImGuiThemeHelper::Instance()->goodColor, "No Glyphs are selected.\n\tAll font glyphs will be exported");
 					}

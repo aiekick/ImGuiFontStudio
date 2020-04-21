@@ -39,8 +39,8 @@ public:
 	bool LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, GlyphInfos *vGlyphInfos);
 
 private:
-	bool DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
-		float vScale, float vProgress, bool vFill = false, bool vControlLines = true);
+	static bool DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
+		float vScale, bool vControlLines);
 
 public: // singleton
 	static GlyphPane *Instance()

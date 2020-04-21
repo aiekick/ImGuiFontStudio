@@ -36,26 +36,26 @@ public:
 	} m_FontPaneFlags = SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH;
 
 public:
-	int DrawSourceFontPane(ProjectFile *vProjectFile, int vWidgetId);
+	int DrawSourceFontPane(ProjectFile *vProjectFile, int vWidgetId) const;
 	int DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId);
 
-	void OpenFonts(ProjectFile *vProjectFile, std::map<std::string, std::string> vFontFilePathNames);
-	void OpenFont(ProjectFile *vProjectFile, std::string vFontFilePathName, bool vUpdateCount);
+	static void OpenFonts(ProjectFile *vProjectFile, const std::map<std::string, std::string>& vFontFilePathNames);
+	static void OpenFont(ProjectFile *vProjectFile, const std::string& vFontFilePathName, bool vUpdateCount);
 	
-	void DrawDialosAndPopups(ProjectFile * vProjectFile);
-	void CloseCurrentFont(ProjectFile *vProjectFile);
-	void SelectFont(ProjectFile *vProjectFile, FontInfos *vFontInfos);
+	static void DrawDialosAndPopups(ProjectFile * vProjectFile);
+	static void CloseCurrentFont(ProjectFile *vProjectFile);
+	static void SelectFont(ProjectFile *vProjectFile, FontInfos *vFontInfos);
 
 private:
-	void DrawFilterBar(ProjectFile *vProjectFile, FontInfos *vFontInfos);
-	bool IfCatchedByFilters(FontInfos *vFontInfos, const std::string& vSymbolName);
+	static void DrawFilterBar(ProjectFile *vProjectFile, FontInfos *vFontInfos);
+	static bool IfCatchedByFilters(FontInfos *vFontInfos, const std::string& vSymbolName);
 
 private:
 	//void DrawFontAtlas(ProjectFile *vProjectFile, FontInfos *vFontInfos);
-	void DrawFontTexture(FontInfos *vFontInfos);
+	static void DrawFontTexture(FontInfos *vFontInfos);
 
 private: // experimental => virtual list
-    void DrawFontAtlas_Virtual(ProjectFile *vProjectFile, FontInfos *vFontInfos);
+    static void DrawFontAtlas_Virtual(ProjectFile *vProjectFile, FontInfos *vFontInfos);
 
 
 public: // singleton

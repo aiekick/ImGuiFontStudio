@@ -1372,8 +1372,8 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile *vProjectFile)
 	if (vProjectFile &&  vProjectFile->IsLoaded())
 	{
 		// search for codepoint and names in double => an generate an error
-		std::set<std::string> namesGlobal; bool nameGlobalInDoubleFound = false;
-		std::set<ImWchar> codePointsGlobal; bool codePointGlobalInDoubleFound = false;
+		std::set<std::string> namesGlobal; vProjectFile->m_NameFoundInDouble = false;
+		std::set<ImWchar> codePointsGlobal; vProjectFile->m_CodePointFoundInDouble = false;
 		std::set<std::string> namesLocal; 
 		std::set<ImWchar> codePointsLocal; 
 		for (auto &font : vProjectFile->m_Fonts)
@@ -1414,7 +1414,7 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile *vProjectFile)
 				}
 
 				// global for all fonts
-				if (!codePointGlobalInDoubleFound)
+				if (!vProjectFile->m_CodePointFoundInDouble)
 				{
 					if (codePointsGlobal.find(selection.second.newCodePoint) == codePointsGlobal.end()) // not found 
 					{
@@ -1423,12 +1423,12 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile *vProjectFile)
 					else
 					{
 						// double detected => cast an error
-						codePointGlobalInDoubleFound = true;
+                        vProjectFile->m_CodePointFoundInDouble = true;
 					}
 				}
 
 				// global for all fonts
-				if (!nameGlobalInDoubleFound)
+				if (!vProjectFile->m_NameFoundInDouble)
 				{
 					if (namesGlobal.find(selection.second.newHeaderName) == namesGlobal.end()) // not found 
 					{
@@ -1437,19 +1437,19 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile *vProjectFile)
 					else
 					{
 						// double detected => cast an error
-						nameGlobalInDoubleFound = true;
+                        vProjectFile->m_NameFoundInDouble = true;
 					}
 				}
 
-				if (codePointGlobalInDoubleFound && 
-					nameGlobalInDoubleFound && 
-					font.second.m_CodePointInDoubleFound &&
+				if (vProjectFile->m_CodePointFoundInDouble &&
+				    vProjectFile->m_NameFoundInDouble &&
+				    font.second.m_CodePointInDoubleFound &&
 					font.second.m_NameInDoubleFound)
 					break;
 			}
 		}
 
-		if (nameGlobalInDoubleFound)
+		if (vProjectFile->m_NameFoundInDouble)
 		{
 			Messaging::Instance()->AddError(true, 0, [this](void*)
 			{
@@ -1464,7 +1464,7 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile *vProjectFile)
 			GeneratorPane::Instance()->AllowStatus(GeneratorStatusFlags::GENERATOR_STATUS_FONT_HEADER_GENERATION_ALLOWED);
 		}
 
-		if (codePointGlobalInDoubleFound)
+		if (vProjectFile->m_CodePointFoundInDouble)
 		{
 			Messaging::Instance()->AddError(true, 0, [this](void*)
 			{

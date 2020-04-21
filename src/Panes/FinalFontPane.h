@@ -66,23 +66,23 @@ public:
 
 private:
 	void CalcGlyphsCountAndSize(ImVec2 *vGlyphSize, int *vGlyphCountX, 
-		bool vForceEditMode = false, bool vForceEditModeOneColumn = false);
+		bool vForceEditMode = false, bool vForceEditModeOneColumn = false) const;
 	bool DrawGlyph(ProjectFile *vProjectFile, 
 		FontInfos *vFontInfos, const ImVec2& vSize,
 		GlyphInfos *vGlyph, bool vShowRect,
 		bool *vNameupdated, bool *vCodePointUpdated,
-		bool vForceEditMode = false);
+		bool vForceEditMode = false) const;
 	
 	void DrawSelectionsByFontNoOrder(ProjectFile *vProjectFile);
 	void DrawSelectionsByFontNoOrder_OneFontOnly(ProjectFile *vProjectFile, FontInfos *vFontInfos,
 		bool vWithFramedGroup = true, bool vForceEditMode = false, bool vForceEditModeOneColumn = false);
 
-	void PrepareSelectionByFontOrderedByCodePoint(ProjectFile *vProjectFile);
+	static void PrepareSelectionByFontOrderedByCodePoint(ProjectFile *vProjectFile);
 	void DrawSelectionsByFontOrderedByCodePoint(ProjectFile *vProjectFile);
 	void DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(ProjectFile *vProjectFile, FontInfos *vFontInfos,
 		bool vWithFramedGroup = true, bool vForceEditMode = false, bool vForceEditModeOneColumn = false);
 
-	void PrepareSelectionByFontOrderedByGlyphNames(ProjectFile *vProjectFile);
+	static void PrepareSelectionByFontOrderedByGlyphNames(ProjectFile *vProjectFile);
 	void DrawSelectionsByFontOrderedByGlyphNames(ProjectFile *vProjectFile);
 	void DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(ProjectFile *vProjectFile, FontInfos *vFontInfos,
 		bool vWithFramedGroup = true, bool vForceEditMode = false, bool vForceEditModeOneColumn = false);

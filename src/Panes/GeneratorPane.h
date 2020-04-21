@@ -48,9 +48,8 @@ public:
 	int DrawGeneratorPane(ProjectFile *vProjectFile, int vWidgetId);
 	int DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId);
 	
-	bool CheckGeneratioConditions(ProjectFile *vProjectFile);
-
-	void DrawDialosAndPopups(ProjectFile *vProjectFile);
+	static bool CheckGeneratioConditions(ProjectFile *vProjectFile);
+	static void DrawDialosAndPopups(ProjectFile *vProjectFile);
 
 private:
 	void GeneratorFileDialogPane(std::string vFilter, igfd::UserDatas vUserDatas, bool *vCantContinue);

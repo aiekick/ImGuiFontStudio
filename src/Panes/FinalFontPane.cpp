@@ -36,15 +36,8 @@ static int FinalFontPane_WidgetId = 0;
 static char glyphNameBuffer[512] = "\0";
 #define GLYH_EDIT_CONTROl_WIDTH 180.0f
 
-FinalFontPane::FinalFontPane()
-{
-
-}
-
-FinalFontPane::~FinalFontPane()
-{
-	
-}
+FinalFontPane::FinalFontPane() = default;
+FinalFontPane::~FinalFontPane() = default;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 ////// PUBLIC : DRAW //////////////////////////////////////////////////////////////////////
@@ -262,7 +255,7 @@ int FinalFontPane::DrawCurrentFontPane(ProjectFile *vProjectFile, int vWidgetId)
 
 void FinalFontPane::SetFinalFontPaneMode(FinalFontPaneModeFlags vFinalFontPaneModeFlags)
 {
-	m_FinalFontPaneModeFlags = (FinalFontPaneModeFlags)(vFinalFontPaneModeFlags | vFinalFontPaneModeFlags);
+	m_FinalFontPaneModeFlags = (FinalFontPaneModeFlags)(m_FinalFontPaneModeFlags | vFinalFontPaneModeFlags);
 }
 
 bool FinalFontPane::IsFinalFontPaneMode(FinalFontPaneModeFlags vFinalFontPaneModeFlags)
@@ -318,7 +311,7 @@ void FinalFontPane::PrepareSelection(ProjectFile *vProjectFile)
 
 void FinalFontPane::CalcGlyphsCountAndSize(
 	ImVec2 *vGlyphSize, int *vGlyphCountX, 
-	bool vForceEditMode, bool vForceEditModeOneColumn)
+	bool vForceEditMode, bool vForceEditModeOneColumn) const
 {
 	if (vGlyphSize && vGlyphCountX)
 	{
@@ -332,8 +325,9 @@ void FinalFontPane::CalcGlyphsCountAndSize(
 			// we will forgot vGlyphCountX
 			// cell_size_y will be item height x 2 + padding_y
 			// cell_size_x will be cell_size_y + padding_x + 100
-			const ImVec2 label_size = ImGui::CalcTextSize("gt", NULL, true);
-			const ImVec2 frame_size = ImGui::CalcItemSize(ImVec2(0, 0), ImGui::CalcItemWidth(), label_size.y + ImGui::GetStyle().FramePadding.y * 2.0f);
+			const ImVec2 label_size = ImGui::CalcTextSize("gt", nullptr, true);
+			const ImVec2 frame_size = ImGui::CalcItemSize(ImVec2(0, 0), ImGui::CalcItemWidth(),
+			        label_size.y + ImGui::GetStyle().FramePadding.y * 2.0f);
 			float cell_size_y = frame_size.y * 2.0f + ImGui::GetStyle().FramePadding.y;
 			float cell_size_x = cell_size_y + ImGui::GetStyle().FramePadding.x + GLYH_EDIT_CONTROl_WIDTH;
 			*vGlyphCountX = ct::maxi(1, (int)floorf(maxWidth / cell_size_x));
@@ -353,7 +347,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 	FontInfos *vFontInfos, const ImVec2& vSize,
 	GlyphInfos *vGlyph, bool vShowRect, 
 	bool *vNameupdated, bool *vCodePointUpdated, 
-	bool vForceEditMode)
+	bool vForceEditMode) const
 {
 	bool res = false;
 	
@@ -453,7 +447,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 				ImGui::PopItemWidth();
 			}
 
-			bool displayResetCodePointBtn = (vGlyph->newCodePoint != vGlyph->glyph.Codepoint);
+			bool displayResetCodePointBtn = ((uint32_t)vGlyph->newCodePoint != vGlyph->glyph.Codepoint);
 			if (!vGlyph->m_editingCodePoint)
 			{
 				vGlyph->editCodePoint = vGlyph->newCodePoint;
@@ -563,7 +557,7 @@ void FinalFontPane::DrawSelectionsByFontNoOrder_OneFontOnly(
 		{
 			if (vFontInfos->m_ImFontAtlas.TexID)
 			{
-				int startCodePoint = vFontInfos->m_SelectedGlyphs.begin()->second.glyph.Codepoint;
+				uint32_t startCodePoint = vFontInfos->m_SelectedGlyphs.begin()->second.glyph.Codepoint;
 
 				char buffer[1024] = "\0";
 				snprintf(buffer, 1023, "Font %s / Start CodePoint %i / Count %u",
@@ -623,11 +617,11 @@ void FinalFontPane::DrawSelectionsByFontNoOrder_OneFontOnly(
 						{
 							if (ImGui::IsItemHovered())
 							{
-								ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nadv x : %.2f\nuv0 : (%.3f,%.3f)\nuv1 : (%.3f,%.3f)",
+								ImGui::SetTooltip("new name : %s\nnew codepoint : %i\nold name : %s\nold codepoint : %i\nadv x : %.2f\nuv0 : (%.3f,%.3f)\nuv1 : (%.3f,%.3f)",
 									glyphInfo->newHeaderName.c_str(),
-									glyphInfo->newCodePoint,
+									(int)glyphInfo->newCodePoint,
 									glyphInfo->oldHeaderName.c_str(),
-									glyphInfo->glyph.Codepoint,
+									(int)glyphInfo->glyph.Codepoint,
 									glyphInfo->glyph.AdvanceX,
 									glyphInfo->glyph.U0, glyphInfo->glyph.V0,
 									glyphInfo->glyph.U1, glyphInfo->glyph.V1);
@@ -789,11 +783,11 @@ void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
 									{
 										if (ImGui::IsItemHovered())
 										{
-											ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nfont : %s",
+											ImGui::SetTooltip("new name : %s\nnew codepoint : %i\nold name : %s\nold codepoint : %i\nfont : %s",
 												glyphInfo->newHeaderName.c_str(),
-												glyphInfo->newCodePoint,
+												(int)glyphInfo->newCodePoint,
 												glyphInfo->oldHeaderName.c_str(),
-												glyphInfo->glyph.Codepoint,
+												(int)glyphInfo->glyph.Codepoint,
 												vFontInfos->m_FontFileName.c_str());
 										}
 									}
@@ -951,11 +945,11 @@ void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(
 									{
 										if (ImGui::IsItemHovered())
 										{
-											ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nfont : %s",
+											ImGui::SetTooltip("new name : %s\nnew codepoint : %i\nold name : %s\nold codepoint : %i\nfont : %s",
 												glyphInfo->newHeaderName.c_str(),
-												glyphInfo->newCodePoint,
+												(int)glyphInfo->newCodePoint,
 												glyphInfo->oldHeaderName.c_str(),
-												glyphInfo->glyph.Codepoint,
+												(int)glyphInfo->glyph.Codepoint,
 												vFontInfos->m_FontFileName.c_str());
 										}
 									}
@@ -1068,11 +1062,11 @@ void FinalFontPane::DrawSelectionMergedNoOrder(ProjectFile *vProjectFile)
 						{
 							if (ImGui::IsItemHovered())
 							{
-								ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nfont : %s",
+								ImGui::SetTooltip("new name : %s\nnew codepoint : %i\nold name : %s\nold codepoint : %i\nfont : %s",
 									glyphInfo->newHeaderName.c_str(),
-									glyphInfo->newCodePoint,
+									(int)glyphInfo->newCodePoint,
 									glyphInfo->oldHeaderName.c_str(),
-									glyphInfo->glyph.Codepoint,
+									(int)glyphInfo->glyph.Codepoint,
 									vFontInfos->m_FontFileName.c_str());
 							}
 						}
@@ -1191,11 +1185,11 @@ void FinalFontPane::DrawSelectionMergedOrderedByCodePoint(ProjectFile *vProjectF
 							{
 								if (ImGui::IsItemHovered())
 								{
-									ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nfont : %s",
+									ImGui::SetTooltip("new name : %s\nnew codepoint : %i\nold name : %s\nold codepoint : %i\nfont : %s",
 										glyphInfo->newHeaderName.c_str(),
-										glyphInfo->newCodePoint,
+										(int)glyphInfo->newCodePoint,
 										glyphInfo->oldHeaderName.c_str(),
-										glyphInfo->glyph.Codepoint,
+										(int)glyphInfo->glyph.Codepoint,
 										vFontInfos->m_FontFileName.c_str());
 								}
 							}
@@ -1313,11 +1307,11 @@ void FinalFontPane::DrawSelectionMergedOrderedByGlyphNames(ProjectFile *vProject
 							{
 								if (ImGui::IsItemHovered())
 								{
-									ImGui::SetTooltip("new name : %s\nnew codepoint : %u\nold name : %s\nold codepoint : %u\nfont : %s",
+									ImGui::SetTooltip("new name : %s\nnew codepoint : %i\nold name : %s\nold codepoint : %i\nfont : %s",
 										glyphInfo->newHeaderName.c_str(),
-										glyphInfo->newCodePoint,
+										(int)glyphInfo->newCodePoint,
 										glyphInfo->oldHeaderName.c_str(),
-										glyphInfo->glyph.Codepoint,
+										(int)glyphInfo->glyph.Codepoint,
 										vFontInfos->m_FontFileName.c_str());
 								}
 							}

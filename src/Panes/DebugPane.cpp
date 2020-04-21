@@ -36,15 +36,8 @@
 
 static int DebugPane_WidgetId = 0;
 
-DebugPane::DebugPane()
-{
-
-}
-
-DebugPane::~DebugPane()
-{
-
-}
+DebugPane::DebugPane() = default;
+DebugPane::~DebugPane() = default;
 
 ///////////////////////////////////////////////////////////////////////////////////
 //// IMGUI PANE ///////////////////////////////////////////////////////////////////
@@ -84,7 +77,7 @@ int DebugPane::DrawDebugPane(ProjectFile *vProjectFile, int vWidgetId)
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void DebugPane::SetGlyphToDebug(GlyphInfos vGlyphInfos)
+void DebugPane::SetGlyphToDebug(const GlyphInfos& vGlyphInfos)
 {
 	m_GlyphToDisplay = vGlyphInfos;
 }

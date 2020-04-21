@@ -310,7 +310,7 @@ void ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 	}
 }
 
-ImVec4 ProjectFile::GetColorFromInteger(int vInteger)
+ImVec4 ProjectFile::GetColorFromInteger(uint32_t vInteger)
 {
 	ImVec4 res;
 

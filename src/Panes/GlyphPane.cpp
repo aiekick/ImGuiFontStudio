@@ -33,47 +33,16 @@
 #include <cTools.h>
 #include <FileHelper.h>
 
-#include <cinttypes> // printf zu
-
-#include "sfntly/tag.h"
-#include "sfntly/font.h"
 #include "sfntly/font_factory.h"
-#include "sfntly/data/memory_byte_array.h"
-#include "sfntly/port/memory_output_stream.h"
-#include "sfntly/port/file_input_stream.h"
-#include "sfntly/table/truetype/loca_table.h"
-#include "sfntly/table/core/cmap_table.h"
-#include "sfntly/table/core/maximum_profile_table.h"
-#include "sfntly/table/core/post_script_table.h"
-#include "sfntly/table/core/horizontal_header_table.h"
-#include "sfntly/table/core/horizontal_metrics_table.h"
-#include "sfntly/port/type.h"
-#include "sfntly/port/refcount.h"
 
 static int GlyphPane_WidgetId = 0;
 
-GlyphPane::GlyphPane()
-{
-	
-}
-
-GlyphPane::~GlyphPane()
-{
-	
-}
+GlyphPane::GlyphPane() = default;
+GlyphPane::~GlyphPane() = default;
 
 ///////////////////////////////////////////////////////////////////////////////////
 //// IMGUI PANE ///////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
-
-static float _progress = 1.0f;
-//static float _scale = 0.5f;
-static bool _stroke = true;
-//static bool _controLines = true;
-//static int _tx = 0;
-//static int _ty = 0;
-//static float _sx = 1.0f;
-//static float _sy = 1.0f;
 
 int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
 {
@@ -114,8 +83,6 @@ int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
 					&m_GlyphToDisplay, 
 					vProjectFile->m_CurrentFont, 
 					vProjectFile->m_GlyphPreview_Scale, 
-					_progress, 
-					_stroke,
 					vProjectFile->m_GlyphPreview_ShowControlLines);
 			}
 		}
@@ -158,10 +125,10 @@ bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, Glyp
 
 					if (m_fontInstance.m_GlyfTable && m_fontInstance.m_LocaTable)
 					{
-						int codePoint = vGlyphInfos->glyph.Codepoint;
-						int32_t glyphId = m_fontInstance.m_CMapTable->GlyphId(codePoint);
-						int32_t length = m_fontInstance.m_LocaTable->GlyphLength(glyphId);
-						int32_t offset = m_fontInstance.m_LocaTable->GlyphOffset(glyphId);
+						uint32_t codePoint = vGlyphInfos->glyph.Codepoint;
+                        uint32_t glyphId = m_fontInstance.m_CMapTable->GlyphId(codePoint);
+                        uint32_t length = m_fontInstance.m_LocaTable->GlyphLength(glyphId);
+                        uint32_t offset = m_fontInstance.m_LocaTable->GlyphOffset(glyphId);
 
 						// Get the GLYF table for the current glyph id.
 						auto g = m_fontInstance.m_GlyfTable->GetGlyph(offset, length);
@@ -193,8 +160,9 @@ bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, Glyp
 }
 
 // https://github.com/rillig/sfntly/tree/master/java/src/com/google/typography/font/tools/fontviewer
-bool GlyphPane::DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
-	float vScale, float /*vProgress*/, bool /*vFill*/, bool vControlLines)
+bool GlyphPane::DrawSimpleGlyph(
+        GlyphInfos *vGlyph, FontInfos* vFontInfos,
+        float vScale, bool vControlLines)
 {
 	if (vGlyph && vFontInfos)
 	{
@@ -312,14 +280,14 @@ bool GlyphPane::DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
 					}
 				}
 
-				if (_stroke)
-				{
+				//if (_stroke)
+				//{
 					drawList->PathStroke(ImGui::GetColorU32(ImGuiCol_Text), true);
-				}
-				else
-				{
-					drawList->PathFillConvex(ImGui::GetColorU32(ImGuiCol_Text));
-				}
+				//}
+				//else
+				//{
+				//	drawList->PathFillConvex(ImGui::GetColorU32(ImGuiCol_Text));
+				//}
 
 #ifdef _DEBUG
 				DebugPane::Instance()->DrawGlyphCurrentPoint(vScale, pos, drawList);

@@ -48,11 +48,14 @@ public: // dont save
 	FontInfos *m_CurrentFont = 0;
 	size_t m_CountSelectedGlyphs = 0; // for all fonts
 	size_t m_CountFontWithSelectedGlyphs = 0; // for all fonts
+    bool m_NameFoundInDouble = false;
+    bool m_CodePointFoundInDouble = false;
 
 private: // dont save
 	bool m_IsLoaded = false;
 	bool m_NeverSaved = false;
 	bool m_IsThereAnyNotSavedChanged = false;
+
 
 public:
 	ProjectFile();
@@ -89,6 +92,6 @@ public:
 	void setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent);
 
 public: // utils
-	ImVec4 GetColorFromInteger(int vInteger);
+	ImVec4 GetColorFromInteger(uint32_t vInteger);
 };
 

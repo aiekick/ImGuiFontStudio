@@ -37,7 +37,7 @@ public:
 	int DrawDebugPane(ProjectFile *vProjectFile, int vWidgetId);
 
 public:
-	void SetGlyphToDebug(GlyphInfos vGlyphInfos);
+	void SetGlyphToDebug(const GlyphInfos& vGlyphInfos);
 	ct::ivec2 GetGlyphCurrentPoint();
 	void DrawGlyphCurrentPoint(float vPreviewScale, ImVec2 vScreenPos, ImDrawList *vImDrawList);
 
