@@ -78,7 +78,7 @@ public: // configuration
 public: // singleton
 	static GuiLayout *Instance()
 	{
-		static GuiLayout *_instance = new GuiLayout();
+		static auto *_instance = new GuiLayout();
 		return _instance;
 	}
 

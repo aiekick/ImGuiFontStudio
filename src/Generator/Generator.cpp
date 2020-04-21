@@ -46,15 +46,8 @@
 #include "Project/ProjectFile.h"
 #include "Helper/Messaging.h"
 
-Generator::Generator()
-{
-	
-}
-
-Generator::~Generator()
-{
-	
-}
+Generator::Generator() = default;
+Generator::~Generator() = default;
 
 void Generator::Generate(
 	const std::string& vFilePath,

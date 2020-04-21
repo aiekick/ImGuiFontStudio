@@ -42,10 +42,7 @@ SettingsDlg::SettingsDlg()
 	m_ShowDialog = false;
 }
 
-SettingsDlg::~SettingsDlg()
-{
-
-}
+SettingsDlg::~SettingsDlg() = default;
 
 void SettingsDlg::OpenDialog()
 {

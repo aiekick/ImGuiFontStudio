@@ -18,12 +18,6 @@
  */
 #include "RibbonBar.h"
 
-RibbonBar::RibbonBar()
-{
+RibbonBar::RibbonBar() = default;
+RibbonBar::~RibbonBar() = default;
 
-}
-
-RibbonBar::~RibbonBar()
-{
-	
-}
