@@ -41,28 +41,15 @@
 #include <FileHelper.h>
 #include <cTools.h>
 
-#include <stdio.h>
-
 #include <set>
 #include <map>
-#include <sstream>
 
-#include "sfntly/tag.h"
-#include "sfntly/font.h"
 #include "sfntly/font_factory.h"
-#include "sfntly/data/font_data.h" // data type size
-#include "sfntly/data/memory_byte_array.h"
 #include "sfntly/port/memory_output_stream.h"
 #include "sfntly/port/file_input_stream.h"
-#include "sfntly/table/truetype/loca_table.h"
-#include "sfntly/table/truetype/glyph_table.h"
-#include "sfntly/table/core/cmap_table.h"
 #include "sfntly/table/core/maximum_profile_table.h"
-#include "sfntly/table/core/post_script_table.h"
 #include "sfntly/table/core/horizontal_header_table.h"
 #include "sfntly/table/core/horizontal_metrics_table.h"
-#include "sfntly/port/type.h"
-#include "sfntly/port/refcount.h"
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -73,10 +60,7 @@ FontHelper::FontHelper()
 	m_InvertedStandardNames = InvertNameMap();
 }
 
-FontHelper::~FontHelper()
-{
-
-}
+FontHelper::~FontHelper() = default;
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -107,9 +91,9 @@ bool FontHelper::OpenFontFile(
 
 				if (fontInstance.m_GlyfTable && fontInstance.m_LocaTable)
 				{
-					fontInstance.m_NewGlyphNames = vNewNames;
-					fontInstance.m_NewGlyphCodePoints = vNewCodePoints;
-					fontInstance.m_NewGlyphInfos = vNewGlyphInfos;
+					fontInstance.m_NewGlyphNames = std::move(vNewNames);
+					fontInstance.m_NewGlyphCodePoints = std::move(vNewCodePoints);
+					fontInstance.m_NewGlyphInfos = std::move(vNewGlyphInfos);
 
 					FillCharacterMap(&fontInstance, fontInstance.m_NewGlyphNames);
 					FillResolvedCompositeGlyphs(&fontInstance, fontInstance.m_CharMap);
@@ -171,7 +155,7 @@ FontInstance* FontHelper::GetBaseFontInstance() // in merge mode the baseFontIns
 	{
 		return &m_Fonts[m_BaseFontIdx];
 	}
-	return 0;
+	return nullptr;
 }
 
 /* based on https://github.com/rillig/sfntly/blob/master/cpp/src/sample/subtly/font_info.cc*/
@@ -203,7 +187,7 @@ void FontHelper::FillCharacterMap(FontInstance *vFontInstance, std::map<CodePoin
 }
 
 /* based on https://github.com/rillig/sfntly/blob/master/cpp/src/sample/subtly/font_info.cc*/
-void FontHelper::FillResolvedCompositeGlyphs(FontInstance *vFontInstance, std::map<CodePoint, int32_t> chars_to_glyph_ids)
+void FontHelper::FillResolvedCompositeGlyphs(FontInstance *vFontInstance, const std::map<CodePoint, int32_t>& chars_to_glyph_ids)
 {
 	if (vFontInstance)
 	{
@@ -217,10 +201,9 @@ void FontHelper::FillResolvedCompositeGlyphs(FontInstance *vFontInstance, std::m
 		// initially containing all the ids and |resolved_glyph_ids|, initially empty.
 		// We'll remove glyph ids from |unresolved_glyph_ids| until it is empty and,
 		// if the glyph is composite, add its elements to the unresolved set.
-		for (auto it = chars_to_glyph_ids.begin(),
-			e = chars_to_glyph_ids.end(); it != e; ++it)
+		for (auto & chars_to_glyph_id : chars_to_glyph_ids)
 		{
-			unresolved_glyph_ids.insert(it->second);
+			unresolved_glyph_ids.insert(chars_to_glyph_id.second);
 		}
 
 		// As long as there are unresolved glyph ids.
@@ -244,7 +227,7 @@ void FontHelper::FillResolvedCompositeGlyphs(FontInstance *vFontInstance, std::m
 			int32_t offset = vFontInstance->m_LocaTable->GlyphOffset(glyph_id);
 			sfntly::GlyphPtr glyph;
 			glyph.Attach(vFontInstance->m_GlyfTable->GetGlyph(offset, length));
-			if (glyph == NULL)
+			if (glyph == nullptr)
 			{
 				fprintf(stderr, "GetGlyph returned NULL for %d\n", glyph_id);
 				continue;
@@ -314,7 +297,7 @@ sfntly::Font* FontHelper::AssembleFont(bool vUsePostTable)
 	auto fontInstance = GetBaseFontInstance();
 	if (fontInstance)
 	{
-		if (m_Fonts.size() > 0)
+		if (!m_Fonts.empty())
 		{
 			m_FontFactory.Attach(sfntly::FontFactory::GetInstance());
 			m_FontBuilder.Attach(m_FontFactory->NewFontBuilder());
@@ -333,12 +316,12 @@ sfntly::Font* FontHelper::AssembleFont(bool vUsePostTable)
 				// include for the moment only head, before generate it
 				// head table is needed else it will be a not loadable font
 				const sfntly::TableMap* common_table_map = fontInstance->m_Font->GetTableMap();
-				for (sfntly::TableMap::const_iterator it = common_table_map->begin(), e = common_table_map->end(); it != e; ++it)
+				for (const auto & it : *common_table_map)
 				{
 					//if (vTableBlackList.find(it->first) != vTableBlackList.end()) // found
 					//	continue;
-					if (it->second->header_tag() == sfntly::Tag::head) // a terme il faudra generer head
-						m_FontBuilder->NewTableBuilder(it->first, it->second->ReadFontData());
+					if (it.second->header_tag() == sfntly::Tag::head) // a terme il faudra generer head
+						m_FontBuilder->NewTableBuilder(it.first, it.second->ReadFontData());
 				}
 
 				return m_FontBuilder->Build();
@@ -367,12 +350,12 @@ bool FontHelper::Assemble_Glyf_Loca_Maxp_Tables()
 
 		int32_t fontId = 0;
 		int32_t new_glyphid = 0;
-		for (auto it = m_ResolvedSet.begin(), e = m_ResolvedSet.end(); it != e; ++it)
+		for (const auto & it : m_ResolvedSet)
 		{
 			// Get the glyph for this resolved_glyph_id.
-			fontId = it->first;
-			int32_t resolved_glyph_id = it->second;
-			m_OldToNewGlyfId[*it] = new_glyphid++;
+			fontId = it.first;
+			int32_t resolved_glyph_id = it.second;
+			m_OldToNewGlyfId[it] = new_glyphid++;
 			m_NewToOldGlyfId[fontId].push_back(resolved_glyph_id);
 
 			// we will need to scale the glyph contours here or somewhere for merging mode
@@ -429,7 +412,7 @@ bool FontHelper::Assemble_Glyf_Loca_Maxp_Tables()
 
 sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 	const int32_t& vFontId, const int32_t& vGlyphId,
-	sfntly::Ptr<sfntly::ReadableFontData> vReadableFontData)
+	const sfntly::Ptr<sfntly::ReadableFontData>& vReadableFontData)
 {
 	// we will not add or remove points
 	// just apply trasnofrmation soe the size will not change
@@ -610,8 +593,8 @@ bool FontHelper::Assemble_CMap_Table()
 		return false;
 
 	// Creating the segments and the glyph id array
-	sfntly::SegmentList* segment_list = new sfntly::SegmentList;
-	sfntly::IntegerList* new_glyph_id_array = new sfntly::IntegerList;
+	auto* segment_list = new sfntly::SegmentList;
+    auto* new_glyph_id_array = new sfntly::IntegerList;
 	int32_t last_chararacter = -2;
 	int32_t last_offset = 0;
 	sfntly::Ptr<sfntly::CMapTable::CMapFormat4::Builder::Segment> current_segment;
@@ -621,12 +604,12 @@ bool FontHelper::Assemble_CMap_Table()
 	// generated by this code without removing any character.
 	// Tuffy.ttf: CMap went from 3146 to 3972 bytes (1.7% to 2.17% of file)
 	// AnonymousPro.ttf: CMap went from 1524 to 1900 bytes (0.96% to 1.2%)
-	for (auto it = m_CharMap.begin(), e = m_CharMap.end(); it != e; ++it)
+	for (auto & it : m_CharMap)
 	{
-		int32_t character = it->first;
+		int32_t character = it.first;
 		if (character != last_chararacter + 1)
 		{  // new segment
-			if (current_segment != NULL)
+			if (current_segment != nullptr)
 			{
 				current_segment->set_end_count(last_chararacter);
 				segment_list->push_back(current_segment);
@@ -639,15 +622,15 @@ bool FontHelper::Assemble_CMap_Table()
 				new sfntly::CMapTable::CMapFormat4::Builder::
 				Segment(character, -1, 0, last_offset);
 		}
-		int32_t old_fontid = it->second.first;
-		int32_t old_glyphid = it->second.second;
+		int32_t old_fontid = it.second.first;
+		int32_t old_glyphid = it.second.second;
 		new_glyph_id_array->push_back(m_OldToNewGlyfId[FontGlyphId(old_fontid,old_glyphid)]);
 		last_offset += sfntly::DataSize::kSHORT;
 		last_chararacter = character;
 	}
 
 	// The last segment is still open.
-	if (current_segment != NULL)
+	if (current_segment != nullptr)
 	{
 		current_segment->set_end_count(last_chararacter);
 		segment_list->push_back(current_segment);
@@ -700,7 +683,7 @@ bool FontHelper::Assemble_Hmtx_Hhea_Tables()
 			{
 				sfntly::HorizontalMetricsTablePtr origMetrics =
 					down_cast<sfntly::HorizontalMetricsTable*>(font.m_Font->GetTable(sfntly::Tag::hmtx));
-				if (origMetrics == NULL)
+				if (origMetrics == nullptr)
 				{
 					return false;
 				}
@@ -728,8 +711,8 @@ bool FontHelper::Assemble_Hmtx_Hhea_Tables()
 			fontId++;
 		}
 
-		int32_t lastWidth = metrics.back().advanceWidth;
-		int32_t numberOfHMetrics = (int32_t)metrics.size();
+        auto lastWidth = metrics.back().advanceWidth;
+		auto numberOfHMetrics = (int32_t)metrics.size();
 		while (numberOfHMetrics > 1 && metrics[numberOfHMetrics - 2].advanceWidth == lastWidth)
 		{
 			numberOfHMetrics--;
@@ -746,7 +729,7 @@ bool FontHelper::Assemble_Hmtx_Hhea_Tables()
 			index += data->WriteUShort(index, adw);
 			index += data->WriteShort(index, metrics[i].lsb);
 		}
-		int32_t nMetric = (int32_t)metrics.size();
+        auto nMetric = (int32_t)metrics.size();
 		for (int32_t j = numberOfHMetrics; j < nMetric; ++j)
 		{
 			index += data->WriteShort(index, metrics[j].lsb);
@@ -794,7 +777,7 @@ bool FontHelper::Assemble_Post_Table(std::map<CodePoint, std::string> vSelection
 				}
 				else
 				{
-					names.push_back(sfntly::PostScriptTable::STANDARD_NAMES[id]);
+					names.emplace_back(sfntly::PostScriptTable::STANDARD_NAMES[id]);
 				}
 			}
 		}
@@ -932,7 +915,7 @@ bool FontHelper::SerializeFont(const char* font_path, sfntly::FontFactory* facto
 	size_t bufferLen = output_stream.Size();
 	if (bufferLen > 0)
 	{
-		FILE* output_file = NULL;
+		FILE* output_file = nullptr;
 #if defined(MSVC)
 		fopen_s(&output_file, font_path, "wb");
 #else
@@ -952,7 +935,7 @@ bool FontHelper::SerializeFont(const char* font_path, sfntly::FontFactory* facto
 
 GlyphInfos* FontHelper::GetGlyphInfosFromGlyphId(int32_t vFontId, int32_t vGlyphId)
 {
-	GlyphInfos *res = 0;
+	GlyphInfos *res = nullptr;
 
 	if (vFontId >= 0 && (int32_t)m_Fonts.size() > vFontId)
 	{

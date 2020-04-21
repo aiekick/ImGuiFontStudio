@@ -32,7 +32,7 @@
 #define CATEGORY_GENERAL "General"
 #define CATEGORY_STYLES "Styles"
 
-// cette classe ne doit rien modifier tant que le user n'a pas appuyé sur ok
+// cette classe ne doit rien modifier tant que le user n'a pas appuyï¿½ sur ok
 // donc ca ne doit rien modifier dans l'app tant que c'est pas ok
 // si cancel ca doit tout annuler
 // donc on ne manipule aucune varaibles externe dans que pas ok
@@ -222,7 +222,7 @@ void SettingsDlg::DrawPane_Style(SettingsPaneModeEnum vMode)
 	}
 	else if (vMode == SettingsPaneModeEnum::SETTINGS_PANE_MODE_CONTENT)
 	{
-		ImGuiStyle* ref = NULL;
+		ImGuiStyle* ref = nullptr;
 
 		// You can pass in a reference ImGuiStyle structure to compare to, revert to and save to (else it compares to an internally stored reference)
 		ImGuiStyle& style = ImGui::GetStyle();
@@ -230,10 +230,10 @@ void SettingsDlg::DrawPane_Style(SettingsPaneModeEnum vMode)
 
 		// Default to using internal storage as reference
 		static bool init = true;
-		if (init && ref == NULL)
+		if (init && ref == nullptr)
 			ref_saved_style = style;
 		init = false;
-		if (ref == NULL)
+		if (ref == nullptr)
 			ref = &ref_saved_style;
 
 		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.50f);

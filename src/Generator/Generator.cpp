@@ -63,14 +63,14 @@ void Generator::Generate(
 {
 	if (vProjectFile)
 	{
-		if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_CPP))
+		if (vProjectFile->IsGenMode(GENERATOR_MODE_CPP))
 		{
-			if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_CURRENT))
+			if (vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT))
 			{
 				std::string filePathName = vFilePath + "/" + vFileName;
 				GenerateCpp_One(filePathName, vProjectFile, vProjectFile->m_CurrentFont, vProjectFile->m_GenMode);
 			}
-			else if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_BATCH))
+			else if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
 			{
 				for (auto &font : vProjectFile->m_Fonts)
 				{
@@ -82,15 +82,15 @@ void Generator::Generate(
 					}
 				}
 			}
-			else if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_MERGED))
+			else if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED))
 			{
 				std::string filePathName = vFilePath + "/" + vFileName;
 				GenerateCpp_Merged(filePathName, vProjectFile, vProjectFile->GetGenMode());
 			}
 		}
-		else if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_FONT))
+		else if (vProjectFile->IsGenMode(GENERATOR_MODE_FONT))
 		{
-			if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_CURRENT))
+			if (vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT))
 			{
 				std::string filePathName = vFilePath + "/" + vFileName;
 				GenerateFontFile_One(filePathName, vProjectFile, vProjectFile->m_CurrentFont, vProjectFile->m_GenMode);
@@ -98,7 +98,7 @@ void Generator::Generate(
 				SourceFontPane::Instance()->OpenFont(vProjectFile, filePathName, false); // directly load the generated font file
 #endif
 			}
-			else if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_BATCH))
+			else if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
 			{
 				for (auto &font : vProjectFile->m_Fonts)
 				{
@@ -113,7 +113,7 @@ void Generator::Generate(
 					}
 				}
 			}
-			else if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_MERGED))
+			else if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED))
 			{
 				std::string filePathName = vFilePath + "/" + vFileName;
 				GenerateFontFile_Merged(filePathName, vProjectFile, vProjectFile->m_GenMode);
@@ -122,14 +122,14 @@ void Generator::Generate(
 #endif
 			}
 		}
-		else if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_HEADER))
+		else if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER))
 		{
-			if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_CURRENT))
+			if (vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT))
 			{
 				std::string filePathName = vFilePath + "/" + vFileName;
 				GenerateHeader_One(filePathName, vProjectFile->m_CurrentFont, vProjectFile->m_GenMode);
 			}
-			else if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_BATCH))
+			else if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
 			{
 				for (auto &font : vProjectFile->m_Fonts)
 				{
@@ -192,7 +192,7 @@ void Generator::GenerateHeader_One(
 			ImWchar maxCodePoint = 0;
 			std::string glyphs;
 
-			if (vFlags & GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES)
+			if (vFlags & GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES)
 			{
 				std::map<std::string, ImWchar> glyphNames;
 
@@ -231,7 +231,7 @@ void Generator::GenerateHeader_One(
 					glyphs += "#define ICON" + prefix + "_" + glyphName + " u8\"\\u" + ct::toHexStr(codePoint) + "\"\n";
 				}
 			}
-			else if (vFlags & GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_CODEPOINT)
+			else if (vFlags & GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_CODEPOINT)
 			{
 				std::map<ImWchar, std::string> glyphCodePoints;
 
@@ -326,7 +326,7 @@ void Generator::GenerateHeader_Merged(
 			ImWchar maxCodePoint = 0;
 			std::string glyphs;
 
-			if (vFlags & GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES)
+			if (vFlags & GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES)
 			{
 				std::map<std::string, ImWchar> glyphNames;
 
@@ -359,7 +359,7 @@ void Generator::GenerateHeader_Merged(
 					glyphs += "#define ICON" + prefix + "_" + glyphName + " u8\"\\u" + ct::toHexStr(codePoint) + "\"\n";
 				}
 			}
-			else if (vFlags & GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_CODEPOINT)
+			else if (vFlags & GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_CODEPOINT)
 			{
 				std::map<ImWchar, std::string> glyphCodePoints;
 
@@ -475,9 +475,9 @@ void Generator::GenerateFontFile_One(
 				ct::replaceString(name, "-", "_");
 				filePathName = ps.GetFilePathWithNameExt(name, ".ttf");
 				
-				if (fontHelper.GenerateFontFile(filePathName, vFlags & GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES))
+				if (fontHelper.GenerateFontFile(filePathName, vFlags & GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES))
 				{
-					if (vFlags & GenModeFlags::GENERATOR_MODE_HEADER)
+					if (vFlags & GENERATOR_MODE_HEADER)
 					{
 						GenerateHeader_One(filePathName, vFontInfos, vFlags);
 					}
@@ -612,9 +612,9 @@ void Generator::GenerateFontFile_Merged(
 				ct::replaceString(name, "-", "_");
 				filePathName = ps.GetFilePathWithNameExt(name, ".ttf");
 
-				if (fontHelper.GenerateFontFile(vFilePathName, vFlags & GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES))
+				if (fontHelper.GenerateFontFile(vFilePathName, vFlags & GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES))
 				{
-					if (vFlags & GenModeFlags::GENERATOR_MODE_HEADER)
+					if (vFlags & GENERATOR_MODE_HEADER)
 					{
 						GenerateHeader_Merged(filePathName, vProjectFile, vFlags);
 					}
@@ -693,7 +693,7 @@ void Generator::GenerateCpp_One(
 				filePathName = ps.GetFilePathWithNameExt("temporary_" + name, ".ttf");
 
 				GenerateFontFile_One(filePathName, vProjectFile, vFontInfos,
-					(GenModeFlags)(vFlags & ~GenModeFlags::GENERATOR_MODE_HEADER)); // no header to generate
+					(GenModeFlags)(vFlags & ~GENERATOR_MODE_HEADER)); // no header to generate
 			}
 
 			if (FileHelper::Instance()->IsFileExist(filePathName))
@@ -717,7 +717,7 @@ void Generator::GenerateCpp_One(
 				{
 					filePathName = ps.path + FileHelper::Instance()->m_SlashType + ps.name + ".cpp";
 
-					if (vFlags & GenModeFlags::GENERATOR_MODE_HEADER)
+					if (vFlags & GENERATOR_MODE_HEADER)
 					{
 						res = "#include \"" + ps.name + ".h\"\n\n" + res;
 						std::string prefix = "";
@@ -769,7 +769,7 @@ void Generator::GenerateCpp_Merged(
 			filePathName = ps.GetFilePathWithNameExt("temporary_" + ps.name, ".ttf");
 
 			GenerateFontFile_Merged(filePathName, vProjectFile,
-				(GenModeFlags)(vFlags & ~GenModeFlags::GENERATOR_MODE_HEADER)); // no header to generate
+				(GenModeFlags)(vFlags & ~GENERATOR_MODE_HEADER)); // no header to generate
 
 			if (FileHelper::Instance()->IsFileExist(filePathName))
 			{
@@ -789,7 +789,7 @@ void Generator::GenerateCpp_Merged(
 				{
 					filePathName = ps.GetFilePathWithNameExt(ps.name, ".cpp");
 
-					if (vFlags & GenModeFlags::GENERATOR_MODE_HEADER)
+					if (vFlags & GENERATOR_MODE_HEADER)
 					{
 						res = "#include \"" + ps.name + ".h\"\n\n" + res;
 						std::string prefix = "";
@@ -1156,9 +1156,9 @@ static int stb_compress_inner(stb_uchar *input, stb_uint length)
 
 	stb_uchar **chash;
 	chash = (stb_uchar**)malloc(stb__hashsize * sizeof(stb_uchar*));
-	if (chash == NULL) return 0; // failure
+	if (chash == nullptr) return 0; // failure
 	for (i = 0; i < stb__hashsize; ++i)
-		chash[i] = NULL;
+		chash[i] = nullptr;
 
 	// stream signature
 	stb_out(0x57); stb_out(0xbc);
@@ -1187,7 +1187,7 @@ static int stb_compress_inner(stb_uchar *input, stb_uint length)
 stb_uint stb_compress(stb_uchar *out, stb_uchar *input, stb_uint length)
 {
 	stb__out = out;
-	stb__outfile = NULL;
+	stb__outfile = nullptr;
 
 	stb_compress_inner(input, length);
 

@@ -18,6 +18,8 @@
  */
 #include "GlyphInfos.h"
 
+#include <utility>
+
  //////////////////////////////////////////////////////////
  //////////////////////////////////////////////////////////
  //////////////////////////////////////////////////////////
@@ -39,8 +41,8 @@ void SimpleGlyph_Solo::LoadSimpleGlyph(sfntly::GlyphTable::SimpleGlyph *vGlyph)
 		int cmax = vGlyph->NumberOfContours();
 		for (int c = 0; c < cmax; c++)
 		{
-			onCurve.push_back(std::vector<bool>());
-			coords.push_back(std::vector<ct::ivec2>());
+			onCurve.emplace_back();
+			coords.emplace_back();
 			int pmax = vGlyph->numberOfPoints(c);
 			for (int p = 0; p < pmax; p++)
 			{
@@ -59,7 +61,7 @@ void SimpleGlyph_Solo::LoadSimpleGlyph(sfntly::GlyphTable::SimpleGlyph *vGlyph)
 	}
 }
 
-int SimpleGlyph_Solo::GetCountContours()
+int SimpleGlyph_Solo::GetCountContours() const
 {
 	return (int)coords.size();
 }
@@ -84,11 +86,11 @@ bool SimpleGlyph_Solo::IsOnCurve(int32_t vContour, int32_t vPoint)
 	return onCurve[vContour][vPoint % count];
 }
 
-ct::ivec2 SimpleGlyph_Solo::Scale(ct::ivec2 p, double scale)
+ct::ivec2 SimpleGlyph_Solo::Scale(ct::ivec2 p, double scale) const
 {
-	return ct::ivec2(
+	return {
 		(int)round(scale * ((double)p.x - (double)rc.x)),
-		(int)round(scale * ((double)rc.w - (double)p.y)));
+		(int)round(scale * ((double)rc.w - (double)p.y))};
 }
 
 ct::ivec2 SimpleGlyph_Solo::GetCoords(int32_t vContour, int32_t vPoint, double scale)
@@ -120,14 +122,11 @@ GlyphInfos::GlyphInfos(
 	std::string vNewName, ImWchar vNewCodePoint)
 {
 	glyph = vGlyph;
-	oldHeaderName = vOldName;
+	oldHeaderName = std::move(vOldName);
 	newHeaderName = vNewName;
 	newCodePoint = vNewCodePoint;
 	if (newCodePoint == 0)
 		newCodePoint = glyph.Codepoint;
 }
 
-GlyphInfos::~GlyphInfos()
-{
-
-}
+GlyphInfos::~GlyphInfos() = default;

@@ -32,10 +32,7 @@ ImGuiThemeHelper::ImGuiThemeHelper()
 	m_FileTypeColors[".ifs"] = ImVec4(0.1f, 0.5f, 0.1f, 1.0f);
 }
 
-ImGuiThemeHelper::~ImGuiThemeHelper()
-{
-	
-}
+ImGuiThemeHelper::~ImGuiThemeHelper() = default;
 
 void ImGuiThemeHelper::DrawMenu()
 {

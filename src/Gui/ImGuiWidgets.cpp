@@ -45,8 +45,8 @@ bool ImGui::SelectableWithBtn(
         PushColumnsBackground();
 
     ImGuiID id = window->GetID(label);
-    ImVec2 label_size = CalcTextSize(label, NULL, true);
-    ImVec2 btn_label_size = btnLabel ? CalcTextSize(btnLabel, NULL, true) : ImVec2(0, 0);
+    ImVec2 label_size = CalcTextSize(label, nullptr, true);
+    ImVec2 btn_label_size = btnLabel ? CalcTextSize(btnLabel, nullptr, true) : ImVec2(0, 0);
     ImVec2 size(size_arg.x > 0.0f ? size_arg.x : label_size.x, size_arg.y > 0.0f ? size_arg.y : label_size.y);
     ImVec2 pos = window->DC.CursorPos;
     pos.y += window->DC.CurrLineTextBaseOffset;

@@ -23,10 +23,7 @@
 
 #include <FileHelper.h>
 
-ProjectFile::ProjectFile()
-{
-
-}
+ProjectFile::ProjectFile() = default;
 
 ProjectFile::ProjectFile(const std::string& vFilePathName)
 {
@@ -38,10 +35,7 @@ ProjectFile::ProjectFile(const std::string& vFilePathName)
 	}
 }
 
-ProjectFile::~ProjectFile()
-{
-	
-}
+ProjectFile::~ProjectFile() = default;
 
 void ProjectFile::Clear()
 {
@@ -52,14 +46,13 @@ void ProjectFile::Clear()
 	m_ShowRangeColoring = false;
 	m_RangeColoringHash = ImVec4(10, 15, 35, 0.5f);
 	m_Preview_Glyph_CountX = 20;
-	m_CurrentFont = 0;
+	m_CurrentFont = nullptr;
 	m_CountSelectedGlyphs = 0; // for all fonts
 	m_IsLoaded = false;
 	m_IsThereAnyNotSavedChanged = false;
-	m_GenMode = (GenModeFlags)(
-		GenModeFlags::GENERATOR_MODE_CURRENT_HEADER |
-		GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES |
-		GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
+	m_GenMode = GENERATOR_MODE_CURRENT_HEADER |
+		GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES |
+		GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES;
 	m_SourcePane_ShowGlyphTooltip = true;
 	m_FinalPane_ShowGlyphTooltip = true;
 	m_CurrentPane_ShowGlyphTooltip = true;
@@ -143,12 +136,12 @@ bool ProjectFile::SaveAs(const std::string& vFilePathName)
 	return false;
 }
 
-bool ProjectFile::IsLoaded()
+bool ProjectFile::IsLoaded() const
 {
 	return m_IsLoaded;
 }
 
-bool ProjectFile::IsThereAnyNotSavedChanged()
+bool ProjectFile::IsThereAnyNotSavedChanged() const
 {
 	return m_IsThereAnyNotSavedChanged;
 }
@@ -175,12 +168,12 @@ void ProjectFile::UpdateCountSelectedGlyphs()
 	SelectionHelper::Instance()->AnalyseSourceSelection(this);
 }
 
-bool ProjectFile::IsRangeColorignShown()
+bool ProjectFile::IsRangeColorignShown() const
 {
 	return m_ShowRangeColoring || SelectionHelper::Instance()->IsSelectionType(GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_RANGE);
 }
 
-std::string ProjectFile::GetAbsolutePath(const std::string& vFilePathName)
+std::string ProjectFile::GetAbsolutePath(const std::string& vFilePathName) const
 {
 	std::string res = vFilePathName;
 
@@ -196,7 +189,7 @@ std::string ProjectFile::GetAbsolutePath(const std::string& vFilePathName)
 	return res;
 }
 
-std::string ProjectFile::GetRelativePath(const std::string& vFilePathName)
+std::string ProjectFile::GetRelativePath(const std::string& vFilePathName) const
 {
 	std::string res = vFilePathName;
 
@@ -247,19 +240,19 @@ std::string ProjectFile::getXml(const std::string& vOffset)
 void ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent)
 {
 	// The value of this child identifies the name of this element
-	std::string strName = "";
-	std::string strValue = "";
-	std::string strParentName = "";
+	std::string strName;
+	std::string strValue;
+	std::string strParentName;
 
 	strName = vElem->Value();
 	if (vElem->GetText())
 		strValue = vElem->GetText();
-	if (vParent != 0)
+	if (vParent != nullptr)
 		strParentName = vParent->Value();
 
 	if (strName == "project")
 	{
-		for (tinyxml2::XMLElement* child = vElem->FirstChildElement(); child != 0; child = child->NextSiblingElement())
+		for (tinyxml2::XMLElement* child = vElem->FirstChildElement(); child != nullptr; child = child->NextSiblingElement())
 		{
 			RecursParsingConfig(child->ToElement(), vElem);
 		}
@@ -278,7 +271,7 @@ void ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 		}
 		else if (strName == "rangecoloring")
 		{
-			for (const tinyxml2::XMLAttribute* attr = vElem->FirstAttribute(); attr != 0; attr = attr->Next())
+			for (const tinyxml2::XMLAttribute* attr = vElem->FirstAttribute(); attr != nullptr; attr = attr->Next())
 			{
 				std::string attName = attr->Name();
 				std::string attValue = attr->Value();
@@ -310,7 +303,7 @@ void ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 	}
 }
 
-ImVec4 ProjectFile::GetColorFromInteger(uint32_t vInteger)
+ImVec4 ProjectFile::GetColorFromInteger(uint32_t vInteger) const
 {
 	ImVec4 res;
 
@@ -327,21 +320,21 @@ ImVec4 ProjectFile::GetColorFromInteger(uint32_t vInteger)
 
 void ProjectFile::AddGenMode(GenModeFlags vFlags)
 {
-	m_GenMode = (GenModeFlags)(m_GenMode | vFlags);
+	m_GenMode |= vFlags;
 }
 
 void ProjectFile::RemoveGenMode(GenModeFlags vFlags)
 {
-	m_GenMode = (GenModeFlags)(m_GenMode & ~vFlags);
+	m_GenMode &= ~vFlags;
 }
 
-GenModeFlags ProjectFile::GetGenMode()
+GenModeFlags ProjectFile::GetGenMode() const
 {
 	return m_GenMode;
 }
 
- bool ProjectFile::IsGenMode(GenModeFlags vFlags)
+ bool ProjectFile::IsGenMode(GenModeFlags vFlags) const
 {
-	return m_GenMode & vFlags;
+	return (m_GenMode & vFlags);
 }
 

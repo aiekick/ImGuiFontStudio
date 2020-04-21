@@ -106,8 +106,8 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 			if (ImGui::Button("Quick Font Current"))
 			{
 				vProjectFile->m_GenMode = (GenModeFlags)0;
-				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_CURRENT_FONT); // font + header
-				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
+				vProjectFile->AddGenMode(GENERATOR_MODE_CURRENT_FONT); // font + header
+				vProjectFile->AddGenMode(GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
 				std::string path = FileHelper::Instance()->GetAppPath() + "/exports";
 				path = FileHelper::Instance()->CorrectFilePathName(path);
 				FileHelper::Instance()->CreateDirectoryIfNotExist(path);
@@ -116,8 +116,8 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 			if (ImGui::Button("Quick Font Merged"))
 			{
 				vProjectFile->m_GenMode = (GenModeFlags)0;
-				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_MERGED_FONT); // font + header
-				vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
+				vProjectFile->AddGenMode(GENERATOR_MODE_MERGED_FONT); // font + header
+				vProjectFile->AddGenMode(GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
 				std::string path = FileHelper::Instance()->GetAppPath() + "/exports";
 				path = FileHelper::Instance()->CorrectFilePathName(path);
 				FileHelper::Instance()->CreateDirectoryIfNotExist(path);
@@ -141,32 +141,32 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 					}
 					else // unselect merge mode
 					{
-						vProjectFile->RemoveGenMode(GenModeFlags::GENERATOR_MODE_MERGED);
-						if (!vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_BATCH) &&
-							!vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_CURRENT))
+						vProjectFile->RemoveGenMode(GENERATOR_MODE_MERGED);
+						if (!vProjectFile->IsGenMode(GENERATOR_MODE_BATCH) &&
+							!vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT))
 						{
-							vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_BATCH);
+							vProjectFile->AddGenMode(GENERATOR_MODE_BATCH);
 						}
 					}
 				}
 				else // select current only
 				{
-					vProjectFile->RemoveGenMode(GenModeFlags::GENERATOR_MODE_MERGED);
-					vProjectFile->RemoveGenMode(GenModeFlags::GENERATOR_MODE_BATCH);
-					vProjectFile->AddGenMode(GenModeFlags::GENERATOR_MODE_CURRENT);
+					vProjectFile->RemoveGenMode(GENERATOR_MODE_MERGED);
+					vProjectFile->RemoveGenMode(GENERATOR_MODE_BATCH);
+					vProjectFile->AddGenMode(GENERATOR_MODE_CURRENT);
 				}
 
 				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Current", "Current Font",
-					&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_CURRENT, 50.0f, true, true,
-					GenModeFlags::GENERATOR_MODE_RADIO_CUR_BAT_MER);
+					&vProjectFile->m_GenMode, GENERATOR_MODE_CURRENT, 50.0f, true, true,
+					GENERATOR_MODE_RADIO_CUR_BAT_MER);
 				ImGui::SameLine();
 				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Batch", "Font by Font",
-					&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_BATCH, 50.0f, true, true,
-					GenModeFlags::GENERATOR_MODE_RADIO_CUR_BAT_MER, batchModeDisabled);
+					&vProjectFile->m_GenMode, GENERATOR_MODE_BATCH, 50.0f, true, true,
+					GENERATOR_MODE_RADIO_CUR_BAT_MER, batchModeDisabled);
 				ImGui::SameLine();
 				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Merged", "Fonts Merged in one",
-					&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_MERGED, 50.0f, true, true,
-					GenModeFlags::GENERATOR_MODE_RADIO_CUR_BAT_MER, mergeModeDisabled);
+					&vProjectFile->m_GenMode, GENERATOR_MODE_MERGED, 50.0f, true, true,
+					GENERATOR_MODE_RADIO_CUR_BAT_MER, mergeModeDisabled);
 			}
 			ImGui::Unindent();
 
@@ -180,24 +180,24 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 				}
 				else
 				{
-					vProjectFile->RemoveGenMode(GenModeFlags::GENERATOR_MODE_HEADER);
+					vProjectFile->RemoveGenMode(GENERATOR_MODE_HEADER);
 				}
 				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Header", "Header File",
-					&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_HEADER, 50.0f, false, false,
-					GenModeFlags::GENERATOR_MODE_NONE, headerModeDisabled);
+					&vProjectFile->m_GenMode, GENERATOR_MODE_HEADER, 50.0f, false, false,
+					GENERATOR_MODE_NONE, headerModeDisabled);
 				ImGui::SameLine();
 				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Font", "Font File",
-					&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_FONT, 50.0f, false, false,
-					GenModeFlags::GENERATOR_MODE_RADIO_FONT_CPP);
+					&vProjectFile->m_GenMode, GENERATOR_MODE_FONT, 50.0f, false, false,
+					GENERATOR_MODE_RADIO_FONT_CPP);
 				ImGui::SameLine();
 				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Cpp", "Source File for c++\n\twith font as a bytes array",
-					&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_CPP, 50.0f, false, false,
-					GenModeFlags::GENERATOR_MODE_RADIO_FONT_CPP);
+					&vProjectFile->m_GenMode, GENERATOR_MODE_CPP, 50.0f, false, false,
+					GENERATOR_MODE_RADIO_FONT_CPP);
 			}
 			ImGui::Unindent();
 
 			ImGui::Text("Settings : ");
-			if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_HEADER))
+			if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER))
 			{
 				ImGui::Indent();
 				{
@@ -206,18 +206,18 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 					{
 						ImGui::Text("Order Glyphs by :");
 						change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("CodePoint", "order by glyph CodePoint",
-							&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_CODEPOINT, 50.0f, true, true,
-							GenModeFlags::GENERATOR_MODE_RADIO_CDP_NAMES);
+							&vProjectFile->m_GenMode, GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_CODEPOINT, 50.0f, true, true,
+							GENERATOR_MODE_RADIO_CDP_NAMES);
 						ImGui::SameLine();
 						change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Names", "order by glyph Name",
-							&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES, 50.0f, true, true,
-							GenModeFlags::GENERATOR_MODE_RADIO_CDP_NAMES);
+							&vProjectFile->m_GenMode, GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES, 50.0f, true, true,
+							GENERATOR_MODE_RADIO_CDP_NAMES);
 					}
 					ImGui::Unindent();
 				}
 				ImGui::Unindent();
 			}
-			if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_FONT))
+			if (vProjectFile->IsGenMode(GENERATOR_MODE_FONT))
 			{
 				ImGui::Indent();
 				{
@@ -225,7 +225,7 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 					ImGui::Indent();
 					{
 						change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Export Names", "export glyph names in font file (increase size)",
-							&vProjectFile->m_GenMode, GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES, 50.0f);
+							&vProjectFile->m_GenMode, GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES, 50.0f);
 					}
 					ImGui::Unindent();
 				}
@@ -239,9 +239,9 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 				if (ImGui::Button(ICON_IGFS_GENERATE " Generate"))
 				{
 					btnClick = true;
-					if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_FONT)) exts = ".ttf\0\0";
-					else if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_CPP)) exts = ".cpp\0\0";
-					else if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_HEADER)) exts = ".h\0\0";
+					if (vProjectFile->IsGenMode(GENERATOR_MODE_FONT)) exts = ".ttf\0\0";
+					else if (vProjectFile->IsGenMode(GENERATOR_MODE_CPP)) exts = ".cpp\0\0";
+					else if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER)) exts = ".h\0\0";
 				}
 
 				ImGui::Unindent();
@@ -284,9 +284,9 @@ bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
 {
 	bool res = true;
 
-	if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_HEADER) ||
-		vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_FONT) ||
-		vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_CPP))
+	if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER) ||
+		vProjectFile->IsGenMode(GENERATOR_MODE_FONT) ||
+		vProjectFile->IsGenMode(GENERATOR_MODE_CPP))
 	{
 		
 	}
@@ -296,9 +296,9 @@ bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
 		ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "Can't generate.\n\tSelect one feature at least");
 	}
 
-	if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_MERGED) &&
-		!(vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_FONT) ||
-			vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_CPP)))
+	if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED) &&
+		!(vProjectFile->IsGenMode(GENERATOR_MODE_FONT) ||
+			vProjectFile->IsGenMode(GENERATOR_MODE_CPP)))
 	{
 		res = false;
 		ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "Merged mode require the\ngeneration of font or cpp.\nPlease Select one of\nthese two at least");
@@ -319,7 +319,7 @@ bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
 					ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "%s : NOK", font.second.m_FontFileName.c_str());
 					errorsCount++;
 				}
-				else if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_MERGED) && font.second.m_SelectedGlyphs.empty())
+				else if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED) && font.second.m_SelectedGlyphs.empty())
 				{
 					ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "%s : NOK", font.second.m_FontFileName.c_str());
 					ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "No Glyphs are selected.\n\tYou need it in Merged mode");
@@ -363,7 +363,7 @@ bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
 				ImGui::TextColored(ImGuiThemeHelper::Instance()->goodColor, "Can fully generate");
 			}
 
-			if (vProjectFile->IsGenMode(GenModeFlags::GENERATOR_MODE_MERGED))
+			if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED))
 			{
 				ImGui::TextColored(ImGuiThemeHelper::Instance()->goodColor,
 					"The selected font\n\tscale / bounding box\n\twill be used for merge in\n\tall other font glyphs");
@@ -392,12 +392,12 @@ void GeneratorPane::GeneratorFileDialogPane(std::string /*vFilter*/, igfd::UserD
 	auto prj = (ProjectFile*)vUserDatas;
 	if (prj)
 	{
-		if (prj->IsGenMode(GenModeFlags::GENERATOR_MODE_HEADER))
+		if (prj->IsGenMode(GENERATOR_MODE_HEADER))
 		{
 			#define PREFIX_MAX_SIZE 49
 			static char prefixBuffer[PREFIX_MAX_SIZE + 1] = "\0";
 
-			if (prj->IsGenMode(GenModeFlags::GENERATOR_MODE_CURRENT))
+			if (prj->IsGenMode(GENERATOR_MODE_CURRENT))
 			{
 				if (prj->m_CurrentFont)
 				{
@@ -419,7 +419,7 @@ void GeneratorPane::GeneratorFileDialogPane(std::string /*vFilter*/, igfd::UserD
 					canContinue = false;
 				}
 			}
-			else if (prj->IsGenMode(GenModeFlags::GENERATOR_MODE_BATCH))
+			else if (prj->IsGenMode(GENERATOR_MODE_BATCH))
 			{
 				canContinue = true;
 				std::map<std::string, int> prefixs;
@@ -451,7 +451,7 @@ void GeneratorPane::GeneratorFileDialogPane(std::string /*vFilter*/, igfd::UserD
 					canContinue &= cond;
 				}
 			}
-			else if (prj->IsGenMode(GenModeFlags::GENERATOR_MODE_MERGED))
+			else if (prj->IsGenMode(GENERATOR_MODE_MERGED))
 			{
 				bool cond = !prj->m_MergedFontPrefix.empty();
 				

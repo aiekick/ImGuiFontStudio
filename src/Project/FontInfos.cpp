@@ -37,7 +37,7 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 {
 	bool res = false;
 
-	if (!vProjectFile && vProjectFile->IsLoaded())
+	if (!vProjectFile || !vProjectFile->IsLoaded())
 		return res;
 
 	std::string fontFilePathName = FileHelper::Instance()->CorrectFilePathName(vFontFilePathName);
@@ -108,18 +108,20 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 				}
 				else
 				{
-					Messaging::Instance()->AddError(true, 0, 0, "The  File %s.%s seem to be bad. Can't load", ps.name.c_str(), ps.ext.c_str());
+					Messaging::Instance()->AddError(true, nullptr, nullptr,
+					        "The  File %s.%s seem to be bad. Can't load", ps.name.c_str(), ps.ext.c_str());
 				}
 			}
 			else
 			{
-				Messaging::Instance()->AddError(true, 0, 0, "The  File %s.%s seem to be bad. Can't load", ps.name.c_str(), ps.ext.c_str());
+				Messaging::Instance()->AddError(true, nullptr, nullptr,
+				        "The  File %s.%s seem to be bad. Can't load", ps.name.c_str(), ps.ext.c_str());
 			}
 		}
 	}
 	else
 	{
-		Messaging::Instance()->AddError(true, 0, 0, "font %s not found", fontFilePathName.c_str());
+		Messaging::Instance()->AddError(true, nullptr, nullptr, "font %s not found", fontFilePathName.c_str());
 		m_NeedFilePathResolve = true;
 	}
 
@@ -201,8 +203,7 @@ void FontInfos::FillGlyphNames()
 				offset += len + 1;
 				pendingNames.push_back(s);
 			}
-			stbtt_uint16 j = 0;
-			for (j = 0; j < numberGlyphs; j++)
+			for (stbtt_uint16 j = 0; j < numberGlyphs; j++)
 			{
 				stbtt_uint16 mapIdx = ttUSHORT(data + 34 + 2 * j);
 				if (mapIdx >= 258)
@@ -289,7 +290,7 @@ void FontInfos::GenerateCodePointToGlypNamesDB()
 				{
 					for (auto glyph : font->Glyphs)
 					{
-						int glyphIndex = stbtt_FindGlyphIndex(&fontInfo, glyph.Codepoint);
+						int glyphIndex = stbtt_FindGlyphIndex(&fontInfo, (uint32_t)glyph.Codepoint);
 						if (glyphIndex < (int)m_GlyphNames.size())
 						{
 							std::string name = m_GlyphNames[glyphIndex];
@@ -339,11 +340,11 @@ void FontInfos::DestroyFontTexture()
     // use (size_t) instead of (Gluint) for avoid error : 
 	// << Cast from pointer to smaller type 'int' loses information >> on MAcOs mojave..
     // it weird than this trick work...
-	GLuint id = (size_t)m_ImFontAtlas.TexID;
+	auto id = (GLuint)m_ImFontAtlas.TexID;
 	if (id)
 	{
 		glDeleteTextures(1, &id);
-		m_ImFontAtlas.TexID = 0;
+		m_ImFontAtlas.TexID = nullptr;
 	}
 }
 
@@ -400,7 +401,7 @@ void FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 	strName = vElem->Value();
 	if (vElem->GetText())
 		strValue = vElem->GetText();
-	if (vParent != 0)
+	if (vParent != nullptr)
 		strParentName = vParent->Value();
 
 	if (strName == "font")
@@ -411,7 +412,7 @@ void FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 			m_FontFileName = att->Value();
 		}
 
-		for (tinyxml2::XMLElement* child = vElem->FirstChildElement(); child != 0; child = child->NextSiblingElement())
+		for (tinyxml2::XMLElement* child = vElem->FirstChildElement(); child != nullptr; child = child->NextSiblingElement())
 		{
 			RecursParsingConfig(child->ToElement(), vElem);
 		}
@@ -428,7 +429,7 @@ void FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 			m_FontSize = ct::ivariant(strValue).getI();
 		else if (strName == "glyphs" || strName == "filters")
 		{
-			for (tinyxml2::XMLElement* child = vElem->FirstChildElement(); child != 0; child = child->NextSiblingElement())
+			for (tinyxml2::XMLElement* child = vElem->FirstChildElement(); child != nullptr; child = child->NextSiblingElement())
 			{
 				RecursParsingConfig(child->ToElement(), vElem);
 			}
@@ -441,7 +442,7 @@ void FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 		std::string oldName;
 		std::string newName;
 
-		for (const tinyxml2::XMLAttribute* attr = vElem->FirstAttribute(); attr != 0; attr = attr->Next())
+		for (const tinyxml2::XMLAttribute* attr = vElem->FirstAttribute(); attr != nullptr; attr = attr->Next())
 		{
 			std::string attName = attr->Name();
 			std::string attValue = attr->Value();

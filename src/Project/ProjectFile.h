@@ -33,10 +33,10 @@ public: // to save
 	std::string m_ProjectFilePathName;
 	std::string m_ProjectFilePath;
 	std::string m_MergedFontPrefix;
-	GenModeFlags m_GenMode = (GenModeFlags)(
-		GenModeFlags::GENERATOR_MODE_CURRENT_HEADER |
-		GenModeFlags::GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES | 
-		GenModeFlags::GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
+	GenModeFlags m_GenMode =
+	        GENERATOR_MODE_CURRENT_HEADER |
+		    GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES |
+		    GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES;
 	bool m_CurrentPane_ShowGlyphTooltip = true;
 	bool m_SourcePane_ShowGlyphTooltip = true;
 	bool m_FinalPane_ShowGlyphTooltip = true;
@@ -45,7 +45,7 @@ public: // to save
 	bool m_GlyphPreview_ShowControlLines = false;
 
 public: // dont save
-	FontInfos *m_CurrentFont = 0;
+	FontInfos *m_CurrentFont = nullptr;
 	size_t m_CountSelectedGlyphs = 0; // for all fonts
 	size_t m_CountFontWithSelectedGlyphs = 0; // for all fonts
     bool m_NameFoundInDouble = false;
@@ -59,7 +59,7 @@ private: // dont save
 
 public:
 	ProjectFile();
-	ProjectFile(const std::string& vFilePathName);
+	explicit ProjectFile(const std::string& vFilePathName);
 	~ProjectFile();
 
 	void Clear();
@@ -69,29 +69,29 @@ public:
 	bool LoadAs(const std::string& vFilePathName);
 	bool Save();
 	bool SaveAs(const std::string& vFilePathName);
-	bool IsLoaded();
+	bool IsLoaded() const;
 
-	bool IsThereAnyNotSavedChanged();
+	bool IsThereAnyNotSavedChanged() const;
 	void SetProjectChange(bool vChange = true);
 
 	void UpdateCountSelectedGlyphs();
 
-	bool IsRangeColorignShown();
+	bool IsRangeColorignShown() const;
 
-	std::string GetAbsolutePath(const std::string& vFilePathName);
-	std::string GetRelativePath(const std::string& vFilePathName);
+	std::string GetAbsolutePath(const std::string& vFilePathName) const;
+	std::string GetRelativePath(const std::string& vFilePathName) const;
 
 public: // Generation Mode
 	void AddGenMode(GenModeFlags vFlags);
 	void RemoveGenMode(GenModeFlags vFlags);
-	GenModeFlags GetGenMode();
-	bool IsGenMode(GenModeFlags vFlags);
+	GenModeFlags GetGenMode() const;
+	bool IsGenMode(GenModeFlags vFlags) const;
 
 public:
-	std::string getXml(const std::string& vOffset);
-	void setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent);
+	std::string getXml(const std::string& vOffset) override;
+	void setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent) override;
 
 public: // utils
-	ImVec4 GetColorFromInteger(uint32_t vInteger);
+	ImVec4 GetColorFromInteger(uint32_t vInteger) const;
 };
 

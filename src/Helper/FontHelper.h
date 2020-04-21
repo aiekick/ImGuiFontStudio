@@ -35,8 +35,8 @@
 class MemoryStream
 {
 public:
-	MemoryStream(){}
-	~MemoryStream(){}
+	MemoryStream()= default;
+	~MemoryStream()= default;
 
 	void WriteByte(uint8_t b)
 	{
@@ -83,6 +83,7 @@ struct Glyph
 	CodePoint codepoint = 0;
 	GlyphId glyphid = 0;
 	FontId fontId = 0;
+
 	Glyph(CodePoint vCdp, GlyphId vGid, FontId vFid)
 	{
 		codepoint = vCdp;
@@ -106,8 +107,6 @@ public:
 	std::set<int32_t> m_ResolvedSet;
 	std::map<int32_t, std::string> m_NewGlyphNames;
 	std::map<CodePoint, CodePoint> m_NewGlyphCodePoints;
-	std::map<int32_t, int32_t> m_OldToNewGlyfId;
-	std::vector<int32_t> m_NewToOldGlyfId;
 	std::map<CodePoint, GlyphInfos> m_NewGlyphInfos;
 };
 
@@ -146,26 +145,26 @@ private: // post table - version / count / size / offsets
 	const int32_t count_StandardNames = 258;
 	const int32_t size_Header = 32;
 	std::unordered_map<std::string, int32_t> m_InvertedStandardNames;
-	std::unordered_map<std::string, int32_t> InvertNameMap();
+	static std::unordered_map<std::string, int32_t> InvertNameMap();
 	int32_t MergeCharacterMaps();
 
 public:
-	sfntly::Font* LoadFontFile(const char* font_path);
+	static sfntly::Font* LoadFontFile(const char* font_path);
 
 private: // imported/based or/modified from sfntly
-	void LoadFontFiles(const char* font_path, sfntly::FontFactory* factory, sfntly::FontArray* fonts);
-	bool SerializeFont(const char* font_path, sfntly::Font* font);
-	bool SerializeFont(const char* font_path, sfntly::FontFactory* factory, sfntly::Font* font);
+	static void LoadFontFiles(const char* font_path, sfntly::FontFactory* factory, sfntly::FontArray* fonts);
+	static bool SerializeFont(const char* font_path, sfntly::Font* font);
+	static bool SerializeFont(const char* font_path, sfntly::FontFactory* factory, sfntly::Font* font);
 	sfntly::Font* AssembleFont(bool vUsePostTable);
 
 private:
 	bool Assemble_Glyf_Loca_Maxp_Tables();
-	sfntly::Ptr<sfntly::WritableFontData> ReScale_Glyph(const int32_t& vFontId, const int32_t& vGlyphId, sfntly::Ptr<sfntly::ReadableFontData> vReadableFontData);
-	void FillResolvedCompositeGlyphs(FontInstance *vFontInstance, std::map<CodePoint, int32_t> chars_to_glyph_ids);
+	sfntly::Ptr<sfntly::WritableFontData> ReScale_Glyph(const int32_t& vFontId, const int32_t& vGlyphId, const sfntly::Ptr<sfntly::ReadableFontData>& vReadableFontData);
+	static void FillResolvedCompositeGlyphs(FontInstance *vFontInstance, const std::map<CodePoint, int32_t>& chars_to_glyph_ids);
 
 private:
 	bool Assemble_CMap_Table();
-	void FillCharacterMap(FontInstance *vFontInstance, std::map<CodePoint, std::string> vSelection);
+	static void FillCharacterMap(FontInstance *vFontInstance, std::map<CodePoint, std::string> vSelection);
 
 private:
 	bool Assemble_Hmtx_Hhea_Tables();
@@ -174,10 +173,10 @@ private:
 	bool Assemble_Post_Table(std::map<CodePoint, std::string> vSelection);
 
 private:
-	bool Assemble_Meta_Table();
+	static bool Assemble_Meta_Table();
 
 private:
-	bool Assemble_Head_Table();
+	static bool Assemble_Head_Table();
 
 private:
 	GlyphInfos* GetGlyphInfosFromGlyphId(int32_t vFontId, int32_t vGlyphId);

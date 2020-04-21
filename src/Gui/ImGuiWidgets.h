@@ -165,9 +165,9 @@ namespace ImGui
 	IMGUI_API bool Selectable_FramedText(const char* fmt, ...);
 	IMGUI_API bool InputText_Validation(const char* label, char* buf, size_t buf_size, 
 		const bool *vValidation = 0, const char* vValidationHelp = 0,
-		ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = NULL, void* user_data = NULL);
+		ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = nullptr, void* user_data = nullptr);
 	IMGUI_API void HelpMarker(const char* desc);
-	IMGUI_API void ShowCustomStyleEditor(bool *vOpen, ImGuiStyle* ref = NULL);
+	IMGUI_API void ShowCustomStyleEditor(bool *vOpen, ImGuiStyle* ref = nullptr);
 
 	////////////////////////////////////////////////////////////////////////////
 }

@@ -19,7 +19,8 @@
 #include <string>
 #include <map>
 
-enum GenModeFlags
+typedef int GenModeFlags;
+enum _GenModeFlags
 {
 	GENERATOR_MODE_NONE = 0,
 	GENERATOR_MODE_HEADER = (1 << 0),

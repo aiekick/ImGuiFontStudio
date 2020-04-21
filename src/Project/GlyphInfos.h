@@ -38,10 +38,10 @@ public:
 public:
 	void clear();
 	void LoadSimpleGlyph(sfntly::GlyphTable::SimpleGlyph *vGlyph);
-	int GetCountContours();
+	int GetCountContours() const;
 	ct::ivec2 GetCoords(int32_t vContour, int32_t vPoint);
 	bool IsOnCurve(int32_t vContour, int32_t vPoint);
-	ct::ivec2 Scale(ct::ivec2 p, double scale);
+	ct::ivec2 Scale(ct::ivec2 p, double scale) const;
 	ct::ivec2 GetCoords(int32_t vContour, int32_t vPoint, double scale);
 };
 
@@ -49,10 +49,10 @@ class FontInfos;
 class GlyphInfos
 {
 public:
-	ImFontGlyph glyph;
+	ImFontGlyph glyph{};
 	std::string oldHeaderName;
 	std::string newHeaderName;
-	ImWchar newCodePoint = 0;
+	uint32_t newCodePoint = 0;
 	FontInfos *fontAtlas = 0;
 	SimpleGlyph_Solo simpleGlyph;
 	ct::ivec4 m_FontBoundingBox;

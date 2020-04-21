@@ -90,8 +90,8 @@ void GuiLayout::ApplyInitialDockingLayout(ImVec2 vSize)
 	float rightWidth = 310.0f;
 
 	ImGuiID dockMainID = m_DockSpaceID; // This variable will track the document node, however we are not using it here as we aren't docking anything into it.
-	ImGuiID dockParamID = ImGui::DockBuilderSplitNode(dockMainID, ImGuiDir_Left, leftWidth / vSize.x, NULL, &dockMainID);
-	ImGuiID dockRightID = ImGui::DockBuilderSplitNode(dockMainID, ImGuiDir_Right, rightWidth / vSize.x, NULL, &dockMainID);
+	ImGuiID dockParamID = ImGui::DockBuilderSplitNode(dockMainID, ImGuiDir_Left, leftWidth / vSize.x, nullptr, &dockMainID);
+	ImGuiID dockRightID = ImGui::DockBuilderSplitNode(dockMainID, ImGuiDir_Right, rightWidth / vSize.x, nullptr, &dockMainID);
 	//ImGuiID dockSelectionID = ImGui::DockBuilderSplitNode(dockRight, ImGuiDir_Up, 0.50f, NULL, &dockRight);
 	//ImGuiID dockGeneratorID = ImGui::DockBuilderSplitNode(dockRight, ImGuiDir_Down, 0.50f, NULL, &dockRight);
 
