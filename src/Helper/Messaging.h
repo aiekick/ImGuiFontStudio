@@ -39,13 +39,15 @@ private:
 		MESSAGE_TYPE_WARNING
 	};
 
-	enum MessageExistFlags
+	enum _MessageExistFlags
 	{
 		MESSAGE_EXIST_NONE = 0,
 		MESSAGE_EXIST_INFOS = (1<<0),
 		MESSAGE_EXIST_ERROR = (1<<1),
 		MESSAGE_EXIST_WARNING = (1<<2)
-	} m_MessageExistFlags = MESSAGE_EXIST_NONE;
+	};
+    typedef int MessageExistFlags;
+    MessageExistFlags m_MessageExistFlags = MESSAGE_EXIST_NONE;
 
 	size_t currentMsgIdx = 0;
 	typedef std::function<void(void*)> MessageFunc;
@@ -53,16 +55,16 @@ private:
 	std::vector<Messagekey> m_Messages;
 
 private:
-	void AddMessage(std::string vMsg, MessageTypeEnum vType, bool vSelect, void* vDatas, MessageFunc vFunction);
-	void AddMessage(MessageTypeEnum vType, bool vSelect, void* vDatas, MessageFunc vFunction, const char* fmt, va_list args);
+	void AddMessage(const std::string& vMsg, MessageTypeEnum vType, bool vSelect, void* vDatas, const MessageFunc& vFunction);
+	void AddMessage(MessageTypeEnum vType, bool vSelect, void* vDatas, const MessageFunc& vFunction, const char* fmt, va_list args);
 	bool DrawMessage(const size_t& vMsgIdx);
 	bool DrawMessage(const Messagekey& vMsg);
 
 public:
 	void Draw(ProjectFile *vProjectFile);
-	void AddInfos(bool vSelect, void* vDatas, MessageFunc vFunction, const char* fmt, ...); // select => set currentMsgIdx to this msg idx
-	void AddWarning(bool vSelect, void* vDatas, MessageFunc vFunction, const char* fmt, ...); // select => set currentMsgIdx to this msg idx
-	void AddError(bool vSelect, void* vDatas, MessageFunc vFunction, const char* fmt, ...); // select => set currentMsgIdx to this msg idx
+	void AddInfos(bool vSelect, void* vDatas, const MessageFunc& vFunction, const char* fmt, ...); // select => set currentMsgIdx to this msg idx
+	void AddWarning(bool vSelect, void* vDatas, const MessageFunc& vFunction, const char* fmt, ...); // select => set currentMsgIdx to this msg idx
+	void AddError(bool vSelect, void* vDatas, const MessageFunc& vFunction, const char* fmt, ...); // select => set currentMsgIdx to this msg idx
 	void ClearErrors();
 	void ClearWarnings();
 	void ClearInfos();

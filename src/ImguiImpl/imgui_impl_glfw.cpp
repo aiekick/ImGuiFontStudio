@@ -86,7 +86,7 @@ static GLFWmousebuttonfun   g_PrevUserCallbackMousebutton = nullptr;
 static GLFWscrollfun        g_PrevUserCallbackScroll = nullptr;
 static GLFWkeyfun           g_PrevUserCallbackKey = nullptr;
 static GLFWcharfun          g_PrevUserCallbackChar = nullptr;
-//static GLFWmonitorfun       g_PrevUserCallbackMonitor = nullptr;
+static GLFWmonitorfun       g_PrevUserCallbackMonitor = nullptr;
 
 // Forward Declarations
 static void ImGui_ImplGlfw_UpdateMonitors();

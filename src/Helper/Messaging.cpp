@@ -23,17 +23,8 @@
 #include "Gui/ImGuiWidgets.h"
 #include "Helper/SelectionHelper.h"
 
-#include "imgui/imgui.h"
-
-Messaging::Messaging()
-{
-
-}
-
-Messaging::~Messaging()
-{
-	
-}
+Messaging::Messaging() = default;
+Messaging::~Messaging() = default;
 
 ///////////////////////////////////////////////////////////////////////////////////////////
 ///// PRIVATE /////////////////////////////////////////////////////////////////////////////
@@ -41,21 +32,21 @@ Messaging::~Messaging()
 
 static char Messaging_Message_Buffer[2048] = "\0";
 
-void Messaging::AddMessage(MessageTypeEnum vType, bool vSelect, void* vDatas, MessageFunc vFunction, const char* fmt, va_list args)
+void Messaging::AddMessage(MessageTypeEnum vType, bool vSelect, void* vDatas, const MessageFunc& vFunction, const char* fmt, va_list args)
 {
 	int size = vsnprintf(Messaging_Message_Buffer, 2047, fmt, args);
 	if (size > 0)
 		AddMessage(std::string(Messaging_Message_Buffer, size), vType, vSelect, vDatas, vFunction);
 }
 
-void Messaging::AddMessage(std::string vMsg, MessageTypeEnum vType, bool vSelect, void* vDatas, MessageFunc vFunction)
+void Messaging::AddMessage(const std::string& vMsg, MessageTypeEnum vType, bool vSelect, void* vDatas, const MessageFunc& vFunction)
 {
 	if (vSelect)
 	{
 		currentMsgIdx = m_Messages.size();
 	}
 
-	m_Messages.push_back(std::make_tuple(vMsg, vType, vDatas, vFunction));
+	m_Messages.emplace_back(vMsg, vType, vDatas, vFunction);
 }
 
 bool Messaging::DrawMessage(const size_t& vMsgIdx)
@@ -96,7 +87,7 @@ bool Messaging::DrawMessage(const Messagekey& vMsg)
 	if (check)
 	{
 		auto datas = std::get<2>(vMsg);
-		auto func = std::get<3>(vMsg);
+		const auto& func = std::get<3>(vMsg);
 		if (func)
 			func(datas);
 	}
@@ -120,9 +111,9 @@ void Messaging::Draw(ProjectFile *vProjectFile)
 	if (!m_Messages.empty())
 	{
 		// on type of message only
-		if (m_MessageExistFlags == MessageExistFlags::MESSAGE_EXIST_INFOS ||
-			m_MessageExistFlags == MessageExistFlags::MESSAGE_EXIST_WARNING ||
-			m_MessageExistFlags == MessageExistFlags::MESSAGE_EXIST_ERROR)
+		if (m_MessageExistFlags == MESSAGE_EXIST_INFOS ||
+			m_MessageExistFlags == MESSAGE_EXIST_WARNING ||
+			m_MessageExistFlags == MESSAGE_EXIST_ERROR)
 		{
 			if (ImGui::MenuItem(ICON_IGFS_DESTROY "##clear"))
 			{
@@ -135,11 +126,11 @@ void Messaging::Draw(ProjectFile *vProjectFile)
 			{
 				if (ImGui::MenuItem("All")) Clear();
 				ImGui::Separator();
-				if (m_MessageExistFlags & MessageExistFlags::MESSAGE_EXIST_INFOS)
+				if (m_MessageExistFlags & MESSAGE_EXIST_INFOS)
 					if (ImGui::MenuItem("Infos")) ClearInfos();
-				if (m_MessageExistFlags & MessageExistFlags::MESSAGE_EXIST_WARNING)
+				if (m_MessageExistFlags & MESSAGE_EXIST_WARNING)
 					if (ImGui::MenuItem("Warnings")) ClearWarnings();
-				if (m_MessageExistFlags & MessageExistFlags::MESSAGE_EXIST_ERROR)
+				if (m_MessageExistFlags & MESSAGE_EXIST_ERROR)
 					if (ImGui::MenuItem("Errors")) ClearErrors();
 
 				ImGui::EndMenu();
@@ -173,31 +164,31 @@ void Messaging::Draw(ProjectFile *vProjectFile)
 	}
 }
 
-void Messaging::AddInfos(bool vSelect, void* vDatas, MessageFunc vFunction, const char* fmt, ...)
+void Messaging::AddInfos(bool vSelect, void* vDatas, const MessageFunc& vFunction, const char* fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
 	AddMessage(MessageTypeEnum::MESSAGE_TYPE_INFOS, vSelect, vDatas, vFunction, fmt, args);
 	va_end(args);
-	m_MessageExistFlags = (MessageExistFlags)(m_MessageExistFlags | MessageExistFlags::MESSAGE_EXIST_INFOS);
+	m_MessageExistFlags = (MessageExistFlags)(m_MessageExistFlags | MESSAGE_EXIST_INFOS);
 }
 
-void Messaging::AddWarning(bool vSelect, void* vDatas, MessageFunc vFunction, const char* fmt, ...)
+void Messaging::AddWarning(bool vSelect, void* vDatas, const MessageFunc& vFunction, const char* fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
 	AddMessage(MessageTypeEnum::MESSAGE_TYPE_WARNING, vSelect, vDatas, vFunction, fmt, args);
 	va_end(args);
-	m_MessageExistFlags = (MessageExistFlags)(m_MessageExistFlags | MessageExistFlags::MESSAGE_EXIST_WARNING);
+	m_MessageExistFlags = (MessageExistFlags)(m_MessageExistFlags | MESSAGE_EXIST_WARNING);
 }
 
-void Messaging::AddError(bool vSelect, void* vDatas, MessageFunc vFunction, const char* fmt, ...)
+void Messaging::AddError(bool vSelect, void* vDatas, const MessageFunc& vFunction, const char* fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
 	AddMessage(MessageTypeEnum::MESSAGE_TYPE_ERROR, vSelect, vDatas, vFunction, fmt, args);
 	va_end(args);
-	m_MessageExistFlags = (MessageExistFlags)(m_MessageExistFlags | MessageExistFlags::MESSAGE_EXIST_ERROR);
+	m_MessageExistFlags = (MessageExistFlags)(m_MessageExistFlags | MESSAGE_EXIST_ERROR);
 }
 
 void Messaging::ClearErrors()
@@ -216,7 +207,7 @@ void Messaging::ClearErrors()
 		m_Messages.erase(m_Messages.begin() + id);
 	}
 
-	m_MessageExistFlags = (MessageExistFlags)(m_MessageExistFlags & ~MessageExistFlags::MESSAGE_EXIST_ERROR);
+	m_MessageExistFlags &= ~MESSAGE_EXIST_ERROR;
 }
 
 void Messaging::ClearWarnings()
@@ -235,7 +226,7 @@ void Messaging::ClearWarnings()
 		m_Messages.erase(m_Messages.begin() + id);
 	}
 	
-	m_MessageExistFlags = (MessageExistFlags)(m_MessageExistFlags & ~MessageExistFlags::MESSAGE_EXIST_WARNING);
+	m_MessageExistFlags &= ~MESSAGE_EXIST_WARNING;
 }
 
 void Messaging::ClearInfos()
@@ -254,11 +245,11 @@ void Messaging::ClearInfos()
 		m_Messages.erase(m_Messages.begin() + id);
 	}
 	
-	m_MessageExistFlags = (MessageExistFlags)(m_MessageExistFlags & ~MessageExistFlags::MESSAGE_EXIST_INFOS);
+	m_MessageExistFlags &= ~MESSAGE_EXIST_INFOS;
 }
 
 void Messaging::Clear()
 {
 	m_Messages.clear();
-	m_MessageExistFlags = MessageExistFlags::MESSAGE_EXIST_NONE;
+	m_MessageExistFlags = MESSAGE_EXIST_NONE;
 }

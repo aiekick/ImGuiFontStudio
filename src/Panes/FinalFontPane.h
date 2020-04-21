@@ -65,7 +65,7 @@ public:
 	void PrepareSelection(ProjectFile *vProjectFile);
 
 private:
-	void CalcGlyphsCountAndSize(ImVec2 *vGlyphSize, int *vGlyphCountX, 
+	void CalcGlyphsCountAndSize(ImVec2 *vGlyphSize, uint32_t *vGlyphCountX,
 		bool vForceEditMode = false, bool vForceEditModeOneColumn = false) const;
 	bool DrawGlyph(ProjectFile *vProjectFile, 
 		FontInfos *vFontInfos, const ImVec2& vSize,

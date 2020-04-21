@@ -310,7 +310,7 @@ void FinalFontPane::PrepareSelection(ProjectFile *vProjectFile)
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 void FinalFontPane::CalcGlyphsCountAndSize(
-	ImVec2 *vGlyphSize, int *vGlyphCountX, 
+	ImVec2 *vGlyphSize, uint32_t *vGlyphCountX,
 	bool vForceEditMode, bool vForceEditModeOneColumn) const
 {
 	if (vGlyphSize && vGlyphCountX)
@@ -1245,14 +1245,14 @@ void FinalFontPane::DrawSelectionMergedOrderedByGlyphNames(ProjectFile *vProject
 
 	if (vProjectFile)
 	{
-		int glyphCountX = vProjectFile->m_Preview_Glyph_CountX;
+        uint32_t glyphCountX = vProjectFile->m_Preview_Glyph_CountX;
 		bool showRangeColoring = vProjectFile->IsRangeColorignShown();
 
 		ImVec2 cell_size;
 		CalcGlyphsCountAndSize(&cell_size, &glyphCountX);
 
-		int idx = 0;
-		int lastGlyphCodePoint = 0;
+        uint32_t idx = 0;
+        uint32_t lastGlyphCodePoint = 0;
 
 		ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
 

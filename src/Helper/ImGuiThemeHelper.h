@@ -33,15 +33,15 @@ public:
 	void DrawMenu();
 
 public:
-	std::string getXml(const std::string& vOffset);
-	void setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent);
+	std::string getXml(const std::string& vOffset) override;
+	void setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent) override;
 
 public:
-	void ApplyStyleColorsDefault(ImGuiStyle* dst = 0);
-	void ApplyStyleColorsClassic(ImGuiStyle* dst = 0);
-	void ApplyStyleColorsDark(ImGuiStyle* dst = 0);
-	void ApplyStyleColorsLight(ImGuiStyle* dst = 0);
-	void ApplyStyleColorsDarcula(ImGuiStyle* dst = 0);
+	void ApplyStyleColorsDefault(ImGuiStyle* dst = nullptr);
+	void ApplyStyleColorsClassic(ImGuiStyle* dst = nullptr);
+	void ApplyStyleColorsDark(ImGuiStyle* dst = nullptr);
+	void ApplyStyleColorsLight(ImGuiStyle* dst = nullptr);
+	void ApplyStyleColorsDarcula(ImGuiStyle* dst = nullptr);
 
 private:
 	void ApplyFileTypeColors();
@@ -53,7 +53,7 @@ private:
 public: // singleton
 	static ImGuiThemeHelper *Instance()
 	{
-		static ImGuiThemeHelper *_instance = new ImGuiThemeHelper();
+		static auto *_instance = new ImGuiThemeHelper();
 		return _instance;
 	}
 
