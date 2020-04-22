@@ -94,9 +94,9 @@ for instance here in this example for load embedded font, we have (with font Pre
 
 ```cpp
  ImGui::GetIO().Fonts->AddFontDefault();
-	static const ImWchar icons_ranges[] = { ICON_MIN_IGFS, ICON_MAX_IGFS, 0 };
-	ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
-	ImGui::GetIO().Fonts->AddFontFromFileTTF(FONT_ICON_FILE_NAME_IGFS, 15.0f, &icons_config, icons_ranges);
+static const ImWchar icons_ranges[] = { ICON_MIN_IGFS, ICON_MAX_IGFS, 0 };
+ ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
+ ImGui::GetIO().Fonts->AddFontFromFileTTF(FONT_ICON_FILE_NAME_IGFS, 15.0f, &icons_config, icons_ranges);
 ```
 
 ### Embeddded Font File Use :
@@ -109,9 +109,9 @@ for instance here in this example for load embedded font, we have (with font Pre
 
 ```cpp
  ImGui::GetIO().Fonts->AddFontDefault();
-	static const ImWchar icons_ranges[] = { ICON_MIN_IGFS, ICON_MAX_IGFS, 0 };
-	ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
-	ImGui::GetIO().Fonts->AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_IGFS, 15.0f, &icons_config, icons_ranges);
+ static const ImWchar icons_ranges[] = { ICON_MIN_IGFS, ICON_MAX_IGFS, 0 };
+ ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
+ ImGui::GetIO().Fonts->AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_IGFS, 15.0f, &icons_config, icons_ranges);
 ```
 
 ### Boths cases :
@@ -121,7 +121,7 @@ In both cases, the use in code is the same :
 After that step, when you have a ImGui widgett with test you just need to put int he label field,
 the glyph you want, defined in the header file :
 ```cpp
-ImGui::Button(ICON_IGFS_FOLDER_OPEN " Open Font");
+ ImGui::Button(ICON_IGFS_FOLDER_OPEN " Open Font");
 ```
 and you will have this reult : 
 ![Button_With_Icons](doc/Button_With_Icons.png)
@@ -129,6 +129,7 @@ and you will have this reult :
 ## Contributions / Issues / Features request
 
 You can use the issue tab for report issues or for features request.
+Or you can also contribute with discuss via issues tabs, or/and Pull Requests :)
 
 ## License :
 
