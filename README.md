@@ -158,7 +158,7 @@ Main View : Final pane with two fonts
 Main View : Final pane for edition
 ![Final pane for edition](doc/dst_edit.png)
 
-## Projects whoare using this font tool :
+## Projects who are using this font tool :
 
 Let me know your project wiht a pciture and i can add it here :
 
