@@ -25,8 +25,8 @@
 
 ImGuiThemeHelper::ImGuiThemeHelper()
 {
-	m_FileTypeInfos[".ttf"] = igfd::FilterInfosStruct(ImVec4(0.1f, 0.1f, 0.5f, 1.0f));
-	m_FileTypeInfos[".otf"] = igfd::FilterInfosStruct(ImVec4(0.1f, 0.1f, 0.5f, 1.0f));
+	m_FileTypeInfos[".ttf"].color = ImVec4(0.1f, 0.1f, 0.5f, 1.0f);
+	m_FileTypeInfos[".otf"].color = ImVec4(0.1f, 0.1f, 0.5f, 1.0f);
 	m_FileTypeInfos[".cpp"] = igfd::FilterInfosStruct(ImVec4(0.5f, 0.1f, 0.7f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
 	m_FileTypeInfos[".h"] = igfd::FilterInfosStruct(ImVec4(0.5f, 0.1f, 0.5f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
 	m_FileTypeInfos[".ifs"] = igfd::FilterInfosStruct(ImVec4(0.1f, 0.5f, 0.1f, 1.0f), ICON_IGFS_FILE_TYPE_PROJECT);
@@ -570,7 +570,7 @@ std::string ImGuiThemeHelper::GetStyleColorName(ImGuiCol idx)
 	case ImGuiCol_NavWindowingHighlight: return "ImGuiCol_NavWindowingHighlight";
 	case ImGuiCol_NavWindowingDimBg: return "ImGuiCol_NavWindowingDimBg";
 	case ImGuiCol_ModalWindowDimBg: return "ImGuiCol_ModalWindowDimBg";
-	default: return "";
+	default:;
 	}
 	return "";
 }

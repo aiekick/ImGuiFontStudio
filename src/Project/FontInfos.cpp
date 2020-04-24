@@ -113,7 +113,7 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 						{
 							uint32_t codePoint = it.first;
 
-							auto glyph = font->FindGlyphNoFallback(codePoint);
+							auto glyph = font->FindGlyphNoFallback((ImWchar)codePoint);
 							if (glyph)
 							{
 								it.second.glyph = *glyph;

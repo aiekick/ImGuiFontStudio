@@ -643,7 +643,7 @@ void SelectionHelper::ApplySelection(ProjectFile *vProjectFile,
 							ImFont* font = codePoint.second->m_ImFontAtlas.Fonts[0];
 							if (font)
 							{
-								auto ptr = font->FindGlyph(codePoint.first);
+								auto ptr = font->FindGlyph((ImWchar)codePoint.first);
 								if (ptr)
 								{
 									SelectGlyph(vProjectFile, codePoint.second, *ptr, false, vSelectionContainerEnum);
@@ -673,7 +673,7 @@ void SelectionHelper::ApplySelection(ProjectFile *vProjectFile,
 							ImFont* font = codePoint.second->m_ImFontAtlas.Fonts[0];
 							if (font)
 							{
-								auto ptr = font->FindGlyph(codePoint.first);
+								auto ptr = font->FindGlyph((ImWchar)codePoint.first);
 								if (ptr)
 								{
 									UnSelectGlyph(vProjectFile, codePoint.second, *ptr, false, vSelectionContainerEnum);
