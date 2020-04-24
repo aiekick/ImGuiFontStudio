@@ -276,7 +276,7 @@ bool GlyphPane::DrawSimpleGlyph(
 						}
 						drawList->PathQuadCurveTo(
 							ct::toImVec2(cur) + pos,
-							ct::toImVec2(nex) + pos, 20);
+							ct::toImVec2(nex) + pos);
 					}
 				}
 
