@@ -280,14 +280,7 @@ bool GlyphPane::DrawSimpleGlyph(
 					}
 				}
 
-				//if (_stroke)
-				//{
-					drawList->PathStroke(ImGui::GetColorU32(ImGuiCol_Text), true);
-				//}
-				//else
-				//{
-				//	drawList->PathFillConvex(ImGui::GetColorU32(ImGuiCol_Text));
-				//}
+				drawList->PathStroke(ImGui::GetColorU32(ImGuiCol_Text), true);
 
 #ifdef _DEBUG
 				DebugPane::Instance()->DrawGlyphCurrentPoint(vScale, pos, drawList);
@@ -321,12 +314,6 @@ bool GlyphPane::DrawSimpleGlyph(
 
 					drawList->PathStroke(ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), true);
 				}
-
-				/*for (auto &it : g->originalCoords)
-				{
-					drawList->PathLineTo(ct::toImVec2(it * vScale) + pos);
-				}
-				drawList->PathStroke(ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), true);*/
 			}
 		}
 	}
