@@ -2,6 +2,8 @@
 
 https://github.com/aiekick/ImGuiFontStudio
 
+<img src="https://github.com/aiekick/ImGuiFontStudio/blob/master/doc/src.png" width="500">
+
 # ImGuiFontStudio
 
 ImGuiFontStudio is a tool for Subset font and extract glyph names for use embbeded or not in a software, especially for use with ImGui for embedded way.
@@ -23,7 +25,7 @@ Succesfully tested on my side :
 * on Win 7 x64 (in exe version x86/x64)
 * On Linux Debian/Ubuntu (in exe version x86)
 * MacOs Mojave (in exe version x86)
- 
+
 ## The features :
 
 * can open ttf or otf font file
@@ -36,7 +38,6 @@ Succesfully tested on my side :
 * many tool available for select glyphs (by zone, by line, by codepoint range)
 * Cross Platform, tested on Win/Osx/Linux 
 * Change / define ImGui app Theme
-* No lib, one executable only
 
 For more information how to use the generated files, see this project : https://github.com/aiekick/IconFontCppHeaders
 
@@ -46,7 +47,6 @@ My soft do the same job and more but easier for user :)
 
 You need to use cMake.
 For the 3 Os (Win, Linux, MacOs), the cMake usage is exactly the same, 
-
 
 1) Choose a build directory. (called here my_build_directory for instance)
 2) Choose a Build Mode : "Release" / "MinSizeRel" / "RelWithDebInfo" / "Debug" (called here BuildMode for instance)
@@ -80,25 +80,61 @@ sudo apt-get install libgl1-mesa-dev libx11-dev libxi-dev libxrandr-dev libxiner
 
 you need many lib : opengl and cocoa framework
 
-## Screenshots (with the default theme)
+## How to use generated font 
 
-Main View : Source pane
-![Source pane](doc/src.png)
+the idea is to merge the icons from your font file into the ImGui current font
+you have in the generated header file, many defines 
 
-Main View : Final pane with two fonts
-![Final pane with two fonts](doc/dst_two_font_merge.png)
+### External Font File Use :
 
-Main View : Final pane for edition
-![Final pane for edition](doc/dst_edit.png)
+for instance here in this example for load embedded font, we have (with font Prefxi IGFS) :
+* ICON_MIN_IGFS => min range
+* ICON_MAX_IGFS => max range
+* FONT_ICON_FILE_NAME_IGFS => the font file name to load (ex: fontawesome.ttf)
+
+```cpp
+ ImGui::GetIO().Fonts->AddFontDefault();
+static const ImWchar icons_ranges[] = { ICON_MIN_IGFS, ICON_MAX_IGFS, 0 };
+ ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
+ ImGui::GetIO().Fonts->AddFontFromFileTTF(FONT_ICON_FILE_NAME_IGFS, 15.0f, &icons_config, icons_ranges);
+```
+
+### Embeddded Font File Use :
+
+for instance here in this example for load embedded font, we have (with font Prefxi IGFS) :
+* ICON_MIN_IGFS => min range
+* ICON_MAX_IGFS => max range
+* FONT_ICON_BUFFER_NAME_IGFS => the compressed buffer name you have in your_embedded_font.cpp to load 
+(ex: IGFS_compressed_data_base85)
+
+```cpp
+ ImGui::GetIO().Fonts->AddFontDefault();
+ static const ImWchar icons_ranges[] = { ICON_MIN_IGFS, ICON_MAX_IGFS, 0 };
+ ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
+ ImGui::GetIO().Fonts->AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_IGFS, 15.0f, &icons_config, icons_ranges);
+```
+
+### Boths cases :
+
+In both cases, the use in code is the same :
+
+After that step, when you have a ImGui widgett with test you just need to put int he label field,
+the glyph you want, defined in the header file :
+```cpp
+ ImGui::Button(ICON_IGFS_FOLDER_OPEN " Open Font");
+```
+and you will have this reult : 
+![Button_With_Icons](doc/Button_With_Icons.png)
 
 ## Contributions / Issues / Features request
 
 You can use the issue tab for report issues or for features request.
+Or you can also contribute with discuss via issues tabs, or/and Pull Requests :)
 
 ## License :
 
 ImGuiFontStudio is an open source software under [license apache 2.0](LICENSE)
- 
+
 ## Library used :
 
 * [Glfw - ZLIB](http://www.glfw.org/)
@@ -110,3 +146,24 @@ ImGuiFontStudio is an open source software under [license apache 2.0](LICENSE)
 * [sfntly - Apache 2.0](https://github.com/rillig/sfntly)
 * [cTools - MIT](https://github.com/aiekick/cTools)
 * [ImGuiFileDialog - MIT](https://github.com/aiekick/ImGuiFileDialog)
+
+## Screenshots (with the default theme)
+
+Main View : Source pane
+![Source pane](doc/src.png)
+
+Main View : Final pane with two fonts
+![Final pane with two fonts](doc/dst_two_font_merge.png)
+
+Main View : Final pane for edition
+![Final pane for edition](doc/dst_edit.png)
+
+## Projects whoare using this font tool :
+
+Let me know your project wiht a pciture and i can add it here :
+
+For the moment, there is :
+
+[ImGuiFontStudio](https://github.com/aiekick/ImGuiFontStudio) himself :)
+
+[ImGuiFileDialog](https://github.com/aiekick/ImGuiFileDialog)

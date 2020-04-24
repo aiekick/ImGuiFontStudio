@@ -16,8 +16,6 @@ include(cmake/3rdparty.cmake)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 add_definitions(-DPROJECT_PATH="${CMAKE_SOURCE_DIR}")
 
-message(${CMAKE_CXX_FLAGS_DEBUG})
-
 if(UNIX)
     if(APPLE)
         add_definitions(-DAPPLE)

@@ -19,7 +19,6 @@
 #include "FontInfos.h"
 
 #include <FileHelper.h>
-#include "Helper/Utils.h"
 #include "Project/ProjectFile.h"
 #include "Gui/ImGuiWidgets.h"
 #include "Helper/Messaging.h"
@@ -32,6 +31,27 @@
 
 FontInfos::FontInfos() = default;
 FontInfos::~FontInfos() = default;
+
+// Extract the UpperCase char's of a string and return as a Prefix
+// if the font name is like "FontAwesome" (UpperCase char), this func will give the prefix "FA"
+// if all the name is lowercase, retunr nothing..
+static std::string GetPrefixFromFontFileName(const std::string& vFileName)
+{
+    std::string res;
+
+    if (!vFileName.empty())
+    {
+        for (auto c : vFileName)
+        {
+            if (std::isupper(c))
+            {
+                res += c;
+            }
+        }
+    }
+
+    return res;
+}
 
 bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFilePathName)
 {
@@ -77,7 +97,7 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 					if (!m_ImFontAtlas.Fonts.empty())
 					{
 						if (m_FontPrefix.empty())
-							m_FontPrefix = Utils::Instance()->GetPrefixFromFontFileName(ps.name);
+							m_FontPrefix = GetPrefixFromFontFileName(ps.name);
 
 						m_FontFilePathName = vProjectFile->GetRelativePath(fontFilePathName);
 

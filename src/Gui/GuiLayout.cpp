@@ -38,15 +38,8 @@
 
 PaneFlags GuiLayout::m_Pane_Shown = PANE_ALLS;
 
-GuiLayout::GuiLayout()
-{
-
-}
-
-GuiLayout::~GuiLayout()
-{
-	
-}
+GuiLayout::GuiLayout() = default;
+GuiLayout::~GuiLayout() = default;
 
 void GuiLayout::Init()
 {
