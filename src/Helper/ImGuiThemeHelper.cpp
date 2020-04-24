@@ -382,7 +382,7 @@ void ImGuiThemeHelper::ApplyFileTypeColors()
 {
 	for (auto &it : m_FileTypeColors)
 	{
-		igfd::ImGuiFileDialog::Instance()->SetFilterColor(it.first, it.second);
+		igfd::ImGuiFileDialog::Instance()->SetFilterInfos(it.first, it.second);
 	}
 }
 
@@ -401,8 +401,7 @@ std::string ImGuiThemeHelper::getXml(const std::string& vOffset)
 
 	for (int i = 0; i < ImGuiCol_COUNT; i++)
 	{
-		std::string name = GetStyleColorName(i);
-		str += vOffset + "\t<" + name + " value=\"" + ct::fvec4(colors[i]).string() + "\"/>\n";
+		str += vOffset + "\t<" + GetStyleColorName(i) + " value=\"" + ct::fvec4(colors[i]).string() + "\"/>\n";
 	}
 
 	str += vOffset + "\t<WindowPadding value=\"" + ct::fvec2(style->WindowPadding).string() + "\"/>\n";
@@ -441,14 +440,14 @@ std::string ImGuiThemeHelper::getXml(const std::string& vOffset)
 void ImGuiThemeHelper::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent)
 {
 	// The value of this child identifies the name of this element
-	std::string strName = "";
-	std::string strValue = "";
-	std::string strParentName = "";
+	std::string strName;
+	std::string strValue;
+	std::string strParentName;
 
 	strName = vElem->Value();
 	if (vElem->GetText())
 		strValue = vElem->GetText();
-	if (vParent != 0)
+	if (vParent != nullptr)
 		strParentName = vParent->Value();
 
 	if (strParentName == "FileTypes")
@@ -456,7 +455,7 @@ void ImGuiThemeHelper::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElem
 		std::string fileType;
 		std::string color;
 		
-		for (const tinyxml2::XMLAttribute* attr = vElem->FirstAttribute(); attr != 0; attr = attr->Next())
+		for (const tinyxml2::XMLAttribute* attr = vElem->FirstAttribute(); attr != nullptr; attr = attr->Next())
 		{
 			std::string attName = attr->Name();
 			std::string attValue = attr->Value();
@@ -466,7 +465,7 @@ void ImGuiThemeHelper::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElem
 		}
 
 		m_FileTypeColors[fileType] = ct::toImVec4(ct::fvariant(color).getV4());
-		igfd::ImGuiFileDialog::Instance()->SetFilterColor(fileType, m_FileTypeColors[fileType]);
+		igfd::ImGuiFileDialog::Instance()->SetFilterInfos(fileType, m_FileTypeColors[fileType]);
 	}
 
 	if (strParentName == "ImGui_Styles")
@@ -571,6 +570,7 @@ std::string ImGuiThemeHelper::GetStyleColorName(ImGuiCol idx)
 	case ImGuiCol_NavWindowingHighlight: return "ImGuiCol_NavWindowingHighlight";
 	case ImGuiCol_NavWindowingDimBg: return "ImGuiCol_NavWindowingDimBg";
 	case ImGuiCol_ModalWindowDimBg: return "ImGuiCol_ModalWindowDimBg";
+	default: return "";
 	}
 	return "";
 }

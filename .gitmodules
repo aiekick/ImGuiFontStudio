@@ -29,3 +29,4 @@
 [submodule "3rdparty/ctools"]
 	path = 3rdparty/ctools
 	url = https://github.com/aiekick/cTools.git
+	branch = master

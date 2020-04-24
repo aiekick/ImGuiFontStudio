@@ -47,8 +47,8 @@ private:
 	void ApplyFileTypeColors();
 
 private:
-	std::string GetStyleColorName(ImGuiCol idx);
-	int GetImGuiColFromName(const std::string& vName);
+	static std::string GetStyleColorName(ImGuiCol idx);
+	static int GetImGuiColFromName(const std::string& vName);
 
 public: // singleton
 	static ImGuiThemeHelper *Instance()
