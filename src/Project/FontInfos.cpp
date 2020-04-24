@@ -485,11 +485,15 @@ void FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 	}
 	else if (strParentName == "filters" &&  strName == "filter")
 	{
+		ct::ResetBuffer(m_SearchBuffer);
 		auto att = vElem->FirstAttribute();
 		if (att && std::string(att->Name()) == "name")
 		{
 			std::string attValue = att->Value();
 			m_Filters.insert(attValue);
+			if (m_Filters.size() > 1)
+				ct::AppendToBuffer(m_SearchBuffer, 1023, ",");
+			ct::AppendToBuffer(m_SearchBuffer, 1023, attValue);
 		}
 	}
 }

@@ -25,3 +25,11 @@
 //#define buttonDriveString "Drives"
 //#define buttonResetPathString "Reset to current directory"
 //#define buttonCreateDirString "Create Directory"
+
+// theses icons will appear in table headers
+#define USE_CUSTOM_SORTING_ICON
+#define tableHeaderAscendingIcon ICON_IGFS_SORT_ASC
+#define tableHeaderDescendingIcon ICON_IGFS_SORT_DESC
+#define tableHeaderFileNameString " File name"
+#define tableHeaderFileSizeString " Size"
+#define tableHeaderFileDateString " Date"

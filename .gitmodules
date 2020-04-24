@@ -1,7 +1,7 @@
 [submodule "3rdparty/imgui"]
 	path = 3rdparty/imgui
 	url = https://github.com/aiekick/imgui.git
-	branch = docking
+	branch = tables_merged_in_docking
 [submodule "3rdparty/glfw"]
 	path = 3rdparty/glfw
 	url = https://github.com/glfw/glfw
@@ -25,7 +25,7 @@
 [submodule "3rdparty/ImGuiFileDialog"]
 	path = 3rdparty/ImGuiFileDialog
 	url = https://github.com/aiekick/ImGuiFileDialog.git
-	branch = master
+	branch = detail_view_mode
 [submodule "3rdparty/ctools"]
 	path = 3rdparty/ctools
 	url = https://github.com/aiekick/cTools.git

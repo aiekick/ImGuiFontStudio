@@ -605,9 +605,9 @@ std::string MainFrame::getXml(const std::string& vOffset)
 void MainFrame::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent)
 {
 	// The value of this child identifies the name of this element
-	std::string strName = "";
-	std::string strValue = "";
-	std::string strParentName = "";
+	std::string strName;
+	std::string strValue;
+	std::string strParentName;
 
 	strName = vElem->Value();
 	if (vElem->GetText())

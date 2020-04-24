@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include <ImGuiFileDialog/ImGuiFileDialog/ImGuiFileDialog.h>
 #include <ConfigAbstract.h>
 #include <imgui.h>
 #include <string>
@@ -27,7 +28,7 @@ public:
 	ImVec4 badColor = ImVec4(0.8f, 0.2f, 0.2f, 1.0f);
 
 private:
-	std::map<std::string, ImVec4> m_FileTypeColors;
+	std::map<std::string, igfd::FilterInfosStruct> m_FileTypeInfos;
 
 public:
 	void DrawMenu();

@@ -58,27 +58,35 @@ int SourceFontPane::DrawSourceFontPane(ProjectFile *vProjectFile, int vWidgetId)
 			{
 				if (vProjectFile->m_CurrentFont)
 				{
-					if (ImGui::BeginMenuBar())
-					{
-						if (ImGui::BeginMenu("Infos"))
-						{
-							if (ImGui::MenuItem("Show Tooltip", "", &vProjectFile->m_SourcePane_ShowGlyphTooltip))
-							{
-								vProjectFile->SetProjectChange();
-							}
-
-							ImGui::EndMenu();
-						}
-
-						SelectionHelper::Instance()->DrawSelectionMenu(vProjectFile, SelectionContainerEnum::SELECTION_CONTAINER_SOURCE);
-
-						ImGui::EndMenuBar();
-					}
-
 					if (m_FontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH)
 					{
-						//DrawFontAtlas(vProjectFile, vProjectFile->m_CurrentFont);
-                        DrawFontAtlas_Virtual(vProjectFile, vProjectFile->m_CurrentFont);
+						if (ImGui::BeginMenuBar())
+						{
+							if (ImGui::BeginMenu("Infos"))
+							{
+								if (ImGui::MenuItem("Show Tooltip", "", &vProjectFile->m_SourcePane_ShowGlyphTooltip))
+								{
+									vProjectFile->SetProjectChange();
+								}
+
+								ImGui::EndMenu();
+							}
+
+							ImGui::Spacing();
+
+							SelectionHelper::Instance()->DrawSelectionMenu(vProjectFile, SelectionContainerEnum::SELECTION_CONTAINER_SOURCE);
+
+							ImGui::Spacing();
+							
+							if (vProjectFile->m_Preview_Glyph_CountX)
+							{
+								DrawFilterBar(vProjectFile, vProjectFile->m_CurrentFont);
+							}
+
+							ImGui::EndMenuBar();
+						}
+						
+						DrawFontAtlas_Virtual(vProjectFile, vProjectFile->m_CurrentFont);
 					}
 					else if (m_FontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_TEXTURE)
 					{
@@ -267,26 +275,35 @@ int SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId)
 
 void SourceFontPane::DrawFilterBar(ProjectFile *vProjectFile, FontInfos *vFontInfos)
 {
-	if (vProjectFile && vProjectFile->IsLoaded() && vFontInfos)
+	if (vProjectFile && vFontInfos)
 	{
-		if (ImGui::BeginMenuBar())
+		ImGui::PushID(vFontInfos);
+		ImGui::Text("Filters"); ImGui::SameLine();
+		ImGui::Text("(?)");
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip("will search for any filter separated\n\tby a coma ',' or a space ' '");
+		ImGui::SameLine();
+		if (ImGui::MenuItem(ICON_IGFS_DESTROY "##clearFilter"))
 		{
-			ImGui::Text("Filter "); ImGui::SameLine();
-			ImGui::PushID(vFontInfos);
-			if (ImGui::InputText("##Filter", vFontInfos->m_SearchBuffer, 1023))
-			{
-				vFontInfos->m_Filters.clear();
-				std::string s = vFontInfos->m_SearchBuffer;
-				auto arr = ct::splitStringToVector(s, ',');
-				for (const auto &it : arr)
-				{
-					vFontInfos->m_Filters.insert(it);
-				}
-				vProjectFile->SetProjectChange();
-			}
-			ImGui::PopID();
+			ct::ResetBuffer(vFontInfos->m_SearchBuffer);
+			vFontInfos->m_Filters.clear();
+			vProjectFile->SetProjectChange();
 		}
-		ImGui::EndMenuBar();
+		ImGui::PushItemWidth(400);
+		bool filterChanged = ImGui::InputText("##Filter", vFontInfos->m_SearchBuffer, 1023);
+		ImGui::PopItemWidth();
+		ImGui::PopID();
+		if (filterChanged)
+		{
+			vFontInfos->m_Filters.clear();
+			std::string s = vFontInfos->m_SearchBuffer;
+			auto arr = ct::splitStringToVectorByManyDelimiters(s, ", ");
+			for (const auto &it : arr)
+			{
+				vFontInfos->m_Filters.insert(it);
+			}
+			vProjectFile->SetProjectChange();
+		}
 	}
 }
 
@@ -313,104 +330,11 @@ bool SourceFontPane::IfCatchedByFilters(FontInfos *vFontInfos, const std::string
 	return false;
 }
 
-/*void SourceFontPane::DrawFontAtlas(ProjectFile *vProjectFile, FontInfos *vFontInfos)
-{
-	if (vProjectFile && vProjectFile->IsLoaded() &&
-		vFontInfos && vProjectFile->m_Preview_Glyph_CountX)
-	{
-		DrawFilterBar(vProjectFile, vFontInfos);
-
-		if (vFontInfos->m_ImFontAtlas.IsBuilt())
-		{
-			ImFont* font = vFontInfos->m_ImFontAtlas.Fonts[0];
-
-			if (vFontInfos->m_ImFontAtlas.TexID)
-			{
-				ImVec2 hostTextureSize = ImVec2(
-					(float)vFontInfos->m_ImFontAtlas.TexWidth, 
-					(float)vFontInfos->m_ImFontAtlas.TexHeight);
-				int countGlyphX = vProjectFile->m_Preview_Glyph_CountX;
-				float maxWidth = ImGui::GetContentRegionAvailWidth();
-				float glyphSize = floorf(maxWidth / (float)countGlyphX);
-				ImVec2 cell_size(glyphSize, glyphSize);
-				cell_size -= ImGui::GetStyle().ItemSpacing;
-				cell_size -= ImGui::GetStyle().FramePadding * 2.0f;
-				int idx = 0; uint32_t lastGlyphCodePoint = 0;
-				ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
-				for (auto glyph : font->Glyphs)
-				{
-					std::string name = vFontInfos->m_GlyphCodePointNames[glyph.Codepoint];
-					if (IfCatchedByFilters(vFontInfos, name))
-					{
-						int x = idx % countGlyphX;
-
-						if (x) ImGui::SameLine();
-
-						if (vProjectFile->IsRangeColorignShown())
-						{
-							if (glyph.Codepoint != lastGlyphCodePoint + 1)
-							{
-								glyphRangeColoring = vProjectFile->GetColorFromInteger(glyph.Codepoint);
-							}
-
-							ImGui::PushStyleColor(ImGuiCol_Button, glyphRangeColoring);
-							ImVec4 bh = glyphRangeColoring; bh.w = 0.8f;
-							ImGui::PushStyleColor(ImGuiCol_ButtonHovered, bh);
-							ImVec4 ba = glyphRangeColoring; ba.w = 1.0f;
-							ImGui::PushStyleColor(ImGuiCol_ButtonActive, ba);
-						}
-
-						bool selected = false;
-						SelectionHelper::Instance()->IsGlyphIntersectedAndSelected(
-							vFontInfos,	cell_size, glyph.Codepoint, &selected, 
-							SelectionContainerEnum::SELECTION_CONTAINER_SOURCE);
-						
-						ImGui::PushID(NEW_ID);
-						bool check = ImGui::ImageCheckButton(vFontInfos->m_ImFontAtlas.TexID, &selected, cell_size,
-							ImVec2(glyph.U0, glyph.V0), ImVec2(glyph.U1, glyph.V1), hostTextureSize);
-						ImGui::PopID();
-
-						if (check)
-						{
-							SelectionHelper::Instance()->SelectWithToolOrApplyOnGlyph(
-								vProjectFile, vFontInfos,
-								glyph, idx, selected, true, 
-								SelectionContainerEnum::SELECTION_CONTAINER_SOURCE);
-						}
-
-						if (vProjectFile->IsRangeColorignShown())
-						{
-							ImGui::PopStyleColor(3);
-						}
-
-						if (vProjectFile->m_SourcePane_ShowGlyphTooltip)
-						{
-							if (ImGui::IsItemHovered())
-							{
-								ImGui::SetTooltip("name : %s\ncodepoint : %u\nadv x : %.2f\nuv0 : (%.3f,%.3f)\nuv1 : (%.3f,%.3f)",
-									name.c_str(), glyph.Codepoint, glyph.AdvanceX, glyph.U0, glyph.V0, glyph.U1, glyph.V1);
-							}
-						}
-
-						lastGlyphCodePoint = glyph.Codepoint;
-						idx++;
-					}
-				}
-
-				SelectionHelper::Instance()->SelectWithToolOrApply(
-					vProjectFile, SelectionContainerEnum::SELECTION_CONTAINER_SOURCE);
-			}
-		}
-	}
-}*/
-
 void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, FontInfos *vFontInfos)
 {
     if (vProjectFile && vProjectFile->IsLoaded() &&
         vFontInfos && vProjectFile->m_Preview_Glyph_CountX)
     {
-        DrawFilterBar(vProjectFile, vFontInfos);
-
         if (vFontInfos->m_ImFontAtlas.IsBuilt())
         {
             ImFont* font = vFontInfos->m_ImFontAtlas.Fonts[0];

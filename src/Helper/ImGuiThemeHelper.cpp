@@ -18,18 +18,18 @@
  */
 #include "ImGuiThemeHelper.h"
 
-#include "ImGuiFileDialog/ImGuiFileDialog/ImGuiFileDialog.h"
+#include "Res/CustomFont.h"
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui_internal.h"
 
 ImGuiThemeHelper::ImGuiThemeHelper()
 {
-	m_FileTypeColors[".ttf"] = ImVec4(0.1f, 0.1f, 0.5f, 1.0f);
-	m_FileTypeColors[".otf"] = ImVec4(0.1f, 0.1f, 0.5f, 1.0f);
-	m_FileTypeColors[".cpp"] = ImVec4(0.5f, 0.1f, 0.7f, 1.0f);
-	m_FileTypeColors[".h"] = ImVec4(0.5f, 0.1f, 0.5f, 1.0f);
-	m_FileTypeColors[".ifs"] = ImVec4(0.1f, 0.5f, 0.1f, 1.0f);
+	m_FileTypeInfos[".ttf"] = igfd::FilterInfosStruct(ImVec4(0.1f, 0.1f, 0.5f, 1.0f));
+	m_FileTypeInfos[".otf"] = igfd::FilterInfosStruct(ImVec4(0.1f, 0.1f, 0.5f, 1.0f));
+	m_FileTypeInfos[".cpp"] = igfd::FilterInfosStruct(ImVec4(0.5f, 0.1f, 0.7f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
+	m_FileTypeInfos[".h"] = igfd::FilterInfosStruct(ImVec4(0.5f, 0.1f, 0.5f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
+	m_FileTypeInfos[".ifs"] = igfd::FilterInfosStruct(ImVec4(0.1f, 0.5f, 0.1f, 1.0f), ICON_IGFS_FILE_TYPE_PROJECT);
 }
 
 ImGuiThemeHelper::~ImGuiThemeHelper() = default;
@@ -47,25 +47,25 @@ void ImGuiThemeHelper::DrawMenu()
 	ImGui::Text("File Type Colors :");
 	ImGui::Indent();
 	ImGui::Text("Fonts :");
-	if (ImGui::ColorEdit4(".ttf", &m_FileTypeColors[".ttf"].x))
+	if (ImGui::ColorEdit4(".ttf", &m_FileTypeInfos[".ttf"].color.x))
 	{
 		ApplyFileTypeColors();
 	}
-	if (ImGui::ColorEdit4(".otf", &m_FileTypeColors[".otf"].x))
+	if (ImGui::ColorEdit4(".otf", &m_FileTypeInfos[".otf"].color.x))
 	{
 		ApplyFileTypeColors();
 	}
 	ImGui::Text("Code :");
-	if (ImGui::ColorEdit4(".cpp", &m_FileTypeColors[".cpp"].x))
+	if (ImGui::ColorEdit4(".cpp", &m_FileTypeInfos[".cpp"].color.x))
 	{
 		ApplyFileTypeColors();
 	}
-	if (ImGui::ColorEdit4(".h", &m_FileTypeColors[".h"].x))
+	if (ImGui::ColorEdit4(".h", &m_FileTypeInfos[".h"].color.x))
 	{
 		ApplyFileTypeColors();
 	}
 	ImGui::Text("Project :");
-	if (ImGui::ColorEdit4(".ifs", &m_FileTypeColors[".ifs"].x))
+	if (ImGui::ColorEdit4(".ifs", &m_FileTypeInfos[".ifs"].color.x))
 	{
 		ApplyFileTypeColors();
 	}
@@ -153,11 +153,11 @@ void ImGuiThemeHelper::ApplyStyleColorsDefault(ImGuiStyle* dst)
 	style->FrameBorderSize = 1;
 	style->TabBorderSize = 0;
 
-	m_FileTypeColors[".ttf"] = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
-	m_FileTypeColors[".otf"] = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
-	m_FileTypeColors[".cpp"] = ImVec4(0.5f, 0.9f, 0.1f, 1.0f); // yellow high
-	m_FileTypeColors[".h"] = ImVec4(0.25f, 0.9f, 0.1f, 1.0f); // yellow high
-	m_FileTypeColors[".ifs"] = ImVec4(0.9f, 0.1f, 0.9f, 1.0f); // purple high
+	m_FileTypeInfos[".ttf"].color = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
+	m_FileTypeInfos[".otf"].color = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
+	m_FileTypeInfos[".cpp"].color = ImVec4(0.5f, 0.9f, 0.1f, 1.0f); // yellow high
+	m_FileTypeInfos[".h"].color = ImVec4(0.25f, 0.9f, 0.1f, 1.0f); // yellow high
+	m_FileTypeInfos[".ifs"].color = ImVec4(0.9f, 0.1f, 0.9f, 1.0f); // purple high
 
 	// dark theme so high color
 	goodColor = ImVec4(0.2f, 0.8f, 0.2f, 1.0f);
@@ -194,11 +194,11 @@ void ImGuiThemeHelper::ApplyStyleColorsClassic(ImGuiStyle* dst)
 	style->FrameBorderSize = 1;
 	style->TabBorderSize = 0;
 
-	m_FileTypeColors[".ttf"] = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
-	m_FileTypeColors[".otf"] = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
-	m_FileTypeColors[".cpp"] = ImVec4(0.5f, 0.9f, 0.1f, 1.0f); // yellow high
-	m_FileTypeColors[".h"] = ImVec4(0.25f, 0.9f, 0.1f, 1.0f); // yellow high
-	m_FileTypeColors[".ifs"] = ImVec4(0.9f, 0.1f, 0.9f, 1.0f); // purple high
+	m_FileTypeInfos[".ttf"].color = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
+	m_FileTypeInfos[".otf"].color = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
+	m_FileTypeInfos[".cpp"].color = ImVec4(0.5f, 0.9f, 0.1f, 1.0f); // yellow high
+	m_FileTypeInfos[".h"].color = ImVec4(0.25f, 0.9f, 0.1f, 1.0f); // yellow high
+	m_FileTypeInfos[".ifs"].color = ImVec4(0.9f, 0.1f, 0.9f, 1.0f); // purple high
 
 	// dark theme so high color
 	goodColor = ImVec4(0.2f, 0.8f, 0.2f, 1.0f);
@@ -235,11 +235,11 @@ void ImGuiThemeHelper::ApplyStyleColorsDark(ImGuiStyle* dst)
 	style->FrameBorderSize = 1;
 	style->TabBorderSize = 0;
 
-	m_FileTypeColors[".ttf"] = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
-	m_FileTypeColors[".otf"] = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
-	m_FileTypeColors[".cpp"] = ImVec4(0.5f, 0.9f, 0.1f, 1.0f); // yellow high
-	m_FileTypeColors[".h"] = ImVec4(0.25f, 0.9f, 0.1f, 1.0f); // yellow high
-	m_FileTypeColors[".ifs"] = ImVec4(0.9f, 0.1f, 0.9f, 1.0f); // purple high
+	m_FileTypeInfos[".ttf"].color = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
+	m_FileTypeInfos[".otf"].color = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
+	m_FileTypeInfos[".cpp"].color = ImVec4(0.5f, 0.9f, 0.1f, 1.0f); // yellow high
+	m_FileTypeInfos[".h"].color = ImVec4(0.25f, 0.9f, 0.1f, 1.0f); // yellow high
+	m_FileTypeInfos[".ifs"].color = ImVec4(0.9f, 0.1f, 0.9f, 1.0f); // purple high
 
 	// dark theme so high color
 	goodColor = ImVec4(0.2f, 0.8f, 0.2f, 1.0f);
@@ -276,11 +276,11 @@ void ImGuiThemeHelper::ApplyStyleColorsLight(ImGuiStyle* dst)
 	style->FrameBorderSize = 1;
 	style->TabBorderSize = 0;
 
-	m_FileTypeColors[".ttf"] = ImVec4(0.1f, 0.5f, 0.1f, 1.0f); // green low
-	m_FileTypeColors[".otf"] = ImVec4(0.1f, 0.5f, 0.1f, 1.0f); // green low
-	m_FileTypeColors[".cpp"] = ImVec4(0.5f, 0.5f, 0.1f, 1.0f); // yellow low
-	m_FileTypeColors[".h"] = ImVec4(0.25f, 0.5f, 0.1f, 1.0f); // yellow low
-	m_FileTypeColors[".ifs"] = ImVec4(0.5f, 0.1f, 0.5f, 1.0f); // purple low
+	m_FileTypeInfos[".ttf"].color = ImVec4(0.1f, 0.5f, 0.1f, 1.0f); // green low
+	m_FileTypeInfos[".otf"].color = ImVec4(0.1f, 0.5f, 0.1f, 1.0f); // green low
+	m_FileTypeInfos[".cpp"].color = ImVec4(0.5f, 0.5f, 0.1f, 1.0f); // yellow low
+	m_FileTypeInfos[".h"].color = ImVec4(0.25f, 0.5f, 0.1f, 1.0f); // yellow low
+	m_FileTypeInfos[".ifs"].color = ImVec4(0.5f, 0.1f, 0.5f, 1.0f); // purple low
 
 	// light theme so low color
 	goodColor = ImVec4(0.2f, 0.5f, 0.2f, 1.0f);
@@ -365,11 +365,11 @@ void ImGuiThemeHelper::ApplyStyleColorsDarcula(ImGuiStyle* dst)
 	style->FrameBorderSize = 1;
 	style->TabBorderSize = 0;
 
-	m_FileTypeColors[".ttf"] = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
-	m_FileTypeColors[".otf"] = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
-	m_FileTypeColors[".cpp"] = ImVec4(0.5f, 0.9f, 0.1f, 1.0f); // yellow high
-	m_FileTypeColors[".h"] = ImVec4(0.25f, 0.9f, 0.1f, 1.0f); // yellow high
-	m_FileTypeColors[".ifs"] = ImVec4(0.9f, 0.1f, 0.9f, 1.0f); // purple high
+	m_FileTypeInfos[".ttf"].color = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
+	m_FileTypeInfos[".otf"].color = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
+	m_FileTypeInfos[".cpp"].color = ImVec4(0.5f, 0.9f, 0.1f, 1.0f); // yellow high
+	m_FileTypeInfos[".h"].color = ImVec4(0.25f, 0.9f, 0.1f, 1.0f); // yellow high
+	m_FileTypeInfos[".ifs"].color = ImVec4(0.9f, 0.1f, 0.9f, 1.0f); // purple high
 
 	// dark theme so high color
 	goodColor = ImVec4(0.2f, 0.8f, 0.2f, 1.0f);
@@ -380,9 +380,9 @@ void ImGuiThemeHelper::ApplyStyleColorsDarcula(ImGuiStyle* dst)
 
 void ImGuiThemeHelper::ApplyFileTypeColors()
 {
-	for (auto &it : m_FileTypeColors)
+	for (auto &it : m_FileTypeInfos)
 	{
-		igfd::ImGuiFileDialog::Instance()->SetFilterInfos(it.first, it.second);
+		igfd::ImGuiFileDialog::Instance()->SetFilterInfos(it.first, it.second.color, it.second.icon);
 	}
 }
 
@@ -427,10 +427,10 @@ std::string ImGuiThemeHelper::getXml(const std::string& vOffset)
 	str += vOffset + "</ImGui_Styles>\n";
 
 	str += vOffset + "<FileTypes>\n";
-	for (auto &it : m_FileTypeColors)
+	for (auto &it : m_FileTypeInfos)
 	{
 		str += vOffset + "\t<filetype value=\"" + it.first + "\" color=\"" +
-			ct::fvec4(it.second.x, it.second.y, it.second.z, it.second.w).string() + "\"/>\n";
+			ct::fvec4(it.second.color).string() + "\"/>\n";
 	}
 	str += vOffset + "</FileTypes>\n";
 
@@ -464,8 +464,8 @@ void ImGuiThemeHelper::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElem
 			if (attName == "color") color = attValue;
 		}
 
-		m_FileTypeColors[fileType] = ct::toImVec4(ct::fvariant(color).getV4());
-		igfd::ImGuiFileDialog::Instance()->SetFilterInfos(fileType, m_FileTypeColors[fileType]);
+		m_FileTypeInfos[fileType] = ct::toImVec4(ct::fvariant(color).getV4());
+		igfd::ImGuiFileDialog::Instance()->SetFilterInfos(fileType, m_FileTypeInfos[fileType]);
 	}
 
 	if (strParentName == "ImGui_Styles")
