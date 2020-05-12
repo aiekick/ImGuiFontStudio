@@ -13,11 +13,11 @@ jobs:
     - name: checkout submodules
       run : git submodule update --init --recursive 
     - name: configure
-      run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release
+      run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=RelWithDebInfo
     - name: build
-      run: cmake --build build --config Release
+      run: cmake --build build --config RelWithDebInfo
     - name: upload artifact
       uses: actions/upload-artifact@v1
       with:
         name: ImGuiFontStudio_Msvc_Win32
-        path: build\Release\ImGuiFontStudio_Msvc_Win32.exe
+        path: build\RelWithDebInfo\ImGuiFontStudio_Msvc_Win32.exe
