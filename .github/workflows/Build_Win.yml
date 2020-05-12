@@ -20,4 +20,4 @@ jobs:
       uses: actions/upload-artifact@v1
       with:
         name: ImGuiFontStudio_Msvc_Win32
-        path: build\Release\ImGuiFontStudio_Msvc_Win32.exe
+        path: build\RelWithDebInfo\ImGuiFontStudio_Msvc_Win32.exe
