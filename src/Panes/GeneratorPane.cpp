@@ -115,9 +115,12 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 			}
 			if (ImGui::Button("Quick Font Merged"))
 			{
+				bool disableGlyphReScale = vProjectFile->IsGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE);
 				vProjectFile->m_GenMode = (GenModeFlags)0;
 				vProjectFile->AddGenMode(GENERATOR_MODE_MERGED_FONT); // font + header
 				vProjectFile->AddGenMode(GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
+				if (disableGlyphReScale)
+					vProjectFile->AddGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE);
 				std::string path = FileHelper::Instance()->GetAppPath() + "/exports";
 				path = FileHelper::Instance()->CorrectFilePathName(path);
 				FileHelper::Instance()->CreateDirectoryIfNotExist(path);
@@ -197,6 +200,21 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 			ImGui::Unindent();
 
 			ImGui::Text("Settings : ");
+			if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED))
+			{
+				ImGui::Indent();
+				{
+					ImGui::Text("Merged Mode : ");
+					ImGui::Indent();
+					{
+						change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
+							"Disable Glyph Re Write", "if your fonts have same size,\nit can be more safe for the moment (bad generated font is some case)\nto disable glyph re write.\nonly needed if we must change glyph scale",
+							&vProjectFile->m_GenMode, GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE, 50.0f);
+					}
+					ImGui::Unindent();
+				}
+				ImGui::Unindent();
+			}
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER))
 			{
 				ImGui::Indent();

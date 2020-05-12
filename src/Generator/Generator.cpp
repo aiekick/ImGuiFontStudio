@@ -520,7 +520,8 @@ void Generator::GenerateFontFile_Merged(
 		// abse infos for merge all toher fonts in this one
 		for (auto &it : vProjectFile->m_Fonts)
 		{
-			if (vProjectFile->m_FontToMergeIn == it.second.m_FontFileName)
+			if (vProjectFile->m_FontToMergeIn == it.second.m_FontFileName &&
+				!vProjectFile->IsGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE))
 			{
 				baseFontBoundingBox = it.second.m_BoundingBox;
 				baseFontAscent = it.second.m_Ascent;
@@ -533,7 +534,8 @@ void Generator::GenerateFontFile_Merged(
 		{
 			bool scaleChanged = false;
 			ct::dvec2 scale = 1.0;
-			if (vProjectFile->m_FontToMergeIn != it.second.m_FontFileName)
+			if (vProjectFile->m_FontToMergeIn != it.second.m_FontFileName &&
+				!vProjectFile->IsGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE))
 			{
 				scaleChanged = true;
 				ct::ivec2 newSize = it.second.m_BoundingBox.zw() - it.second.m_BoundingBox.xy();
@@ -554,7 +556,8 @@ void Generator::GenerateFontFile_Merged(
 				newHeaderNames[glyph.first] = gInfos.newHeaderName;
 				newCodePoints[glyph.first] = gInfos.newCodePoint;
 
-				if (scaleChanged)
+				if (scaleChanged &&
+					!vProjectFile->IsGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE))
 				{
 					gInfos.simpleGlyph.isValid = true;
 					gInfos.simpleGlyph.m_Scale = scale;
@@ -562,9 +565,8 @@ void Generator::GenerateFontFile_Merged(
 					gInfos.m_FontBoundingBox = baseFontBoundingBox;
 					gInfos.m_FontAscent = baseFontAscent;
 					gInfos.m_FontDescent = baseFontDescent;
-
 				}
-				
+								
 				newGlyphInfos[glyph.first] = gInfos;
 			}
 

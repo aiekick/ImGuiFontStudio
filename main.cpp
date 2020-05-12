@@ -95,7 +95,7 @@ int main(int, char**argv)
 	static const ImWchar icons_ranges[] = { ICON_MIN_IGFS, ICON_MAX_IGFS, 0 };
 	ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
 	ImGui::GetIO().Fonts->AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_IGFS, 15.0f, &icons_config, icons_ranges);
-   
+
 	MainFrame::Instance(mainWindow)->Init();
 
     // Main loop
