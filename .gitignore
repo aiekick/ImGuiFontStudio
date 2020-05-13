@@ -7,3 +7,6 @@
 /fonts
 /debug.log
 /imgui.ini
+/cmake-build-minsizerel/
+/cmake-build-relwithdebinfo/
+/config.xml
