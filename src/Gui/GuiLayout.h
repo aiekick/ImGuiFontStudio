@@ -25,6 +25,7 @@
 #define GENERATOR_PANE "Generator"
 #define CURRENT_FONT_PANE "Current Font"
 #define GLYPH_PANE "Glyph Edition"
+#define FONT_STRUCTURE_PANE "Font Structure"
 #ifdef _DEBUG
 #define DEBUG_PANE "Debug"
 #endif
@@ -38,6 +39,7 @@ enum PaneFlags
 	PANE_PARAM = (1 << 4),
 	PANE_GENERATOR = (1 << 5),
 	PANE_GLYPH = (1 << 6),
+	PANE_FONT_STRUCTURE = (1 << 7),
 #ifdef _DEBUG
 	PANE_DEBUG = (1 << 7),
 #endif
