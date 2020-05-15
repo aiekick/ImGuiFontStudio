@@ -40,6 +40,7 @@
 #include "FontHelper.h"
 #include <FileHelper.h>
 #include <cTools.h>
+#include "MemoryStream.h"
 
 #include <set>
 #include <map>
@@ -442,13 +443,6 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 			{
 				if (glyphInfos->simpleGlyph.isValid)
 				{
-					if (glyphInfos->newHeaderName == "Wait")
-						int i = 0;
-
-					MemoryStream str;
-					str.WriteShort(341);
-					str.WriteInt(4578);
-
 					SimpleGlyph_Solo simpleGlyph = glyphInfos->simpleGlyph;
 
 					auto sglyph = down_cast<sfntly::GlyphTable::SimpleGlyph*>(glyph.p_);
@@ -460,9 +454,7 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 						countContours = simpleGlyph.GetCountContours();
 					}
 
-					auto instructionSize = sglyph->InstructionSize();
-					if (instructionSize > 0)
-						int i = 0;
+					//auto instructionSize = sglyph->InstructionSize();
 
 					//ct::ivec2 trans = glyphInfos->simpleGlyph.m_Translation; // first apply
 					ct::dvec2 scale = glyphInfos->simpleGlyph.m_Scale; // second apply

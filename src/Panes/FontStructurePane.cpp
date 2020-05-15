@@ -58,10 +58,20 @@ int FontStructurePane::DrawFontStructurePane(ProjectFile *vProjectFile, int vWid
         {
             if (vProjectFile &&  vProjectFile->IsLoaded())
             {
-                if (ImGui::Button("Analyse Font"))
-                {
-                    AnalyzeFont(vProjectFile->m_ProjectFilePathName);
-                }
+				if (vProjectFile->m_CurrentFont)
+				{
+					if (ImGui::Button("Analyse Font"))
+					{
+						std::string fontFilePathName = FileHelper::Instance()->CorrectFilePathName(vProjectFile->m_CurrentFont->m_FontFilePathName);
+
+						if (!FileHelper::Instance()->IsAbsolutePath(fontFilePathName))
+						{
+							fontFilePathName = vProjectFile->GetAbsolutePath(fontFilePathName);
+						}
+
+						m_FontParser.ParseFont(fontFilePathName);
+					}
+				}
 
                 FontStructurePane_WidgetId = DisplayAnalyze(FontStructurePane_WidgetId);
             }
@@ -77,12 +87,9 @@ int FontStructurePane::DrawFontStructurePane(ProjectFile *vProjectFile, int vWid
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void FontStructurePane::AnalyzeFont(const std::string& vFilePathName)
-{
-
-}
-
 int FontStructurePane::DisplayAnalyze(int vWidgetId)
 {
+	vWidgetId = m_FontParser.m_FontAnalyzed.draw(vWidgetId);
 
+	return vWidgetId;
 }

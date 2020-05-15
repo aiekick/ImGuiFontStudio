@@ -16,29 +16,33 @@
 
 #pragma once
 
+#include "Helper/FontParser.h"
+
 #include <string>
 
 class ProjectFile;
 class FontInfos;
 class FontStructurePane
 {
-    public:
-        int DrawFontStructurePane(ProjectFile *vProjectFile, int vWidgetId);
+private:
+	FontParser m_FontParser;
 
-    private:
-        void AnalyzeFont(const std::string& vFilePathName);
-        int DisplayAnalyze(int vWidgetId);
+public:
+	int DrawFontStructurePane(ProjectFile *vProjectFile, int vWidgetId);
 
-    public: // singleton
-        static FontStructurePane *Instance()
-        {
-            static auto *_instance = new FontStructurePane();
-            return _instance;
-        }
+private:
+	int DisplayAnalyze(int vWidgetId);
 
-    protected:
-        FontStructurePane(); // Prevent construction
-        FontStructurePane(const FontStructurePane&) = default; // Prevent construction by copying
-        FontStructurePane& operator =(const FontStructurePane&) { return *this; }; // Prevent assignment
-        ~FontStructurePane(); // Prevent unwanted destruction
+public: // singleton
+	static FontStructurePane *Instance()
+	{
+		static auto *_instance = new FontStructurePane();
+		return _instance;
+	}
+
+protected:
+	FontStructurePane(); // Prevent construction
+	FontStructurePane(const FontStructurePane&) = default; // Prevent construction by copying
+	FontStructurePane& operator =(const FontStructurePane&) { return *this; }; // Prevent assignment
+	~FontStructurePane(); // Prevent unwanted destruction
 };

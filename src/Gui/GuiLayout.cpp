@@ -118,15 +118,15 @@ void GuiLayout::DisplayMenu(ImVec2 vSize)
 
 		ImGui::Separator();
 
-		ImGui::MenuItem<PaneFlags>("Show/Hide Params Pane", "", &m_Pane_Shown, PaneFlags::PANE_PARAM);
-		ImGui::MenuItem<PaneFlags>("Show/Hide Source Pane", "", &m_Pane_Shown, PaneFlags::PANE_SOURCE);
-		ImGui::MenuItem<PaneFlags>("Show/Hide Selected Font Pane", "", &m_Pane_Shown, PaneFlags::PANE_SELECTED_FONT);
-		ImGui::MenuItem<PaneFlags>("Show/Hide Final Pane", "", &m_Pane_Shown, PaneFlags::PANE_FINAL);
-		ImGui::MenuItem<PaneFlags>("Show/Hide Generator Pane", "", &m_Pane_Shown, PaneFlags::PANE_GENERATOR);
-		ImGui::MenuItem<PaneFlags>("Show/Hide Glyph Pane", "", &m_Pane_Shown, PaneFlags::PANE_GLYPH);
-        ImGui::MenuItem<PaneFlags>("Show/Hide Font Structure Pane", "", &m_Pane_Shown, PaneFlags::PANE_FONT_STRUCTURE);
+		ImGui::MenuItem<PaneFlags>("Params Pane", "", &m_Pane_Shown, PaneFlags::PANE_PARAM);
+		ImGui::MenuItem<PaneFlags>("Source Pane", "", &m_Pane_Shown, PaneFlags::PANE_SOURCE);
+		ImGui::MenuItem<PaneFlags>("Selected Font Pane", "", &m_Pane_Shown, PaneFlags::PANE_SELECTED_FONT);
+		ImGui::MenuItem<PaneFlags>("Final Pane", "", &m_Pane_Shown, PaneFlags::PANE_FINAL);
+		ImGui::MenuItem<PaneFlags>("Generator Pane", "", &m_Pane_Shown, PaneFlags::PANE_GENERATOR);
+		ImGui::MenuItem<PaneFlags>("Glyph Pane", "", &m_Pane_Shown, PaneFlags::PANE_GLYPH);
+        ImGui::MenuItem<PaneFlags>("Font Structure Pane", "", &m_Pane_Shown, PaneFlags::PANE_FONT_STRUCTURE);
 #ifdef _DEBUG
-		ImGui::MenuItem<PaneFlags>("Show/Hide Debug Pane", "", &m_Pane_Shown, PaneFlags::PANE_DEBUG);
+		ImGui::MenuItem<PaneFlags>("Debug Pane", "", &m_Pane_Shown, PaneFlags::PANE_DEBUG);
 #endif
 		ImGui::EndMenu();
 	}
@@ -236,7 +236,8 @@ void GuiLayout::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 		{
 			strValue = att->Value();
 
-			if (strName == "panes") m_Pane_Shown = (PaneFlags)ct::ivariant(strValue).getI();
+			if (strName == "panes") 
+				m_Pane_Shown = (PaneFlags)ct::ivariant(strValue).getI();
 		}
 	}
 }

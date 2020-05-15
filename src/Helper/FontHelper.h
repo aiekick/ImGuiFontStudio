@@ -32,48 +32,6 @@
 #include "sfntly/table/truetype/glyph_table.h"
 #include "sfntly/table/truetype/loca_table.h"
 
-class MemoryStream
-{
-public:
-	MemoryStream()= default;
-	~MemoryStream()= default;
-
-	void WriteByte(uint8_t b)
-	{
-		m_Datas.push_back(b);
-	}
-	void WriteBytes(std::vector<uint8_t> *buffer)
-	{
-		if (buffer)
-		{
-			m_Datas.insert(m_Datas.end(), buffer->begin(), buffer->end());
-		}
-	}
-	void WriteShort(int32_t i)
-	{
-		WriteByte((uint8_t)((i >> 8) & 0xff));
-		WriteByte((uint8_t)(i & 0xff));
-	}
-	void WriteInt(int32_t i)
-	{
-		WriteByte((uint8_t)((i >> 24) & 0xff));
-		WriteByte((uint8_t)((i >> 16) & 0xff));
-		WriteByte((uint8_t)((i >> 8) & 0xff));
-		WriteByte((uint8_t)(i & 0xff));
-	}
-	uint8_t* Get()
-	{
-		return m_Datas.data();
-	}
-	size_t Size()
-	{
-		return m_Datas.size();
-	}
-
-private:
-	std::vector<uint8_t> m_Datas;
-};
-
 typedef int32_t FontId;
 typedef int32_t CodePoint;
 typedef int32_t GlyphId;

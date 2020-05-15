@@ -564,6 +564,11 @@ std::string ImGuiThemeHelper::GetStyleColorName(ImGuiCol idx)
 	case ImGuiCol_PlotLinesHovered: return "ImGuiCol_PlotLinesHovered";
 	case ImGuiCol_PlotHistogram: return "ImGuiCol_PlotHistogram";
 	case ImGuiCol_PlotHistogramHovered: return "ImGuiCol_PlotHistogramHovered";
+	case ImGuiCol_TableHeaderBg: return "ImGuiCol_TableHeaderBg";
+	case ImGuiCol_TableBorderStrong: return "ImGuiCol_TableBorderStrong";
+	case ImGuiCol_TableBorderLight: return "ImGuiCol_TableBorderLight";
+	case ImGuiCol_TableRowBg: return "ImGuiCol_TableRowBg";
+	case ImGuiCol_TableRowBgAlt: return "ImGuiCol_TableRowBgAlt";
 	case ImGuiCol_TextSelectedBg: return "ImGuiCol_TextSelectedBg";
 	case ImGuiCol_DragDropTarget: return "ImGuiCol_DragDropTarget";
 	case ImGuiCol_NavHighlight: return "ImGuiCol_NavHighlight";
@@ -572,7 +577,7 @@ std::string ImGuiThemeHelper::GetStyleColorName(ImGuiCol idx)
 	case ImGuiCol_ModalWindowDimBg: return "ImGuiCol_ModalWindowDimBg";
 	default:;
 	}
-	return "";
+	return "ImGuiCol_Unknown";
 }
 
 int ImGuiThemeHelper::GetImGuiColFromName(const std::string& vName)
@@ -621,6 +626,11 @@ int ImGuiThemeHelper::GetImGuiColFromName(const std::string& vName)
 	else if (vName == "ImGuiCol_PlotLinesHovered") return ImGuiCol_PlotLinesHovered;
 	else if (vName == "ImGuiCol_PlotHistogram") return ImGuiCol_PlotHistogram;
 	else if (vName == "ImGuiCol_PlotHistogramHovered") return ImGuiCol_PlotHistogramHovered;
+	else if (vName == "ImGuiCol_TableHeaderBg") return ImGuiCol_TableHeaderBg;
+	else if (vName == "ImGuiCol_TableBorderStrong") return ImGuiCol_TableBorderStrong;
+	else if (vName == "ImGuiCol_TableBorderLight") return ImGuiCol_TableBorderLight;
+	else if (vName == "ImGuiCol_TableRowBg") return ImGuiCol_TableRowBg;
+	else if (vName == "ImGuiCol_TableRowBgAlt") return ImGuiCol_TableRowBgAlt;
 	else if (vName == "ImGuiCol_TextSelectedBg") return ImGuiCol_TextSelectedBg;
 	else if (vName == "ImGuiCol_DragDropTarget") return ImGuiCol_DragDropTarget;
 	else if (vName == "ImGuiCol_NavHighlight") return ImGuiCol_NavHighlight;
