@@ -84,5 +84,5 @@ void FontStructurePane::AnalyzeFont(const std::string& vFilePathName)
 
 int FontStructurePane::DisplayAnalyze(int vWidgetId)
 {
-
+    return vWidgetId;
 }
