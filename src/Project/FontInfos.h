@@ -37,7 +37,8 @@ class FontInfos : public conf::ConfigAbstract
 public: // not to save
 	ImFontAtlas m_ImFontAtlas;
 	std::vector<std::string> m_GlyphNames;
-	std::map<uint32_t, std::string> m_GlyphCodePointNames;
+	std::map<uint32_t, std::string> m_GlyphCodePointToName;
+	std::map<uint32_t, uint32_t> m_GlyphCodePointToGlyphIndex;
 	char m_SearchBuffer[1024] = "\0";
 	ImFontConfig m_FontConfig;
 	bool m_NeedFilePathResolve = false; // the path is not found, need resolve for not lost glyphs datas

@@ -307,8 +307,8 @@ sfntly::Font* FontHelper::AssembleFont(bool vUsePostTable)
 			CanWeGo &= Assemble_Glyf_Loca_Maxp_Tables();
 			CanWeGo &= Assemble_CMap_Table();
 			CanWeGo &= Assemble_Hmtx_Hhea_Tables();
-			CanWeGo &= Assemble_Meta_Table(); // not made for the moment
-			CanWeGo &= Assemble_Head_Table(); // not made for the moment
+			CanWeGo &= Assemble_Meta_Table(); // todo: not made for the moment
+			CanWeGo &= Assemble_Head_Table(); // todo: not made for the moment
 			if (vUsePostTable)
 				CanWeGo &= Assemble_Post_Table(m_GlyphNames);
 			if (CanWeGo)
@@ -348,6 +348,9 @@ bool FontHelper::Assemble_Glyf_Loca_Maxp_Tables()
 		sfntly::Ptr<sfntly::GlyphTable::Builder> glyph_table_builder = down_cast<sfntly::GlyphTable::Builder*>(m_FontBuilder->NewTableBuilder(sfntly::Tag::glyf));
 		sfntly::GlyphTable::GlyphBuilderList* glyph_builders = glyph_table_builder->GlyphBuilders();
 
+		sfntly::IntegerList my_loca_list;
+		int32_t glyphOffset = 0;
+		my_loca_list.emplace_back(glyphOffset);
 		int32_t fontId = 0;
 		int32_t new_glyphid = 0;
 		for (const auto & it : m_ResolvedSet)
@@ -379,7 +382,8 @@ bool FontHelper::Assemble_Glyf_Loca_Maxp_Tables()
 			////////////////////////////////////////////////////////////////////////////
 
 			sfntly::Ptr<sfntly::WritableFontData> newGlyfTable = ReScale_Glyph(fontId, resolved_glyph_id, actualGlyfData);
-
+			glyphOffset += newGlyfTable->Length();
+			my_loca_list.emplace_back(glyphOffset);
 			////////////////////////////////////////////////////////////////////////////
 			////////////////////////////////////////////////////////////////////////////
 			////////////////////////////////////////////////////////////////////////////
@@ -438,6 +442,9 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 			{
 				if (glyphInfos->simpleGlyph.isValid)
 				{
+					if (glyphInfos->newHeaderName == "Wait")
+						int i = 0;
+
 					MemoryStream str;
 					str.WriteShort(341);
 					str.WriteInt(4578);
@@ -452,6 +459,10 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 						simpleGlyph.LoadSimpleGlyph(sglyph);
 						countContours = simpleGlyph.GetCountContours();
 					}
+
+					auto instructionSize = sglyph->InstructionSize();
+					if (instructionSize > 0)
+						int i = 0;
 
 					//ct::ivec2 trans = glyphInfos->simpleGlyph.m_Translation; // first apply
 					ct::dvec2 scale = glyphInfos->simpleGlyph.m_Scale; // second apply
@@ -485,7 +496,7 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 
 							ct::ivec2 dv = pt - last;
 
-							int8_t flag = 0;
+							uint8_t flag = 0;
 							if (simpleGlyph.onCurve[contourIdx][pointIdx])
 								flag = flag | (1 << 0);
 							flagStream.WriteByte(flag);
@@ -559,9 +570,16 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 
 					//we will not do Component glyph for the moment
 
+					size_t originalLen = vReadableFontData->Length();
+					size_t minelen = finalStream->Length();
+
 					return finalStream;
 				}
 			}
+		}
+		else if (glyph->GlyphType() == sfntly::GlyphType::kComposite)
+		{
+			int i = 0;
 		}
 	}
 		

@@ -48,7 +48,7 @@ int FontStructurePane::DrawFontStructurePane(ProjectFile *vProjectFile, int vWid
     if (GuiLayout::m_Pane_Shown & PaneFlags::PANE_FONT_STRUCTURE)
     {
         if (ImGui::Begin<PaneFlags>(FONT_STRUCTURE_PANE,
-                &GuiLayout::m_Pane_Shown, PaneFlags::PANE_DEBUG,
+                &GuiLayout::m_Pane_Shown, PaneFlags::PANE_FONT_STRUCTURE,
                 //ImGuiWindowFlags_NoTitleBar |
                 //ImGuiWindowFlags_MenuBar |
                 //ImGuiWindowFlags_NoMove |

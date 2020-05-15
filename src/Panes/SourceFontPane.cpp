@@ -368,7 +368,7 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, FontInfos 
                                 {
                                     auto glyph = *(font->Glyphs.begin() + glyphIdx);
 
-                                    std::string name = vFontInfos->m_GlyphCodePointNames[glyph.Codepoint];
+                                    std::string name = vFontInfos->m_GlyphCodePointToName[glyph.Codepoint];
                                     if (IfCatchedByFilters(vFontInfos, name))
                                     {
                                         int x = idx % countGlyphX;

@@ -50,6 +50,7 @@ class GlyphInfos
 {
 public:
 	ImFontGlyph glyph{};
+	int glyphIndex = 0;
 	std::string oldHeaderName;
 	std::string newHeaderName;
 	uint32_t newCodePoint = 0;

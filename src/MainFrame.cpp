@@ -71,7 +71,7 @@ void MainFrame::Init()
 #ifdef _DEBUG
 	std::string projectPath = PROJECT_PATH;
 	//LoadProject(projectPath + "\\projects\\ImGuiFontStudio.ifs"); // directly open this project file
-	LoadProject(projectPath + "\\bug\\2020_05_12\\filemenu.ifs");
+	LoadProject(projectPath + "\\bugs\\issue_7\\filemenu.ifs");
 #endif
 
 	GuiLayout::Instance()->Init();

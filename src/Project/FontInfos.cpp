@@ -118,6 +118,7 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 							{
 								it.second.glyph = *glyph;
 								it.second.oldHeaderName = GetGlyphName(codePoint);
+								it.second.glyphIndex = m_GlyphCodePointToGlyphIndex[codePoint];
 							}
 						}
 
@@ -155,7 +156,7 @@ void FontInfos::Clear()
 	DestroyFontTexture();
 	m_ImFontAtlas.Clear();
 	m_GlyphNames.clear();
-	m_GlyphCodePointNames.clear();
+	m_GlyphCodePointToName.clear();
 	m_SelectedGlyphs.clear();
 	m_Filters.clear();
 }
@@ -243,9 +244,9 @@ void FontInfos::FillGlyphNames()
 
 std::string FontInfos::GetGlyphName(uint32_t vCodePoint)
 {
-	if (m_GlyphCodePointNames.find(vCodePoint) != m_GlyphCodePointNames.end())
+	if (m_GlyphCodePointToName.find(vCodePoint) != m_GlyphCodePointToName.end())
 	{
-		return m_GlyphCodePointNames[vCodePoint];
+		return m_GlyphCodePointToName[vCodePoint];
 	}
 	return "Symbol Name";
 }
@@ -295,7 +296,7 @@ void FontInfos::GenerateCodePointToGlypNamesDB()
 {
 	if (!m_ImFontAtlas.ConfigData.empty())
 	{
-		m_GlyphCodePointNames.clear();
+		m_GlyphCodePointToName.clear();
 
 		stbtt_fontinfo fontInfo;
 		const int font_offset = stbtt_GetFontOffsetForIndex(
@@ -311,14 +312,15 @@ void FontInfos::GenerateCodePointToGlypNamesDB()
 					for (auto glyph : font->Glyphs)
 					{
 						int glyphIndex = stbtt_FindGlyphIndex(&fontInfo, (uint32_t)glyph.Codepoint);
+						m_GlyphCodePointToGlyphIndex[(uint32_t)glyph.Codepoint] = glyphIndex;
 						if (glyphIndex < (int)m_GlyphNames.size())
 						{
 							std::string name = m_GlyphNames[glyphIndex];
-							m_GlyphCodePointNames[glyph.Codepoint] = name;
+							m_GlyphCodePointToName[glyph.Codepoint] = name;
 						}
 						else
 						{
-							m_GlyphCodePointNames[glyph.Codepoint] = "";
+							m_GlyphCodePointToName[glyph.Codepoint] = "";
 						}
 					}
 				}

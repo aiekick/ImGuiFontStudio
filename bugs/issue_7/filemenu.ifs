@@ -1,0 +1,66 @@
+<config>
+	<project>
+		<font name="filemenu_bis.ttf">
+			<glyphs>
+				<glyph orgId="59650" newId="59650" orgName="uniE902" newName="CenterView"/>
+				<glyph orgId="59652" newId="59652" orgName="uniE904" newName="GridOff"/>
+				<glyph orgId="59653" newId="59654" orgName="uniE905" newName="GridOn"/>
+				<glyph orgId="59654" newId="59697" orgName="uniE906" newName="Help"/>
+				<glyph orgId="59655" newId="59690" orgName="uniE907" newName="SelectAll"/>
+				<glyph orgId="59656" newId="59691" orgName="uniE908" newName="settings"/>
+				<glyph orgId="59657" newId="59656" orgName="uniE909" newName="ResetZoom"/>
+				<glyph orgId="59658" newId="59657" orgName="uniE90A" newName="Save"/>
+				<glyph orgId="59659" newId="59692" orgName="uniE90B" newName="Paste"/>
+				<glyph orgId="59661" newId="59698" orgName="uniE90D" newName="Copy"/>
+				<glyph orgId="59662" newId="59699" orgName="uniE90E" newName="New"/>
+				<glyph orgId="59663" newId="59700" orgName="uniE90F" newName="Open"/>
+				<glyph orgId="59664" newId="59701" orgName="uniE910" newName="Export"/>
+				<glyph orgId="59665" newId="59702" orgName="uniE911" newName="PasteValue"/>
+				<glyph orgId="59666" newId="59703" orgName="uniE912" newName="Unsellect"/>
+			</glyphs>
+			<prefix>FileMenu</prefix>
+			<pathfilename>filemenu_bis.ttf</pathfilename>
+			<oversample>2</oversample>
+			<fontsize>22</fontsize>
+		</font>
+		<font name="tasks_bis.ttf">
+			<glyphs>
+				<glyph orgId="59648" newId="59648" orgName="uniE900" newName="Failler"/>
+				<glyph orgId="59649" newId="59649" orgName="uniE901" newName="Log"/>
+				<glyph orgId="59650" newId="59651" orgName="uniE902" newName="UntilFail"/>
+				<glyph orgId="59651" newId="59653" orgName="uniE903" newName="Inverter"/>
+				<glyph orgId="59652" newId="59693" orgName="uniE904" newName="ReturnFail"/>
+				<glyph orgId="59653" newId="65535" orgName="uniE905" newName="ReturnSuccess"/>
+				<glyph orgId="59654" newId="59694" orgName="uniE906" newName="GenericDecorator"/>
+				<glyph orgId="59655" newId="59655" orgName="uniE907" newName="RandomSelector"/>
+				<glyph orgId="59656" newId="59695" orgName="uniE908" newName="Prallel"/>
+				<glyph orgId="59657" newId="59696" orgName="uniE909" newName="Selector"/>
+				<glyph orgId="59658" newId="59658" orgName="uniE90A" newName="Root"/>
+				<glyph orgId="59659" newId="59659" orgName="uniE90B" newName="Error"/>
+				<glyph orgId="59660" newId="59660" orgName="uniE90C" newName="Repeater"/>
+				<glyph orgId="59661" newId="59661" orgName="uniE90D" newName="RandomSequence"/>
+				<glyph orgId="59662" newId="59662" orgName="uniE90E" newName="Event"/>
+				<glyph orgId="59663" newId="59663" orgName="uniE90F" newName="PrioritySelector"/>
+				<glyph orgId="59664" newId="59664" orgName="uniE910" newName="GenericAction"/>
+				<glyph orgId="59665" newId="59665" orgName="uniE911" newName="UntilSuccess"/>
+				<glyph orgId="59666" newId="59666" orgName="uniE912" newName="Wait"/>
+				<glyph orgId="59667" newId="59667" orgName="uniE913" newName="Succeeder"/>
+				<glyph orgId="59668" newId="59668" orgName="uniE914" newName="Sequence"/>
+			</glyphs>
+			<prefix></prefix>
+			<pathfilename>tasks_bis.ttf</pathfilename>
+			<oversample>3</oversample>
+			<fontsize>27</fontsize>
+		</font>
+		<rangecoloring show="false" hash="10;15;35;0.5"/>
+		<previewcountglyph_x>9</previewcountglyph_x>
+		<mergedfontprefix>FileMenu</mergedfontprefix>
+		<curglyphtooltip>true</curglyphtooltip>
+		<srcglyphtooltip>true</srcglyphtooltip>
+		<dstglyphtooltip>true</dstglyphtooltip>
+		<glyphpreviewscale>1</glyphpreviewscale>
+		<glyphpreviewshowcontrollines>false</glyphpreviewshowcontrollines>
+		<genmode>546</genmode>
+		<fonttomergein>filemenu_bis.ttf</fonttomergein>
+	</project>
+</config>

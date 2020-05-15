@@ -191,7 +191,7 @@ void Generator::GenerateHeader_One(
 
 				if (vFontInfos->m_SelectedGlyphs.empty()) // no glyph selected so generate for whole font
 				{
-					for (auto &it : vFontInfos->m_GlyphCodePointNames)
+					for (auto &it : vFontInfos->m_GlyphCodePointToName)
 					{
 						glyphNames[it.second] = it.first;
 					}
@@ -230,7 +230,7 @@ void Generator::GenerateHeader_One(
 
 				if (vFontInfos->m_SelectedGlyphs.empty()) // no glyph selected so generate for whole font
 				{
-					for (auto &it : vFontInfos->m_GlyphCodePointNames)
+					for (auto &it : vFontInfos->m_GlyphCodePointToName)
 					{
 						glyphCodePoints[it.first] = it.second;
 					}
