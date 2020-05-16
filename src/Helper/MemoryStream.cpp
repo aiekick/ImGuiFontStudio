@@ -19,6 +19,8 @@
 
 #include "MemoryStream.h"
 
+#include <cstring>
+
 MemoryStream::MemoryStream() = default;
 
 MemoryStream::MemoryStream(uint8_t *vDatas, size_t vSize)
