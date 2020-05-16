@@ -27,6 +27,8 @@
 
 namespace FontAnalyser
 {
+	//////////////////////////////////////
+
 	class HeaderStruct
 	{
 	public:
@@ -41,10 +43,12 @@ namespace FontAnalyser
 		void parse(MemoryStream *vMem);
 	};
 
+	//////////////////////////////////////
+
 	class TableStruct
 	{
 	public:
-		uint8_t tag[5] = "\0";
+		uint8_t tag[5] = {};
 		uint32_t checkSum = 0;
 		uint32_t offset = 0;
 		uint32_t length = 0;
@@ -54,6 +58,8 @@ namespace FontAnalyser
 		void parse(MemoryStream *vMem);
 	};
 	
+	//////////////////////////////////////
+
 	class maxpTableStruct
 	{
 	public:
@@ -77,6 +83,8 @@ namespace FontAnalyser
 		int draw(int vWidgetId);
 		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
 	};
+
+	//////////////////////////////////////
 
 	class postTableF2Struct
 	{
@@ -112,6 +120,8 @@ namespace FontAnalyser
 		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
 	};
 
+	//////////////////////////////////////
+
 	class headTableStruct
 	{
 	public:
@@ -138,13 +148,24 @@ namespace FontAnalyser
 		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
 	};
 
-	class cmapSubTableF0Struct
+	//////////////////////////////////////
+
+	class cmapSubTableF4Struct
 	{
 	public:
 		uint16_t format = 0;
 		uint16_t length = 0;
 		uint16_t language = 0;
-		std::vector<uint8_t> glyphIndexArray;
+		uint16_t segCountX2 = 0;
+		uint16_t searchRange = 0;
+		uint16_t entrySelector = 0;
+		uint16_t rangeShift = 0;
+		std::vector<uint16_t> endCode;
+		uint16_t reservedPad = 0;
+		std::vector<uint16_t> startCode;
+		std::vector<int16_t> idDelta;
+		std::vector<uint16_t> idRangeOffset;
+		std::vector<uint16_t> glyphIdArray;
 
 	public:
 		bool filled = false;
@@ -154,13 +175,30 @@ namespace FontAnalyser
 		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
 	};
 
-	class cmapSubTableStruct
+	class cmapSubTableF0Struct
+	{
+	public:
+		uint16_t format = 0;
+		uint16_t length = 0;
+		uint16_t language = 0;
+		uint8_t glyphIndexArray[256]; // max256
+
+	public:
+		bool filled = false;
+
+	public:
+		int draw(int vWidgetId);
+		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
+	};
+
+	class cmapEncodingRecordStruct
 	{
 	public:
 		uint16_t platformID = 0;
-		uint16_t platformSpecificID = 0;
+		uint16_t encodingID = 0;
 		uint32_t offset = 0;
 		cmapSubTableF0Struct subTableF0;
+		cmapSubTableF4Struct subTableF4;
 
 	public:
 		int draw(int vWidgetId);
@@ -171,13 +209,15 @@ namespace FontAnalyser
 	{
 	public:
 		uint16_t version = 0;
-		uint16_t numberSubtables = 0;
-		std::vector<cmapSubTableStruct> subTables;
+		uint16_t numEncodingRecords = 0;
+		std::vector<cmapEncodingRecordStruct> encodingRecords;
 
 	public:
 		int draw(int vWidgetId);
 		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
 	};
+
+	//////////////////////////////////////
 
 	class locaTableStruct
 	{
@@ -186,13 +226,62 @@ namespace FontAnalyser
 		maxpTableStruct *maxp = 0;
 
 	public:
-		std::vector<uint32_t> longVersion;
-		std::vector<uint16_t> shortVersion;
+		std::vector<uint32_t> offsets;
+		
+	public:
+		int draw(int vWidgetId);
+		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
+	};
+
+	//////////////////////////////////////
+
+	class simpleGlyphTableStruct
+	{
+	public: 
+		bool filled = false;
+
+	public:
+		std::vector<uint16_t> endPtsOfContours;
+		uint16_t instructionLength;
+		std::vector<uint8_t> instructions;
+		std::vector<uint8_t> flags;
+		std::vector<int16_t> xCoordinates;
+		std::vector<int16_t> yCoordinates;
+
+	public:
+		int draw(int vWidgetId);
+		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength, int16_t vCountContours);
+	};
+
+	class glyfStruct
+	{
+	public:
+		int16_t numberOfContours = 0;
+		MemoryStream::FWord xMin = 0;
+		MemoryStream::FWord yMin = 0;
+		MemoryStream::FWord xMax = 0;
+		MemoryStream::FWord yMax = 0;
+		simpleGlyphTableStruct simpleGlyph;
 
 	public:
 		int draw(int vWidgetId);
 		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
 	};
+
+	class glyfTableStruct
+	{
+	public:
+		locaTableStruct *loca = 0;
+
+	public:
+		std::vector<glyfStruct> glyfs;
+
+	public:
+		int draw(int vWidgetId);
+		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
+	};
+
+	//////////////////////////////////////
 
 	class FontAnalyzedStruct
 	{
@@ -205,6 +294,7 @@ namespace FontAnalyser
 		headTableStruct head;
 		cmapTableStruct cmap;
 		locaTableStruct loca;
+		glyfTableStruct glyf;
 
 	public:
 		int draw(int vWidgetId);

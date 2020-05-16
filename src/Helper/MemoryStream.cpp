@@ -132,15 +132,17 @@ void MemoryStream::Set(uint8_t *vDatas, size_t vSize)
 
 uint8_t MemoryStream::ReadByte()
 {
-	return m_Datas[m_ReadPos++];
+	if (m_ReadPos < m_Datas.size())
+		return m_Datas[m_ReadPos++];
+	return 0;
 }
 
-int16_t MemoryStream::ReadUShort()
+int32_t MemoryStream::ReadUShort()
 {
 	return 0xffff & (ReadByte() << 8 | ReadByte());
 }
 
-int16_t MemoryStream::ReadShort()
+int32_t MemoryStream::ReadShort()
 {
 	return ((ReadByte() << 8 | ReadByte()) << 16) >> 16;
 }

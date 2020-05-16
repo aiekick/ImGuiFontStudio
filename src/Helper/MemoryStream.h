@@ -59,8 +59,8 @@ public:
 	void SetPos(size_t vPos);
 	
 	uint8_t ReadByte();
-	int16_t ReadUShort();
-	int16_t ReadShort();
+	int32_t ReadUShort();
+	int32_t ReadShort();
 	FWord ReadFWord();
 	uint32_t ReadUInt24();
 	uint64_t ReadULong();

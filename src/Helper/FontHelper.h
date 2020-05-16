@@ -131,10 +131,10 @@ private:
 	bool Assemble_Post_Table(std::map<CodePoint, std::string> vSelection);
 
 private:
-	static bool Assemble_Meta_Table();
+	bool Assemble_Name_Table(); // Copyright
 
 private:
-	static bool Assemble_Head_Table();
+	bool Assemble_Head_Table();
 
 private:
 	GlyphInfos* GetGlyphInfosFromGlyphId(int32_t vFontId, int32_t vGlyphId);

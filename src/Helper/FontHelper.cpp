@@ -308,8 +308,8 @@ sfntly::Font* FontHelper::AssembleFont(bool vUsePostTable)
 			CanWeGo &= Assemble_Glyf_Loca_Maxp_Tables();
 			CanWeGo &= Assemble_CMap_Table();
 			CanWeGo &= Assemble_Hmtx_Hhea_Tables();
-			CanWeGo &= Assemble_Meta_Table(); // todo: not made for the moment
-			CanWeGo &= Assemble_Head_Table(); // todo: not made for the moment
+			CanWeGo &= Assemble_Name_Table(); // todo: not made for the moment
+			CanWeGo &= Assemble_Head_Table();
 			if (vUsePostTable)
 				CanWeGo &= Assemble_Post_Table(m_GlyphNames);
 			if (CanWeGo)
@@ -853,7 +853,7 @@ bool FontHelper::Assemble_Post_Table(std::map<CodePoint, std::string> vSelection
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 
-bool FontHelper::Assemble_Meta_Table()
+bool FontHelper::Assemble_Name_Table()
 {
 	//todo: la table Meta contient les infos sur les font, comme la license , l'auteur etc..
 	return true;
@@ -864,7 +864,30 @@ bool FontHelper::Assemble_Meta_Table()
 
 bool FontHelper::Assemble_Head_Table()
 {
-	//todo: la table Meta contient les infos sur le type de font etc..
+	//4+4+4+4+2+2+8+8+2+2+2+2+2+2+2+2+2 => 54
+	sfntly::WritableFontDataPtr head;
+	head.Attach(sfntly::WritableFontData::CreateWritableFontData(54));
+	int32_t offset = 0;
+	offset += head->WriteFixed(offset, 0x00010000); // version
+	offset += head->WriteFixed(offset, 0x00010000); // fontRevision
+	offset += head->WriteULong(offset, 0); // checkSumAdjustment
+	offset += head->WriteULong(offset, 0x5F0F3CF5); // magicNumber
+	offset += head->WriteUShort(offset, 0); // flags
+	offset += head->WriteUShort(offset, 0); // unitsPerEm
+	offset += head->WriteDateTime(offset, 0); // created
+	offset += head->WriteDateTime(offset, 0); // modified
+	offset += head->WriteShort(offset, 0); // xMin
+	offset += head->WriteShort(offset, 0); // yMin
+	offset += head->WriteShort(offset, 0); // xMax
+	offset += head->WriteShort(offset, 0); // yMax
+	offset += head->WriteUShort(offset, 0); // macStyle
+	offset += head->WriteUShort(offset, 0); // lowestRecPPEM
+	offset += head->WriteShort(offset, 0); // fontDirectionHint
+	offset += head->WriteShort(offset, 0); // indexToLocFormat
+	offset += head->WriteShort(offset, 0); // glyphDataFormat
+
+	m_FontBuilder->NewTableBuilder(sfntly::Tag::head, head);
+
 	return true;
 }
 
