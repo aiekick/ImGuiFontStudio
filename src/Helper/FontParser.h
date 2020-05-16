@@ -198,7 +198,7 @@ namespace FontAnalyser
 
 class FontParser
 {
-public:
+private:
 	FontAnalyser::FontAnalyzedStruct m_FontAnalyzed;
 
 public:
@@ -206,5 +206,6 @@ public:
 	~FontParser();
 
 	void ParseFont(const std::string& vFilePathName);
+	int draw(int vWidgetId);
 };
 

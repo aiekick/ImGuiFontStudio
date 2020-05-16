@@ -17,6 +17,7 @@
 
 #include <cstdint>
 #include <vector>
+#include <string>
 
 class MemoryStream
 {

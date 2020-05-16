@@ -146,7 +146,7 @@ int FontAnalyser::cmapTableStruct::draw(int vWidgetId)
 {
 	ImGui::PushID(++vWidgetId);
 
-	if (ImGui::TreeNode("cmap Table :"))
+	if (ImGui::TreeNode("cmap Table (bad parse for the moment) :"))
 	{
 		ImGui::Text("version            (2 bytes) : %i", version);
 		ImGui::Text("numberSubtables    (2 bytes) : %i", numberSubtables);
@@ -202,7 +202,7 @@ int FontAnalyser::postTableF2Struct::draw(int vWidgetId)
 	{
 		ImGui::PushID(++vWidgetId);
 
-		if (ImGui::TreeNode("post Table V2 :"))
+		if (ImGui::TreeNode("post Table Format 2 :"))
 		{
 			ImGui::Text("numberOfGlyphs  (4 bytes) : %i", numberOfGlyphs);
 
@@ -503,4 +503,9 @@ void FontParser::ParseFont(const std::string& vFilePathName)
 		/////////////////////////////
 		m_FontAnalyzed.parsed = true;
 	}
+}
+
+int FontParser::draw(int vWidgetId)
+{
+	return m_FontAnalyzed.draw(vWidgetId);
 }

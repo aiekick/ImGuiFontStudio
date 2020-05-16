@@ -86,7 +86,7 @@ int FontStructurePane::DrawFontStructurePane(ProjectFile *vProjectFile, int vWid
 
 int FontStructurePane::DisplayAnalyze(int vWidgetId)
 {
-	vWidgetId = m_FontParser.m_FontAnalyzed.draw(vWidgetId);
+	vWidgetId = m_FontParser.draw(vWidgetId);
 
     return vWidgetId;
 }
