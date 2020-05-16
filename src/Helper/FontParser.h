@@ -15,7 +15,10 @@
  */
 #pragma once
 
+#include "MemoryStream.h"
+
 #include <cstdint>
+#include <string>
 #include <vector>
 #include <map>
 
@@ -27,7 +30,7 @@ namespace FontAnalyser
 	class HeaderStruct
 	{
 	public:
-		uint32_t scalerType = 0;
+		std::string scalerType;
 		uint16_t numTables = 0;
 		uint16_t searchRange = 0;
 		uint16_t entrySelector = 0;
@@ -35,6 +38,7 @@ namespace FontAnalyser
 
 	public:
 		int draw(int vWidgetId);
+		void parse(MemoryStream *vMem);
 	};
 
 	class TableStruct
@@ -47,21 +51,13 @@ namespace FontAnalyser
 
 	public:
 		int draw(int vWidgetId);
-	};
-
-	class FixedType
-	{
-	public:
-		uint16_t high = 0;
-		uint16_t low = 0;
+		void parse(MemoryStream *vMem);
 	};
 	
-	typedef uint16_t FWord;
-
 	class maxpTableStruct
 	{
 	public:
-		FixedType version;
+		MemoryStream::Fixed version;
 		uint16_t numGlyphs = 0;
 		uint16_t maxPoints = 0;
 		uint16_t maxContours = 0;
@@ -79,6 +75,7 @@ namespace FontAnalyser
 
 	public:
 		int draw(int vWidgetId);
+		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
 	};
 
 	class postTableF2Struct
@@ -86,7 +83,6 @@ namespace FontAnalyser
 	public:
 		uint16_t numberOfGlyphs = 0;
 		std::vector<uint16_t> glyphNameIndex;
-		uint8_t space;
 		std::vector<std::string> names;
 
 	public:
@@ -94,15 +90,16 @@ namespace FontAnalyser
 
 	public:
 		int draw(int vWidgetId);
+		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
 	};
 
 	class postTableStruct
 	{
 	public:
-		FixedType format;
-		FixedType italicAngle;
-		FWord underlinePosition = 0;
-		FWord underlineThickness = 0;
+		MemoryStream::Fixed format;
+		MemoryStream::Fixed italicAngle;
+		MemoryStream::FWord underlinePosition = 0;
+		MemoryStream::FWord underlineThickness = 0;
 		uint32_t isFixedPitch = 0;
 		uint32_t minMemType42 = 0;
 		uint32_t maxMemType42 = 0;
@@ -112,23 +109,24 @@ namespace FontAnalyser
 
 	public:
 		int draw(int vWidgetId);
+		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
 	};
 
 	class headTableStruct
 	{
 	public:
-		int16_t version;
-		int16_t fontRevision;
+		MemoryStream::Fixed version;
+		MemoryStream::Fixed fontRevision;
 		uint32_t checkSumAdjustment;
 		uint32_t magicNumber;
 		uint16_t flags; // bitset
 		uint16_t unitsPerEm;
-		int64_t created;
-		int64_t modified;
-		int16_t xMin;
-		int16_t yMin;
-		int16_t xMax;
-		int16_t yMax;
+		MemoryStream::longDateTime created;
+		MemoryStream::longDateTime modified;
+		MemoryStream::FWord xMin;
+		MemoryStream::FWord yMin;
+		MemoryStream::FWord xMax;
+		MemoryStream::FWord yMax;
 		uint16_t macStyle; // bitset
 		uint16_t lowestRecPPEM;
 		int16_t fontDirectionHint;
@@ -137,6 +135,7 @@ namespace FontAnalyser
 
 	public:
 		int draw(int vWidgetId);
+		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
 	};
 
 	class cmapSubTableF0Struct
@@ -152,6 +151,7 @@ namespace FontAnalyser
 
 	public:
 		int draw(int vWidgetId);
+		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
 	};
 
 	class cmapSubTableStruct
@@ -164,6 +164,7 @@ namespace FontAnalyser
 
 	public:
 		int draw(int vWidgetId);
+		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
 	};
 
 	class cmapTableStruct
@@ -175,6 +176,22 @@ namespace FontAnalyser
 
 	public:
 		int draw(int vWidgetId);
+		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
+	};
+
+	class locaTableStruct
+	{
+	public:
+		headTableStruct *head = 0;
+		maxpTableStruct *maxp = 0;
+
+	public:
+		std::vector<uint32_t> longVersion;
+		std::vector<uint16_t> shortVersion;
+
+	public:
+		int draw(int vWidgetId);
+		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
 	};
 
 	class FontAnalyzedStruct
@@ -187,9 +204,11 @@ namespace FontAnalyser
 		postTableStruct post;
 		headTableStruct head;
 		cmapTableStruct cmap;
+		locaTableStruct loca;
 
 	public:
 		int draw(int vWidgetId);
+		void parse(MemoryStream *vMem);
 	};
 }
 

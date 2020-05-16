@@ -55,6 +55,11 @@ void MemoryStream::WriteUShort(int32_t us)
 	WriteByte((uint8_t)(us & 0xff));
 }
 
+void MemoryStream::WriteFWord(int32_t us)
+{
+	WriteUShort(us);
+}
+
 void MemoryStream::WriteShort(int32_t s)
 {
 	WriteUShort(s);
@@ -80,12 +85,15 @@ void MemoryStream::WriteLong(int64_t l)
 	WriteULong(l);
 }
 
-void MemoryStream::WriteFixed(int32_t f)
+void MemoryStream::WriteFixed(Fixed f)
 {
-	WriteULong(f);
+	WriteByte((uint8_t)((f.high >> 24) & 0xff));
+	WriteByte((uint8_t)((f.high >> 16) & 0xff));
+	WriteByte((uint8_t)((f.low >> 8) & 0xff));
+	WriteByte((uint8_t)(f.low & 0xff));
 }
 
-void MemoryStream::WriteDateTime(int64_t date)
+void MemoryStream::WriteDateTime(longDateTime date)
 {
 	WriteULong((date >> 32) & 0xffffffff);
 	WriteULong(date & 0xffffffff);
@@ -122,32 +130,37 @@ void MemoryStream::Set(uint8_t *vDatas, size_t vSize)
 	}
 }
 
-int32_t MemoryStream::ReadByte()
+uint8_t MemoryStream::ReadByte()
 {
 	return m_Datas[m_ReadPos++];
 }
 
-int32_t MemoryStream::ReadUShort()
+int16_t MemoryStream::ReadUShort()
 {
 	return 0xffff & (ReadByte() << 8 | ReadByte());
 }
 
-int32_t MemoryStream::ReadShort()
+int16_t MemoryStream::ReadShort()
 {
 	return ((ReadByte() << 8 | ReadByte()) << 16) >> 16;
 }
 
-int32_t MemoryStream::ReadUInt24()
+MemoryStream::FWord MemoryStream::ReadFWord()
+{
+	return ReadShort();
+}
+
+uint32_t MemoryStream::ReadUInt24()
 {
 	return 0xffffff & (ReadByte() << 16 | ReadByte() << 8 | ReadByte());
 }
 
-int64_t MemoryStream::ReadULong()
+uint64_t MemoryStream::ReadULong()
 {
 	return 0xffffffffL & ReadLong();
 }
 
-int32_t MemoryStream::ReadULongAsInt()
+uint32_t MemoryStream::ReadULongAsInt()
 {
 	int64_t ulong = ReadULong();
 	return ((int32_t)ulong) & ~0x80000000;
@@ -158,12 +171,16 @@ int32_t MemoryStream::ReadLong()
 	return ReadByte() << 24 | ReadByte() << 16 | ReadByte() << 8 | ReadByte();
 }
 
-int32_t MemoryStream::ReadFixed()
+MemoryStream::Fixed MemoryStream::ReadFixed()
 {
-	return ReadLong();
+	Fixed res;
+	int32_t f = ReadLong();
+	res.high = (int16_t)((f >> 16) & 0xff);
+	res.low = (int16_t)(f & 0xff);
+	return res;
 }
 
-int64_t MemoryStream::ReadDateTimeAsLong()
+MemoryStream::longDateTime MemoryStream::ReadDateTime()
 {
 	return (int64_t)ReadULong() << 32 | ReadULong();
 }

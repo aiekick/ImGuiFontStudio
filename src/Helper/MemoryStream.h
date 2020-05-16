@@ -19,8 +19,20 @@
 #include <vector>
 #include <string>
 
+
 class MemoryStream
 {
+public:
+	class Fixed // its like a float with int32 : high.low ex : 1 high 0 low => 1.0
+	{
+	public:
+		int16_t high = 0;
+		int16_t low = 0;
+	};
+	typedef uint16_t UFWord;
+	typedef int16_t FWord;
+	typedef int64_t longDateTime;
+
 public:
 	MemoryStream();
 	MemoryStream(uint8_t *vDatas, size_t vSize);
@@ -30,12 +42,13 @@ public:
 	void WriteBytes(std::vector<uint8_t> *buffer);
 	void WriteShort(int32_t i);
 	void WriteUShort(int32_t us);
+	void WriteFWord(int32_t us);
 	void WriteInt(int32_t i);
 	void WriteUInt24(int32_t ui);
 	void WriteULong(int64_t ul);
 	void WriteLong(int64_t l);
-	void WriteFixed(int32_t f);
-	void WriteDateTime(int64_t date);
+	void WriteFixed(Fixed f);
+	void WriteDateTime(longDateTime date);
 
 	uint8_t* Get();
 	void Set(uint8_t *vDatas, size_t vSize);
@@ -45,15 +58,16 @@ public:
 	size_t GetPos();
 	void SetPos(size_t vPos);
 	
-	int32_t ReadByte();
-	int32_t ReadUShort();
-	int32_t ReadShort();
-	int32_t ReadUInt24();
-	int64_t ReadULong();
-	int32_t ReadULongAsInt();
+	uint8_t ReadByte();
+	int16_t ReadUShort();
+	int16_t ReadShort();
+	FWord ReadFWord();
+	uint32_t ReadUInt24();
+	uint64_t ReadULong();
+	uint32_t ReadULongAsInt();
 	int32_t ReadLong();
-	int32_t ReadFixed();
-	int64_t ReadDateTimeAsLong();
+	Fixed ReadFixed();
+	longDateTime ReadDateTime();
 	std::string ReadString(size_t vLen);
 
 private:
