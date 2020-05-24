@@ -297,7 +297,7 @@ void SourceFontPane::DrawFilterBar(ProjectFile *vProjectFile, FontInfos *vFontIn
 		{
 			vFontInfos->m_Filters.clear();
 			std::string s = vFontInfos->m_SearchBuffer;
-			auto arr = ct::splitStringToVectorByManyDelimiters(s, ", ");
+			auto arr = ct::splitStringToVector(s, ", ");
 			for (const auto &it : arr)
 			{
 				vFontInfos->m_Filters.insert(it);
