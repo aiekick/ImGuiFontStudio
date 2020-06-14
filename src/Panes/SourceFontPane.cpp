@@ -121,7 +121,7 @@ int SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId)
 				{
 					if (ImGui::Button(ICON_IGFS_FOLDER_OPEN " Open Font"))
 					{
-						igfd::ImGuiFileDialog::Instance()->OpenModal("OpenFontDlg", "Open Font File", ".ttf\0.otf\0\0", ".", 0);
+						igfd::ImGuiFileDialog::Instance()->OpenModal("OpenFontDlg", "Open Font File", "Font File (*.ttf *.otf){.ttf,.otf}", ".", 0);
 					}
 
 					if (!vProjectFile->m_Fonts.empty())
@@ -160,7 +160,7 @@ int SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId)
 
 										igfd::ImGuiFileDialog::Instance()->OpenModal(
 											"SolveBadFilePathName",
-											label.c_str(), ".ttf\0\0", ".",
+											label.c_str(), "Font File (*.ttf *.otf){.ttf,.otf}", ".",
 											itFont.first, 1, (igfd::UserDatas)itFont.first.c_str());
 									}
 								}
@@ -180,7 +180,7 @@ int SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId)
 
 										igfd::ImGuiFileDialog::Instance()->OpenModal(
 											"SolveBadFilePathName",
-											label.c_str(), ".ttf\0\0", ".",
+											label.c_str(), "Font File (*.ttf *.otf){.ttf,.otf}", ".",
 											itFont.first, 1, (igfd::UserDatas)itFont.first.c_str());
 									}
 								}

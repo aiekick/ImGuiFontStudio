@@ -17,7 +17,7 @@
  * limitations under the License.
  */
 
-#define IMGUIFONTSTUDIO_VERSION "Beta 0.6"
+#define IMGUIFONTSTUDIO_VERSION "Beta 0.7"
 
 #include "MainFrame.h"
 
@@ -188,13 +188,13 @@ void MainFrame::DrawDockPane(ImVec2 vSize)
 					m_SaveDialogIfRequired = true;
 					m_SaveChangeDialogActions.push_front([this]()
 					{
-						igfd::ImGuiFileDialog::Instance()->OpenModal("OpenProjectDlg", "Open Project File", ".ifs\0\0", ".");
+						igfd::ImGuiFileDialog::Instance()->OpenModal("OpenProjectDlg", "Open Project File", "Project File{.ifs}", ".");
 						m_SaveDialogIfRequired = false;
 					});
 				}
 				else
 				{
-					igfd::ImGuiFileDialog::Instance()->OpenModal("OpenProjectDlg", "Open Project File", ".ifs\0\0", ".");
+					igfd::ImGuiFileDialog::Instance()->OpenModal("OpenProjectDlg", "Open Project File", "Project File{.ifs}", ".");
 				}
 			}
 
@@ -206,13 +206,13 @@ void MainFrame::DrawDockPane(ImVec2 vSize)
 				{
 					if (!m_ProjectFile.Save())
 					{
-						igfd::ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", ".ifs\0\0", ".");
+						igfd::ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", "Project File{.ifs}", ".");
 					}
 				}
 
 				if (ImGui::MenuItem(ICON_IGFS_SAVE " Save As"))
 				{
-					igfd::ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", ".ifs\0\0", ".");
+					igfd::ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", "Project File{.ifs}", ".");
 				}
 
 				ImGui::Separator();
@@ -282,7 +282,7 @@ void MainFrame::DrawDockPane(ImVec2 vSize)
 			{
 				if (!m_ProjectFile.Save())
 				{
-					igfd::ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", ".ifs\0\0", ".", 0);
+					igfd::ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", "Project File{.ifs}", ".", 0);
 				}
 			}
 		}
@@ -512,7 +512,7 @@ void MainFrame::ShowSaveDialogIfRequired()
 					choiceMade = true;
 					m_SaveChangeDialogActions.push_front([this]()
 					{
-						igfd::ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", ".ifs\0\0", ".");
+						igfd::ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", "Project File{.ifs}", ".");
 						m_SaveDialogIfRequired = false;
 					});
 				}

@@ -28,7 +28,7 @@ public:
 	ImVec4 badColor = ImVec4(0.8f, 0.2f, 0.2f, 1.0f);
 
 private:
-	std::map<std::string, igfd::FilterInfosStruct> m_FileTypeInfos;
+	std::map<std::string, igfd::FileExtentionInfosStruct> m_FileTypeInfos;
 
 public:
 	void DrawMenu();

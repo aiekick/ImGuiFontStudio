@@ -50,8 +50,11 @@
 				<glyph orgId="61550" newId="61550" orgName="eye" newName="eye"/>
 				<glyph orgId="61552" newId="61552" orgName="eye-slash" newName="eye-slash"/>
 				<glyph orgId="61553" newId="61553" orgName="exclamation-triangle" newName="exclamation-triangle"/>
+				<glyph orgId="61559" newId="61559" orgName="chevron-up" newName="chevron_up"/>
+				<glyph orgId="61560" newId="61560" orgName="chevron-down" newName="chevron_down"/>
 				<glyph orgId="61564" newId="61564" orgName="folder-open" newName="folder-open"/>
 				<glyph orgId="61573" newId="61573" orgName="cogs" newName="cogs"/>
+				<glyph orgId="61578" newId="61578" orgName="heart-o" newName="heart-o"/>
 				<glyph orgId="61618" newId="61618" orgName="arrows-alt" newName="arrows-alt"/>
 				<glyph orgId="61633" newId="61633" orgName="link" newName="link"/>
 				<glyph orgId="61636" newId="61636" orgName="scissors" newName="scissors"/>
@@ -63,6 +66,7 @@
 				<glyph orgId="61714" newId="61714" orgName="reply" newName="reply"/>
 				<glyph orgId="61723" newId="61723" orgName="gamepad" newName="gamepad"/>
 				<glyph orgId="61724" newId="61724" orgName="keyboard-o" newName="keyboard-o"/>
+				<glyph orgId="61734" newId="61734" orgName="code-fork" newName="code-fork"/>
 				<glyph orgId="61736" newId="61736" orgName="question" newName="question"/>
 				<glyph orgId="61737" newId="61737" orgName="info" newName="info"/>
 				<glyph orgId="61744" newId="61744" orgName="microphone" newName="microphone"/>
@@ -77,14 +81,18 @@
 				<glyph orgId="61896" newId="61896" orgName="file-video-o" newName="file-video-o"/>
 				<glyph orgId="61897" newId="61897" orgName="file-code-o" newName="file-code-o"/>
 				<glyph orgId="62003" newId="62003" orgName="server" newName="drives"/>
+				<glyph orgId="62071" newId="62071" orgName="map-signs" newName="map-signs"/>
 			</glyphs>
-			<prefix></prefix>
+			<prefix>NDP</prefix>
 			<pathfilename>..\samples_Fonts\forkawesome-webfont.ttf</pathfilename>
 			<oversample>2</oversample>
 			<fontsize>36</fontsize>
 		</font>
 		<font name="materialdesignicons-webfont.ttf">
 			<glyphs>
+				<glyph orgId="61499" newId="61499" orgName="apps" newName="apps"/>
+				<glyph orgId="61656" newId="61656" orgName="briefcase-download" newName="briefcase-download"/>
+				<glyph orgId="61668" newId="61668" orgName="bug" newName="debug"/>
 				<glyph orgId="61692" newId="61692" orgName="camcorder" newName="camcorder"/>
 				<glyph orgId="61695" newId="61695" orgName="camcorder-off" newName="camcorder-off"/>
 				<glyph orgId="61738" newId="61738" orgName="chart-line" newName="chart-line"/>
@@ -94,11 +102,32 @@
 				<glyph orgId="61794" newId="61794" orgName="cloud-download" newName="import"/>
 				<glyph orgId="61799" newId="61799" orgName="cloud-upload" newName="upload"/>
 				<glyph orgId="61972" newId="61972" orgName="file" newName="file"/>
+				<glyph orgId="61973" newId="61973" orgName="file-chart" newName="file-chart"/>
+				<glyph orgId="61974" newId="61974" orgName="file-check" newName="file-check"/>
+				<glyph orgId="61975" newId="61975" orgName="file-cloud" newName="file-cloud"/>
+				<glyph orgId="61976" newId="61976" orgName="file-delimited" newName="file-delimited"/>
+				<glyph orgId="61977" newId="61977" orgName="file-document" newName="file-document"/>
+				<glyph orgId="61978" newId="61978" orgName="file-document-box" newName="file-document-box"/>
+				<glyph orgId="61981" newId="61981" orgName="file-export" newName="file-export"/>
+				<glyph orgId="61982" newId="61982" orgName="file-find" newName="file-find"/>
+				<glyph orgId="61983" newId="61983" orgName="file-image" newName="file-image"/>
+				<glyph orgId="61984" newId="61984" orgName="file-import" newName="file-import"/>
+				<glyph orgId="61987" newId="61987" orgName="file-music" newName="file-music"/>
+				<glyph orgId="61988" newId="61988" orgName="file-outline" newName="file-outline"/>
+				<glyph orgId="61994" newId="61994" orgName="file-send" newName="file-send"/>
+				<glyph orgId="61995" newId="61995" orgName="file-video" newName="file-video"/>
 				<glyph orgId="62027" newId="62027" orgName="folder" newName="folder"/>
+				<glyph orgId="62029" newId="62029" orgName="folder-download" newName="folder-download"/>
+				<glyph orgId="62031" newId="62031" orgName="folder-image" newName="folder-image"/>
+				<glyph orgId="62034" newId="62034" orgName="folder-move" newName="folder-move"/>
 				<glyph orgId="62036" newId="62036" orgName="folder-multiple-image" newName="folder_open_picture"/>
 				<glyph orgId="62039" newId="62039" orgName="folder-plus" newName="folder_add"/>
+				<glyph orgId="62040" newId="62040" orgName="folder-remove" newName="folder-remove"/>
+				<glyph orgId="62041" newId="62041" orgName="folder-upload" newName="folder-upload"/>
+				<glyph orgId="62112" newId="62112" orgName="ghost" newName="ghost"/>
 				<glyph orgId="62132" newId="62132" orgName="google-controller" newName="google-controller"/>
 				<glyph orgId="62133" newId="62133" orgName="google-controller-off" newName="google-controller-off"/>
+				<glyph orgId="62161" newId="62161" orgName="heart" newName="heart"/>
 				<glyph orgId="62220" newId="62220" orgName="keyboard" newName="keyboard"/>
 				<glyph orgId="62224" newId="62224" orgName="keyboard-off" newName="keyboard-off"/>
 				<glyph orgId="62248" newId="62248" orgName="layers" newName="layers"/>
@@ -251,6 +280,11 @@
 				<glyph orgId="64025" newId="64025" orgName="toggle-switch-outline" newName="toggle-switch-outline"/>
 				<glyph orgId="64072" newId="64072" orgName="feature-search" newName="feature-search"/>
 				<glyph orgId="64073" newId="64073" orgName="feature-search-outline" newName="feature-search-outline"/>
+				<glyph orgId="64074" newId="64074" orgName="file-alert" newName="file-alert"/>
+				<glyph orgId="64075" newId="64075" orgName="file-alert-outline" newName="file-alert-outline"/>
+				<glyph orgId="64076" newId="64076" orgName="file-upload" newName="file-upload"/>
+				<glyph orgId="64077" newId="64077" orgName="file-upload-outline" newName="file-upload-outline"/>
+				<glyph orgId="64153" newId="64153" orgName="calculator-variant" newName="calculator-variant"/>
 				<glyph orgId="64157" newId="64157" orgName="circle-slice-1" newName="circle-slice-1"/>
 				<glyph orgId="64158" newId="64158" orgName="circle-slice-2" newName="circle-slice-2"/>
 				<glyph orgId="64159" newId="64159" orgName="circle-slice-3" newName="circle-slice-3"/>
@@ -259,28 +293,72 @@
 				<glyph orgId="64162" newId="64162" orgName="circle-slice-6" newName="circle-slice-6"/>
 				<glyph orgId="64163" newId="64163" orgName="circle-slice-7" newName="circle-slice-7"/>
 				<glyph orgId="64164" newId="64164" orgName="circle-slice-8" newName="circle-slice-8"/>
+				<glyph orgId="64350" newId="64350" orgName="controller-classic" newName="controller-classic"/>
+				<glyph orgId="64351" newId="64351" orgName="controller-classic-outline" newName="controller-classic-outline"/>
+				<glyph orgId="64371" newId="64371" orgName="file-find-outline" newName="file-find-outline"/>
+				<glyph orgId="64372" newId="64372" orgName="file-remove" newName="file-remove"/>
+				<glyph orgId="64376" newId="64376" orgName="folder-account-outline" newName="folder-account-outline"/>
+				<glyph orgId="64377" newId="64377" orgName="folder-plus-outline" newName="folder-plus-outline"/>
+				<glyph orgId="64378" newId="64378" orgName="folder-remove-outline" newName="folder-remove-outline"/>
+				<glyph orgId="64379" newId="64379" orgName="folder-star-outline" newName="folder-star-outline"/>
+				<glyph orgId="64600" newId="64600" orgName="file-search" newName="file-search"/>
+				<glyph orgId="64601" newId="64601" orgName="file-search-outline" newName="file-search-outline"/>
+				<glyph orgId="64602" newId="64602" orgName="file-table" newName="file-table"/>
+				<glyph orgId="64603" newId="64603" orgName="file-table-outline" newName="file-table-outline"/>
+				<glyph orgId="64683" newId="64683" orgName="source-repository" newName="source-repository"/>
+				<glyph orgId="64684" newId="64684" orgName="source-repository-multiple" newName="source-repository-multiple"/>
+				<glyph orgId="64741" newId="64741" orgName="folder-pound" newName="folder-pound"/>
+				<glyph orgId="64742" newId="64742" orgName="folder-pound-outline" newName="folder-pound-outline"/>
+				<glyph orgId="64743" newId="64743" orgName="folder-sync" newName="folder-sync"/>
+				<glyph orgId="64744" newId="64744" orgName="folder-sync-outline" newName="folder-sync-outline"/>
 				<glyph orgId="64805" newId="64805" orgName="axis-arrow" newName="axis-arrow"/>
 				<glyph orgId="64806" newId="64806" orgName="axis-arrow-lock" newName="axis-arrow-lock"/>
+				<glyph orgId="64810" newId="64810" orgName="axis-x-rotate-clockwise" newName="axis-x-rotate-clockwise"/>
+				<glyph orgId="64811" newId="64811" orgName="axis-x-rotate-counterclockwise" newName="axis-x-rotate-counterclockwise"/>
+				<glyph orgId="64819" newId="64819" orgName="axis-z-rotate-clockwise" newName="axis-z-rotate-clockwise"/>
+				<glyph orgId="64820" newId="64820" orgName="axis-z-rotate-counterclockwise" newName="axis-z-rotate-counterclockwise"/>
 				<glyph orgId="64846" newId="64846" orgName="flare" newName="flare"/>
 				<glyph orgId="64932" newId="64932" orgName="file-document-edit" newName="file-document-edit"/>
 				<glyph orgId="64933" newId="64933" orgName="file-document-edit-outline" newName="file-document-edit-outline"/>
+				<glyph orgId="64934" newId="64934" orgName="file-eye" newName="file-eye"/>
+				<glyph orgId="64935" newId="64935" orgName="file-eye-outline" newName="file-eye-outline"/>
+				<glyph orgId="64936" newId="64936" orgName="folder-alert" newName="folder-alert"/>
+				<glyph orgId="64937" newId="64937" orgName="folder-alert-outline" newName="folder-alert-outline"/>
+				<glyph orgId="65072" newId="65072" orgName="layers-plus" newName="layers-plus"/>
+				<glyph orgId="65073" newId="65073" orgName="layers-remove" newName="layers-remove"/>
 				<glyph orgId="65074" newId="65074" orgName="lightbulb-off" newName="lightbulb-off"/>
 				<glyph orgId="65075" newId="65075" orgName="lightbulb-off-outline" newName="lightbulb-off-outline"/>
+				<glyph orgId="65147" newId="65147" orgName="file-check-outline" newName="file-check-outline"/>
+				<glyph orgId="65148" newId="65148" orgName="file-music-outline" newName="file-music-outline"/>
+				<glyph orgId="65219" newId="65219" orgName="file-document-box-check" newName="file-document-box-check"/>
+				<glyph orgId="65220" newId="65220" orgName="file-document-box-check-outline" newName="file-document-box-check-outline"/>
+				<glyph orgId="65221" newId="65221" orgName="file-document-box-minus" newName="file-document-box-minus"/>
+				<glyph orgId="65222" newId="65222" orgName="file-document-box-minus-outline" newName="file-document-box-minus-outline"/>
+				<glyph orgId="65223" newId="65223" orgName="file-document-box-plus" newName="file-document-box-plus"/>
+				<glyph orgId="65224" newId="65224" orgName="file-document-box-plus-outline" newName="file-document-box-plus-outline"/>
+				<glyph orgId="65225" newId="65225" orgName="file-document-box-remove" newName="file-document-box-remove"/>
+				<glyph orgId="65226" newId="65226" orgName="file-document-box-remove-outline" newName="file-document-box-remove-outline"/>
+				<glyph orgId="65227" newId="65227" orgName="file-document-box-search" newName="file-document-box-search"/>
+				<glyph orgId="65228" newId="65228" orgName="file-document-box-search-outline" newName="file-document-box-search-outline"/>
+				<glyph orgId="65352" newId="65352" orgName="stretch-to-page" newName="stretch-to-page"/>
+				<glyph orgId="65353" newId="65353" orgName="stretch-to-page-outline" newName="stretch-to-page-outline"/>
+				<glyph orgId="65397" newId="65397" orgName="layers-triple" newName="layers-triple"/>
+				<glyph orgId="65398" newId="65398" orgName="layers-triple-outline" newName="layers-triple-outline"/>
 			</glyphs>
-			<prefix></prefix>
+			<prefix>NDP2</prefix>
 			<pathfilename>..\samples_Fonts\materialdesignicons-webfont.ttf</pathfilename>
 			<oversample>2</oversample>
 			<fontsize>29</fontsize>
 		</font>
 		<rangecoloring show="false" hash="10;15;35;0.5"/>
-		<previewcountglyph_x>20</previewcountglyph_x>
+		<previewcountglyph_x>15</previewcountglyph_x>
 		<mergedfontprefix>NDP</mergedfontprefix>
-		<curglyphtooltip>true</curglyphtooltip>
+		<curglyphtooltip>false</curglyphtooltip>
 		<srcglyphtooltip>true</srcglyphtooltip>
 		<dstglyphtooltip>true</dstglyphtooltip>
 		<glyphpreviewscale>0.333</glyphpreviewscale>
 		<glyphpreviewshowcontrollines>false</glyphpreviewshowcontrollines>
-		<genmode>357</genmode>
-		<fonttomergein>ndp.ttf</fonttomergein>
+		<genmode>717</genmode>
+		<fonttomergein>forkawesome-webfont.ttf</fonttomergein>
 	</project>
 </config>

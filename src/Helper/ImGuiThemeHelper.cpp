@@ -27,9 +27,9 @@ ImGuiThemeHelper::ImGuiThemeHelper()
 {
 	m_FileTypeInfos[".ttf"].color = ImVec4(0.1f, 0.1f, 0.5f, 1.0f);
 	m_FileTypeInfos[".otf"].color = ImVec4(0.1f, 0.1f, 0.5f, 1.0f);
-	m_FileTypeInfos[".cpp"] = igfd::FilterInfosStruct(ImVec4(0.5f, 0.1f, 0.7f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
-	m_FileTypeInfos[".h"] = igfd::FilterInfosStruct(ImVec4(0.5f, 0.1f, 0.5f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
-	m_FileTypeInfos[".ifs"] = igfd::FilterInfosStruct(ImVec4(0.1f, 0.5f, 0.1f, 1.0f), ICON_IGFS_FILE_TYPE_PROJECT);
+	m_FileTypeInfos[".cpp"] = igfd::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.7f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
+	m_FileTypeInfos[".h"] = igfd::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.5f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
+	m_FileTypeInfos[".ifs"] = igfd::FileExtentionInfosStruct(ImVec4(0.1f, 0.5f, 0.1f, 1.0f), ICON_IGFS_FILE_TYPE_PROJECT);
 }
 
 ImGuiThemeHelper::~ImGuiThemeHelper() = default;
@@ -382,7 +382,7 @@ void ImGuiThemeHelper::ApplyFileTypeColors()
 {
 	for (auto &it : m_FileTypeInfos)
 	{
-		igfd::ImGuiFileDialog::Instance()->SetFilterInfos(it.first, it.second.color, it.second.icon);
+		igfd::ImGuiFileDialog::Instance()->SetExtentionInfos(it.first, it.second.color, it.second.icon);
 	}
 }
 
@@ -465,7 +465,7 @@ void ImGuiThemeHelper::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElem
 		}
 
 		m_FileTypeInfos[fileType] = ct::toImVec4(ct::fvariant(color).getV4());
-		igfd::ImGuiFileDialog::Instance()->SetFilterInfos(fileType, m_FileTypeInfos[fileType]);
+		igfd::ImGuiFileDialog::Instance()->SetExtentionInfos(fileType, m_FileTypeInfos[fileType]);
 	}
 
 	if (strParentName == "ImGui_Styles")

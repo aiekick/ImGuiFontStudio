@@ -257,9 +257,9 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 				if (ImGui::Button(ICON_IGFS_GENERATE " Generate"))
 				{
 					btnClick = true;
-					if (vProjectFile->IsGenMode(GENERATOR_MODE_FONT)) exts = ".ttf\0\0";
-					else if (vProjectFile->IsGenMode(GENERATOR_MODE_CPP)) exts = ".cpp\0\0";
-					else if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER)) exts = ".h\0\0";
+					if (vProjectFile->IsGenMode(GENERATOR_MODE_FONT)) exts = ".ttf";
+					else if (vProjectFile->IsGenMode(GENERATOR_MODE_CPP)) exts = ".cpp";
+					else if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER)) exts = ".h";
 				}
 
 				ImGui::Unindent();
