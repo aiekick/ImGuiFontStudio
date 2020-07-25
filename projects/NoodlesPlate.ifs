@@ -16,6 +16,7 @@
 				<glyph orgId="61463" newId="61463" orgName="clock-o" newName="clock-o"/>
 				<glyph orgId="61470" newId="61470" orgName="repeat" newName="repeat"/>
 				<glyph orgId="61473" newId="61473" orgName="refresh" newName="refresh"/>
+				<glyph orgId="61486" newId="61486" orgName="bookmark" newName="bookmark"/>
 				<glyph orgId="61502" newId="61502" orgName="picture-o" newName="picture-o"/>
 				<glyph orgId="61508" newId="61508" orgName="pencil-square-o" newName="pencil-square-o"/>
 				<glyph orgId="61509" newId="61509" orgName="share-square-o" newName="share-square-o"/>
@@ -45,7 +46,7 @@
 				<glyph orgId="61539" newId="61539" orgName="arrow-down" newName="arrow-down"/>
 				<glyph orgId="61540" newId="61540" orgName="share" newName="reset"/>
 				<glyph orgId="61543" newId="61543" orgName="plus" newName="add"/>
-				<glyph orgId="61544" newId="61544" orgName="minus" newName="minux"/>
+				<glyph orgId="61544" newId="61544" orgName="minus" newName="remove"/>
 				<glyph orgId="61546" newId="61546" orgName="exclamation-circle" newName="exclamation-circle"/>
 				<glyph orgId="61550" newId="61550" orgName="eye" newName="eye"/>
 				<glyph orgId="61552" newId="61552" orgName="eye-slash" newName="eye-slash"/>
@@ -63,6 +64,7 @@
 				<glyph orgId="61639" newId="61639" orgName="floppy-o" newName="floppy-o"/>
 				<glyph orgId="61666" newId="61666" orgName="undo" newName="undo"/>
 				<glyph orgId="61686" newId="61686" orgName="file-text-o" newName="file-text-o"/>
+				<glyph orgId="61700" newId="61700" orgName="angle-left" newName="angle-left"/>
 				<glyph orgId="61714" newId="61714" orgName="reply" newName="reply"/>
 				<glyph orgId="61723" newId="61723" orgName="gamepad" newName="gamepad"/>
 				<glyph orgId="61724" newId="61724" orgName="keyboard-o" newName="keyboard-o"/>

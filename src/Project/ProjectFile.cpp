@@ -20,7 +20,6 @@
 
 #include "Helper/Messaging.h"
 #include "Helper/SelectionHelper.h"
-
 #include <FileHelper.h>
 
 ProjectFile::ProjectFile() = default;
@@ -231,7 +230,7 @@ std::string ProjectFile::getXml(const std::string& vOffset)
 
 	str += vOffset + "\t<genmode>" + ct::toStr(m_GenMode) + "</genmode>\n";
 	str += vOffset + "\t<fonttomergein>" + m_FontToMergeIn + "</fonttomergein>\n";
-
+	
 	str += vOffset + "</project>\n";
 
 	return str;

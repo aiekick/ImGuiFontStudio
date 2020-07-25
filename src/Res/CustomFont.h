@@ -4,16 +4,15 @@
 #pragma once
 
 #define FONT_ICON_BUFFER_NAME_IGFS IGFS_compressed_data_base85
-#define FONT_ICON_BUFFER_SIZE_IGFS 0x27fb
+#define FONT_ICON_BUFFER_SIZE_IGFS 0x23a0
 
 #define ICON_MIN_IGFS 0xf002
-#define ICON_MAX_IGFS 0xf3a0
+#define ICON_MAX_IGFS 0xf26c
 
 #define ICON_IGFS_ABOUT u8"\uf129"
 #define ICON_IGFS_ADD u8"\uf067"
-#define ICON_IGFS_BY_CODEPOINT u8"\uf3a0"
+#define ICON_IGFS_BOOKMARK u8"\uf02e"
 #define ICON_IGFS_BY_FONT u8"\uf031"
-#define ICON_IGFS_BY_NAME u8"\uf02c"
 #define ICON_IGFS_CANCEL u8"\uf00d"
 #define ICON_IGFS_COLUMNS u8"\uf0db"
 #define ICON_IGFS_COPY u8"\uf0c5"

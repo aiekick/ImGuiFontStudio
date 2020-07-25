@@ -35,3 +35,23 @@
 #define tableHeaderFileNameString " File name"
 #define tableHeaderFileSizeString " Size"
 #define tableHeaderFileDateString " Date"
+
+#define USE_EXPLORATION_BY_KEYS
+// this mapping by default is for GLFW but you can use another
+//#include <GLFW/glfw3.h> 
+// Up key for explore to the top
+#define IGFD_KEY_UP 265 //GLFW_KEY_UP
+// Down key for explore to the bottom
+#define IGFD_KEY_DOWN 264 // GLFW_KEY_DOWN
+// Enter key for open directory
+#define IGFD_KEY_ENTER 257 // GLFW_KEY_ENTER
+// BackSpace for comming back to the last directory
+#define IGFD_KEY_BACKSPACE 259 // GLFW_KEY_BACKSPACE
+
+#define USE_BOOKMARK
+#define bookmarkPaneWith 200.0f
+//#define IMGUI_TOGGLE_BUTTON ToggleButton
+#define bookmarksButtonString ICON_IGFS_BOOKMARK
+//#define bookmarksButtonHelpString "Bookmark"
+#define addBookmarkButtonString ICON_IGFS_ADD
+#define removeBookmarkButtonString ICON_IGFS_REMOVE

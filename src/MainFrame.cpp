@@ -313,7 +313,7 @@ void MainFrame::DisplayDialogsAndPopups()
 		{
 			if (igfd::ImGuiFileDialog::Instance()->IsOk)
 			{
-				auto GoodFilePathName = igfd::ImGuiFileDialog::Instance()->GetFilepathName();
+				auto GoodFilePathName = igfd::ImGuiFileDialog::Instance()->GetFilePathName();
 				auto UserDatas = std::string((const char*)igfd::ImGuiFileDialog::Instance()->GetUserDatas());
 
 				if (FileHelper::Instance()->IsFileExist(GoodFilePathName))
@@ -334,7 +334,7 @@ void MainFrame::DisplayDialogsAndPopups()
 	{
 		if (igfd::ImGuiFileDialog::Instance()->IsOk)
 		{
-			NewProject(igfd::ImGuiFileDialog::Instance()->GetFilepathName());
+			NewProject(igfd::ImGuiFileDialog::Instance()->GetFilePathName());
 		}
 
 		igfd::ImGuiFileDialog::Instance()->CloseDialog("NewProjectDlg");
@@ -345,7 +345,7 @@ void MainFrame::DisplayDialogsAndPopups()
 	{
 		if (igfd::ImGuiFileDialog::Instance()->IsOk)
 		{
-			LoadProject(igfd::ImGuiFileDialog::Instance()->GetFilepathName());
+			LoadProject(igfd::ImGuiFileDialog::Instance()->GetFilePathName());
 		}
 
 		igfd::ImGuiFileDialog::Instance()->CloseDialog("OpenProjectDlg");
@@ -356,7 +356,7 @@ void MainFrame::DisplayDialogsAndPopups()
 	{
 		if (igfd::ImGuiFileDialog::Instance()->IsOk)
 		{
-			SaveAsProject(igfd::ImGuiFileDialog::Instance()->GetFilepathName());
+			SaveAsProject(igfd::ImGuiFileDialog::Instance()->GetFilePathName());
 		}
 
 		igfd::ImGuiFileDialog::Instance()->CloseDialog("SaveProjectDlg");
@@ -599,6 +599,7 @@ std::string MainFrame::getXml(const std::string& vOffset)
 
 	str += ImGuiThemeHelper::Instance()->getXml(vOffset);
 	str += GuiLayout::Instance()->getXml(vOffset);
+	str += vOffset + "<bookmarks>" + igfd::ImGuiFileDialog::Instance()->SerializeBookmarks() + "</bookmarks>\n";
 
 	return str;
 }
@@ -618,4 +619,7 @@ void MainFrame::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 
 	ImGuiThemeHelper::Instance()->setFromXml(vElem, vParent);
 	GuiLayout::Instance()->setFromXml(vElem, vParent);
+
+	if (strName == "bookmarks")
+		igfd::ImGuiFileDialog::Instance()->DeserializeBookmarks(strValue);
 }
