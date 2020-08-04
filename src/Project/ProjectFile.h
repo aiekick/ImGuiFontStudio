@@ -42,6 +42,7 @@ public: // to save
 	bool m_FinalPane_ShowGlyphTooltip = true;
 	std::string m_FontToMergeIn;
 	float m_GlyphPreview_Scale = 1.0f;
+	int m_GlyphPreview_QuadBezierCountSegments = 5; // count segments per bezier quad 
 	bool m_GlyphPreview_ShowControlLines = false;
 
 public: // dont save

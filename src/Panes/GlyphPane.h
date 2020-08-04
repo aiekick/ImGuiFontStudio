@@ -40,7 +40,7 @@ public:
 
 private:
 	static bool DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
-		float vScale, bool vControlLines);
+		float vScale, int vCountSegments, bool vControlLines);
 
 public: // singleton
 	static GlyphPane *Instance()

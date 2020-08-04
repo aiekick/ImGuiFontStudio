@@ -227,6 +227,7 @@ std::string ProjectFile::getXml(const std::string& vOffset)
 
 	str += vOffset + "\t<glyphpreviewscale>" + ct::toStr(m_GlyphPreview_Scale) + "</glyphpreviewscale>\n";
 	str += vOffset + "\t<glyphpreviewshowcontrollines>" + (m_GlyphPreview_ShowControlLines ? "true" : "false") + "</glyphpreviewshowcontrollines>\n";
+	str += vOffset + "\t<glyphpreviewquadbeziercounsegment>" + ct::toStr(m_GlyphPreview_QuadBezierCountSegments) + "</glyphpreviewquadbeziercounsegment>\n";
 
 	str += vOffset + "\t<genmode>" + ct::toStr(m_GenMode) + "</genmode>\n";
 	str += vOffset + "\t<fonttomergein>" + m_FontToMergeIn + "</fonttomergein>\n";
@@ -299,6 +300,8 @@ void ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 			m_GlyphPreview_Scale = ct::fvariant(strValue).getF();
 		else if (strName == "glyphpreviewshowcontrollines")
 			m_GlyphPreview_ShowControlLines = ct::ivariant(strValue).getB();
+		else if (strName == "glyphpreviewquadbeziercounsegment")
+			m_GlyphPreview_QuadBezierCountSegments = ct::ivariant(strValue).getI();
 	}
 }
 

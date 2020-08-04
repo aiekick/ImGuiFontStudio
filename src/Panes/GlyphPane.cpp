@@ -70,6 +70,13 @@ int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
 					}
 					ImGui::PopItemWidth();
 
+					ImGui::PushItemWidth(100.0f);
+					if (ImGui::SliderInt("Segments", &vProjectFile->m_GlyphPreview_QuadBezierCountSegments, 1, 50))
+					{
+						vProjectFile->SetProjectChange();
+					}
+					ImGui::PopItemWidth();
+					
 					//ImGui::Checkbox("Stroke or Fill", &_stroke);
 					if (ImGui::Checkbox("Control Lines", &vProjectFile->m_GlyphPreview_ShowControlLines))
 					{
@@ -83,6 +90,7 @@ int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
 					&m_GlyphToDisplay, 
 					vProjectFile->m_CurrentFont, 
 					vProjectFile->m_GlyphPreview_Scale, 
+					vProjectFile->m_GlyphPreview_QuadBezierCountSegments,
 					vProjectFile->m_GlyphPreview_ShowControlLines);
 			}
 		}
@@ -162,7 +170,7 @@ bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, Glyp
 // https://github.com/rillig/sfntly/tree/master/java/src/com/google/typography/font/tools/fontviewer
 bool GlyphPane::DrawSimpleGlyph(
         GlyphInfos *vGlyph, FontInfos* vFontInfos,
-        float vScale, bool vControlLines)
+        float vScale, int vCountSegments, bool vControlLines)
 {
 	if (vGlyph && vFontInfos)
 	{
@@ -276,7 +284,8 @@ bool GlyphPane::DrawSimpleGlyph(
 						}
 						drawList->PathQuadBezierCurveTo(
 							ct::toImVec2(cur) + pos,
-							ct::toImVec2(nex) + pos);
+							ct::toImVec2(nex) + pos, 
+							vCountSegments);
 					}
 				}
 
