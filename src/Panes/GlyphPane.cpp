@@ -274,7 +274,7 @@ bool GlyphPane::DrawSimpleGlyph(
 							nex.x = (int)(((double)nex.x + (double)cur.x) * 0.5);
 							nex.y = (int)(((double)nex.y + (double)cur.y) * 0.5);
 						}
-						drawList->PathQuadCurveTo(
+						drawList->PathQuadBezierCurveTo(
 							ct::toImVec2(cur) + pos,
 							ct::toImVec2(nex) + pos);
 					}
