@@ -735,7 +735,7 @@ bool FontHelper::Assemble_Hmtx_Hhea_Tables()
 		for (int32_t i = 0; i < numberOfHMetrics; ++i)
 		{
 			int32_t adw = metrics[i].advanceWidth;
-			advanceWidthMax = max(adw, advanceWidthMax);
+			advanceWidthMax = ct::maxi<int32_t>(adw, advanceWidthMax);
 			index += data->WriteUShort(index, adw);
 			index += data->WriteShort(index, metrics[i].lsb);
 		}
