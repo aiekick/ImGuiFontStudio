@@ -252,10 +252,7 @@ void ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 
 	if (strName == "project")
 	{
-		for (tinyxml2::XMLElement* child = vElem->FirstChildElement(); child != nullptr; child = child->NextSiblingElement())
-		{
-			RecursParsingConfig(child->ToElement(), vElem);
-		}
+
 	}
 
 	if (strParentName == "project")
