@@ -27,6 +27,7 @@ namespace ImGui
 	IMGUI_API bool ImageCheckButton(ImTextureID user_texture_id, bool *v, const ImVec2& size, const ImVec2& uv0 = ImVec2(0.0f, 0.0f), const ImVec2& uv1 = ImVec2(1.0f, 1.0f), const ImVec2& vHostTextureSize = ImVec2(0.0f, 0.0f), int frame_padding = -1, float vRectThickNess = 0.0f, ImVec4 vRectColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
 	IMGUI_API bool BeginFramedGroup(const char *vLabel, bool vSpacing = false, ImVec4 vCol = ImVec4(0.0f, 0.0f, 0.0f, 0.5f), ImVec4 vHoveredCol = ImVec4(0.15f, 0.15f, 0.15f, 0.5f));
 	IMGUI_API void EndFramedGroup(bool vSpacing = false);
+	IMGUI_API void FramedGroupSeparator();
 	IMGUI_API bool CollapsingHeader_SmallHeight(const char *vName, float vHeightRatio, float vWidth, bool vDefaulExpanded, bool *vIsOpen = 0);
 	IMGUI_API bool RadioButtonLabeled(const char* label, bool active, bool disabled);
 	IMGUI_API bool RadioButtonLabeled(const char* label, const char* help, bool active, bool disabled = false);

@@ -54,8 +54,8 @@
 			</glyphs>
 			<prefix>IGFS</prefix>
 			<pathfilename>..\samples_Fonts\fontawesome-webfont.ttf</pathfilename>
-			<oversample>1</oversample>
-			<fontsize>17</fontsize>
+			<oversample>2</oversample>
+			<fontsize>21</fontsize>
 		</font>
 		<font name="materialdesignicons-webfont.ttf">
 			<glyphs>
@@ -68,7 +68,7 @@
 			<fontsize>32</fontsize>
 		</font>
 		<rangecoloring show="false" hash="42.606;14.789;27.817;0.5"/>
-		<previewcountglyph_x>20</previewcountglyph_x>
+		<previewcountglyph_x>34</previewcountglyph_x>
 		<mergedfontprefix>IGFS</mergedfontprefix>
 		<curglyphtooltip>true</curglyphtooltip>
 		<srcglyphtooltip>true</srcglyphtooltip>

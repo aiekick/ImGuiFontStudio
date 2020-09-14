@@ -262,34 +262,30 @@ bool ImGui::BeginFramedGroup(const char *vLabel, bool vSpacing, ImVec4 /*vCol*/,
 
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 1));
 
-        //ImGuiWindow* window = ImGui::GetCurrentWindow();
-        //if (!window->SkipItems)
-        {
-            // header
-            const ImGuiID id = window->GetID(vLabel);
-            const ImVec2 label_size = ImGui::CalcTextSize(vLabel, nullptr, true);
+		// header
+		const ImGuiID id = window->GetID(vLabel);
+		const ImVec2 label_size = ImGui::CalcTextSize(vLabel, nullptr, true);
 
-            const float frame_height =
-                    ImMax(ImMin(window->DC.CurrLineSize.y, g.FontSize + style.FramePadding.y * 2),
-                          label_size.y + style.FramePadding.y * 2);
-            ImRect frame_bb;
-            frame_bb.Min.x = window->WorkRect.Min.x;
-            frame_bb.Min.y = window->DC.CursorPos.y - 5.0f;
-            frame_bb.Max.x = window->WorkRect.Max.x;
-            frame_bb.Max.y = window->DC.CursorPos.y + frame_height;
+		const float frame_height =
+			ImMax(ImMin(window->DC.CurrLineSize.y, g.FontSize + style.FramePadding.y * 2),
+				label_size.y + style.FramePadding.y * 2);
+		ImRect frame_bb;
+		frame_bb.Min.x = window->WorkRect.Min.x;
+		frame_bb.Min.y = window->DC.CursorPos.y - 5.0f;
+		frame_bb.Max.x = window->WorkRect.Max.x;
+		frame_bb.Max.y = window->DC.CursorPos.y + frame_height;
 
-            ImGui::ItemSize(frame_bb, style.FramePadding.y);
-            if (ImGui::ItemAdd(frame_bb, id))
-            {
-                bool hovered, held;
-                ImGui::ButtonBehavior(frame_bb, id, &hovered, &held);
+		ImGui::ItemSize(frame_bb, style.FramePadding.y);
+		if (ImGui::ItemAdd(frame_bb, id))
+		{
+			bool hovered, held;
+			ImGui::ButtonBehavior(frame_bb, id, &hovered, &held);
 
-                // Render
-                const ImU32 frameCol = ImGui::GetColorU32(hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
-                ImGui::RenderFrame(frame_bb.Min, frame_bb.Max, frameCol, true, style.FrameRounding);
-                ImGui::RenderTextClipped(frame_bb.Min, frame_bb.Max, vLabel, nullptr, &label_size, style.ButtonTextAlign, &frame_bb);
-            }
-        }
+			ImGui::RenderTextClipped(frame_bb.Min, frame_bb.Max, vLabel, nullptr, &label_size, style.ButtonTextAlign, &frame_bb);
+
+			const ImU32 lineCol = ImGui::GetColorU32(ImGuiCol_FrameBg);
+			draw_list->AddLine(ImVec2(frame_bb.Min.x + style.ItemInnerSpacing.x, frame_bb.Max.y), ImVec2(frame_bb.Max.x - style.ItemInnerSpacing.x, frame_bb.Max.y), lineCol);
+		}
 
         ImGui::PopStyleVar();
     }
@@ -322,14 +318,36 @@ void ImGui::EndFramedGroup(bool vSpacing)
     p_max.x = window->WorkRect.Max.x;
     p_max.y += 5.0f;
 
-    draw_list->AddRectFilled(p_min, p_max, ImGui::GetColorU32(ImGuiCol_WindowBg), style.FrameRounding);
+	//const ImU32 frameCol = ImGui::GetColorU32(ImGui::IsItemHovered(ImGuiHoveredFlags_RectOnly) ? ImGuiCol_TabUnfocusedActive : ImGuiCol_TabUnfocused);
+	const ImU32 frameCol = ImGui::GetColorU32(ImGuiCol_TableHeaderBg); 
+	ImGui::RenderFrame(p_min, p_max, frameCol, true, style.FrameRounding);
 
-    draw_list->ChannelsSetCurrent(1); // Layer Foreground
+	draw_list->ChannelsMerge(); // merge layers
+}
 
-    const ImU32 frameCol = ImGui::GetColorU32(ImGui::IsItemHovered(ImGuiHoveredFlags_RectOnly) ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
-    draw_list->AddRect(p_min, p_max, frameCol, style.FrameRounding, ImDrawCornerFlags_Top, 4.0f);
+void ImGui::FramedGroupSeparator()
+{
+	ImGuiWindow* window = GetCurrentWindow();
+	if (window->SkipItems)
+		return;
 
-    draw_list->ChannelsMerge(); // merge layers
+	ImGuiContext& g = *GImGui;
+	const ImGuiStyle& style = g.Style;
+	
+	ImRect bb;
+	bb.Min.x = window->WorkRect.Min.x;
+	bb.Min.y = window->DC.CursorPos.y - 5.0f;
+	bb.Max.x = window->WorkRect.Max.x;
+	bb.Max.y = window->DC.CursorPos.y;
+
+	ImGui::ItemSize(bb, style.FramePadding.y);
+	if (ImGui::ItemAdd(bb, 0))
+	{
+		const ImU32 lineCol = ImGui::GetColorU32(ImGuiCol_FrameBg);
+		window->DrawList->AddLine(ImVec2(bb.Min.x + style.ItemInnerSpacing.x, bb.Max.y), ImVec2(bb.Max.x - style.ItemInnerSpacing.x, bb.Max.y), lineCol);
+		if (g.LogEnabled)
+			LogRenderedText(&bb.Min, "--------------------------------");
+	}
 }
 
 bool ImGui::RadioButtonLabeled(const char* label, bool active, bool disabled)

@@ -246,7 +246,7 @@ int SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId)
 						{
 							bool change = ImGui::SliderIntDefaultCompact(aw, "Width Count", &vProjectFile->m_Preview_Glyph_CountX, 50, 1, defaultProjectValues.m_Preview_Glyph_CountX);
 
-							ImGui::Separator();
+							ImGui::FramedGroupSeparator();
 
 							ImGui::Checkbox("Show Range Colors", &vProjectFile->m_ShowRangeColoring);
 							if (vProjectFile->IsRangeColorignShown())
