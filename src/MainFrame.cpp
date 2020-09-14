@@ -68,12 +68,6 @@ void MainFrame::Init()
 	
 	LoadConfigFile("config.xml");
 
-#ifdef _DEBUG
-	std::string projectPath = PROJECT_PATH;
-	//LoadProject(projectPath + "\\projects\\ImGuiFontStudio.ifs"); // directly open this project file
-	LoadProject(projectPath + "\\bugs\\issue_7\\filemenu.ifs");
-#endif
-
 	GuiLayout::Instance()->Init();
 }
 
@@ -600,6 +594,8 @@ std::string MainFrame::getXml(const std::string& vOffset)
 	str += ImGuiThemeHelper::Instance()->getXml(vOffset);
 	str += GuiLayout::Instance()->getXml(vOffset);
 	str += vOffset + "<bookmarks>" + igfd::ImGuiFileDialog::Instance()->SerializeBookmarks() + "</bookmarks>\n";
+	if (GetProject())
+		str += vOffset + "<project>" + GetProject()->m_ProjectFilePathName + "</project>\n";
 
 	return str;
 }
@@ -622,4 +618,7 @@ void MainFrame::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 
 	if (strName == "bookmarks")
 		igfd::ImGuiFileDialog::Instance()->DeserializeBookmarks(strValue);
+
+	if (strName == "project")
+		LoadProject(strValue);
 }

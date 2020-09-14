@@ -54,8 +54,8 @@
 			</glyphs>
 			<prefix>IGFS</prefix>
 			<pathfilename>..\samples_Fonts\fontawesome-webfont.ttf</pathfilename>
-			<oversample>3</oversample>
-			<fontsize>26</fontsize>
+			<oversample>1</oversample>
+			<fontsize>17</fontsize>
 		</font>
 		<font name="materialdesignicons-webfont.ttf">
 			<glyphs>
@@ -75,6 +75,7 @@
 		<dstglyphtooltip>true</dstglyphtooltip>
 		<glyphpreviewscale>0.193</glyphpreviewscale>
 		<glyphpreviewshowcontrollines>false</glyphpreviewshowcontrollines>
+		<glyphpreviewquadbeziercounsegment>5</glyphpreviewquadbeziercounsegment>
 		<genmode>293</genmode>
 		<fonttomergein>fontawesome-webfont.ttf</fonttomergein>
 	</project>

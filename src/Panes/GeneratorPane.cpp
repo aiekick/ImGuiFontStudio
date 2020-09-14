@@ -25,6 +25,7 @@
 #include "imgui_internal.h"
 
 #include <cTools.h>
+#include <Logger.h>
 #include <FileHelper.h>
 #include "Gui/GuiLayout.h"
 #include "Gui/ImGuiWidgets.h"
@@ -403,7 +404,7 @@ bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
 void GeneratorPane::GeneratorFileDialogPane(std::string /*vFilter*/, igfd::UserDatas vUserDatas,
 	bool *vCantContinue) // if vCantContinue is false, the user cant validate the dialog
 {
-	cAssert(vCantContinue != 0, "ImGuiFileDialog Pane param vCantContinue is NULL");
+	LogAssert(vCantContinue != 0, "ImGuiFileDialog Pane param vCantContinue is NULL");
 
 	bool canContinue = true;
 

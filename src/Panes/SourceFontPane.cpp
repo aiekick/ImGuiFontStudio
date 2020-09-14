@@ -35,6 +35,8 @@
 
 static int SourceFontPane_WidgetId = 0;
 #define NEW_ID ++SourceFontPane_WidgetId
+static ProjectFile defaultProjectValues;
+static FontInfos defaultFontInfosValues;
 
 SourceFontPane::SourceFontPane() = default;
 SourceFontPane::~SourceFontPane() = default;
@@ -227,8 +229,10 @@ int SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId)
 
 						bool needFontReGen = false;
 
-						needFontReGen |= ImGui::SliderInt("Size", &vProjectFile->m_CurrentFont->m_FontSize, 7, 50);
-						needFontReGen |= ImGui::SliderInt("Over Sample", &vProjectFile->m_CurrentFont->m_Oversample, 1, 5);
+						const float aw = ImGui::GetContentRegionAvailWidth();
+
+						needFontReGen |= ImGui::SliderIntDefaultCompact(aw, "Size", &vProjectFile->m_CurrentFont->m_FontSize, 7, 50, defaultFontInfosValues.m_FontSize);
+						needFontReGen |= ImGui::SliderIntDefaultCompact(aw, "Over Sample", &vProjectFile->m_CurrentFont->m_Oversample, 1, 5, defaultFontInfosValues.m_Oversample);
 
 						if (needFontReGen)
 						{
@@ -240,19 +244,17 @@ int SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId)
 
 						if (m_FontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH)
 						{
-							bool change = ImGui::SliderInt("Width Count", &vProjectFile->m_Preview_Glyph_CountX, 50, 1);
+							bool change = ImGui::SliderIntDefaultCompact(aw, "Width Count", &vProjectFile->m_Preview_Glyph_CountX, 50, 1, defaultProjectValues.m_Preview_Glyph_CountX);
 
-							ImGui::Checkbox("Display Range Coloring", &vProjectFile->m_ShowRangeColoring);
+							ImGui::Separator();
+
+							ImGui::Checkbox("Show Range Colors", &vProjectFile->m_ShowRangeColoring);
 							if (vProjectFile->IsRangeColorignShown())
 							{
-								ImGui::Indent();
-
-								change |= ImGui::SliderFloat("H x", &vProjectFile->m_RangeColoringHash.x, 0, 50);
-								change |= ImGui::SliderFloat("H y", &vProjectFile->m_RangeColoringHash.y, 0, 50);
-								change |= ImGui::SliderFloat("H z", &vProjectFile->m_RangeColoringHash.z, 0, 50);
-								//ImGui::SliderFloat("Alpha", &vProjectFile->m_RangeColoringHash.w, 0, 1);
-
-								ImGui::Unindent();
+								change |= ImGui::SliderFloatDefaultCompact(aw, "H x", &vProjectFile->m_RangeColoringHash.x, 0, 50, defaultProjectValues.m_RangeColoringHash.x);
+								change |= ImGui::SliderFloatDefaultCompact(aw, "H y", &vProjectFile->m_RangeColoringHash.y, 0, 50, defaultProjectValues.m_RangeColoringHash.y);
+								change |= ImGui::SliderFloatDefaultCompact(aw, "H z", &vProjectFile->m_RangeColoringHash.z, 0, 50, defaultProjectValues.m_RangeColoringHash.z);
+								//change |= ImGui::SliderFloatDefaultCompact(aw, "Alpha", &vProjectFile->m_RangeColoringHash.w, 0, 1, defaultProjectValues.m_RangeColoringHash.w);
 							}
 
 							if (change)

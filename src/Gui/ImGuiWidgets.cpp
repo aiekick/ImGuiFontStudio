@@ -18,6 +18,7 @@
  */
 #include "ImGuiWidgets.h"
 #include <FileHelper.h>
+#include <Res/CustomFont.h>
 
 #include "imgui.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
@@ -930,4 +931,124 @@ void ImGui::ShowCustomStyleEditor(bool *vOpen, ImGuiStyle* ref)
 		ImGui::PopItemWidth();
 	}
 	ImGui::End();
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+///// SLIDERS //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// Note: p_data, p_min and p_max are _pointers_ to a memory address holding the data. For a slider, they are all required.
+// Read code of e.g. SliderFloat(), SliderInt() etc. or examples in 'Demo->Widgets->Data Types' to understand how to use this function directly.
+// text on the left in the box for keep space
+// value on the right in the box
+bool ImGui::SliderScalarDefaultCompact(float width, const char* label, ImGuiDataType data_type, void* p_data, const void* p_min, const void* p_max, const char* format, float power)
+{
+	ImGuiWindow* window = GetCurrentWindow();
+	if (window->SkipItems)
+		return false;
+
+	ImGuiContext& g = *GImGui;
+	const ImGuiStyle& style = g.Style;
+	const ImGuiID id = window->GetID(label);
+	const float w = width - style.FramePadding.x * 2.0f;
+
+	const ImVec2 label_size = CalcTextSize(label, NULL, true);
+	const ImRect frame_bb(window->DC.CursorPos, window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y * 2.0f));
+	const ImRect total_bb(frame_bb.Min, frame_bb.Max + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f, 0.0f));
+
+	ItemSize(total_bb, style.FramePadding.y);
+	if (!ItemAdd(total_bb, id, &frame_bb))
+		return false;
+
+	// Default format string when passing NULL
+	if (format == NULL)
+		format = DataTypeGetInfo(data_type)->PrintFmt;
+	else if (data_type == ImGuiDataType_S32 && strcmp(format, "%d") != 0) // (FIXME-LEGACY: Patch old "%.0f" format string to use "%d", read function more details.)
+		IM_ASSERT(0 && "DragInt(): Invalid format string!");
+
+	// Tabbing or CTRL-clicking on Slider turns it into an input box
+	const bool hovered = ItemHoverable(frame_bb, id);
+	bool temp_input_is_active = TempInputIsActive(id);
+	if (!temp_input_is_active)
+	{
+		const bool focus_requested = FocusableItemRegister(window, id);
+		const bool clicked = (hovered && g.IO.MouseClicked[0]);
+		if (focus_requested || clicked || g.NavActivateId == id || g.NavInputId == id)
+		{
+			SetActiveID(id, window);
+			SetFocusID(id, window);
+			FocusWindow(window);
+			g.ActiveIdUsingNavDirMask |= (1 << ImGuiDir_Left) | (1 << ImGuiDir_Right);
+			if (focus_requested || (clicked && g.IO.KeyCtrl) || g.NavInputId == id)
+			{
+				temp_input_is_active = true;
+				FocusableItemUnregister(window);
+			}
+		}
+	}
+
+	// Our current specs do NOT clamp when using CTRL+Click manual input, but we should eventually add a flag for that..
+	if (temp_input_is_active)
+		return TempInputScalar(frame_bb, id, label, data_type, p_data, format);// , p_min, p_max);
+
+	// Draw frame
+	const ImU32 frame_col = GetColorU32(g.ActiveId == id ? ImGuiCol_FrameBgActive : g.HoveredId == id ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
+	RenderNavHighlight(frame_bb, id);
+	RenderFrame(frame_bb.Min, frame_bb.Max, frame_col, true, g.Style.FrameRounding);
+
+	// Slider behavior
+	ImRect grab_bb;
+	const bool value_changed = SliderBehavior(frame_bb, id, data_type, p_data, p_min, p_max, format, power, ImGuiSliderFlags_None, &grab_bb);
+	if (value_changed)
+		MarkItemEdited(id);
+
+	// Render grab
+	if (grab_bb.Max.x > grab_bb.Min.x)
+		window->DrawList->AddRectFilled(grab_bb.Min, grab_bb.Max, GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
+
+	// display label / but not if input mode 
+	if (label_size.x > 0.0f && !temp_input_is_active)
+		RenderTextClipped(frame_bb.Min + ImVec2(style.ItemInnerSpacing.x, 0), frame_bb.Max, label, NULL, NULL, ImVec2(0.0f, 0.5f));
+
+	// Display value using user-provided display format so user can add prefix/suffix/decorations to the value.
+	char value_buf[64];
+	const char* value_buf_end = value_buf + DataTypeFormatString(value_buf, IM_ARRAYSIZE(value_buf), data_type, p_data, format);
+	RenderTextClipped(frame_bb.Min, frame_bb.Max - ImVec2(style.ItemInnerSpacing.x, 0), value_buf, value_buf_end, NULL, ImVec2(1.0f, 0.5f));
+
+	IMGUI_TEST_ENGINE_ITEM_INFO(id, label, window->DC.ItemFlags);
+	return value_changed;
+}
+
+bool ImGui::SliderIntDefaultCompact(float width, const char* label, int* v, int v_min, int v_max, int v_default, const char* format)
+{
+	float ax = ImGui::GetCursorPosX();
+
+	ImGui::PushID(label);
+	if (Button(ICON_IGFS_RESET))
+	{
+		*v = v_default;
+	}
+	ImGui::PopID();
+
+	ImGui::SameLine();
+
+	float w = width - ImGui::GetCursorPosX() + ax;
+
+	return SliderScalarDefaultCompact(w, label, ImGuiDataType_S32, v, &v_min, &v_max, format);
+}
+
+bool ImGui::SliderFloatDefaultCompact(float width, const char* label, float* v, float v_min, float v_max, float v_default, const char* format, float power)
+{
+	float ax = ImGui::GetCursorPosX();
+
+	if (Button(ICON_IGFS_RESET))
+	{
+		*v = v_default;
+	}
+
+	ImGui::SameLine();
+
+	float w = width - ImGui::GetCursorPosX() + ax;
+
+	return SliderScalarDefaultCompact(w, label, ImGuiDataType_Float, v, &v_min, &v_max, format, power);
 }

@@ -36,6 +36,8 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui_internal.h"
 
+#include <Logger.h>
+
 PaneFlags GuiLayout::m_Pane_Shown = PANE_ALLS;
 
 GuiLayout::GuiLayout() = default;

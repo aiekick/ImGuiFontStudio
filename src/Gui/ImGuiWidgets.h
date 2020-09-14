@@ -170,5 +170,16 @@ namespace ImGui
 	IMGUI_API void ShowCustomStyleEditor(bool *vOpen, ImGuiStyle* ref = nullptr);
 
 	////////////////////////////////////////////////////////////////////////////
+
+	IMGUI_API bool SliderScalarDefaultCompact(float width,
+		const char* label, ImGuiDataType data_type, 
+		void* p_data, const void* p_min, const void* p_max, 
+		const char* format = NULL, float power = 1.0f);
+	IMGUI_API bool SliderIntDefaultCompact(float width,
+		const char* label, int* v, int v_min, 
+		int v_max, int v_default, const char* format = "%d");
+	IMGUI_API bool SliderFloatDefaultCompact(float width,
+		const char* label, float* v, float v_min, 
+		float v_max, float v_default, const char* format = "%.3f", float power = 1.0f);
 }
 
