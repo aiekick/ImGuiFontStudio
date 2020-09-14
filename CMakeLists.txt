@@ -102,10 +102,10 @@ if (APPLE)
 	if ("${CMAKE_EXE_LINKER_FLAGS}" STREQUAL "/machine:x64")
 		set_target_properties(${PROJECT}
 			PROPERTIES
-			OUTPUT_NAME "ImGuiFontStudio_Osx_x32"
-			MACOSX_BUNDLE_EXECUTABLE_NAME "ImGuiFontStudio_Osx_x32"
-			MACOSX_BUNDLE_BUNDLE_NAME "ImGuiFontStudio_Osx_x32"
-			FOLDER "ImGuiFontStudio_Osx_x32"
+			OUTPUT_NAME "ImGuiFontStudio_Osx_x64"
+			MACOSX_BUNDLE_EXECUTABLE_NAME "ImGuiFontStudio_Osx_x64"
+			MACOSX_BUNDLE_BUNDLE_NAME "ImGuiFontStudio_Osx_x64"
+			FOLDER "ImGuiFontStudio_Osx_x64"
 			##RESOURCE icon.icns
 			MACOSX_BUNDLE_SHORT_VERSION_STRING "0.5"
 			MACOSX_BUNDLE_LONG_VERSION_STRING "Beta 0.5"
@@ -114,10 +114,10 @@ if (APPLE)
 	else()
 		set_target_properties(${PROJECT}
 			PROPERTIES
-			OUTPUT_NAME "ImGuiFontStudio_Osx_x64"
-			MACOSX_BUNDLE_EXECUTABLE_NAME "ImGuiFontStudio_Osx_x64"
-			MACOSX_BUNDLE_BUNDLE_NAME "ImGuiFontStudio_Osx_x64"
-			FOLDER "ImGuiFontStudio_Osx_x64"
+			OUTPUT_NAME "ImGuiFontStudio_Osx_x32"
+			MACOSX_BUNDLE_EXECUTABLE_NAME "ImGuiFontStudio_Osx_x32"
+			MACOSX_BUNDLE_BUNDLE_NAME "ImGuiFontStudio_Osx_x32"
+			FOLDER "ImGuiFontStudio_Osx_x32"
 			##RESOURCE icon.icns
 			MACOSX_BUNDLE_SHORT_VERSION_STRING "0.5"
 			MACOSX_BUNDLE_LONG_VERSION_STRING "Beta 0.5"
