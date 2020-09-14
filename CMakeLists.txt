@@ -46,29 +46,29 @@ add_definitions(-DCUSTOM_IMGUIFILEDIALOG_CONFIG="../../../src/Gui/CustomImGuiFil
 
 file(GLOB IMGUIFONTSTUDIO_SOURCES ${CMAKE_SOURCE_DIR}/*.cpp)
 file(GLOB IMGUIFONTSTUDIO_SRC 
-		${CMAKE_SOURCE_DIR}/src/*.cpp 
-		${CMAKE_SOURCE_DIR}/src/*.h) 
+	${CMAKE_SOURCE_DIR}/src/*.cpp 
+	${CMAKE_SOURCE_DIR}/src/*.h) 
 file(GLOB IMGUIFONTSTUDIO_HELPER 
-		${CMAKE_SOURCE_DIR}/src/Helper/*.cpp 
-		${CMAKE_SOURCE_DIR}/src/Helper/*.h)
+	${CMAKE_SOURCE_DIR}/src/Helper/*.cpp 
+	${CMAKE_SOURCE_DIR}/src/Helper/*.h)
 file(GLOB IMGUIFONTSTUDIO_IMGUIIMPL
-		${CMAKE_SOURCE_DIR}/src/ImguiImpl/*.cpp 
-		${CMAKE_SOURCE_DIR}/src/ImguiImpl/*.h)
+	${CMAKE_SOURCE_DIR}/src/ImguiImpl/*.cpp 
+	${CMAKE_SOURCE_DIR}/src/ImguiImpl/*.h)
 file(GLOB IMGUIFONTSTUDIO_GENERATOR
-		${CMAKE_SOURCE_DIR}/src/Generator/*.cpp 
-		${CMAKE_SOURCE_DIR}/src/Generator/*.h)
+	${CMAKE_SOURCE_DIR}/src/Generator/*.cpp 
+	${CMAKE_SOURCE_DIR}/src/Generator/*.h)
 file(GLOB IMGUIFONTSTUDIO_RES
-		${CMAKE_SOURCE_DIR}/src/Res/*.cpp 
-		${CMAKE_SOURCE_DIR}/src/Res/*.h)
+	${CMAKE_SOURCE_DIR}/src/Res/*.cpp 
+	${CMAKE_SOURCE_DIR}/src/Res/*.h)
 file(GLOB IMGUIFONTSTUDIO_GUI
-		${CMAKE_SOURCE_DIR}/src/Gui/*.cpp 
-		${CMAKE_SOURCE_DIR}/src/Gui/*.h)
+	${CMAKE_SOURCE_DIR}/src/Gui/*.cpp 
+	${CMAKE_SOURCE_DIR}/src/Gui/*.h)
 file(GLOB IMGUIFONTSTUDIO_PROJECT
-		${CMAKE_SOURCE_DIR}/src/Project/*.cpp 
-		${CMAKE_SOURCE_DIR}/src/Project/*.h)		
+	${CMAKE_SOURCE_DIR}/src/Project/*.cpp 
+	${CMAKE_SOURCE_DIR}/src/Project/*.h)		
 file(GLOB IMGUIFONTSTUDIO_PANES
-		${CMAKE_SOURCE_DIR}/src/Panes/*.cpp 
-		${CMAKE_SOURCE_DIR}/src/Panes/*.h)
+	${CMAKE_SOURCE_DIR}/src/Panes/*.cpp 
+	${CMAKE_SOURCE_DIR}/src/Panes/*.h)
 source_group(src FILES ${IMGUIFONTSTUDIO_SRC})
 source_group(src\\Generator FILES ${IMGUIFONTSTUDIO_GENERATOR})
 source_group(src\\Helper FILES ${IMGUIFONTSTUDIO_HELPER})
@@ -84,54 +84,89 @@ if (APPLE)
 endif()
 
 add_executable(${PROJECT}
-		MACOSX_BUNDLE
-		##${ICON}
-		${IMGUIFONTSTUDIO_SOURCES} 
-		${IMGUIFONTSTUDIO_SRC} 
-		${IMGUIFONTSTUDIO_IMGUIFILEDIALOG} 
-		${IMGUIFONTSTUDIO_HELPER}
-		${IMGUIFONTSTUDIO_IMGUIIMPL}
-		${IMGUIFONTSTUDIO_GENERATOR}
-		${IMGUIFONTSTUDIO_GUI}
-		${IMGUIFONTSTUDIO_RES}
-		${IMGUIFONTSTUDIO_PROJECT}
-		${IMGUIFONTSTUDIO_PANES}
+	MACOSX_BUNDLE
+	##${ICON}
+	${IMGUIFONTSTUDIO_SOURCES} 
+	${IMGUIFONTSTUDIO_SRC} 
+	${IMGUIFONTSTUDIO_IMGUIFILEDIALOG} 
+	${IMGUIFONTSTUDIO_HELPER}
+	${IMGUIFONTSTUDIO_IMGUIIMPL}
+	${IMGUIFONTSTUDIO_GENERATOR}
+	${IMGUIFONTSTUDIO_GUI}
+	${IMGUIFONTSTUDIO_RES}
+	${IMGUIFONTSTUDIO_PROJECT}
+	${IMGUIFONTSTUDIO_PANES}
 )
 
 if (APPLE)
-	set_target_properties(${PROJECT}
+	if ("${CMAKE_EXE_LINKER_FLAGS}" STREQUAL "/machine:x64")
+		set_target_properties(${PROJECT}
 			PROPERTIES
-			OUTPUT_NAME "ImGuiFontStudio_Osx"
-			MACOSX_BUNDLE_EXECUTABLE_NAME "ImGuiFontStudio_Osx"
-			MACOSX_BUNDLE_BUNDLE_NAME "ImGuiFontStudio_Osx"
-			FOLDER "ImGuiFontStudio_Osx"
+			OUTPUT_NAME "ImGuiFontStudio_Osx_x32"
+			MACOSX_BUNDLE_EXECUTABLE_NAME "ImGuiFontStudio_Osx_x32"
+			MACOSX_BUNDLE_BUNDLE_NAME "ImGuiFontStudio_Osx_x32"
+			FOLDER "ImGuiFontStudio_Osx_x32"
 			##RESOURCE icon.icns
 			MACOSX_BUNDLE_SHORT_VERSION_STRING "0.5"
 			MACOSX_BUNDLE_LONG_VERSION_STRING "Beta 0.5"
 			##MACOSX_BUNDLE_ICON_FILE icon.icns
 			MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/MacOSXBundleInfo.plist.in")
+	else()
+		set_target_properties(${PROJECT}
+			PROPERTIES
+			OUTPUT_NAME "ImGuiFontStudio_Osx_x64"
+			MACOSX_BUNDLE_EXECUTABLE_NAME "ImGuiFontStudio_Osx_x64"
+			MACOSX_BUNDLE_BUNDLE_NAME "ImGuiFontStudio_Osx_x64"
+			FOLDER "ImGuiFontStudio_Osx_x64"
+			##RESOURCE icon.icns
+			MACOSX_BUNDLE_SHORT_VERSION_STRING "0.5"
+			MACOSX_BUNDLE_LONG_VERSION_STRING "Beta 0.5"
+			##MACOSX_BUNDLE_ICON_FILE icon.icns
+			MACOSX_BUNDLE_INFO_PLIST "${CMAKE_SOURCE_DIR}/MacOSXBundleInfo.plist.in")
+	endif()
 elseif(WIN32)
 	if (MINGW)
-		set_target_properties(${PROJECT} PROPERTIES	OUTPUT_NAME "ImGuiFontStudio_Mingw32_Win32")
+		if ("${CMAKE_EXE_LINKER_FLAGS}" STREQUAL "/machine:x64")
+			set_target_properties(${PROJECT} PROPERTIES	OUTPUT_NAME "ImGuiFontStudio_Mingw32_x64")
+		else()
+			set_target_properties(${PROJECT} PROPERTIES	OUTPUT_NAME "ImGuiFontStudio_Mingw32_x32")
+		endif()
 	elseif (CYGWIN)
-		set_target_properties(${PROJECT} PROPERTIES	OUTPUT_NAME "ImGuiFontStudio_Cygwin_Win32")
+		if ("${CMAKE_EXE_LINKER_FLAGS}" STREQUAL "/machine:x64")
+			set_target_properties(${PROJECT} PROPERTIES	OUTPUT_NAME "ImGuiFontStudio_Cygwin_x64")
+		else()
+			set_target_properties(${PROJECT} PROPERTIES	OUTPUT_NAME "ImGuiFontStudio_Cygwin_x32")
+		endif()
 	elseif(MSVC)
-		set_target_properties(${PROJECT} PROPERTIES	OUTPUT_NAME "ImGuiFontStudio_Msvc_Win32")
+		if ("${CMAKE_EXE_LINKER_FLAGS}" STREQUAL "/machine:x64")
+			set_target_properties(${PROJECT} PROPERTIES	OUTPUT_NAME "ImGuiFontStudio_Msvc_x64")
+		else()
+			set_target_properties(${PROJECT} PROPERTIES	OUTPUT_NAME "ImGuiFontStudio_Msvc_x32")
+		endif()
 	endif()
 elseif(UNIX)
-	set_target_properties(${PROJECT} PROPERTIES	OUTPUT_NAME "ImGuiFontStudio_Linux")
+	if ("${CMAKE_EXE_LINKER_FLAGS}" STREQUAL "/machine:x64")
+		set_target_properties(${PROJECT} PROPERTIES	OUTPUT_NAME "ImGuiFontStudio_Linux_x64")
+	else()
+		set_target_properties(${PROJECT} PROPERTIES	OUTPUT_NAME "ImGuiFontStudio_Linux_x32")
+	endif()
 endif()
 
-set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}")
+if ("${CMAKE_EXE_LINKER_FLAGS}" STREQUAL "/machine:x64")
+	set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/bin/x64")
+else()
+	set(CMAKE_INSTALL_PREFIX "${CMAKE_SOURCE_DIR}/bin/x32")
+endif()
+
 install(TARGETS ${PROJECT} DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 include_directories(
 	src
-        ${PLOG_INCLUDE_DIR}
-        ${OPENGL_INCLUDE_DIR}
-        ${GLFW_INCLUDE_DIR}
-        ${GLAD_INCLUDE_DIR}
-        ${IMGUI_INCLUDE_DIR}
+	${PLOG_INCLUDE_DIR}
+	${OPENGL_INCLUDE_DIR}
+	${GLFW_INCLUDE_DIR}
+	${GLAD_INCLUDE_DIR}
+	${IMGUI_INCLUDE_DIR}
 	${CTOOLS_INCLUDE_DIR}
 	${SFNTLY_INCLUDE_DIR}
 	${TINYXML2_INCLUDE_DIR}
@@ -139,11 +174,11 @@ include_directories(
 )
 
 target_link_libraries(${PROJECT} PRIVATE
-        ${OPENGL_LIBRARIES}
-        ${GLFW_LIBRARIES}
-        ${GLAD_LIBRARIES}
-        ${IMGUI_LIBRARIES}
-        ${CTOOLS_LIBRARIES}
+	${OPENGL_LIBRARIES}
+	${GLFW_LIBRARIES}
+	${GLAD_LIBRARIES}
+	${IMGUI_LIBRARIES}
+	${CTOOLS_LIBRARIES}
 	${SFNTLY_LIBRARIES}
 	${TINYXML2_LIBRARIES}
 	${IMGUIFILEDIALOG_LIBRARIES}
