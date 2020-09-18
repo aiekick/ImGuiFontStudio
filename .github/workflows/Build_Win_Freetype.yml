@@ -1,4 +1,4 @@
-name: Win
+name: Win_FreeType
 
 on:
   push:
@@ -6,7 +6,7 @@ on:
     - freetype
 
 jobs:
-  build_Win_2016_Freetype_Branch:
+  build_Win_2016:
     runs-on: windows-2016
     steps:
     - uses: actions/checkout@v1
