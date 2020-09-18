@@ -1,12 +1,13 @@
 name: Win_FreeType
 
 on:
+  workflow_dispatch:
   push:
     branches:
     - freetype
 
 jobs:
-  build_Win_2016:
+  build_Win_FreeType:
     runs-on: windows-2016
     steps:
     - uses: actions/checkout@v1
