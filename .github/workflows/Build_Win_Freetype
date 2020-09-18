@@ -6,7 +6,7 @@ on:
     - freetype
 
 jobs:
-  build_Win_2016:
+  build_Win_2016_Freetype_Branch:
     runs-on: windows-2016
     steps:
     - uses: actions/checkout@v1
