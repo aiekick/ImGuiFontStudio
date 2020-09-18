@@ -1,4 +1,4 @@
-name: Win
+name: Win_Master
 
 on:
   push:
