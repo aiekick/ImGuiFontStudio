@@ -1,5 +1,7 @@
 [<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Win/badge.svg" width="150"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3AWin) [<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Linux/badge.svg" width="165"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3ALinux) [<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Osx/badge.svg" width="150"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3AOsx)
 
+[<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Win_FreeType/badge.svg" width="235"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3AWin_FreeType) 
+
 https://github.com/aiekick/ImGuiFontStudio
 
 <img src="https://github.com/aiekick/ImGuiFontStudio/blob/master/doc/src.png" width="500">
