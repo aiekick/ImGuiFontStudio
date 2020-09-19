@@ -8,7 +8,7 @@
 
 <img src="https://github.com/aiekick/ImGuiFontStudio/blob/master/doc/src.png" width="500">
 
-# [ImGuiFontStudio](https://github.com/aiekick/ImGuiFontStudio
+# [ImGuiFontStudio](https://github.com/aiekick/ImGuiFontStudio)
 
 ImGuiFontStudio is a tool for Subset font and extract glyph names for use embbeded or not in a software, especially for use with ImGui for embedded way.
 
