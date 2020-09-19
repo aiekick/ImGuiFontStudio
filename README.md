@@ -2,9 +2,9 @@
 [<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Linux/badge.svg" width="165"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3ALinux) 
 [<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Osx/badge.svg" width="150"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3AOsx)
 
-[<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Win_FreeType/badge.svg" width="235"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3AWin_FreeType) 
-[<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Linux_FreeType/badge.svg" width="235"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3ALinux_FreeType) 
-[<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Osx_FreeType/badge.svg" width="235"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3AOsx_FreeType) 
+[<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Win_Freetype/badge.svg?branch=freetype" width="235"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3AWin_FreeType) 
+[<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Linux_Freetype/badge.svg?branch=freetype" width="235"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3ALinux_FreeType) 
+[<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Osx_Freetype/badge.svg?branch=freetype" width="235"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3AOsx_FreeType) 
 
 https://github.com/aiekick/ImGuiFontStudio
 
