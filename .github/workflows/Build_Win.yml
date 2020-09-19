@@ -1,6 +1,7 @@
-name: Win_Master
+name: Win
 
 on:
+  workflow_dispatch:
   push:
     branches:
     - master
