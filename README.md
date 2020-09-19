@@ -6,11 +6,9 @@
 [<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Linux_Freetype/badge.svg?branch=freetype" width="235"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3ALinux_FreeType) 
 [<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Osx_Freetype/badge.svg?branch=freetype" width="235"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3AOsx_FreeType) 
 
-https://github.com/aiekick/ImGuiFontStudio
-
 <img src="https://github.com/aiekick/ImGuiFontStudio/blob/master/doc/src.png" width="500">
 
-# ImGuiFontStudio
+# [ImGuiFontStudio](https://github.com/aiekick/ImGuiFontStudio
 
 ImGuiFontStudio is a tool for Subset font and extract glyph names for use embbeded or not in a software, especially for use with ImGui for embedded way.
 
