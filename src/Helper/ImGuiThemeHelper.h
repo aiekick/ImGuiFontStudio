@@ -35,7 +35,7 @@ public:
 
 public:
 	std::string getXml(const std::string& vOffset) override;
-	void setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent) override;
+	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent) override;
 
 public:
 	void ApplyStyleColorsDefault(ImGuiStyle* dst = nullptr);

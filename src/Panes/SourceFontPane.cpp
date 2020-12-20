@@ -137,55 +137,88 @@ int SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId)
 
 						ImGui::Text("Opened Fonts :");
 
-						ImGui::PushItemWidth(ImGui::GetContentRegionAvailWidth() - ImGui::GetStyle().IndentSpacing);
+						ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().IndentSpacing);
 
-						if (ImGui::ListBoxHeader("##OpenedFontsListBox", 5))
+						static int selection = 0;
+						static ImGuiTableFlags flags = ImGuiTableFlags_ColumnsWidthFixed | ImGuiTableFlags_RowBg |
+							ImGuiTableFlags_ScrollY | ImGuiTableFlags_NoHostExtendY;
+						if (ImGui::BeginTable("##fileTable", 2, flags, ImVec2(0, 100)))
 						{
+							ImGui::TableSetupColumn("Font Files", ImGuiTableColumnFlags_WidthStretch, -1, 0);
+							ImGui::TableSetupColumn("Act", ImGuiTableColumnFlags_WidthAutoResize, -1, 1);
+
+							ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
+							for (int column = 0; column < 2; column++)
+							{
+								ImGui::TableSetColumnIndex(column);
+								const char* column_name = ImGui::TableGetColumnName(column); // Retrieve name passed to TableSetupColumn()
+								ImGui::PushID(column);
+								ImGui::TableHeader(column_name);
+								ImGui::PopID();
+							}
+
 							for (auto & itFont : vProjectFile->m_Fonts)
 							{
-								bool sel = false, infosClick = false, infosHovered = false;
+								bool sel = false;
+
+								ImGui::TableNextRow();
 								if (itFont.second.m_NeedFilePathResolve)
 								{
-									ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.8f, 0.5f, 0.2f, 0.6f));
-									sel = ImGui::SelectableWithBtn(itFont.first.c_str(), vProjectFile->m_CurrentFont == &itFont.second,
-										ICON_IGFS_WARNING, &infosClick, &infosHovered, ImVec4(0.8f, 0.8f, 0.0f, 0.8f), ImVec4(0.8f, 0.5f, 0.5f, 0.8f));
-									ImGui::PopStyleColor();
-
-									if (infosHovered)
+									if (ImGui::TableSetColumnIndex(0)) // first column
 									{
-										ImGui::SetTooltip("Font file Not Found\nClick for search the good file");
+										ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.8f, 0.5f, 0.2f, 0.6f));
+										ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_AllowDoubleClick;
+										selectableFlags |= ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
+										sel = ImGui::Selectable(itFont.first.c_str(), vProjectFile->m_CurrentFont == &itFont.second, selectableFlags);
+										ImGui::PopStyleColor();
 									}
-
-									if (infosClick)
+									if (ImGui::TableSetColumnIndex(1)) // second column
 									{
-										std::string label = "Search good file for Font " + itFont.first;
+										ImGui::PushID(++vWidgetId);
+										if (ImGui::SmallButton(ICON_IGFS_EDIT))
+										{
+											std::string label = "Search good file for Font " + itFont.first;
 
-										igfd::ImGuiFileDialog::Instance()->OpenModal(
-											"SolveBadFilePathName",
-											label.c_str(), "Font File (*.ttf *.otf){.ttf,.otf}", ".",
-											itFont.first, 1, (igfd::UserDatas)itFont.first.c_str());
+											igfd::ImGuiFileDialog::Instance()->OpenModal(
+												"SolveBadFilePathName",
+												label.c_str(), "Font File (*.ttf *.otf){.ttf,.otf}", ".",
+												itFont.first, 1, (igfd::UserDatas)itFont.first.c_str());
+										}
+										if (ImGui::IsItemHovered())
+										{
+											ImGui::SetTooltip("Font file Not Found\nClick for search the good file");
+										}
+										ImGui::PopID();
 									}
 								}
 								else
 								{
-									sel = ImGui::SelectableWithBtn(itFont.first.c_str(), vProjectFile->m_CurrentFont == &itFont.second,
-										ICON_IGFS_EDIT, &infosClick, &infosHovered, ImGui::GetStyleColorVec4(ImGuiCol_Text), ImGui::GetStyleColorVec4(ImGuiCol_HeaderHovered));
-
-									if (infosHovered)
+									if (ImGui::TableSetColumnIndex(0)) // first column
 									{
-										ImGui::SetTooltip("Click for search an alternative file\nbut keep selected glyphs");
+										ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_AllowDoubleClick;
+										selectableFlags |= ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
+										sel = ImGui::Selectable(itFont.first.c_str(), vProjectFile->m_CurrentFont == &itFont.second, selectableFlags);
 									}
-
-									if (infosClick)
+									if (ImGui::TableSetColumnIndex(1)) // second column
 									{
-										std::string label = "Search an alternative file for Font " + itFont.first;
+										ImGui::PushID(++vWidgetId);
+										if (ImGui::SmallButton(ICON_IGFS_EDIT))
+										{
+											std::string label = "Search an alternative file for Font " + itFont.first;
 
-										igfd::ImGuiFileDialog::Instance()->OpenModal(
-											"SolveBadFilePathName",
-											label.c_str(), "Font File (*.ttf *.otf){.ttf,.otf}", ".",
-											itFont.first, 1, (igfd::UserDatas)itFont.first.c_str());
+											igfd::ImGuiFileDialog::Instance()->OpenModal(
+												"SolveBadFilePathName",
+												label.c_str(), "Font File (*.ttf *.otf){.ttf,.otf}", ".",
+												itFont.first, 1, (igfd::UserDatas)itFont.first.c_str());
+										}
+										if (ImGui::IsItemHovered())
+										{
+											ImGui::SetTooltip("Click for search an alternative file\nbut keep selected glyphs");
+										}
+										ImGui::PopID();
 									}
 								}
+
 								if (sel)
 								{
 									if (!itFont.second.m_NeedFilePathResolve)
@@ -194,9 +227,8 @@ int SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId)
 									}
 								}
 							}
-
-							ImGui::ListBoxFooter();
 						}
+						ImGui::EndTable();
 
 						ImGui::PopItemWidth();
 					}
@@ -229,7 +261,7 @@ int SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId)
 
 						bool needFontReGen = false;
 
-						const float aw = ImGui::GetContentRegionAvailWidth();
+						const float aw = ImGui::GetContentRegionAvail().x;
 
 						needFontReGen |= ImGui::SliderIntDefaultCompact(aw, "Size", &vProjectFile->m_CurrentFont->m_FontSize, 7, 50, defaultFontInfosValues.m_FontSize);
 						needFontReGen |= ImGui::SliderIntDefaultCompact(aw, "Over Sample", &vProjectFile->m_CurrentFont->m_Oversample, 1, 5, defaultFontInfosValues.m_Oversample);
@@ -358,10 +390,11 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, FontInfos 
                 {
                     size_t countGlyphs = font->Glyphs.size();
                     int rowCount = (int)ct::ceil((double)countGlyphs / (double)countGlyphX);
-                    // ImGuiListClipper infos, found in https://github.com/ocornut/imgui/issues/150 // for virtual list display
-                    ImGuiListClipper clipper(rowCount, glyphSize);
-                    {
-                        for (int j = clipper.DisplayStart; j < clipper.DisplayEnd; j++)
+					ImGuiListClipper m_Clipper;
+					m_Clipper.Begin(rowCount, glyphSize);
+					while (m_Clipper.Step())
+					{
+                        for (int j = m_Clipper.DisplayStart; j < m_Clipper.DisplayEnd; j++)
                         {
                             for (int i = 0; i < countGlyphX; i++)
                             {
@@ -430,7 +463,7 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, FontInfos 
                             }
                         }
                     }
-                    clipper.End();
+					m_Clipper.End();
                 }
 
                 SelectionHelper::Instance()->SelectWithToolOrApply(
@@ -448,7 +481,7 @@ void SourceFontPane::DrawFontTexture(FontInfos *vFontInfos)
 		{
 			if (vFontInfos->m_ImFontAtlas.TexID)
 			{
-				float w = ImGui::GetContentRegionAvailWidth();
+				float w = ImGui::GetContentRegionAvail().x;
 				float h = w * (float)vFontInfos->m_ImFontAtlas.TexHeight;
 				if (vFontInfos->m_ImFontAtlas.TexWidth > 0)
 					h /= (float)vFontInfos->m_ImFontAtlas.TexWidth;

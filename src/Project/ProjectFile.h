@@ -90,7 +90,7 @@ public: // Generation Mode
 
 public:
 	std::string getXml(const std::string& vOffset) override;
-	void setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent) override;
+	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent) override;
 
 public: // utils
 	ImVec4 GetColorFromInteger(uint32_t vInteger) const;

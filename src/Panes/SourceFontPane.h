@@ -27,6 +27,9 @@ class ProjectFile;
 struct ImGuiWindow;
 class SourceFontPane
 {
+private:
+	ImGuiListClipper m_FontsClipper;
+
 public:
 	enum SourceFontPaneFlags
 	{
@@ -56,7 +59,6 @@ private:
 
 private: // experimental => virtual list
     static void DrawFontAtlas_Virtual(ProjectFile *vProjectFile, FontInfos *vFontInfos);
-
 
 public: // singleton
 	static SourceFontPane *Instance()

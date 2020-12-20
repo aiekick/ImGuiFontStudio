@@ -315,7 +315,7 @@ void FinalFontPane::CalcGlyphsCountAndSize(
 {
 	if (vGlyphSize && vGlyphCountX)
 	{
-		float maxWidth = ImGui::GetContentRegionAvailWidth();
+		float maxWidth = ImGui::GetContentRegionAvail().x;
 		float glyphSize = floorf(maxWidth / (float)*vGlyphCountX);
 		*vGlyphSize = ImVec2(glyphSize, glyphSize);
 		*vGlyphSize -= ImGui::GetStyle().ItemSpacing;

@@ -78,7 +78,7 @@ private: // Opengl Texture
 
 public: // Configuration
 	std::string getXml(const std::string& vOffset);
-	void setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent);
+	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent);
 
 public: // Cons/Des tructors
 	FontInfos();

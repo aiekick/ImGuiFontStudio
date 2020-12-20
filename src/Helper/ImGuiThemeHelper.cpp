@@ -452,7 +452,7 @@ std::string ImGuiThemeHelper::getXml(const std::string& vOffset)
 	return str;
 }
 
-void ImGuiThemeHelper::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent)
+bool ImGuiThemeHelper::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent)
 {
 	// The value of this child identifies the name of this element
 	std::string strName;
@@ -479,7 +479,7 @@ void ImGuiThemeHelper::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElem
 			if (attName == "color") color = attValue;
 		}
 
-		m_FileTypeInfos[fileType] = ct::toImVec4(ct::fvariant(color).getV4());
+		m_FileTypeInfos[fileType] = igfd::FileExtentionInfosStruct(ct::toImVec4(ct::fvariant(color).GetV4()));
 		igfd::ImGuiFileDialog::Instance()->SetExtentionInfos(fileType, m_FileTypeInfos[fileType]);
 	}
 
@@ -498,32 +498,34 @@ void ImGuiThemeHelper::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElem
 				int id = GetImGuiColFromName(strName);
 				if (id >= 0)
 				{
-					colors[id] = ct::toImVec4(ct::fvariant(strValue).getV4());
-					return;
+					colors[id] = ct::toImVec4(ct::fvariant(strValue).GetV4());
+					return false;
 				}
 			}
 
-			if (strName == "WindowPadding") style->WindowPadding = ct::toImVec2(ct::fvariant(strValue).getV2());
-			else if (strName == "FramePadding") style->FramePadding = ct::toImVec2(ct::fvariant(strValue).getV2());
-			else if (strName == "ItemSpacing") style->ItemSpacing = ct::toImVec2(ct::fvariant(strValue).getV2());
-			else if (strName == "ItemInnerSpacing") style->ItemInnerSpacing = ct::toImVec2(ct::fvariant(strValue).getV2());
-			else if (strName == "IndentSpacing") style->IndentSpacing = ct::fvariant(strValue).getF();
-			else if (strName == "ScrollbarSize") style->ScrollbarSize = ct::fvariant(strValue).getF();
-			else if (strName == "GrabMinSize") style->GrabMinSize = ct::fvariant(strValue).getF();
-			else if (strName == "WindowRounding") style->WindowRounding = ct::fvariant(strValue).getF();
-			else if (strName == "ChildRounding") style->ChildRounding = ct::fvariant(strValue).getF();
-			else if (strName == "FrameRounding") style->FrameRounding = ct::fvariant(strValue).getF();
-			else if (strName == "PopupRounding") style->PopupRounding = ct::fvariant(strValue).getF();
-			else if (strName == "ScrollbarRounding") style->ScrollbarRounding = ct::fvariant(strValue).getF();
-			else if (strName == "GrabRounding") style->GrabRounding = ct::fvariant(strValue).getF();
-			else if (strName == "TabRounding") style->TabRounding = ct::fvariant(strValue).getF();
-			else if (strName == "WindowBorderSize") style->WindowBorderSize = ct::fvariant(strValue).getF();
-			else if (strName == "ChildBorderSize") style->ChildBorderSize = ct::fvariant(strValue).getF();
-			else if (strName == "PopupBorderSize") style->PopupBorderSize = ct::fvariant(strValue).getF();
-			else if (strName == "FrameBorderSize") style->FrameBorderSize = ct::fvariant(strValue).getF();
-			else if (strName == "TabBorderSize") style->TabBorderSize = ct::fvariant(strValue).getF();
+			if (strName == "WindowPadding") style->WindowPadding = ct::toImVec2(ct::fvariant(strValue).GetV2());
+			else if (strName == "FramePadding") style->FramePadding = ct::toImVec2(ct::fvariant(strValue).GetV2());
+			else if (strName == "ItemSpacing") style->ItemSpacing = ct::toImVec2(ct::fvariant(strValue).GetV2());
+			else if (strName == "ItemInnerSpacing") style->ItemInnerSpacing = ct::toImVec2(ct::fvariant(strValue).GetV2());
+			else if (strName == "IndentSpacing") style->IndentSpacing = ct::fvariant(strValue).GetF();
+			else if (strName == "ScrollbarSize") style->ScrollbarSize = ct::fvariant(strValue).GetF();
+			else if (strName == "GrabMinSize") style->GrabMinSize = ct::fvariant(strValue).GetF();
+			else if (strName == "WindowRounding") style->WindowRounding = ct::fvariant(strValue).GetF();
+			else if (strName == "ChildRounding") style->ChildRounding = ct::fvariant(strValue).GetF();
+			else if (strName == "FrameRounding") style->FrameRounding = ct::fvariant(strValue).GetF();
+			else if (strName == "PopupRounding") style->PopupRounding = ct::fvariant(strValue).GetF();
+			else if (strName == "ScrollbarRounding") style->ScrollbarRounding = ct::fvariant(strValue).GetF();
+			else if (strName == "GrabRounding") style->GrabRounding = ct::fvariant(strValue).GetF();
+			else if (strName == "TabRounding") style->TabRounding = ct::fvariant(strValue).GetF();
+			else if (strName == "WindowBorderSize") style->WindowBorderSize = ct::fvariant(strValue).GetF();
+			else if (strName == "ChildBorderSize") style->ChildBorderSize = ct::fvariant(strValue).GetF();
+			else if (strName == "PopupBorderSize") style->PopupBorderSize = ct::fvariant(strValue).GetF();
+			else if (strName == "FrameBorderSize") style->FrameBorderSize = ct::fvariant(strValue).GetF();
+			else if (strName == "TabBorderSize") style->TabBorderSize = ct::fvariant(strValue).GetF();
 		}
 	}
+
+	return true;
 }
 
 

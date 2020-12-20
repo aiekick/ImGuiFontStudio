@@ -1016,7 +1016,7 @@ bool ImGui::SliderScalarDefaultCompact(float width, const char* label, ImGuiData
 
 	// Slider behavior
 	ImRect grab_bb;
-	const bool value_changed = SliderBehavior(frame_bb, id, data_type, p_data, p_min, p_max, format, power, ImGuiSliderFlags_None, &grab_bb);
+	const bool value_changed = SliderBehavior(frame_bb, id, data_type, p_data, p_min, p_max, format, ImGuiSliderFlags_None, &grab_bb);
 	if (value_changed)
 		MarkItemEdited(id);
 

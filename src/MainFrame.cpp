@@ -600,7 +600,7 @@ std::string MainFrame::getXml(const std::string& vOffset)
 	return str;
 }
 
-void MainFrame::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent)
+bool MainFrame::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent)
 {
 	// The value of this child identifies the name of this element
 	std::string strName;
@@ -621,4 +621,6 @@ void MainFrame::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 
 	if (strName == "project")
 		LoadProject(strValue);
+
+	return true;
 }

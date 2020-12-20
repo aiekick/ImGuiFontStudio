@@ -16,6 +16,8 @@ include(cmake/3rdparty.cmake)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 add_definitions(-DPROJECT_PATH="${CMAKE_SOURCE_DIR}")
 
+add_definitions(-DIMGUI_DISABLE_OBSOLETE_FUNCTIONS)
+
 if(UNIX)
     if(APPLE)
         add_definitions(-DAPPLE)

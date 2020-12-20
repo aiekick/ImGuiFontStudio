@@ -2,9 +2,26 @@
 
 // uncomment and modify defines under for customize ImGuiFileDialog
 
+//#define MAX_FILE_DIALOG_NAME_BUFFER 1024
+//#define MAX_PATH_BUFFER_SIZE 1024
+
 #define USE_IMGUI_TABLES
 
+#define USE_EXPLORATION_BY_KEYS
+// this mapping by default is for GLFW but you can use another
+//#include <GLFW/glfw3.h> 
+// Up key for explore to the top
+#define IGFD_KEY_UP 265 //GLFW_KEY_UP
+// Down key for explore to the bottom
+#define IGFD_KEY_DOWN 264 // GLFW_KEY_DOWN
+// Enter key for open directory
+#define IGFD_KEY_ENTER 257 // GLFW_KEY_ENTER
+// BackSpace for comming back to the last directory
+#define IGFD_KEY_BACKSPACE 259 // GLFW_KEY_BACKSPACE
+
 // widget
+// filter combobox width
+//#define FILTER_COMBO_WIDTH 120.0f
 // button widget use for compose path
 //#define IMGUI_PATH_BUTTON ImGui::Button
 // standar button
@@ -35,18 +52,6 @@
 #define tableHeaderFileNameString " File name"
 #define tableHeaderFileSizeString " Size"
 #define tableHeaderFileDateString " Date"
-
-#define USE_EXPLORATION_BY_KEYS
-// this mapping by default is for GLFW but you can use another
-//#include <GLFW/glfw3.h> 
-// Up key for explore to the top
-#define IGFD_KEY_UP 265 //GLFW_KEY_UP
-// Down key for explore to the bottom
-#define IGFD_KEY_DOWN 264 // GLFW_KEY_DOWN
-// Enter key for open directory
-#define IGFD_KEY_ENTER 257 // GLFW_KEY_ENTER
-// BackSpace for comming back to the last directory
-#define IGFD_KEY_BACKSPACE 259 // GLFW_KEY_BACKSPACE
 
 #define USE_BOOKMARK
 #define bookmarkPaneWith 200.0f

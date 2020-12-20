@@ -413,7 +413,7 @@ std::string FontInfos::getXml(const std::string& vOffset)
 	return res;
 }
 
-void FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent)
+bool FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent)
 {
 	// The value of this child identifies the name of this element
 	std::string strName;
@@ -446,9 +446,9 @@ void FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 		else if (strName == "pathfilename")
 			m_FontFilePathName = strValue;
 		else if (strName == "oversample")
-			m_Oversample = ct::ivariant(strValue).getI();
+			m_Oversample = ct::ivariant(strValue).GetI();
 		else if (strName == "fontsize")
-			m_FontSize = ct::ivariant(strValue).getI();
+			m_FontSize = ct::ivariant(strValue).GetI();
 		else if (strName == "glyphs" || strName == "filters")
 		{
 			for (tinyxml2::XMLElement* child = vElem->FirstChildElement(); child != nullptr; child = child->NextSiblingElement())
@@ -471,10 +471,10 @@ void FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 
 			if (attName == "orgId" || 
 				attName == "id") // for compatibility with first format, will be removed in few versions
-				oldcodepoint = (uint32_t)ct::ivariant(attValue).getI();
+				oldcodepoint = (uint32_t)ct::ivariant(attValue).GetI();
 			else if (attName == "newId" || 
 				attName == "nid")  // for compatibility with first format, will be removed in few versions
-				newcodepoint = (uint32_t)ct::ivariant(attValue).getI();
+				newcodepoint = (uint32_t)ct::ivariant(attValue).GetI();
 			else if (attName == "orgName") oldName = attValue;
 			else if (attName == "newName" || 
 				attName == "name")  // for compatibility with first format, will be removed in few versions
@@ -498,4 +498,6 @@ void FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 			ct::AppendToBuffer(m_SearchBuffer, 1023, attValue);
 		}
 	}
+
+	return true;
 }

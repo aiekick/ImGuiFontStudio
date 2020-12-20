@@ -237,7 +237,7 @@ std::string ProjectFile::getXml(const std::string& vOffset)
 	return str;
 }
 
-void ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent)
+bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent)
 {
 	// The value of this child identifies the name of this element
 	std::string strName;
@@ -274,32 +274,34 @@ void ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 				std::string attValue = attr->Value();
 
 				if (attName == "show")
-					m_ShowRangeColoring = ct::ivariant(attValue).getB();
+					m_ShowRangeColoring = ct::ivariant(attValue).GetB();
 				else if (attName == "hash")
-					m_RangeColoringHash = ct::toImVec4(ct::fvariant(attValue).getV4());
+					m_RangeColoringHash = ct::toImVec4(ct::fvariant(attValue).GetV4());
 			}
 		}
 		else if (strName == "previewcountglyph_x")
-			m_Preview_Glyph_CountX = ct::ivariant(strValue).getI();
+			m_Preview_Glyph_CountX = ct::ivariant(strValue).GetI();
 		else if (strName == "mergedfontprefix")
 			m_MergedFontPrefix = strValue;
 		else if (strName == "genmode")
-			m_GenMode = (GenModeFlags)ct::ivariant(strValue).getI();
+			m_GenMode = (GenModeFlags)ct::ivariant(strValue).GetI();
 		else if (strName == "fonttomergein")
 			m_FontToMergeIn = strValue;
 		else if (strName == "curglyphtooltip")
-			m_CurrentPane_ShowGlyphTooltip = ct::ivariant(strValue).getB();
+			m_CurrentPane_ShowGlyphTooltip = ct::ivariant(strValue).GetB();
 		else if (strName == "srcglyphtooltip")
-			m_SourcePane_ShowGlyphTooltip = ct::ivariant(strValue).getB();
+			m_SourcePane_ShowGlyphTooltip = ct::ivariant(strValue).GetB();
 		else if (strName == "dstglyphtooltip")
-			m_FinalPane_ShowGlyphTooltip = ct::ivariant(strValue).getB();
+			m_FinalPane_ShowGlyphTooltip = ct::ivariant(strValue).GetB();
 		else if (strName == "glyphpreviewscale")
-			m_GlyphPreview_Scale = ct::fvariant(strValue).getF();
+			m_GlyphPreview_Scale = ct::fvariant(strValue).GetF();
 		else if (strName == "glyphpreviewshowcontrollines")
-			m_GlyphPreview_ShowControlLines = ct::ivariant(strValue).getB();
+			m_GlyphPreview_ShowControlLines = ct::ivariant(strValue).GetB();
 		else if (strName == "glyphpreviewquadbeziercounsegment")
-			m_GlyphPreview_QuadBezierCountSegments = ct::ivariant(strValue).getI();
+			m_GlyphPreview_QuadBezierCountSegments = ct::ivariant(strValue).GetI();
 	}
+
+	return true;
 }
 
 ImVec4 ProjectFile::GetColorFromInteger(uint32_t vInteger) const

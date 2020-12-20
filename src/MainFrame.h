@@ -74,7 +74,7 @@ private:
 
 public: // configuration
 	std::string getXml(const std::string& vOffset);
-	void setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent);
+	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent);
 
 public: // singleton
 	static MainFrame *Instance(GLFWwindow *vWin = 0)

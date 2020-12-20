@@ -211,14 +211,14 @@ std::string GuiLayout::getXml(const std::string& vOffset)
 
 	str += vOffset + "<layout>\n";
 
-	str += vOffset + "\t<panes value=\"" + ct::ivariant(m_Pane_Shown).getS() + "\"/>\n";
+	str += vOffset + "\t<panes value=\"" + ct::ivariant(m_Pane_Shown).GetS() + "\"/>\n";
 	
 	str += vOffset + "</layout>\n";
 
 	return str;
 }
 
-void GuiLayout::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent)
+bool GuiLayout::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent)
 {
 	// The value of this child identifies the name of this element
 	std::string strName;
@@ -239,7 +239,9 @@ void GuiLayout::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 			strValue = att->Value();
 
 			if (strName == "panes") 
-				m_Pane_Shown = (PaneFlags)ct::ivariant(strValue).getI();
+				m_Pane_Shown = (PaneFlags)ct::ivariant(strValue).GetI();
 		}
 	}
+
+	return true;
 }

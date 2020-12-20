@@ -85,7 +85,7 @@ bool SelectionHelper::CanWeApplySelection(SelectionContainerEnum vSelectionConta
 	size_t n = s->tmpSel.size() + s->tmpUnSel.size();
 	if (n > 0)
 	{
-		if (ImGui::IsAnyWindowHovered() && s->startSelWindow)
+		if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) && s->startSelWindow)
 		{
 			res = (s->startSelWindow == ImGui::GetHoveredWindow());
 		}
