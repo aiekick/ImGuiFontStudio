@@ -141,22 +141,13 @@ int SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId)
 
 						static int selection = 0;
 						static ImGuiTableFlags flags = ImGuiTableFlags_ColumnsWidthFixed | ImGuiTableFlags_RowBg |
-							ImGuiTableFlags_ScrollY | ImGuiTableFlags_NoHostExtendY;
+							ImGuiTableFlags_ScrollY | ImGuiTableFlags_NoHostExtendY | ImGuiTableFlags_Borders;
 						if (ImGui::BeginTable("##fileTable", 2, flags, ImVec2(0, 100)))
 						{
 							ImGui::TableSetupColumn("Font Files", ImGuiTableColumnFlags_WidthStretch, -1, 0);
 							ImGui::TableSetupColumn("Act", ImGuiTableColumnFlags_WidthAutoResize, -1, 1);
-
-							ImGui::TableNextRow(ImGuiTableRowFlags_Headers);
-							for (int column = 0; column < 2; column++)
-							{
-								ImGui::TableSetColumnIndex(column);
-								const char* column_name = ImGui::TableGetColumnName(column); // Retrieve name passed to TableSetupColumn()
-								ImGui::PushID(column);
-								ImGui::TableHeader(column_name);
-								ImGui::PopID();
-							}
-
+							ImGui::TableHeadersRow();
+							
 							for (auto & itFont : vProjectFile->m_Fonts)
 							{
 								bool sel = false;
@@ -312,11 +303,10 @@ void SourceFontPane::DrawFilterBar(ProjectFile *vProjectFile, FontInfos *vFontIn
 	if (vProjectFile && vFontInfos)
 	{
 		ImGui::PushID(vFontInfos);
-		ImGui::Text("Filters"); ImGui::SameLine();
+		ImGui::Text("Filters");
 		ImGui::Text("(?)");
 		if (ImGui::IsItemHovered())
 			ImGui::SetTooltip("will search for any filter separated\n\tby a coma ',' or a space ' '");
-		ImGui::SameLine();
 		if (ImGui::MenuItem(ICON_IGFS_DESTROY "##clearFilter"))
 		{
 			ct::ResetBuffer(vFontInfos->m_SearchBuffer);

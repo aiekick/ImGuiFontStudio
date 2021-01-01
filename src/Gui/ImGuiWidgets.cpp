@@ -1044,7 +1044,7 @@ bool ImGui::SliderIntDefaultCompact(float width, const char* label, int* v, int 
 	float ax = ImGui::GetCursorPosX();
 
 	ImGui::PushID(label);
-	if (Button(ICON_IGFS_RESET))
+	if (Button(ICON_IGFS_DESTROY))
 	{
 		*v = v_default;
 		change = true;
@@ -1066,7 +1066,7 @@ bool ImGui::SliderFloatDefaultCompact(float width, const char* label, float* v, 
 
 	float ax = ImGui::GetCursorPosX();
 
-	if (Button(ICON_IGFS_RESET))
+	if (Button(ICON_IGFS_DESTROY))
 	{
 		*v = v_default;
 		change = true;

@@ -73,19 +73,34 @@ private:
 		bool *vNameupdated, bool *vCodePointUpdated,
 		bool vForceEditMode = false) const;
 	
-	void DrawSelectionsByFontNoOrder(ProjectFile *vProjectFile);
-	void DrawSelectionsByFontNoOrder_OneFontOnly(ProjectFile *vProjectFile, FontInfos *vFontInfos,
-		bool vWithFramedGroup = true, bool vForceEditMode = false, bool vForceEditModeOneColumn = false);
+	void DrawSelectionsByFontNoOrder(ProjectFile *vProjectFile,
+		bool vShowTooltipInfos = false);
+	void DrawSelectionsByFontNoOrder_OneFontOnly(
+		ProjectFile *vProjectFile, FontInfos *vFontInfos,
+		bool vWithFramedGroup = true, 
+		bool vForceEditMode = false, 
+		bool vForceEditModeOneColumn = false,
+		bool vShowTooltipInfos = false);
 
 	static void PrepareSelectionByFontOrderedByCodePoint(ProjectFile *vProjectFile);
-	void DrawSelectionsByFontOrderedByCodePoint(ProjectFile *vProjectFile);
-	void DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(ProjectFile *vProjectFile, FontInfos *vFontInfos,
-		bool vWithFramedGroup = true, bool vForceEditMode = false, bool vForceEditModeOneColumn = false);
+	void DrawSelectionsByFontOrderedByCodePoint(ProjectFile *vProjectFile,
+		bool vShowTooltipInfos = false);
+	void DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
+		ProjectFile *vProjectFile, FontInfos *vFontInfos,
+		bool vWithFramedGroup = true, 
+		bool vForceEditMode = false, 
+		bool vForceEditModeOneColumn = false,
+		bool vShowTooltipInfos = false);
 
 	static void PrepareSelectionByFontOrderedByGlyphNames(ProjectFile *vProjectFile);
-	void DrawSelectionsByFontOrderedByGlyphNames(ProjectFile *vProjectFile);
-	void DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(ProjectFile *vProjectFile, FontInfos *vFontInfos,
-		bool vWithFramedGroup = true, bool vForceEditMode = false, bool vForceEditModeOneColumn = false);
+	void DrawSelectionsByFontOrderedByGlyphNames(ProjectFile *vProjectFile,
+		bool vShowTooltipInfos = false);
+	void DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(
+		ProjectFile *vProjectFile, FontInfos *vFontInfos,
+		bool vWithFramedGroup = true, 
+		bool vForceEditMode = false, 
+		bool vForceEditModeOneColumn = false,
+		bool vShowTooltipInfos = false);
 
 	void PrepareSelectionMergedNoOrder(ProjectFile *vProjectFile);
 	void DrawSelectionMergedNoOrder(ProjectFile *vProjectFile);

@@ -84,7 +84,7 @@ int FinalFontPane::DrawFinalFontPane(ProjectFile *vProjectFile, int vWidgetId)
 								PrepareSelectionByFontOrderedByGlyphNames(vProjectFile);
 							}
 
-							ImGui::Separator();
+							ImGui::Spacing();
 
 							if (ImGui::MenuItem<FinalFontPaneModeFlags>("Merged, no order", "",
 								&m_FinalFontPaneModeFlags , 
@@ -140,15 +140,15 @@ int FinalFontPane::DrawFinalFontPane(ProjectFile *vProjectFile, int vWidgetId)
 
 					if (m_FinalFontPaneModeFlags & FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_NO_ORDER)
 					{
-						DrawSelectionsByFontNoOrder(vProjectFile);
+						DrawSelectionsByFontNoOrder(vProjectFile, vProjectFile->m_FinalPane_ShowGlyphTooltip);
 					}
 					else if (m_FinalFontPaneModeFlags & FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_CODEPOINT)
 					{
-						DrawSelectionsByFontOrderedByCodePoint(vProjectFile);
+						DrawSelectionsByFontOrderedByCodePoint(vProjectFile, vProjectFile->m_FinalPane_ShowGlyphTooltip);
 					}
 					else if (m_FinalFontPaneModeFlags & FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_NAMES)
 					{
-						DrawSelectionsByFontOrderedByGlyphNames(vProjectFile);
+						DrawSelectionsByFontOrderedByGlyphNames(vProjectFile, vProjectFile->m_FinalPane_ShowGlyphTooltip);
 					}
 					else if (m_FinalFontPaneModeFlags & FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_NO_ORDER)
 					{
@@ -233,11 +233,11 @@ int FinalFontPane::DrawCurrentFontPane(ProjectFile *vProjectFile, int vWidgetId)
 
 					if (m_CurrentFontPaneModeFlags & CurrentFontPaneModeFlags::CURRENT_FONT_PANE_ORDERED_BY_CODEPOINT)
 					{
-						DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(vProjectFile, vProjectFile->m_CurrentFont, false, true, false);
+						DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(vProjectFile, vProjectFile->m_CurrentFont, false, true, false, vProjectFile->m_CurrentPane_ShowGlyphTooltip);
 					}
 					else if (m_CurrentFontPaneModeFlags & CurrentFontPaneModeFlags::CURRENT_FONT_PANE_ORDERED_BY_NAMES)
 					{
-						DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(vProjectFile, vProjectFile->m_CurrentFont, false, true, false);
+						DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(vProjectFile, vProjectFile->m_CurrentFont, false, true, false, vProjectFile->m_CurrentPane_ShowGlyphTooltip);
 					}
 				}
 			}
@@ -524,13 +524,16 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 	return res;
 }
 
-void FinalFontPane::DrawSelectionsByFontNoOrder(ProjectFile *vProjectFile)
+// this func can be called by FinalFontPane et CurrentFontPane
+// but these two panes have a specific flag for show the tooltip
+// so we need to pass this flag in parameter
+void FinalFontPane::DrawSelectionsByFontNoOrder(ProjectFile *vProjectFile, bool vShowTooltipInfos)
 {
 	if (vProjectFile)
 	{
 		for (auto & it : vProjectFile->m_Fonts)
 		{
-			DrawSelectionsByFontNoOrder_OneFontOnly(vProjectFile, &it.second);
+			DrawSelectionsByFontNoOrder_OneFontOnly(vProjectFile, &it.second, true, false, false, vShowTooltipInfos);
 
 			if (vProjectFile->m_Fonts.size() > 1)
 				ImGui::Separator();
@@ -555,12 +558,16 @@ static inline void DrawGlyphInfosToolTip(FontInfos *vFontInfos, GlyphInfos *vGly
 	}
 }
 
+// this func can be called by FinalFontPane et CurrentFontPane
+// but these two panes have a specific flag for show the tooltip
+// so we need to pass this flag in parameter
 void FinalFontPane::DrawSelectionsByFontNoOrder_OneFontOnly(
 	ProjectFile *vProjectFile,
 	FontInfos *vFontInfos,
 	bool vWithFramedGroup,
 	bool vForceEditMode,
-	bool vForceEditModeOneColumn)
+	bool vForceEditModeOneColumn,
+	bool vShowTooltipInfos)
 {
 	if (vProjectFile && vFontInfos)
 	{
@@ -627,7 +634,7 @@ void FinalFontPane::DrawSelectionsByFontNoOrder_OneFontOnly(
 							ImGui::PopStyleColor(3);
 						}
 
-						if (vProjectFile->m_FinalPane_ShowGlyphTooltip)
+						if (vShowTooltipInfos)
 						{
 							DrawGlyphInfosToolTip(vFontInfos, glyphInfo);
 						}
@@ -681,13 +688,16 @@ void FinalFontPane::PrepareSelectionByFontOrderedByCodePoint(ProjectFile *vProje
 	}
 }
 
-void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint(ProjectFile *vProjectFile)
+// this func can be called by FinalFontPane et CurrentFontPane
+// but these two panes have a specific flag for show the tooltip
+// so we need to pass this flag in parameter
+void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint(ProjectFile *vProjectFile, bool vShowTooltipInfos)
 {
 	if (vProjectFile)
 	{
 		for (auto & it : vProjectFile->m_Fonts)
 		{
-			DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(vProjectFile, &it.second);
+			DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(vProjectFile, &it.second, true, false, false, vShowTooltipInfos);
 
 			if (vProjectFile->m_Fonts.size() > 1)
 				ImGui::Separator();
@@ -698,12 +708,16 @@ void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint(ProjectFile *vProject
 	}
 }
 
+// this func can be called by FinalFontPane et CurrentFontPane
+// but these two panes have a specific flag for show the tooltip
+// so we need to pass this flag in parameter
 void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
 	ProjectFile *vProjectFile, 
 	FontInfos *vFontInfos,
 	bool vWithFramedGroup, 
 	bool vForceEditMode, 
-	bool vForceEditModeOneColumn)
+	bool vForceEditModeOneColumn,
+	bool vShowTooltipInfos)
 {
 	if (vProjectFile && vFontInfos)
 	{
@@ -783,7 +797,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
 										ImGui::PopStyleColor(3);
 									}
 
-									if (vProjectFile->m_FinalPane_ShowGlyphTooltip)
+									if (vShowTooltipInfos)
 									{
 										DrawGlyphInfosToolTip(vFontInfos, glyphInfo);
 
@@ -845,13 +859,16 @@ void FinalFontPane::PrepareSelectionByFontOrderedByGlyphNames(ProjectFile *vProj
 	}
 }
 
-void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames(ProjectFile *vProjectFile)
+// this func can be called by FinalFontPane et CurrentFontPane
+// but these two panes have a specific flag for show the tooltip
+// so we need to pass this flag in parameter
+void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames(ProjectFile *vProjectFile, bool vShowTooltipInfos)
 {
 	if (vProjectFile)
 	{
 		for (auto & it : vProjectFile->m_Fonts)
 		{
-			DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(vProjectFile, &it.second);
+			DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(vProjectFile, &it.second, true, false, false, vShowTooltipInfos);
 
 			if (vProjectFile->m_Fonts.size() > 1)
 				ImGui::Separator();
@@ -862,12 +879,16 @@ void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames(ProjectFile *vProjec
 	}
 }
 
+// this func can be called by FinalFontPane et CurrentFontPane
+// but these two panes have a specific flag for show the tooltip
+// so we need to pass this flag in parameter
 void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(
 	ProjectFile *vProjectFile, 
 	FontInfos *vFontInfos,
 	bool vWithFramedGroup, 
 	bool vForceEditMode, 
-	bool vForceEditModeOneColumn)
+	bool vForceEditModeOneColumn,
+	bool vShowTooltipInfos)
 {
 	if (vFontInfos->m_GlyphCodePointToName.empty())
 		return;
@@ -947,7 +968,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(
 										ImGui::PopStyleColor(3);
 									}
 
-									if (vProjectFile->m_FinalPane_ShowGlyphTooltip)
+									if (vShowTooltipInfos)
 									{
 										DrawGlyphInfosToolTip(vFontInfos, glyphInfo);
 										

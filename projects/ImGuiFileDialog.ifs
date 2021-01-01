@@ -3,12 +3,18 @@
 		<font name="fontawesome-webfont.ttf">
 			<glyphs>
 				<glyph orgId="61442" newId="61442" orgName="search" newName="search"/>
+				<glyph orgId="61449" newId="61449" orgName="th_large" newName="big_thumbails"/>
+				<glyph orgId="61450" newId="61450" orgName="th" newName="small_thumbails"/>
+				<glyph orgId="61451" newId="61451" orgName="th_list" newName="thumbails_list"/>
 				<glyph orgId="61452" newId="61452" orgName="ok" newName="ok"/>
 				<glyph orgId="61453" newId="61453" orgName="remove" newName="cancel"/>
+				<glyph orgId="61460" newId="61460" orgName="trash" newName="trash"/>
 				<glyph orgId="61473" newId="61473" orgName="refresh" newName="refresh"/>
 				<glyph orgId="61486" newId="61486" orgName="bookmark" newName="bookmark"/>
-				<glyph orgId="61540" newId="61540" orgName="share_alt" newName="reset"/>
+				<glyph orgId="61498" newId="61498" orgName="list" newName="file_list"/>
 				<glyph orgId="61543" newId="61543" orgName="plus" newName="add"/>
+				<glyph orgId="61559" newId="61559" orgName="chevron_up" newName="chevron_up"/>
+				<glyph orgId="61560" newId="61560" orgName="chevron_down" newName="chevron_down"/>
 				<glyph orgId="61563" newId="61563" orgName="folder_close" newName="folder"/>
 				<glyph orgId="61564" newId="61564" orgName="folder_open" newName="folder_open"/>
 				<glyph orgId="61600" newId="61600" orgName="hdd" newName="drives"/>
@@ -21,18 +27,16 @@
 			<pathfilename>..\samples_Fonts\fontawesome-webfont.ttf</pathfilename>
 			<oversample>3</oversample>
 			<fontsize>27</fontsize>
-			<filters>
-				<filter name="boo"/>
-			</filters>
 		</font>
 		<rangecoloring show="false" hash="42.606;14.789;27.817;0.5"/>
 		<previewcountglyph_x>13</previewcountglyph_x>
 		<mergedfontprefix></mergedfontprefix>
-		<curglyphtooltip>true</curglyphtooltip>
+		<curglyphtooltip>false</curglyphtooltip>
 		<srcglyphtooltip>true</srcglyphtooltip>
 		<dstglyphtooltip>true</dstglyphtooltip>
 		<glyphpreviewscale>0.193</glyphpreviewscale>
 		<glyphpreviewshowcontrollines>false</glyphpreviewshowcontrollines>
+		<glyphpreviewquadbeziercounsegment>5</glyphpreviewquadbeziercounsegment>
 		<genmode>653</genmode>
 		<fonttomergein>fontawesome-webfont.ttf</fonttomergein>
 	</project>
