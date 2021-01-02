@@ -21,36 +21,60 @@
 
 #include "DebugPane.h"
 
-#include "MainFrame.h"
+#include <MainFrame.h>
 
-#include "Gui/GuiLayout.h"
-#include "Gui/ImGuiWidgets.h"
+#include <Panes/Manager/LayoutManager.h>
+#include <Gui/ImGuiWidgets.h>
 
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include "imgui_internal.h"
+#include <imgui/imgui_internal.h>
 
-#include <cTools.h>
-#include <FileHelper.h>
+#include <ctools/cTools.h>
+#include <ctools/FileHelper.h>
 
 #include <cinttypes> // printf zu
-
-static int DebugPane_WidgetId = 0;
 
 DebugPane::DebugPane() = default;
 DebugPane::~DebugPane() = default;
 
 ///////////////////////////////////////////////////////////////////////////////////
-//// IMGUI PANE ///////////////////////////////////////////////////////////////////
+//// OVERRIDES ////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-int DebugPane::DrawDebugPane(ProjectFile *vProjectFile, int vWidgetId)
+void DebugPane::Init()
 {
-	DebugPane_WidgetId = vWidgetId;
+	
+}
 
-	if (GuiLayout::m_Pane_Shown & PaneFlags::PANE_DEBUG)
+void DebugPane::Unit()
+{
+
+}
+
+int DebugPane::DrawPanes(ProjectFile * vProjectFile, int vWidgetId)
+{
+	paneWidgetId = vWidgetId;
+
+	DrawDebugPane(vProjectFile);
+
+	return paneWidgetId;
+}
+
+void DebugPane::DrawDialogsAndPopups(ProjectFile* /*vProjectFile*/)
+{
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+//// PRIVATE //////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
+
+void DebugPane::DrawDebugPane(ProjectFile *vProjectFile)
+{
+	if (LayoutManager::m_Pane_Shown & PaneFlags::PANE_DEBUG)
 	{
 		if (ImGui::Begin<PaneFlags>(DEBUG_PANE,
-			&GuiLayout::m_Pane_Shown, PaneFlags::PANE_DEBUG,
+			&LayoutManager::m_Pane_Shown, PaneFlags::PANE_DEBUG,
 			//ImGuiWindowFlags_NoTitleBar |
 			//ImGuiWindowFlags_MenuBar |
 			//ImGuiWindowFlags_NoMove |
@@ -60,17 +84,15 @@ int DebugPane::DrawDebugPane(ProjectFile *vProjectFile, int vWidgetId)
 		{
 			if (vProjectFile &&  vProjectFile->IsLoaded())
 			{
-				if (GuiLayout::Instance()->IsPaneActive(PaneFlags::PANE_GLYPH))
+				if (LayoutManager::Instance()->IsSpecificPaneFocused(PaneFlags::PANE_GLYPH))
 				{
-					DebugPane_WidgetId = DrawDebugGlyphPane(vProjectFile, DebugPane_WidgetId);
+					DrawDebugGlyphPane(vProjectFile);
 				}
 			}
 		}
 
 		ImGui::End();
 	}
-
-	return DebugPane_WidgetId;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -115,7 +137,7 @@ void DebugPane::DrawGlyphCurrentPoint(float vPreviewScale, ImVec2 vScreenPos, Im
 	}
 }
 
-int DebugPane::DrawDebugGlyphPane(ProjectFile* /*vProjectFile*/, int vWidgetId)
+void DebugPane::DrawDebugGlyphPane(ProjectFile* /*vProjectFile*/)
 {
 	auto g = &(m_GlyphToDisplay.simpleGlyph);
 	if (g->isValid)
@@ -123,7 +145,7 @@ int DebugPane::DrawDebugGlyphPane(ProjectFile* /*vProjectFile*/, int vWidgetId)
 		int _c = 0;
 		for (auto &co : g->coords)
 		{
-			ImGui::PushID(++vWidgetId);
+			ImGui::PushID(++paneWidgetId);
 			bool res = ImGui::CollapsingHeader_SmallHeight("Contour", 0.5f, -1, true);
 			ImGui::PopID();
 			if (res)
@@ -140,8 +162,6 @@ int DebugPane::DrawDebugGlyphPane(ProjectFile* /*vProjectFile*/, int vWidgetId)
 			_c++;
 		}
 	}
-
-	return vWidgetId;
 }
 
 #endif

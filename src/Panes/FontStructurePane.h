@@ -16,22 +16,28 @@
 
 #pragma once
 
-#include "Helper/FontParser.h"
+#include <Panes/Abstract/AbstractPane.h>
+
+#include <Helper/FontParser.h>
 
 #include <string>
 
 class ProjectFile;
 class FontInfos;
-class FontStructurePane
+class FontStructurePane : public AbstractPane
 {
 private:
 	FontParser m_FontParser;
 
 public:
-	int DrawFontStructurePane(ProjectFile *vProjectFile, int vWidgetId);
+	void Init() override;
+	void Unit() override;
+	int DrawPanes(ProjectFile* vProjectFile, int vWidgetId) override;
+	void DrawDialogsAndPopups(ProjectFile* vProjectFile) override;
 
 private:
-	int DisplayAnalyze(int vWidgetId);
+	void DrawFontStructurePane(ProjectFile *vProjectFile);
+	void DisplayAnalyze();
 
 public: // singleton
 	static FontStructurePane *Instance()

@@ -16,21 +16,21 @@
 
 #pragma once
 
-#include "Project/GlyphInfos.h"
+#include <Project/GlyphInfos.h>
 
 #include <string>
 #include <set>
 #include <map>
 #include <unordered_map>
 
-#include "sfntly/tag.h"
-#include "sfntly/font.h"
-#include "sfntly/port/type.h"
-#include "sfntly/port/refcount.h"
-#include "sfntly/table/core/cmap_table.h"
-#include "sfntly/table/core/post_script_table.h"
-#include "sfntly/table/truetype/glyph_table.h"
-#include "sfntly/table/truetype/loca_table.h"
+#include <sfntly/tag.h>
+#include <sfntly/font.h>
+#include <sfntly/port/type.h>
+#include <sfntly/port/refcount.h>
+#include <sfntly/table/core/cmap_table.h>
+#include <sfntly/table/core/post_script_table.h>
+#include <sfntly/table/truetype/glyph_table.h>
+#include <sfntly/table/truetype/loca_table.h>
 
 typedef int32_t FontId;
 typedef int32_t CodePoint;

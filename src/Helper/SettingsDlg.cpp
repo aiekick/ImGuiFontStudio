@@ -18,16 +18,17 @@
  */
 
 #include "SettingsDlg.h"
-#include "imgui/imgui.h"
-#include "MainFrame.h"
-#include "Gui/ImGuiWidgets.h"
-#include "Helper/ImGuiThemeHelper.h"
-#include "Res/CustomFont.h"
 
+#include <MainFrame.h>
+#include <Gui/ImGuiWidgets.h>
+#include <Helper/ImGuiThemeHelper.h>
+#include <Res/CustomFont.h>
+
+#include <imgui/imgui.h>
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include "imgui_internal.h"
+#include <imgui/imgui_internal.h>
 
-#include "GLFW/glfw3.h"
+#include <GLFW/glfw3.h>
 
 #define CATEGORY_GENERAL "General"
 #define CATEGORY_STYLES "Styles"

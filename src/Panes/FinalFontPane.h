@@ -15,12 +15,14 @@
  */
 #pragma once
 
-#include "Project/ProjectFile.h"
-#include "Gui/ImGuiWidgets.h"
+#include <Panes/Abstract/AbstractPane.h>
 
-#include <imgui.h>
+#include <Gui/ImGuiWidgets.h>
+
+#include <imgui/imgui.h>
 #include <map>
 #include <string>
+#include <vector>
 
 enum FinalFontPaneModeFlags
 {
@@ -33,15 +35,27 @@ enum FinalFontPaneModeFlags
 	FINAL_FONT_PANE_MERGED_ORDERED_BY_NAMES = (1 << 5)
 };
 
-enum CurrentFontPaneModeFlags
+enum SelectedFontPaneModeFlags
 {
-	CURRENT_FONT_PANE_NONE = 0,
-	CURRENT_FONT_PANE_ORDERED_BY_CODEPOINT = (1 << 0),
-	CURRENT_FONT_PANE_ORDERED_BY_NAMES = (1 << 1),
+	SELECTED_FONT_PANE_NONE = 0,
+	SELECTED_FONT_PANE_ORDERED_BY_CODEPOINT = (1 << 0),
+	SELECTED_FONT_PANE_ORDERED_BY_NAMES = (1 << 1),
 };
 
-class FinalFontPane
+class GlyphInfos;
+class ProjectFile;
+class FontInfos;
+class FinalFontPane : public AbstractPane
 {
+public:
+	static void CalcGlyphsCountAndSize(
+		ImVec2* vCellSize,						/* cell size						*/
+		ImVec2* vGlyphSize,						/* glyph size (cell - paddings)		*/
+		uint32_t* vGlyphCountX,					/* count glypoh ot show in X axis	*/
+		bool vGlyphEdited = false,				/* in edition						*/
+		bool vForceEditMode = false,			/* edition forced					*/
+		bool vForceEditModeOneColumn = false);	/* edition in one column			*/
+
 private:
 	std::vector<GlyphInfos*> m_GlyphsMergedNoOrder;
 	std::map<uint32_t, std::vector<GlyphInfos*>> m_GlyphsMergedOrderedByCodePoints;
@@ -50,23 +64,28 @@ private:
 private:
 	FinalFontPaneModeFlags m_FinalFontPaneModeFlags = 
 		FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_NO_ORDER;
-	CurrentFontPaneModeFlags m_CurrentFontPaneModeFlags =
-		CurrentFontPaneModeFlags::CURRENT_FONT_PANE_ORDERED_BY_NAMES;
+	SelectedFontPaneModeFlags m_SelectedFontPaneModeFlags =
+		SelectedFontPaneModeFlags::SELECTED_FONT_PANE_ORDERED_BY_NAMES;
 
 	bool m_GlyphEdition = false;
 	bool m_AutoUpdateCodepoint_WhenEditWithButtons = false;
 
 public:
-	int DrawFinalFontPane(ProjectFile *vProjectFile, int vWidgetId);
-	int DrawCurrentFontPane(ProjectFile *vProjectFile, int vWidgetId);
+	void Init() override;
+	void Unit() override;
+	int DrawPanes(ProjectFile* vProjectFile, int vWidgetId) override;
+	void DrawDialogsAndPopups(ProjectFile* vProjectFile) override;
+
+	// Preparation
 	void SetFinalFontPaneMode(FinalFontPaneModeFlags vFinalFontPaneModeFlags);
 	bool IsFinalFontPaneMode(FinalFontPaneModeFlags vFinalFontPaneModeFlags);
-	bool IsCurrentFontPaneMode(CurrentFontPaneModeFlags vCurrentFontPaneModeFlags);
+	bool IsSelectedFontPaneMode(SelectedFontPaneModeFlags vSelectedFontPaneModeFlags);
 	void PrepareSelection(ProjectFile *vProjectFile);
 
 private:
-	void CalcGlyphsCountAndSize(ImVec2 *vGlyphSize, uint32_t *vGlyphCountX,
-		bool vForceEditMode = false, bool vForceEditModeOneColumn = false) const;
+	void DrawFinalFontPane(ProjectFile* vProjectFile);
+	void DrawSelectedFontPane(ProjectFile* vProjectFile);
+
 	bool DrawGlyph(ProjectFile *vProjectFile, 
 		FontInfos *vFontInfos, const ImVec2& vSize,
 		GlyphInfos *vGlyph, bool vShowRect,

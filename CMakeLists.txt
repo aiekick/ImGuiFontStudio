@@ -1,8 +1,4 @@
-cmake_minimum_required(VERSION 2.8)
-cmake_policy(SET CMP0048 NEW)
-cmake_policy(SET CMP0054 NEW)
-cmake_policy(SET CMP0012 NEW)
-cmake_policy(SET CMP0023 NEW)
+cmake_minimum_required(VERSION 3.1)
 
 set(PROJECT ImGuiFontStudio)
 
@@ -102,12 +98,12 @@ install(TARGETS ${PROJECT} DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 include_directories(
 	src
+	3rdparty
 	${PLOG_INCLUDE_DIR}
 	${OPENGL_INCLUDE_DIR}
 	${GLFW_INCLUDE_DIR}
 	${GLAD_INCLUDE_DIR}
 	${IMGUI_INCLUDE_DIR}
-	${CTOOLS_INCLUDE_DIR}
 	${SFNTLY_INCLUDE_DIR}
 	${TINYXML2_INCLUDE_DIR}
 	${IMGUIFILEDIALOG_INCLUDE_DIR}

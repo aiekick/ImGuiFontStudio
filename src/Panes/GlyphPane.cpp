@@ -19,39 +19,63 @@
 
 #include "GlyphPane.h"
 
-#include "MainFrame.h"
+#include <MainFrame.h>
 
-#include "Gui/GuiLayout.h"
-#include "Gui/ImGuiWidgets.h"
+#include <Panes/Manager/LayoutManager.h>
+#include <Gui/ImGuiWidgets.h>
 #ifdef _DEBUG
-#include "Panes/DebugPane.h"
+#include <Panes/DebugPane.h>
 #endif
 
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include "imgui_internal.h"
+#include <imgui/imgui_internal.h>
 
-#include <cTools.h>
-#include <FileHelper.h>
+#include <ctools/cTools.h>
+#include <ctools/FileHelper.h>
 
-#include "sfntly/font_factory.h"
-
-static int GlyphPane_WidgetId = 0;
+#include <sfntly/font_factory.h>
 
 GlyphPane::GlyphPane() = default;
 GlyphPane::~GlyphPane() = default;
 
 ///////////////////////////////////////////////////////////////////////////////////
-//// IMGUI PANE ///////////////////////////////////////////////////////////////////
+//// OVERRIDES ////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
+void GlyphPane::Init()
 {
-	GlyphPane_WidgetId = vWidgetId;
+	
+}
 
-	if (GuiLayout::m_Pane_Shown & PaneFlags::PANE_GLYPH)
+void GlyphPane::Unit()
+{
+
+}
+
+int GlyphPane::DrawPanes(ProjectFile * vProjectFile, int vWidgetId)
+{
+	paneWidgetId = vWidgetId;
+
+	DrawGlyphPane(vProjectFile);
+
+	return paneWidgetId;
+}
+
+void GlyphPane::DrawDialogsAndPopups(ProjectFile* /*vProjectFile*/)
+{
+
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+//// PRIVATE //////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
+
+void GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile)
+{
+	if (LayoutManager::m_Pane_Shown & PaneFlags::PANE_GLYPH)
 	{
 		if (ImGui::Begin<PaneFlags>(GLYPH_PANE,
-			&GuiLayout::m_Pane_Shown, PaneFlags::PANE_GLYPH,
+			&LayoutManager::m_Pane_Shown, PaneFlags::PANE_GLYPH,
 			//ImGuiWindowFlags_NoTitleBar |
 			ImGuiWindowFlags_MenuBar |
 			//ImGuiWindowFlags_NoMove |
@@ -71,7 +95,7 @@ int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
 					ImGui::PopItemWidth();
 
 					ImGui::PushItemWidth(100.0f);
-					if (ImGui::SliderInt("Segments", &vProjectFile->m_GlyphPreview_QuadBezierCountSegments, 1, 50))
+					if (ImGui::SliderInt("Segments", &vProjectFile->m_GlyphPreview_QuadBezierCountSegments, 0, 50))
 					{
 						vProjectFile->SetProjectChange();
 					}
@@ -88,7 +112,7 @@ int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
 
 				DrawSimpleGlyph(
 					&m_GlyphToDisplay, 
-					vProjectFile->m_CurrentFont, 
+					vProjectFile->m_SelectedFont, 
 					vProjectFile->m_GlyphPreview_Scale, 
 					vProjectFile->m_GlyphPreview_QuadBezierCountSegments,
 					vProjectFile->m_GlyphPreview_ShowControlLines);
@@ -97,8 +121,6 @@ int GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile, int vWidgetId)
 
 		ImGui::End();
 	}
-
-	return GlyphPane_WidgetId;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -153,7 +175,7 @@ bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, Glyp
 								DebugPane::Instance()->SetGlyphToDebug(m_GlyphToDisplay);
 #endif
 								// show and active the glyph pane
-								GuiLayout::Instance()->ShowAndFocusPane(PaneFlags::PANE_GLYPH);
+								LayoutManager::Instance()->ShowAndFocusSpecificPane(PaneFlags::PANE_GLYPH);
 								
 								res = true;
 							}
@@ -282,7 +304,7 @@ bool GlyphPane::DrawSimpleGlyph(
 							nex.x = (int)(((double)nex.x + (double)cur.x) * 0.5);
 							nex.y = (int)(((double)nex.y + (double)cur.y) * 0.5);
 						}
-						drawList->PathQuadBezierCurveTo(
+						drawList->PathBezierQuadraticCurveTo(
 							ct::toImVec2(cur) + pos,
 							ct::toImVec2(nex) + pos, 
 							vCountSegments);

@@ -17,49 +17,36 @@
 
 #include <Panes/Abstract/AbstractPane.h>
 
-#include <Helper/FontHelper.h>
-
-#include <imgui/imgui.h>
-
-#include <stdint.h>
-#include <string>
-#include <map>
-
-#include <sfntly/table/truetype/glyph_table.h>
-
+class FontInstance;
 class ProjectFile;
 class FontInfos;
 class GlyphInfos;
-class GlyphPane : public AbstractPane
+class FontPreviewPane : public AbstractPane
 {
 private:
-	FontInstance m_fontInstance;
-	GlyphInfos m_GlyphToDisplay;
+	FontInstance* m_fontInstance = 0;
+	GlyphInfos* m_GlyphToDisplay = 0;
 	
 public:
 	void Init() override;
 	void Unit() override;
 	int DrawPanes(ProjectFile* vProjectFile, int vWidgetId) override;
 	void DrawDialogsAndPopups(ProjectFile* vProjectFile) override;
-
-	void DrawGlyphPane(ProjectFile *vProjectFile);
-	bool LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, GlyphInfos *vGlyphInfos);
-
+	
 private:
-	static bool DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
-		float vScale, int vCountSegments, bool vControlLines);
+	void DrawFontPreviewPane(ProjectFile *vProjectFile);
 
 public: // singleton
-	static GlyphPane *Instance()
+	static FontPreviewPane *Instance()
 	{
-		static GlyphPane *_instance = new GlyphPane();
+		static FontPreviewPane *_instance = new FontPreviewPane();
 		return _instance;
 	}
 
 protected:
-	GlyphPane(); // Prevent construction
-	GlyphPane(const GlyphPane&) {}; // Prevent construction by copying
-	GlyphPane& operator =(const GlyphPane&) { return *this; }; // Prevent assignment
-	~GlyphPane(); // Prevent unwanted destruction};
+	FontPreviewPane(); // Prevent construction
+	FontPreviewPane(const FontPreviewPane&) {}; // Prevent construction by copying
+	FontPreviewPane& operator =(const FontPreviewPane&) { return *this; }; // Prevent assignment
+	~FontPreviewPane(); // Prevent unwanted destruction};
 };
 

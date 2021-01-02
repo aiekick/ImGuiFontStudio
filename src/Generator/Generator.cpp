@@ -19,15 +19,15 @@
 
 #include "Generator.h"
 
-#include "imgui/imgui.h"
+#include <imgui/imgui.h>
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include "imgui/imgui_internal.h"
+#include <imgui/imgui_internal.h>
 
 // header
 #include <ios>
-#include "sfntly/font.h"
-#include "sfntly/port/file_input_stream.h"
-#include "sfntly/tag.h"
+#include <sfntly/font.h>
+#include <sfntly/port/file_input_stream.h>
+#include <sfntly/tag.h>
 
 // cpp
 #define _CRT_SECURE_NO_WARNINGS
@@ -36,15 +36,15 @@
 #include <stdlib.h>
 #include <assert.h>
 
-#include <cTools.h>
-#include <FileHelper.h>
-#include "Helper/FontHelper.h"
-#include "Helper/Messaging.h"
+#include <ctools/cTools.h>
+#include <ctools/FileHelper.h>
+#include <Helper/FontHelper.h>
+#include <Helper/Messaging.h>
 
-#include "Panes/SourceFontPane.h"
-#include "Project/FontInfos.h"
-#include "Project/ProjectFile.h"
-#include "Helper/Messaging.h"
+#include <Panes/SourceFontPane.h>
+#include <Project/FontInfos.h>
+#include <Project/ProjectFile.h>
+#include <Helper/Messaging.h>
 
 Generator::Generator() = default;
 Generator::~Generator() = default;
@@ -61,7 +61,7 @@ void Generator::Generate(
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT))
 			{
 				std::string filePathName = vFilePath + "/" + vFileName;
-				GenerateCpp_One(filePathName, vProjectFile, vProjectFile->m_CurrentFont, vProjectFile->m_GenMode);
+				GenerateCpp_One(filePathName, vProjectFile, vProjectFile->m_SelectedFont, vProjectFile->m_GenMode);
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
 			{
@@ -86,7 +86,7 @@ void Generator::Generate(
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT))
 			{
 				std::string filePathName = vFilePath + "/" + vFileName;
-				GenerateFontFile_One(filePathName, vProjectFile, vProjectFile->m_CurrentFont, vProjectFile->m_GenMode);
+				GenerateFontFile_One(filePathName, vProjectFile, vProjectFile->m_SelectedFont, vProjectFile->m_GenMode);
 #ifdef _DEBUG
 				SourceFontPane::Instance()->OpenFont(vProjectFile, filePathName, false); // directly load the generated font file
 #endif
@@ -120,7 +120,7 @@ void Generator::Generate(
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT))
 			{
 				std::string filePathName = vFilePath + "/" + vFileName;
-				GenerateHeader_One(filePathName, vProjectFile->m_CurrentFont, vProjectFile->m_GenMode);
+				GenerateHeader_One(filePathName, vProjectFile->m_SelectedFont, vProjectFile->m_GenMode);
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
 			{
@@ -492,7 +492,7 @@ void Generator::GenerateFontFile_One(
 		{
 			Messaging::Instance()->AddError(true, 0, 0,
 				"Could not open font file %s.\n", 
-				vProjectFile->m_CurrentFont->m_FontFilePathName.c_str());
+				vProjectFile->m_SelectedFont->m_FontFilePathName.c_str());
 			return;
 		}
 	}
@@ -630,7 +630,7 @@ void Generator::GenerateFontFile_Merged(
 		{
 			Messaging::Instance()->AddError(true, 0, 0,
 				"Could not open font file %s.\n",
-				vProjectFile->m_CurrentFont->m_FontFilePathName.c_str());
+				vProjectFile->m_SelectedFont->m_FontFilePathName.c_str());
 			return;
 		}
 	}

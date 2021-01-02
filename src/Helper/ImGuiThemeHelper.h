@@ -16,8 +16,8 @@
 #pragma once
 
 #include <ImGuiFileDialog/ImGuiFileDialog/ImGuiFileDialog.h>
-#include <ConfigAbstract.h>
-#include <imgui.h>
+#include <ctools/ConfigAbstract.h>
+#include <imgui/imgui.h>
 #include <string>
 #include <map>
 

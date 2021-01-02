@@ -17,12 +17,11 @@
  * limitations under the License.
  */
 #include "ImGuiWidgets.h"
-#include <FileHelper.h>
+#include <ctools/FileHelper.h>
 #include <Res/CustomFont.h>
 
-#include "imgui.h"
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include "imgui_internal.h"
+#include <imgui/imgui_internal.h>
 
 bool ImGui::SelectableWithBtn(
         const char* label,
@@ -647,31 +646,27 @@ bool ImGui::BeginMainStatusBar()
 	ImGuiViewportP* viewport = g.Viewports[0];
 
 	// For the main menu bar, which cannot be moved, we honor g.Style.DisplaySafeAreaPadding to ensure text can be visible on a TV set.
-	g.NextWindowData.MenuBarOffsetMinVal = ImVec2(g.Style.DisplaySafeAreaPadding.x, ImMax(g.Style.DisplaySafeAreaPadding.y - g.Style.FramePadding.y, 0.0f));
+	//g.NextWindowData.MenuBarOffsetMinVal = ImVec2(g.Style.DisplaySafeAreaPadding.x, ImMax(g.Style.DisplaySafeAreaPadding.y - g.Style.FramePadding.y, 0.0f));
 
 	// Get our rectangle in the work area, and report the size we need for next frame.
 	// We don't attempt to calculate our height ahead, as it depends on the per-viewport font size. However menu-bar will affect the minimum window size so we'll get the right height.
-	ImVec2 menu_bar_size = ImVec2(viewport->Size.x - viewport->CurrWorkOffsetMin.x + viewport->CurrWorkOffsetMax.x, 1.0f);
-	
-	// Create window
-	//SetNextWindowPos(menu_bar_pos);
+	static float menuBarH = 0.0f; // will be 0 at first frame
+	ImVec2 menu_bar_size = ImVec2(viewport->Size.x - viewport->CurrWorkOffsetMin.x + viewport->CurrWorkOffsetMax.x, 0.0f);
+	ImVec2 menu_bar_pos = viewport->Pos + viewport->CurrWorkOffsetMin + ImVec2(0.0f, viewport->Size.y - menuBarH);
+	SetNextWindowPos(menu_bar_pos);
 	SetNextWindowSize(menu_bar_size);
 	SetNextWindowViewport(viewport->ID); // Enforce viewport so we don't create our own viewport when ImGuiConfigFlags_ViewportsNoMerge is set.
 	PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
 	PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(0, 0));    // Lift normal size constraint, however the presence of a menu-bar will give us the minimum height we want.
-	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar;
-	bool is_open = Begin("##MainStatusBar", nullptr, window_flags) && BeginMenuBar();
+	ImGuiWindowFlags window_flags = 
+		ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize | 
+		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar;
+	bool is_open = Begin("MainStatusBar", nullptr, window_flags) && BeginMenuBar();
 	PopStyleVar(2);
 
-	float barH = 0.0f;
 	auto curWin = ImGui::GetCurrentWindowRead();
 	if (curWin)
-		barH = curWin->MenuBarHeight();
-	ImVec2 menu_bar_pos = viewport->Pos + viewport->CurrWorkOffsetMin + ImVec2(0.0f, viewport->Size.y - barH);
-	SetWindowPos(menu_bar_pos);
-
-	// Feed back into work area using actual window size
-	viewport->CurrWorkOffsetMin.y += GetCurrentWindow()->Size.y;
+		menuBarH = curWin->MenuBarHeight();
 
 	g.NextWindowData.MenuBarOffsetMinVal = ImVec2(0.0f, 0.0f);
 	if (!is_open)
@@ -1079,4 +1074,39 @@ bool ImGui::SliderFloatDefaultCompact(float width, const char* label, float* v, 
 	change |= SliderScalarDefaultCompact(w, label, ImGuiDataType_Float, v, &v_min, &v_max, format, power);
 
 	return change;
+}
+
+bool ImGui::TransparentButton(const char* label, const ImVec2& size_arg, ImGuiButtonFlags flags)
+{
+	ImGuiWindow* window = GetCurrentWindow();
+	if (window->SkipItems)
+		return false;
+
+	ImGuiContext& g = *GImGui;
+	const ImGuiStyle& style = g.Style;
+	const ImGuiID id = window->GetID(label);
+	const ImVec2 label_size = CalcTextSize(label, NULL, true);
+
+	ImVec2 pos = window->DC.CursorPos;
+	if ((flags & ImGuiButtonFlags_AlignTextBaseLine) && style.FramePadding.y < window->DC.CurrLineTextBaseOffset) // Try to vertically align buttons that are smaller/have no padding so that text baseline matches (bit hacky, since it shouldn't be a flag)
+		pos.y += window->DC.CurrLineTextBaseOffset - style.FramePadding.y;
+	ImVec2 size = CalcItemSize(size_arg, label_size.x, label_size.y);
+
+	const ImRect bb(pos, pos + size);
+	ItemSize(size, style.FramePadding.y);
+	if (!ItemAdd(bb, id))
+		return false;
+
+	if (window->DC.ItemFlags & ImGuiItemFlags_ButtonRepeat)
+		flags |= ImGuiButtonFlags_Repeat;
+	bool hovered, held;
+	bool pressed = ButtonBehavior(bb, id, &hovered, &held, flags);
+
+	// Render
+	const ImU32 col = GetColorU32((held && hovered) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+	RenderNavHighlight(bb, id);
+	//RenderFrame(bb.Min, bb.Max, col, true, style.FrameRounding);
+	RenderTextClipped(bb.Min + style.FramePadding, bb.Max - style.FramePadding, label, NULL, &label_size, style.ButtonTextAlign, &bb);
+
+	return pressed;
 }

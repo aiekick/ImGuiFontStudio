@@ -18,14 +18,14 @@
  */
 #include "FontInfos.h"
 
-#include <FileHelper.h>
-#include "Project/ProjectFile.h"
-#include "Gui/ImGuiWidgets.h"
-#include "Helper/Messaging.h"
-#include <Logger.h>
+#include <ctools/FileHelper.h>
+#include <Project/ProjectFile.h>
+#include <Gui/ImGuiWidgets.h>
+#include <Helper/Messaging.h>
+#include <ctools/Logger.h>
 
 #define STB_TRUETYPE_IMPLEMENTATION
-#include "Helper/stb_truetype.h"
+#include <Helper/stb_truetype.h>
 
 #include <glad/glad.h>
 
@@ -257,18 +257,19 @@ void FontInfos::DrawInfos()
 {
 	if (!m_ImFontAtlas.Fonts.empty() && !m_InfosToDisplay.empty())
 	{
-		if (ImGui::BeginFramedGroup("Current Font Infos"))
+		if (ImGui::BeginFramedGroup("Selected Font Infos"))
 		{
 			const float aw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 2.0f;
 
-			static ImGuiTableFlags flags =
-				ImGuiTableFlags_ColumnsWidthFixed | ImGuiTableFlags_RowBg |
+			static ImGuiTableFlags flags = 
+				ImGuiTableFlags_ColumnsWidthFixed |
+				ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable |
 				ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
 				ImGuiTableFlags_NoHostExtendY | ImGuiTableFlags_Borders;
 			if (ImGui::BeginTable("##fontinfosTable", 2, flags, ImVec2(aw, ImGui::GetTextLineHeightWithSpacing() * 7)))
 			{
 				ImGui::TableSetupScrollFreeze(0, 1); // Make header always visible
-				ImGui::TableSetupColumn("Item", ImGuiTableColumnFlags_WidthAutoResize, -1, 0);
+				ImGui::TableSetupColumn("Item", ImGuiTableColumnFlags_WidthFixed, -1, 0);
 				ImGui::TableSetupColumn("Infos", ImGuiTableColumnFlags_WidthStretch, -1, 1);
 				ImGui::TableHeadersRow(); // draw headers
 
@@ -299,9 +300,9 @@ void FontInfos::DrawInfos()
 						}
 					}
 				}
+				ImGui::EndTable();
 			}
-			ImGui::EndTable();
-
+			
 			ImGui::EndFramedGroup(true);
 		}
 	}
@@ -321,7 +322,7 @@ void FontInfos::GetInfos()
 	}
 
 	//--------------------------------------------------------
-
+	m_InfosToDisplay.clear();
 	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Font", m_FontFilePathName));
 	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Count Glyphs :", ct::toStr(m_ImFontAtlas.Fonts[0]->Glyphs.size())));
 	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Count Selected Glyphs :", ct::toStr(m_SelectedGlyphs.size())));
@@ -392,7 +393,7 @@ void FontInfos::CreateFontTexture()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-		m_ImFontAtlas.TexID = (ImTextureID)id;
+		m_ImFontAtlas.TexID = reinterpret_cast<ImTextureID>(id);
 
 		glBindTexture(GL_TEXTURE_2D, last_texture);
 	}
@@ -403,7 +404,7 @@ void FontInfos::DestroyFontTexture()
     // use (size_t) instead of (Gluint) for avoid error : 
 	// << Cast from pointer to smaller type 'int' loses information >> on MAcOs mojave..
     // it weird than this trick work...
-    GLuint id = (size_t)m_ImFontAtlas.TexID;
+    GLuint id = reinterpret_cast<GLuint>(m_ImFontAtlas.TexID);
 	if (id)
 	{
 		glDeleteTextures(1, &id);

@@ -15,13 +15,12 @@
  */
 #pragma once
 
-#include <ConfigAbstract.h>
-#include "tinyxml2/tinyxml2.h"
-#include <imgui.h>
+#include <ctools/ConfigAbstract.h>
+#include <imgui/imgui.h>
 #include <string>
 
-#include "FontInfos.h"
-#include "Generator/Generator.h"
+#include <Project/FontInfos.h>
+#include <Generator/Generator.h>
 
 class ProjectFile : public conf::ConfigAbstract
 {
@@ -42,11 +41,11 @@ public: // to save
 	bool m_FinalPane_ShowGlyphTooltip = true;
 	std::string m_FontToMergeIn;
 	float m_GlyphPreview_Scale = 1.0f;
-	int m_GlyphPreview_QuadBezierCountSegments = 5; // count segments per bezier quad 
+	int m_GlyphPreview_QuadBezierCountSegments = 0; // count segments per bezier quad, 0 mean auto tesselation
 	bool m_GlyphPreview_ShowControlLines = false;
 
 public: // dont save
-	FontInfos *m_CurrentFont = nullptr;
+	FontInfos *m_SelectedFont = nullptr;
 	size_t m_CountSelectedGlyphs = 0; // for all fonts
 	size_t m_CountFontWithSelectedGlyphs = 0; // for all fonts
     bool m_NameFoundInDouble = false;
@@ -77,7 +76,7 @@ public:
 
 	void UpdateCountSelectedGlyphs();
 
-	bool IsRangeColorignShown() const;
+	bool IsRangeColoringShown() const;
 
 	std::string GetAbsolutePath(const std::string& vFilePathName) const;
 	std::string GetRelativePath(const std::string& vFilePathName) const;

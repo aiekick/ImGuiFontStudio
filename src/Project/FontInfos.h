@@ -15,12 +15,12 @@
  */
 #pragma once
 
-#include <ConfigAbstract.h>
-#include "tinyxml2/tinyxml2.h"
+#include <ctools/ConfigAbstract.h>
+#include <tinyxml2/tinyxml2.h>
 
-#include "GlyphInfos.h"
+#include <Project/GlyphInfos.h>
 
-#include <imgui.h>
+#include <imgui/imgui.h>
 #include <string>
 #include <set>
 #include <vector>

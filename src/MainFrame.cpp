@@ -21,29 +21,29 @@
 
 #include "MainFrame.h"
 
-#include <cTools.h>
-#include <FileHelper.h>
+#include <ctools/cTools.h>
+#include <ctools/FileHelper.h>
 #include <cctype>
-#include "GLFW/glfw3.h"
+#include <GLFW/glfw3.h>
 
-#include "ImGuiFileDialog/ImGuiFileDialog/ImGuiFileDialog.h"
-#include "Generator/Generator.h"
-#include "Gui/ImGuiWidgets.h"
-#include "Gui/GuiLayout.h"
-#include "Helper/ImGuiThemeHelper.h"
-#include "Helper/Messaging.h"
-#include "Helper/SelectionHelper.h"
-#include "Helper/SettingsDlg.h"
-#include "Panes/FinalFontPane.h"
-#include "Panes/GeneratorPane.h"
-#include "Panes/GlyphPane.h"
-#include "Panes/SourceFontPane.h"
-#include "Project/FontInfos.h"
-#include "Project/ProjectFile.h"
-#include "Res/CustomFont.h"
+#include <ImGuiFileDialog/ImGuiFileDialog/ImGuiFileDialog.h>
+#include <Generator/Generator.h>
+#include <Gui/ImGuiWidgets.h>
+#include <Panes/Manager/LayoutManager.h>
+#include <Helper/ImGuiThemeHelper.h>
+#include <Helper/Messaging.h>
+#include <Helper/SelectionHelper.h>
+#include <Helper/SettingsDlg.h>
+#include <Panes/FinalFontPane.h>
+#include <Panes/GeneratorPane.h>
+#include <Panes/GlyphPane.h>
+#include <Panes/SourceFontPane.h>
+#include <Project/FontInfos.h>
+#include <Project/ProjectFile.h>
+#include <Res/CustomFont.h>
 
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include "imgui_internal.h"
+#include <imgui/imgui_internal.h>
 
 #define WIDGET_ID_MAGIC_NUMBER 4577
 static int widgetId = WIDGET_ID_MAGIC_NUMBER;
@@ -68,7 +68,7 @@ void MainFrame::Init()
 	
 	LoadConfigFile("config.xml");
 
-	GuiLayout::Instance()->Init();
+	LayoutManager::Instance()->Init();
 }
 
 void MainFrame::Unit()
@@ -121,49 +121,51 @@ ProjectFile* MainFrame::GetProject()
 //// DRAW ////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-#define NEW_ID ++widgetId
+#define NewWidgetId() ++widgetId
 
-void MainFrame::Display(ImVec2 vSize)
+void MainFrame::Display(ImVec2 vPos, ImVec2 vSize)
 {
 	widgetId = WIDGET_ID_MAGIC_NUMBER; // important for event catching on imgui widgets
 
+	m_DisplayPos = vPos;
 	m_DisplaySize = vSize;
 
-	DrawDockPane(vSize);
+	DrawDockPane(m_DisplayPos, m_DisplaySize);
 
-	widgetId = GuiLayout::Instance()->DisplayPanes(&m_ProjectFile, widgetId);
+	widgetId = LayoutManager::Instance()->DisplayPanes(&m_ProjectFile, widgetId);
 	
 	DisplayDialogsAndPopups();
 
-	GuiLayout::Instance()->InitAfterFirstDisplay(vSize);
-
-	if (ImGui::BeginMainStatusBar())
-	{
-		Messaging::Instance()->Draw(&m_ProjectFile);
-
-		ImGui::EndMainStatusBar();
-	}
+	LayoutManager::Instance()->InitAfterFirstDisplay(m_DisplaySize);
 }
 
-void MainFrame::DrawDockPane(ImVec2 vSize)
+void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 {
-	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
-	ImGui::Begin("MainDockPane", (bool*)0,
+	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
+	static ImGuiWindowFlags window_flags =
 		ImGuiWindowFlags_NoTitleBar |
 		ImGuiWindowFlags_MenuBar |
 		ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_NoCollapse |
 		ImGuiWindowFlags_NoResize |
 		ImGuiWindowFlags_NoBringToFrontOnFocus |
-		ImGuiWindowFlags_NoDocking);
-	ImGui::PopStyleVar();
+		ImGuiWindowFlags_NoDocking |
+		ImGuiWindowFlags_NoNavFocus;
+
+	ImGuiViewport* viewport = ImGui::GetMainViewport();
+	ImGui::SetNextWindowViewport(viewport->ID);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowBorderSize, 0.0f);
+	
+	ImGui::PushStyleVar(ImGuiStyleVar_WindowPadding, ImVec2(0.0f, 0.0f));
+	ImGui::Begin("MainDockPane", (bool*)0, window_flags);
+	ImGui::PopStyleVar(3);
 
 	float barH = 0.0f;
 	auto curWin = ImGui::GetCurrentWindowRead();
-	if (curWin)
-		barH = curWin->MenuBarHeight();
+	if (curWin)	barH = curWin->MenuBarHeight();
 	ImGui::SetWindowSize(vSize - ImVec2(0.0f, barH));
-	ImGui::SetWindowPos(ImVec2(0, 0));
+	ImGui::SetWindowPos(vPos);
 
 	if (ImGui::BeginMenuBar())
 	{
@@ -242,7 +244,7 @@ void MainFrame::DrawDockPane(ImVec2 vSize)
 		
 		ImGui::Spacing();
 
-		GuiLayout::Instance()->DisplayMenu(vSize);
+		LayoutManager::Instance()->DisplayMenu(vSize);
 
 		ImGui::Spacing();
 		
@@ -261,6 +263,7 @@ void MainFrame::DrawDockPane(ImVec2 vSize)
 
 				ImGui::MenuItem("Show ImGui", "", &m_ShowImGui);
 				ImGui::MenuItem("Show ImGui Style", "", &m_ShowImGuiStyle);
+				ImGui::MenuItem("Show ImGui Metric/Debug", "", &m_ShowMetric);
 
 				ImGui::EndMenu();
 			}
@@ -284,9 +287,16 @@ void MainFrame::DrawDockPane(ImVec2 vSize)
 		ImGui::EndMenuBar();
 	}
 
-	GuiLayout::Instance()->StartDockPane();
+	LayoutManager::Instance()->StartDockPane(dockspace_flags);
 
 	ImGui::End();
+
+	if (ImGui::BeginMainStatusBar())
+	{
+		Messaging::Instance()->Draw(&m_ProjectFile);
+
+		ImGui::EndMainStatusBar();
+	}
 }
 
 void MainFrame::DisplayDialogsAndPopups()
@@ -299,8 +309,7 @@ void MainFrame::DisplayDialogsAndPopups()
 
 	if (m_ProjectFile.IsLoaded())
 	{
-		SourceFontPane::DrawDialosAndPopups(&m_ProjectFile);
-		GeneratorPane::DrawDialosAndPopups(&m_ProjectFile);
+		LayoutManager::Instance()->DrawDialogsAndPopups(&m_ProjectFile);
 
 		if (igfd::ImGuiFileDialog::Instance()->FileDialog("SolveBadFilePathName",
 			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking, min, max))
@@ -362,6 +371,8 @@ void MainFrame::DisplayDialogsAndPopups()
 		ImGui::ShowDemoWindow(&m_ShowImGui);
 	if (m_ShowImGuiStyle)
 		ImGui::ShowCustomStyleEditor(&m_ShowImGuiStyle);
+	if (m_ShowMetric)
+		ImGui::ShowMetricsWindow(&m_ShowMetric);
 
 	//SettingsDlg::Instance()->DrawDialog();
 }
@@ -592,7 +603,7 @@ std::string MainFrame::getXml(const std::string& vOffset)
 	std::string str;
 
 	str += ImGuiThemeHelper::Instance()->getXml(vOffset);
-	str += GuiLayout::Instance()->getXml(vOffset);
+	str += LayoutManager::Instance()->getXml(vOffset);
 	str += vOffset + "<bookmarks>" + igfd::ImGuiFileDialog::Instance()->SerializeBookmarks() + "</bookmarks>\n";
 	if (GetProject())
 		str += vOffset + "<project>" + GetProject()->m_ProjectFilePathName + "</project>\n";
@@ -614,7 +625,7 @@ bool MainFrame::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 		strParentName = vParent->Value();
 
 	ImGuiThemeHelper::Instance()->setFromXml(vElem, vParent);
-	GuiLayout::Instance()->setFromXml(vElem, vParent);
+	LayoutManager::Instance()->setFromXml(vElem, vParent);
 
 	if (strName == "bookmarks")
 		igfd::ImGuiFileDialog::Instance()->DeserializeBookmarks(strValue);

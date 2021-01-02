@@ -22,7 +22,7 @@ target_link_libraries(ctools
     ${GLAD_LIBRARIES})
     
 set_target_properties(ctools PROPERTIES LINKER_LANGUAGE CXX)
-set_target_properties(ctools PROPERTIES FOLDER 3rdparty)
+set_target_properties(ctools PROPERTIES FOLDER 3rdparty/aiekick)
 
 set(CTOOLS_LIBRARIES ctools)
 

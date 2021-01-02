@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include <imgui.h>
+#include <imgui/imgui.h>
 
 #include <cstdarg>
 
@@ -136,13 +136,15 @@ namespace ImGui
 	{
 		bool check = *vContainer & vFlag;
 		bool res = Begin(name, &check, flags);
-		if (res)
-		{
+		//if (res)
+		//{
+			// si on fait que quand c'est ouvert, alors on peut pas fermer un onglet qui 'nest pas focused
+			// alors on le sort de la boucle
 			if (check)
 				*vContainer = (T)(*vContainer | vFlag); // add
 			else
 				*vContainer = (T)(*vContainer & ~vFlag); // remove
-		}
+		//}
 		return res;
 	}
 	IMGUI_API bool ClickableTextUrl(const char* label,const char* url,bool vOnlined = true);
@@ -182,5 +184,9 @@ namespace ImGui
 	IMGUI_API bool SliderFloatDefaultCompact(float width,
 		const char* label, float* v, float v_min, 
 		float v_max, float v_default, const char* format = "%.3f", float power = 1.0f);
+
+	////////////////////////////////////////////////////////////////////////////
+
+	IMGUI_API bool TransparentButton(const char* label, const ImVec2& size_arg = ImVec2(0, 0), ImGuiButtonFlags flags = 0);
 }
 

@@ -19,9 +19,9 @@
  
 #include "Messaging.h"
 
-#include "Res/CustomFont.h"
-#include "Gui/ImGuiWidgets.h"
-#include "Helper/SelectionHelper.h"
+#include <Res/CustomFont.h>
+#include <Gui/ImGuiWidgets.h>
+#include <Helper/SelectionHelper.h>
 
 Messaging::Messaging() = default;
 Messaging::~Messaging() = default;

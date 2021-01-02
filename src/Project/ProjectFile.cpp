@@ -18,9 +18,9 @@
  */
 #include "ProjectFile.h"
 
-#include "Helper/Messaging.h"
-#include "Helper/SelectionHelper.h"
-#include <FileHelper.h>
+#include <Helper/Messaging.h>
+#include <Helper/SelectionHelper.h>
+#include <ctools/FileHelper.h>
 
 ProjectFile::ProjectFile() = default;
 
@@ -45,7 +45,7 @@ void ProjectFile::Clear()
 	m_ShowRangeColoring = false;
 	m_RangeColoringHash = ImVec4(10, 15, 35, 0.5f);
 	m_Preview_Glyph_CountX = 20;
-	m_CurrentFont = nullptr;
+	m_SelectedFont = nullptr;
 	m_CountSelectedGlyphs = 0; // for all fonts
 	m_IsLoaded = false;
 	m_IsThereAnyNotSavedChanged = false;
@@ -167,7 +167,7 @@ void ProjectFile::UpdateCountSelectedGlyphs()
 	SelectionHelper::Instance()->AnalyseSourceSelection(this);
 }
 
-bool ProjectFile::IsRangeColorignShown() const
+bool ProjectFile::IsRangeColoringShown() const
 {
 	return m_ShowRangeColoring || SelectionHelper::Instance()->IsSelectionType(GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_RANGE);
 }

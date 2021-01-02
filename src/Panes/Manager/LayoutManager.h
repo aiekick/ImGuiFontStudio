@@ -15,17 +15,18 @@
  */
 #pragma once
 
-#include <ConfigAbstract.h>
+#include <ctools/ConfigAbstract.h>
 
-#include <imgui.h>
+#include <imgui/imgui.h>
 
 #define PARAM_PANE "Parameters"
 #define SOURCE_PANE "Source Fonts"
 #define FINAL_PANE "Final Font"
 #define GENERATOR_PANE "Generator"
-#define CURRENT_FONT_PANE "Current Font"
+#define SELECTED_FONT_PANE "Selected Font"
 #define GLYPH_PANE "Glyph Edition"
 #define FONT_STRUCTURE_PANE "Font Structure"
+#define FONT_PREVIEW_PANE "Font Preview"
 #ifdef _DEBUG
 #define DEBUG_PANE "Debug"
 #endif
@@ -40,14 +41,18 @@ enum PaneFlags
 	PANE_GENERATOR = (1 << 5),
 	PANE_GLYPH = (1 << 6),
 	PANE_FONT_STRUCTURE = (1 << 7),
+	PANE_FONT_PREVIEW = (1 << 8),
 #ifdef _DEBUG
-	PANE_DEBUG = (1 << 8),
+	PANE_DEBUG = (1 << 9),
 #endif
-	PANE_ALLS = PANE_SELECTED_FONT | PANE_SOURCE | PANE_FINAL | PANE_PARAM | PANE_GENERATOR// | PANE_GLYPH
+	PANE_OPENED_DEFAULT =
+		PANE_SELECTED_FONT | PANE_SOURCE | PANE_FINAL | PANE_PARAM | PANE_GENERATOR | PANE_FONT_PREVIEW,
+	PANE_FOCUS_DEFAULT =
+		PANE_SELECTED_FONT | PANE_SOURCE | PANE_PARAM | PANE_GENERATOR | PANE_FONT_PREVIEW
 };
 
 class ProjectFile;
-class GuiLayout : public conf::ConfigAbstract
+class LayoutManager : public conf::ConfigAbstract
 {
 private:
 	ImGuiID m_DockSpaceID = 0;
@@ -56,38 +61,48 @@ private:
 
 public:
 	static PaneFlags m_Pane_Shown;
-	PaneFlags m_Pane_Hovered = PANE_NONE;
-	PaneFlags m_Pane_LastHovered = PANE_NONE;
+	static PaneFlags m_Pane_Focused;
+	PaneFlags m_Pane_Hovered = PaneFlags::PANE_NONE;
+	PaneFlags m_Pane_LastHovered = PaneFlags::PANE_NONE;
 
 public:
-	void StartDockPane();
-	void ApplyInitialDockingLayout(ImVec2 vSize);
 	void Init();
+	void Unit();
 	void InitAfterFirstDisplay(ImVec2 vSize);
+	void StartDockPane(ImGuiDockNodeFlags vFlags);
+	void ApplyInitialDockingLayout(ImVec2 vSize);
 	void DisplayMenu(ImVec2 vSize);
 	int DisplayPanes(ProjectFile *vProjectFile, int vWidgetId);
-	void ShowAndFocusPane(PaneFlags vPane);
-	bool IsPaneActive(PaneFlags vPane);
+	void DrawDialogsAndPopups(ProjectFile* vProjectFile);
+	void ShowSpecificPane(PaneFlags vPane);
+	void FocusSpecificPane(PaneFlags vPane);
+	void ShowAndFocusSpecificPane(PaneFlags vPane);
+	bool IsSpecificPaneFocused(PaneFlags vPane);
+	void AddSpecificPaneToExisting(const char* vNewPane, const char* vExistingPane);
 
 private:
-	void ActivePane(const char *vlabel);
-	bool IsPaneActive(const char *vlabel);
+	void FocusSpecificPane(const char *vlabel);
+	bool IsSpecificPaneFocused(const char *vlabel);
+
+private: // configuration
+	PaneFlags GetFocusedPanes();
+	void SetFocusedPanes(PaneFlags vActivePanes);
 
 public: // configuration
 	std::string getXml(const std::string& vOffset);
 	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent);
 
 public: // singleton
-	static GuiLayout *Instance()
+	static LayoutManager *Instance()
 	{
-		static auto *_instance = new GuiLayout();
+		static auto *_instance = new LayoutManager();
 		return _instance;
 	}
 
 protected:
-	GuiLayout(); // Prevent construction
-	GuiLayout(const GuiLayout&) {}; // Prevent construction by copying
-	GuiLayout& operator =(const GuiLayout&) { return *this; }; // Prevent assignment
-	~GuiLayout(); // Prevent unwanted destruction
+	LayoutManager(); // Prevent construction
+	LayoutManager(const LayoutManager&) {}; // Prevent construction by copying
+	LayoutManager& operator =(const LayoutManager&) { return *this; }; // Prevent assignment
+	~LayoutManager(); // Prevent unwanted destruction
 };
 

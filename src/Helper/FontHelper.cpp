@@ -38,19 +38,21 @@
  //               integer.
 
 #include "FontHelper.h"
-#include <FileHelper.h>
-#include <cTools.h>
+
 #include "MemoryStream.h"
+
+#include <ctools/FileHelper.h>
+#include <ctools/cTools.h>
 
 #include <set>
 #include <map>
 
-#include "sfntly/font_factory.h"
-#include "sfntly/port/memory_output_stream.h"
-#include "sfntly/port/file_input_stream.h"
-#include "sfntly/table/core/maximum_profile_table.h"
-#include "sfntly/table/core/horizontal_header_table.h"
-#include "sfntly/table/core/horizontal_metrics_table.h"
+#include <sfntly/font_factory.h>
+#include <sfntly/port/memory_output_stream.h>
+#include <sfntly/port/file_input_stream.h>
+#include <sfntly/table/core/maximum_profile_table.h>
+#include <sfntly/table/core/horizontal_header_table.h>
+#include <sfntly/table/core/horizontal_metrics_table.h>
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////

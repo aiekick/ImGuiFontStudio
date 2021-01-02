@@ -15,53 +15,58 @@
  */
 #pragma once
 
-#include "ctools/cTools.h"
-#include "Gui/ImGuiWidgets.h"
+#include <Panes/Abstract/AbstractPane.h>
+
+#include <ctools/cTools.h>
+#include <Gui/ImGuiWidgets.h>
 
 #include <string>
 #include <map>
 #include <set>
 
+enum SourceFontPaneFlags
+{
+	SOURCE_FONT_PANE_NONE = 0,
+	SOURCE_FONT_PANE_GLYPH = (1 << 0),
+	SOURCE_FONT_PANE_TEXTURE = (1 << 1)
+};
+
 class FontInfos;
 class ProjectFile;
 struct ImGuiWindow;
-class SourceFontPane
+class SourceFontPane : public AbstractPane
 {
-private:
+private: // private vars
 	ImGuiListClipper m_FontsClipper;
 
-public:
-	enum SourceFontPaneFlags
-	{
-		SOURCE_FONT_PANE_NONE = 0,
-		SOURCE_FONT_PANE_GLYPH = (1 << 0),
-		SOURCE_FONT_PANE_TEXTURE = (1 << 1)
-	} m_FontPaneFlags = SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH;
+private: // private enum
+	SourceFontPaneFlags m_FontPaneFlags = SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH;
 
 public:
-	int DrawSourceFontPane(ProjectFile *vProjectFile, int vWidgetId) const;
-	int DrawParamsPane(ProjectFile *vProjectFile, int vWidgetId);
+	void Init() override;
+	void Unit() override;
+	int DrawPanes(ProjectFile* vProjectFile, int vWidgetId) override;
+	void DrawDialogsAndPopups(ProjectFile* vProjectFile) override;
 
-	static void OpenFonts(ProjectFile *vProjectFile, const std::map<std::string, std::string>& vFontFilePathNames);
-	static void OpenFont(ProjectFile *vProjectFile, const std::string& vFontFilePathName, bool vUpdateCount);
-	
-	static void DrawDialosAndPopups(ProjectFile * vProjectFile);
-	static void CloseCurrentFont(ProjectFile *vProjectFile);
-	static void SelectFont(ProjectFile *vProjectFile, FontInfos *vFontInfos);
+	void OpenFonts(ProjectFile* vProjectFile, const std::map<std::string, std::string>& vFontFilePathNames);
+	void OpenFont(ProjectFile* vProjectFile, const std::string& vFontFilePathName, bool vUpdateCount);
+	void CloseSelectedFont(ProjectFile* vProjectFile);
+	void SelectFont(ProjectFile* vProjectFile, FontInfos* vFontInfos);
 
-private:
-	static void DrawFilterBar(ProjectFile *vProjectFile, FontInfos *vFontInfos);
-	static bool IfCatchedByFilters(FontInfos *vFontInfos, const std::string& vSymbolName);
+	bool IsFlagSet(SourceFontPaneFlags vFlag);
 
-private:
-	//void DrawFontAtlas(ProjectFile *vProjectFile, FontInfos *vFontInfos);
-	static void DrawFontTexture(FontInfos *vFontInfos);
+private: 
+	void DrawFilterBar(ProjectFile* vProjectFile, FontInfos* vFontInfos);
+	bool IfCatchedByFilters(FontInfos* vFontInfos, const std::string& vSymbolName);
+	void DrawFontTexture(FontInfos* vFontInfos);
+	void DrawFontAtlas_Virtual(ProjectFile* vProjectFile, FontInfos* vFontInfos);
 
-private: // experimental => virtual list
-    static void DrawFontAtlas_Virtual(ProjectFile *vProjectFile, FontInfos *vFontInfos);
-
+	// panes
+	void DrawSourceFontPane(ProjectFile *vProjectFile);
+	void DrawParamsPane(ProjectFile *vProjectFile);
+    
 public: // singleton
-	static SourceFontPane *Instance()
+	static SourceFontPane* Instance()
 	{
 		static SourceFontPane *_instance = new SourceFontPane();
 		return _instance;

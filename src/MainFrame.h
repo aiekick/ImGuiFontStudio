@@ -15,11 +15,11 @@
  */
 #pragma once
 
-#include "glad/glad.h"
-#include <imgui.h>
+#include <glad/glad.h>
+#include <imgui/imgui.h>
 
-#include <ConfigAbstract.h>
-#include "Project/ProjectFile.h"
+#include <ctools/ConfigAbstract.h>
+#include <Project/ProjectFile.h>
 
 #include <functional>
 #include <string>
@@ -33,12 +33,14 @@ public:
 	bool leftMouseClicked = false;
 	bool leftMouseReleased = false;
 	bool rightMouseClicked = false;
-	ImVec2 m_DisplaySize = ImVec2(100, 100);
+	ImVec2 m_DisplayPos = ImVec2(0, 0); // viewport
+	ImVec2 m_DisplaySize = ImVec2(1280, 720);
 
 private:
 	ProjectFile m_ProjectFile;	
 
 	bool m_ShowImGui = false;
+	bool m_ShowMetric = false;
 	bool m_ShowImGuiStyle = false;
 	bool m_ShowAboutDialog = false;
 
@@ -52,7 +54,7 @@ public:
 	void SaveAsProject(const std::string& vFilePathName);
 	ProjectFile* GetProject();
 
-	void Display(ImVec2 vSize);
+	void Display(ImVec2 vPos, ImVec2 vSize);
 
 public: // save : on quit or project loading
 	void IWantToCloseTheApp(); // user want close app, but we want to ensure its saved
@@ -65,7 +67,7 @@ private: // save : on quit or project loading
 	void ReRouteFontToFile(const std::string& vFontNameToReRoute, const std::string& vGoodFilePathName);
 
 private: // imgui pane / dialogs
-	void DrawDockPane(ImVec2 vSize);
+	void DrawDockPane(ImVec2 vPos, ImVec2 vSize);
 	void DisplayDialogsAndPopups();
 	void ShowAboutDialog(bool *vOpen);
 	

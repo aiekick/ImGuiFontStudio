@@ -17,9 +17,11 @@
 
 #ifdef _DEBUG
 
+#include <Panes/Abstract/AbstractPane.h>
+
 #include <imgui/imgui.h>
 
-#include "Project/GlyphInfos.h"
+#include <Project/GlyphInfos.h>
 
 #include <stdint.h>
 #include <string>
@@ -27,22 +29,26 @@
 
 class ProjectFile;
 class FontInfos;
-class DebugPane
+class DebugPane : public AbstractPane
 {
 private:
 	GlyphInfos m_GlyphToDisplay;
 	ct::ivec2 m_GlyphCurrentPoint = -1;
 
 public:
-	int DrawDebugPane(ProjectFile *vProjectFile, int vWidgetId);
+	void Init() override;
+	void Unit() override;
+	int DrawPanes(ProjectFile* vProjectFile, int vWidgetId) override;
+	void DrawDialogsAndPopups(ProjectFile* vProjectFile) override;
+
+private:
+	void DrawDebugPane(ProjectFile *vProjectFile);
+	void DrawDebugGlyphPane(ProjectFile* vProjectFile);
 
 public:
 	void SetGlyphToDebug(const GlyphInfos& vGlyphInfos);
 	ct::ivec2 GetGlyphCurrentPoint();
 	void DrawGlyphCurrentPoint(float vPreviewScale, ImVec2 vScreenPos, ImDrawList *vImDrawList);
-
-private:
-	int DrawDebugGlyphPane(ProjectFile *vProjectFile, int vWidgetId);
 
 public: // singleton
 	static DebugPane *Instance()

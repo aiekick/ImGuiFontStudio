@@ -15,13 +15,13 @@
  */
 #pragma once
 
-#include "ImGuiFileDialog/ImGuiFileDialog/ImGuiFileDialog.h"
+#include <Panes/Abstract/AbstractPane.h>
+
+#include <ImGuiFileDialog/ImGuiFileDialog/ImGuiFileDialog.h>
 
 #include <stdint.h>
 #include <string>
 #include <map>
-
-class ProjectFile;
 
 enum GeneratorStatusFlags
 {
@@ -35,25 +35,30 @@ enum GeneratorStatusFlags
 		GENERATOR_STATUS_FONT_HEADER_GENERATION_ALLOWED
 };
 
-class GeneratorPane
+class ProjectFile;
+
+class GeneratorPane : public AbstractPane
 {
 private: // STATUS FLAGS
 	GeneratorStatusFlags m_GeneratorStatusFlags = GENERATOR_STATUS_DEFAULT;
 
-public: // STATUS FLAGS
+public:
+	void Init() override;
+	void Unit() override;
+	int DrawPanes(ProjectFile* vProjectFile, int vWidgetId) override;
+	void DrawDialogsAndPopups(ProjectFile* vProjectFile) override;
+
+	// STATUS FLAGS
 	void AllowStatus(GeneratorStatusFlags vGeneratorStatusFlags);
 	void ProhibitStatus(GeneratorStatusFlags vGeneratorStatusFlags);
 
-public:
-	int DrawGeneratorPane(ProjectFile *vProjectFile, int vWidgetId);
-	int DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId);
-	
-	static bool CheckGeneratioConditions(ProjectFile *vProjectFile);
-	static void DrawDialosAndPopups(ProjectFile *vProjectFile);
-
 private:
-	void GeneratorFileDialogPane(std::string vFilter, igfd::UserDatas vUserDatas, bool *vCantContinue);
+	void DrawGeneratorPane(ProjectFile *vProjectFile);
+	void DrawFontsGenerator(ProjectFile *vProjectFile);
+	void GeneratorFileDialogPane(std::string vFilter, igfd::UserDatas vUserDatas, bool* vCantContinue);
 
+	bool CheckGeneratioConditions(ProjectFile *vProjectFile);
+	
 public: // singleton
 	static GeneratorPane *Instance()
 	{

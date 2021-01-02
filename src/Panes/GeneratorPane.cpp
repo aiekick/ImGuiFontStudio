@@ -19,27 +19,25 @@
 
 #include "GeneratorPane.h"
 
-#include "MainFrame.h"
+#include <MainFrame.h>
 
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include "imgui_internal.h"
+#include <imgui/imgui_internal.h>
 
-#include <cTools.h>
-#include <Logger.h>
-#include <FileHelper.h>
-#include "Gui/GuiLayout.h"
-#include "Gui/ImGuiWidgets.h"
-#include "Helper/Messaging.h"
-#include "Helper/SelectionHelper.h"
-#include "Helper/ImGuiThemeHelper.h"
-#include "Panes/FinalFontPane.h"
-#include "Panes/SourceFontPane.h"
-#include "Project/ProjectFile.h"
-#include "Generator/Generator.h"
+#include <ctools/cTools.h>
+#include <ctools/Logger.h>
+#include <ctools/FileHelper.h>
+#include <Panes/Manager/LayoutManager.h>
+#include <Gui/ImGuiWidgets.h>
+#include <Helper/Messaging.h>
+#include <Helper/SelectionHelper.h>
+#include <Helper/ImGuiThemeHelper.h>
+#include <Panes/FinalFontPane.h>
+#include <Panes/SourceFontPane.h>
+#include <Project/ProjectFile.h>
+#include <Generator/Generator.h>
 
 #include <cinttypes> // printf zu
-
-static int GeneratorPane_WidgetId = 0;
 
 GeneratorPane::GeneratorPane() = default;
 GeneratorPane::~GeneratorPane() = default;
@@ -59,17 +57,56 @@ void GeneratorPane::ProhibitStatus(GeneratorStatusFlags vGeneratorStatusFlags)
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
-//// IMGUI PANE ///////////////////////////////////////////////////////////////////
+//// OVERRIDES ////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-int GeneratorPane::DrawGeneratorPane(ProjectFile *vProjectFile, int vWidgetId)
+void GeneratorPane::Init()
 {
-	GeneratorPane_WidgetId = vWidgetId;
+	
+}
 
-	if (GuiLayout::m_Pane_Shown & PaneFlags::PANE_GENERATOR)
+void GeneratorPane::Unit()
+{
+
+}
+
+int GeneratorPane::DrawPanes(ProjectFile* vProjectFile, int vWidgetId)
+{
+	paneWidgetId = vWidgetId;
+
+	DrawGeneratorPane(vProjectFile);
+
+	return paneWidgetId;
+}
+
+void GeneratorPane::DrawDialogsAndPopups(ProjectFile* vProjectFile)
+{
+	ImVec2 min = MainFrame::Instance()->m_DisplaySize * 0.5f;
+	ImVec2 max = MainFrame::Instance()->m_DisplaySize;
+
+	if (igfd::ImGuiFileDialog::Instance()->FileDialog("GenerateFileDlg", ImGuiWindowFlags_NoDocking, min, max))
+	{
+		if (igfd::ImGuiFileDialog::Instance()->IsOk)
+		{
+			std::string filePath = igfd::ImGuiFileDialog::Instance()->GetCurrentPath();
+			std::string fileName = igfd::ImGuiFileDialog::Instance()->GetCurrentFileName();
+			Generator::Instance()->Generate(filePath, fileName, vProjectFile);
+		}
+
+		igfd::ImGuiFileDialog::Instance()->CloseDialog("GenerateFileDlg");
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+//// PRIVATE //////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
+
+void GeneratorPane::DrawGeneratorPane(ProjectFile *vProjectFile)
+{
+	if (LayoutManager::m_Pane_Shown & PaneFlags::PANE_GENERATOR)
 	{
 		if (ImGui::Begin<PaneFlags>(GENERATOR_PANE,
-			&GuiLayout::m_Pane_Shown, PaneFlags::PANE_GENERATOR,
+			&LayoutManager::m_Pane_Shown, PaneFlags::PANE_GENERATOR,
 			//ImGuiWindowFlags_NoTitleBar |
 			ImGuiWindowFlags_MenuBar |
 			//ImGuiWindowFlags_NoMove |
@@ -79,26 +116,24 @@ int GeneratorPane::DrawGeneratorPane(ProjectFile *vProjectFile, int vWidgetId)
 		{
 			if (vProjectFile && vProjectFile->IsLoaded())
 			{
-				if (SourceFontPane::Instance()->m_FontPaneFlags & SourceFontPane::SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH)
+				if (SourceFontPane::Instance()->IsFlagSet(SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH))
 				{
 					SelectionHelper::Instance()->DrawMenu(vProjectFile);
 
-					GeneratorPane_WidgetId = DrawFontsGenerator(vProjectFile, GeneratorPane_WidgetId);
+					DrawFontsGenerator(vProjectFile);
 				}
 			}
 		}
 
 		ImGui::End();
 	}
-
-	return GeneratorPane_WidgetId;
 }
 
-int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
+void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 {
 	if (ImGui::BeginFramedGroup("Font Generation"))
 	{
-		if (vProjectFile->m_CurrentFont)
+		if (vProjectFile->m_SelectedFont)
 		{
 			bool btnClick = false;
 			std::string exts;
@@ -282,7 +317,7 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 				igfd::ImGuiFileDialog::Instance()->OpenModal(
 					"GenerateFileDlg",
 					"Location and name where create the file", extTypes, ".",
-					vProjectFile->m_CurrentFont->m_FontFileName,
+					vProjectFile->m_SelectedFont->m_FontFileName,
 					std::bind(&GeneratorPane::GeneratorFileDialogPane, this,
 						std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
 					200, 1, vProjectFile);
@@ -295,8 +330,6 @@ int GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile, int vWidgetId)
 
 		ImGui::EndFramedGroup(true);
 	}
-
-	return vWidgetId;
 }
 
 bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
@@ -418,18 +451,18 @@ void GeneratorPane::GeneratorFileDialogPane(std::string /*vFilter*/, igfd::UserD
 
 			if (prj->IsGenMode(GENERATOR_MODE_CURRENT))
 			{
-				if (prj->m_CurrentFont)
+				if (prj->m_SelectedFont)
 				{
-					bool cond = !prj->m_CurrentFont->m_FontPrefix.empty();
-					snprintf(prefixBuffer, PREFIX_MAX_SIZE, "%s", prj->m_CurrentFont->m_FontPrefix.c_str());
-					ImGui::TextWrapped("Header Prefix for\n\t%s :", prj->m_CurrentFont->m_FontFileName.c_str());
+					bool cond = !prj->m_SelectedFont->m_FontPrefix.empty();
+					snprintf(prefixBuffer, PREFIX_MAX_SIZE, "%s", prj->m_SelectedFont->m_FontPrefix.c_str());
+					ImGui::TextWrapped("Header Prefix for\n\t%s :", prj->m_SelectedFont->m_FontFileName.c_str());
 					if (ImGui::InputText_Validation("##FontPrefix", prefixBuffer, PREFIX_MAX_SIZE,
 						&cond, "You must Define a\nfont prefix for continue"))
 					{
-						prj->m_CurrentFont->m_FontPrefix = std::string(prefixBuffer);
+						prj->m_SelectedFont->m_FontPrefix = std::string(prefixBuffer);
 						prj->SetProjectChange();
 					}
-					canContinue = !prj->m_CurrentFont->m_FontPrefix.empty();
+					canContinue = !prj->m_SelectedFont->m_FontPrefix.empty();
 				}
 				else
 				{
@@ -492,24 +525,6 @@ void GeneratorPane::GeneratorFileDialogPane(std::string /*vFilter*/, igfd::UserD
 		{
 			*vCantContinue = canContinue;
 		}
-	}
-}
-
-void GeneratorPane::DrawDialosAndPopups(ProjectFile *vProjectFile)
-{
-	ImVec2 min = MainFrame::Instance()->m_DisplaySize * 0.5f;
-	ImVec2 max = MainFrame::Instance()->m_DisplaySize;
-
-	if (igfd::ImGuiFileDialog::Instance()->FileDialog("GenerateFileDlg", ImGuiWindowFlags_NoDocking, min, max))
-	{
-		if (igfd::ImGuiFileDialog::Instance()->IsOk)
-		{
-			std::string filePath = igfd::ImGuiFileDialog::Instance()->GetCurrentPath();
-			std::string fileName = igfd::ImGuiFileDialog::Instance()->GetCurrentFileName();
-			Generator::Instance()->Generate(filePath, fileName, vProjectFile);
-		}
-
-		igfd::ImGuiFileDialog::Instance()->CloseDialog("GenerateFileDlg");
 	}
 }
 

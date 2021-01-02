@@ -15,13 +15,13 @@
  */
 #pragma once
 
-#include <ConfigAbstract.h>
-#include "tinyxml2/tinyxml2.h"
-#include <imgui.h>
+#include <ctools/ConfigAbstract.h>
+#include <tinyxml2/tinyxml2.h>
+#include <imgui/imgui.h>
 #include <string>
 
-#include <cTools.h>
-#include "sfntly/table/truetype/glyph_table.h"
+#include <ctools/cTools.h>
+#include <sfntly/table/truetype/glyph_table.h>
 
 class SimpleGlyph_Solo
 {

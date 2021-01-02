@@ -18,17 +18,18 @@
  */
 
 #include "SelectionHelper.h"
-#include "MainFrame.h"
-#include "Gui/ImGuiWidgets.h"
-#include "Gui/GuiLayout.h"
-#include "Helper/Messaging.h"
-#include "Panes/FinalFontPane.h"
-#include "Panes/GeneratorPane.h"
-#include "Project/ProjectFile.h"
-#include "Res/CustomFont.h"
+
+#include <MainFrame.h>
+#include <Gui/ImGuiWidgets.h>
+#include <Helper/Messaging.h>
+#include <Panes/Manager/LayoutManager.h>
+#include <Panes/FinalFontPane.h>
+#include <Panes/GeneratorPane.h>
+#include <Project/ProjectFile.h>
+#include <Res/CustomFont.h>
 
 #define IMGUI_DEFINE_MATH_OPERATORS
-#include "imgui_internal.h"
+#include <imgui/imgui_internal.h>
 
 #include <cinttypes> // printf zu
 
@@ -290,7 +291,7 @@ void SelectionHelper::DrawSelectionMenu(ProjectFile *vProjectFile, SelectionCont
 			if (vSelectionContainerEnum == SelectionContainerEnum::SELECTION_CONTAINER_SOURCE)
 			{
 				SelectAllGlyphs(
-					vProjectFile, vProjectFile->m_CurrentFont,
+					vProjectFile, vProjectFile->m_SelectedFont,
 					vSelectionContainerEnum);
 			}
 			else if (vSelectionContainerEnum == SelectionContainerEnum::SELECTION_CONTAINER_FINAL)
@@ -311,7 +312,7 @@ void SelectionHelper::DrawSelectionMenu(ProjectFile *vProjectFile, SelectionCont
 			if (vSelectionContainerEnum == SelectionContainerEnum::SELECTION_CONTAINER_SOURCE)
 			{
 				UnSelectAllGlyphs(
-					vProjectFile, vProjectFile->m_CurrentFont,
+					vProjectFile, vProjectFile->m_SelectedFont,
 					vSelectionContainerEnum);
 			}
 			else if (vSelectionContainerEnum == SelectionContainerEnum::SELECTION_CONTAINER_FINAL)
@@ -739,7 +740,7 @@ void SelectionHelper::SelectAllGlyphs(ProjectFile *vProjectFile, FontInfos *vFon
 
 					if (font)
 					{
-						for (auto glyph : font->Glyphs)
+						for (const auto& glyph : font->Glyphs)
 						{
 							SelectGlyph(vProjectFile, vFontInfos, glyph, false, vSelectionContainerEnum);
 						}
@@ -778,7 +779,7 @@ void SelectionHelper::UnSelectAllGlyphs(ProjectFile *vProjectFile, FontInfos *vF
 
 					if (font)
 					{
-						for (auto glyph : font->Glyphs)
+						for (const auto & glyph : font->Glyphs)
 						{
 							UnSelectGlyph(vProjectFile, vFontInfos, glyph, false, vSelectionContainerEnum);
 						}
@@ -1469,7 +1470,7 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile *vProjectFile)
 				Messaging::Instance()->AddError(true, &font.second, [this](void *vDatas)
 				{
 					ImGui::SetWindowFocus(FINAL_PANE);
-					MainFrame::Instance()->GetProject()->m_CurrentFont = (FontInfos*)vDatas;
+					MainFrame::Instance()->GetProject()->m_SelectedFont = (FontInfos*)vDatas;
 					FinalFontPane::Instance()->SetFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_CODEPOINT);
 					FinalFontPane::Instance()->PrepareSelection(MainFrame::Instance()->GetProject());
 				}, "Glyph codePoint found in double in font %s ! Font generation solo is prohibited until solved.", font.second.m_FontFileName.c_str());
@@ -1480,7 +1481,7 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile *vProjectFile)
 				Messaging::Instance()->AddError(true, &font.second, [this](void *vDatas)
 				{
 					ImGui::SetWindowFocus(FINAL_PANE);
-					MainFrame::Instance()->GetProject()->m_CurrentFont = (FontInfos*)vDatas;
+					MainFrame::Instance()->GetProject()->m_SelectedFont = (FontInfos*)vDatas;
 					FinalFontPane::Instance()->SetFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_NAMES);
 					FinalFontPane::Instance()->PrepareSelection(MainFrame::Instance()->GetProject());
 				}, "Glyph name found in double in font %s ! Font generation solo is prohibited until solved.", font.second.m_FontFileName.c_str());
