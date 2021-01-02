@@ -29,6 +29,8 @@
 
 #include <glad/glad.h>
 
+#include <array>
+
 FontInfos::FontInfos() = default;
 FontInfos::~FontInfos() = default;
 
@@ -253,25 +255,52 @@ std::string FontInfos::GetGlyphName(uint32_t vCodePoint)
 
 void FontInfos::DrawInfos()
 {
-	if (!m_ImFontAtlas.Fonts.empty())
+	if (!m_ImFontAtlas.Fonts.empty() && !m_InfosToDisplay.empty())
 	{
 		if (ImGui::BeginFramedGroup("Current Font Infos"))
 		{
-			if (!m_FontFilePathName.empty())
-			{
-				ImGui::Text("[Font path]");
-				if (ImGui::IsItemHovered())
-					ImGui::SetTooltip("%s", m_FontFilePathName.c_str());
-			}
+			const float aw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 2.0f;
 
-			ImGui::Text("Count Glyphs : %i", m_ImFontAtlas.Fonts[0]->Glyphs.size());
-			ImGui::Text("Count Selected Glyphs : %u", m_SelectedGlyphs.size());
-			ImGui::Text("Texture Size : %i x %i", m_ImFontAtlas.TexWidth, m_ImFontAtlas.TexHeight);
-			ImGui::Text("Ascent / Descent : %i / %i", m_Ascent, m_Descent);
-			//ImGui::Text("Line gap : %i", m_LineGap); // dont know what is it haha
-			//ImGui::Text("Scale pixel height : %.4f", m_Point); // same.., its used internally by ImGui but dont know what is it
-			ImGui::Text("Glyph Bounding Box :\n\tinf x : %i, inf y : %i\n\tsup x : %i, sup y : %i", 
-				m_BoundingBox.x, m_BoundingBox.y, m_BoundingBox.z, m_BoundingBox.w);
+			static ImGuiTableFlags flags =
+				ImGuiTableFlags_ColumnsWidthFixed | ImGuiTableFlags_RowBg |
+				ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
+				ImGuiTableFlags_NoHostExtendY | ImGuiTableFlags_Borders;
+			if (ImGui::BeginTable("##fontinfosTable", 2, flags, ImVec2(aw, ImGui::GetTextLineHeightWithSpacing() * 7)))
+			{
+				ImGui::TableSetupScrollFreeze(0, 1); // Make header always visible
+				ImGui::TableSetupColumn("Item", ImGuiTableColumnFlags_WidthAutoResize, -1, 0);
+				ImGui::TableSetupColumn("Infos", ImGuiTableColumnFlags_WidthStretch, -1, 1);
+				ImGui::TableHeadersRow(); // draw headers
+
+				m_InfosToDisplayClipper.Begin((int)m_InfosToDisplay.size(), ImGui::GetTextLineHeightWithSpacing());
+				while (m_InfosToDisplayClipper.Step())
+				{
+					for (int i = m_InfosToDisplayClipper.DisplayStart; i < m_InfosToDisplayClipper.DisplayEnd; i++)
+					{
+						if (i < 0) continue;
+
+						const auto& infos = m_InfosToDisplay[i];
+
+						ImGui::TableNextRow();
+
+						if (ImGui::TableSetColumnIndex(0)) // first column
+						{
+							ImGui::Selectable(infos.first.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap);
+						}
+						if (ImGui::TableSetColumnIndex(1)) // second column
+						{
+							float sw = ImGui::CalcTextSize(infos.second.c_str()).x;
+							ImGui::Text("%s", infos.second.c_str());
+							if (sw > aw - ImGui::GetCursorPosX())
+							{
+								if (ImGui::IsItemHovered())
+									ImGui::SetTooltip(infos.second.c_str());
+							}
+						}
+					}
+				}
+			}
+			ImGui::EndTable();
 
 			ImGui::EndFramedGroup(true);
 		}
@@ -290,6 +319,18 @@ void FontInfos::GetInfos()
 		stbtt_GetFontBoundingBox(&fontInfo, &m_BoundingBox.x, &m_BoundingBox.y, &m_BoundingBox.z, &m_BoundingBox.w);
 		m_Point = stbtt_ScaleForPixelHeight(&fontInfo, (float)m_FontSize);
 	}
+
+	//--------------------------------------------------------
+
+	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Font", m_FontFilePathName));
+	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Count Glyphs :", ct::toStr(m_ImFontAtlas.Fonts[0]->Glyphs.size())));
+	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Count Selected Glyphs :", ct::toStr(m_SelectedGlyphs.size())));
+	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Texture Size :", ct::toStr("%i x %i", m_ImFontAtlas.TexWidth, m_ImFontAtlas.TexHeight)));
+	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Ascent / Descent :", ct::toStr("%i / %i", m_Ascent, m_Descent)));
+	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Glyph Bounding Box Inf/Sup :", ct::toStr("x:%i,y:%i/x:%i,y:%i",
+		m_BoundingBox.x, m_BoundingBox.y, m_BoundingBox.z, m_BoundingBox.w)));
+	//m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Line gap :", ct::toStr("%i", m_LineGap))); // dont know what is it haha
+	//m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Scale pixel height :", ct::toStr("%.4f", m_Point))); // same.., its used internally by ImGui but dont know what is it
 }
 
 void FontInfos::GenerateCodePointToGlypNamesDB()

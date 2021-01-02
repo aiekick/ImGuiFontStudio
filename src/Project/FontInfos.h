@@ -23,6 +23,8 @@
 #include <imgui.h>
 #include <string>
 #include <set>
+#include <vector>
+#include <utility>
 
 struct GlyphsRange
 {
@@ -52,7 +54,9 @@ public: // not to save
 	ct::ivec4 m_BoundingBox;
 	float m_Point = 0.0f;
 	std::string m_FontFileName;
-	
+	std::vector<std::pair<std::string, std::string>> m_InfosToDisplay;
+	ImGuiListClipper m_InfosToDisplayClipper;
+
 public: // to save
 	std::map<uint32_t, GlyphInfos> m_SelectedGlyphs;
 	std::string m_FontPrefix; // peut servir pour la generation par lot

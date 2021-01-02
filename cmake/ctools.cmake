@@ -6,6 +6,8 @@ add_library(ctools STATIC ${CTOOLS_SOURCES} ${CTOOLS_HEADERS})
 
 add_definitions(-DGLAD)
 add_definitions(-DIMGUI)
+add_definitions(-DUSE_IMGUI="../imgui/imgui.h")
+add_definitions(-DUSE_GLFW3)
 
 include_directories(
     ${CTOOLS_INCLUDE_DIR}

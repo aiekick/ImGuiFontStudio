@@ -22,5 +22,5 @@ jobs:
     - name: upload artifact
       uses: actions/upload-artifact@v1
       with:
-        name: ImGuiFontStudio_Linux_x32
-        path: build/ImGuiFontStudio_Linux_x32
+        name: ImGuiFontStudio_x32
+        path: build/ImGuiFontStudio_x32

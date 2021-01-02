@@ -22,5 +22,5 @@ jobs:
     - name: upload artifact
       uses: actions/upload-artifact@v1
       with:
-        name: ImGuiFontStudio_Osx_x32.app
-        path: build/ImGuiFontStudio_Osx_x32.app
+        name: ImGuiFontStudio_x32.app
+        path: build/ImGuiFontStudio_x32.app
