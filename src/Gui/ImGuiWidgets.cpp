@@ -363,7 +363,8 @@ bool ImGui::RadioButtonLabeled(const char* label, bool active, bool disabled)
     if (w == window->ItemWidthDefault)	w = 0.0f; // no push item width
     const ImGuiID id = window->GetID(label);
     const ImVec2 label_size = CalcTextSize(label, nullptr, true);
-    ImVec2 bb_size = ImVec2(style.FramePadding.x * 2 - 1, style.FramePadding.y * 2 - 1) + label_size;
+	ImVec2 bb_size = ImGui::CalcItemSize(ImVec2(0, 0), label_size.x + style.FramePadding.x * 2.0f, label_size.y + style.FramePadding.y * 2.0f);
+    //bb_size = ImVec2(style.FramePadding.x * 2 - 1, style.FramePadding.y * 2 - 1) + label_size;
     bb_size.x = ImMax(w, bb_size.x);
 
     const ImRect check_bb(
@@ -966,11 +967,10 @@ bool ImGui::SliderScalarDefaultCompact(float width, const char* label, ImGuiData
 	const float w = width - style.FramePadding.x * 2.0f;
 
 	const ImVec2 label_size = CalcTextSize(label, NULL, true);
-	const ImRect frame_bb(window->DC.CursorPos, window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y * 2.0f));
-	const ImRect total_bb(frame_bb.Min, frame_bb.Max + ImVec2(label_size.x > 0.0f ? style.ItemInnerSpacing.x + label_size.x : 0.0f, 0.0f));
-
+	const ImRect total_bb(window->DC.CursorPos, window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y * 2.0f));
+	
 	ItemSize(total_bb, style.FramePadding.y);
-	if (!ItemAdd(total_bb, id, &frame_bb))
+	if (!ItemAdd(total_bb, id))
 		return false;
 
 	// Default format string when passing NULL
@@ -980,7 +980,7 @@ bool ImGui::SliderScalarDefaultCompact(float width, const char* label, ImGuiData
 		IM_ASSERT(0 && "DragInt(): Invalid format string!");
 
 	// Tabbing or CTRL-clicking on Slider turns it into an input box
-	const bool hovered = ItemHoverable(frame_bb, id);
+	const bool hovered = ItemHoverable(total_bb, id);
 	bool temp_input_is_active = TempInputIsActive(id);
 	if (!temp_input_is_active)
 	{
@@ -1002,16 +1002,16 @@ bool ImGui::SliderScalarDefaultCompact(float width, const char* label, ImGuiData
 
 	// Our current specs do NOT clamp when using CTRL+Click manual input, but we should eventually add a flag for that..
 	if (temp_input_is_active)
-		return TempInputScalar(frame_bb, id, label, data_type, p_data, format);// , p_min, p_max);
+		return TempInputScalar(total_bb, id, label, data_type, p_data, format);// , p_min, p_max);
 
 	// Draw frame
 	const ImU32 frame_col = GetColorU32(g.ActiveId == id ? ImGuiCol_FrameBgActive : g.HoveredId == id ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
-	RenderNavHighlight(frame_bb, id);
-	RenderFrame(frame_bb.Min, frame_bb.Max, frame_col, true, g.Style.FrameRounding);
+	RenderNavHighlight(total_bb, id);
+	RenderFrame(total_bb.Min, total_bb.Max, frame_col, true, g.Style.FrameRounding);
 
 	// Slider behavior
 	ImRect grab_bb;
-	const bool value_changed = SliderBehavior(frame_bb, id, data_type, p_data, p_min, p_max, format, ImGuiSliderFlags_None, &grab_bb);
+	const bool value_changed = SliderBehavior(total_bb, id, data_type, p_data, p_min, p_max, format, ImGuiSliderFlags_None, &grab_bb);
 	if (value_changed)
 		MarkItemEdited(id);
 
@@ -1021,12 +1021,12 @@ bool ImGui::SliderScalarDefaultCompact(float width, const char* label, ImGuiData
 
 	// display label / but not if input mode 
 	if (label_size.x > 0.0f && !temp_input_is_active)
-		RenderTextClipped(frame_bb.Min + ImVec2(style.ItemInnerSpacing.x, 0), frame_bb.Max, label, NULL, NULL, ImVec2(0.0f, 0.5f));
+		RenderTextClipped(total_bb.Min + ImVec2(style.ItemInnerSpacing.x, 0), total_bb.Max, label, NULL, NULL, ImVec2(0.0f, 0.5f));
 
 	// Display value using user-provided display format so user can add prefix/suffix/decorations to the value.
 	char value_buf[64];
 	const char* value_buf_end = value_buf + DataTypeFormatString(value_buf, IM_ARRAYSIZE(value_buf), data_type, p_data, format);
-	RenderTextClipped(frame_bb.Min, frame_bb.Max - ImVec2(style.ItemInnerSpacing.x, 0), value_buf, value_buf_end, NULL, ImVec2(1.0f, 0.5f));
+	RenderTextClipped(total_bb.Min, total_bb.Max - ImVec2(style.ItemInnerSpacing.x, 0), value_buf, value_buf_end, NULL, ImVec2(1.0f, 0.5f));
 
 	IMGUI_TEST_ENGINE_ITEM_INFO(id, label, window->DC.ItemFlags);
 	return value_changed;

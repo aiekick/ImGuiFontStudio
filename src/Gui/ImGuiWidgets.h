@@ -101,6 +101,62 @@ namespace ImGui
 		}
 		return res;
 	}
+	template<typename T>
+	IMGUI_API bool RadioButtonLabeled_BitWize(
+		const char* vLabelOK, const char* vLabelNOK, const char* vHelp, T* vContainer, T vFlag,
+		float vWidth = 0.0f,
+		bool vOneOrZeroAtTime = false, //only one selcted at a time
+		bool vAlwaysOne = true, // radio behavior, always one selected
+		T vFlagsToTakeIntoAccount = (T)0,
+		bool vDisableSelection = false) // radio witl use only theses flags
+	{
+		bool selected = *vContainer & vFlag;
+		const char* label = (selected ? vLabelOK : vLabelNOK);
+		//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
+		ImGui::PushItemWidth(vWidth);
+		bool res = RadioButtonLabeled(label, vHelp, &selected, vDisableSelection);
+		ImGui::PopItemWidth();
+		//ImGui::PopStyleVar();
+		if (res)
+		{
+			if (selected)
+			{
+				if (vOneOrZeroAtTime)
+				{
+					if (vFlagsToTakeIntoAccount)
+					{
+						if (vFlag & vFlagsToTakeIntoAccount)
+						{
+							*vContainer = (T)(*vContainer & ~vFlagsToTakeIntoAccount); // remove these flags
+							*vContainer = (T)(*vContainer | vFlag); // add
+						}
+					}
+					else *vContainer = vFlag; // set
+				}
+				else
+				{
+					if (vFlagsToTakeIntoAccount)
+					{
+						if (vFlag & vFlagsToTakeIntoAccount)
+						{
+							*vContainer = (T)(*vContainer & ~vFlagsToTakeIntoAccount); // remove these flags
+							*vContainer = (T)(*vContainer | vFlag); // add
+						}
+					}
+					else *vContainer = (T)(*vContainer | vFlag); // add
+				}
+			}
+			else
+			{
+				if (vOneOrZeroAtTime)
+				{
+					if (!vAlwaysOne) *vContainer = (T)(0); // remove all
+				}
+				else *vContainer = (T)(*vContainer & ~vFlag); // remove one
+			}
+		}
+		return res;
+	}
 	template<typename T> 
 	IMGUI_API bool MenuItem(
 		const char* label, const char *shortcut, T *vContainer, T vFlag, bool vOnlyOneSameTime = false)

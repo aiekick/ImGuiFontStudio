@@ -39,8 +39,11 @@
 				<glyph orgId="61666" newId="61666" orgName="undo" newName="undo"/>
 				<glyph orgId="61674" newId="61674" orgName="paste" newName="paste"/>
 				<glyph orgId="61686" newId="61686" orgName="file_text_alt" newName="file_type_text"/>
+				<glyph orgId="61696" newId="61696" orgName="double_angle_left" newName="set_mode"/>
 				<glyph orgId="61716" newId="61716" orgName="folder_close_alt" newName="folder"/>
 				<glyph orgId="61717" newId="61717" orgName="folder_open_alt" newName="folder_open"/>
+				<glyph orgId="61720" newId="61720" orgName="smile" newName="used"/>
+				<glyph orgId="61722" newId="61722" orgName="meh" newName="not_used"/>
 				<glyph orgId="61736" newId="61736" orgName="question" newName="help"/>
 				<glyph orgId="61737" newId="61737" orgName="_279" newName="about"/>
 				<glyph orgId="61738" newId="61738" orgName="exclamation" newName="exclamation"/>
@@ -68,7 +71,7 @@
 			<fontsize>32</fontsize>
 		</font>
 		<rangecoloring show="false" hash="42.606;14.789;27.817;0.5"/>
-		<previewcountglyph_x>34</previewcountglyph_x>
+		<previewcountglyph_x>5</previewcountglyph_x>
 		<mergedfontprefix>IGFS</mergedfontprefix>
 		<curglyphtooltip>true</curglyphtooltip>
 		<srcglyphtooltip>true</srcglyphtooltip>
@@ -76,7 +79,9 @@
 		<glyphpreviewscale>0.193</glyphpreviewscale>
 		<glyphpreviewshowcontrollines>false</glyphpreviewshowcontrollines>
 		<glyphpreviewquadbeziercounsegment>5</glyphpreviewquadbeziercounsegment>
-		<genmode>293</genmode>
+		<genmode>165</genmode>
 		<fonttomergein>fontawesome-webfont.ttf</fonttomergein>
+		<glyphdisplaytuningmode>2</glyphdisplaytuningmode>
+		<sourcefontpaneflags>1</sourcefontpaneflags>
 	</project>
 </config>

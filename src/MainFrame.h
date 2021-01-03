@@ -38,11 +38,10 @@ public:
 
 private:
 	ProjectFile m_ProjectFile;	
-
+	bool m_ShowAboutDialog = false;
 	bool m_ShowImGui = false;
 	bool m_ShowMetric = false;
 	bool m_ShowImGuiStyle = false;
-	bool m_ShowAboutDialog = false;
 
 public:
 	void Init();

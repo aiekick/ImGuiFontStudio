@@ -21,6 +21,14 @@
 
 #include <Project/FontInfos.h>
 #include <Generator/Generator.h>
+#include <Panes/SourceFontPane.h>
+
+enum GlyphDisplayTuningModeFlags
+{
+	GLYPH_DISPLAY_TUNING_MODE_NONE = 0,
+	GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT = (1 << 0),
+	GLYPH_DISPLAY_TUNING_MODE_GLYPH_SIZE = (1 << 1),
+};
 
 class ProjectFile : public conf::ConfigAbstract
 {
@@ -44,7 +52,11 @@ public: // to save
 	float m_GlyphPreview_Scale = 1.0f;
 	int m_GlyphPreview_QuadBezierCountSegments = 0; // count segments per bezier quad, 0 mean auto tesselation
 	bool m_GlyphPreview_ShowControlLines = false;
-
+	GlyphDisplayTuningModeFlags m_GlyphDisplayTuningMode =
+		GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT;
+	SourceFontPaneFlags m_SourceFontPaneFlags = 
+		SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH;
+	
 public: // dont save
 	FontInfos *m_SelectedFont = nullptr;
 	size_t m_CountSelectedGlyphs = 0; // for all fonts
@@ -56,7 +68,6 @@ private: // dont save
 	bool m_IsLoaded = false;
 	bool m_NeverSaved = false;
 	bool m_IsThereAnyNotSavedChanged = false;
-
 
 public:
 	ProjectFile();

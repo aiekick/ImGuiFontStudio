@@ -104,7 +104,7 @@ void SourceFontPane::DrawSourceFontPane(ProjectFile *vProjectFile)
 			{
 				if (vProjectFile->m_SelectedFont)
 				{
-					if (m_FontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH)
+					if (vProjectFile->m_SourceFontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH)
 					{
 						if (ImGui::BeginMenuBar())
 						{
@@ -134,7 +134,7 @@ void SourceFontPane::DrawSourceFontPane(ProjectFile *vProjectFile)
 						
 						DrawFontAtlas_Virtual(vProjectFile, vProjectFile->m_SelectedFont);
 					}
-					else if (m_FontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_TEXTURE)
+					else if (vProjectFile->m_SourceFontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_TEXTURE)
 					{
 						DrawFontTexture(vProjectFile->m_SelectedFont);
 					}
@@ -294,13 +294,13 @@ void SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile)
 					{
 						ImGui::RadioButtonLabeled_BitWize<SourceFontPaneFlags>(
 							ICON_IGFS_GLYPHS " Glyphs", "Show Font Glyphs", 
-							&m_FontPaneFlags, SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH, 0.0f, true);
+							&vProjectFile->m_SourceFontPaneFlags, SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH, 0.0f, true);
 						
 						ImGui::SameLine();
 
 						ImGui::RadioButtonLabeled_BitWize<SourceFontPaneFlags>(
 							ICON_IGFS_TEXTURE " Texture", "Show Font Texture", 
-							&m_FontPaneFlags, SourceFontPaneFlags::SOURCE_FONT_PANE_TEXTURE, 0.0f, true);
+							&vProjectFile->m_SourceFontPaneFlags, SourceFontPaneFlags::SOURCE_FONT_PANE_TEXTURE, 0.0f, true);
 						
 						ImGui::EndFramedGroup(true);
 					}
@@ -309,7 +309,7 @@ void SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile)
 					{
 						bool needFontReGen = false;
 
-						const float aw = ImGui::GetContentRegionAvail().x;
+						float aw = ImGui::GetContentRegionAvail().x;
 
 						needFontReGen |= ImGui::SliderIntDefaultCompact(aw, "Font Size", &vProjectFile->m_SelectedFont->m_FontSize, 7, 50, defaultFontInfosValues.m_FontSize);
 						needFontReGen |= ImGui::SliderIntDefaultCompact(aw, "Font Anti-aliasing", &vProjectFile->m_SelectedFont->m_Oversample, 1, 5, defaultFontInfosValues.m_Oversample);
@@ -322,26 +322,42 @@ void SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile)
 							vProjectFile->SetProjectChange();
 						}
 
-						if (m_FontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH)
+						if (vProjectFile->m_SourceFontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH)
 						{
+							const auto style = &ImGui::GetStyle();
+							static float radioButtonWidth = ImGui::GetFrameHeight();
+							float aw = ImGui::GetContentRegionAvail().x - style->ItemSpacing.x - radioButtonWidth;
+
 							bool change = false;
 							if (ImGui::SliderIntDefaultCompact(aw, "Glyph Count X", &vProjectFile->m_Preview_Glyph_CountX, 50, 1, defaultProjectValues.m_Preview_Glyph_CountX))
 							{
 								change = true;
+								vProjectFile->m_GlyphDisplayTuningMode = GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT;
 								vProjectFile->m_Preview_Glyph_CountX = ct::maxi(vProjectFile->m_Preview_Glyph_CountX, 1); // can prevent bugs (like div by zero) everywhere when user input value
 							}
-							if (ImGui::SliderFloatDefaultCompact(aw, "Glyph Width", &vProjectFile->m_Preview_Glyph_Width, 1.0f,
-								GlyphDisplayHelper::currentPaneAvailWidth, defaultProjectValues.m_Preview_Glyph_Width))
+							ImGui::SameLine();
+							ImGui::RadioButtonLabeled_BitWize<GlyphDisplayTuningModeFlags>(
+								ICON_IGFS_USED "##GlypCountIsMaster",
+								ICON_IGFS_NOT_USED "##GlypCountIsMaster",
+								"Apply Glyph Count Policy on Resize",
+								&vProjectFile->m_GlyphDisplayTuningMode, GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT, radioButtonWidth, true);
+							radioButtonWidth = ImGui::GetItemRectSize().x;
+
+							if (ImGui::SliderFloatDefaultCompact(aw, "Glyph Width", &vProjectFile->m_Preview_Glyph_Width, 10.0f,
+								GlyphDisplayHelper::currentPaneAvailWidth, defaultProjectValues.m_Preview_Glyph_Width * 0.5f))
 							{
 								change = true;
-								GlyphDisplayHelper::glyphWidth_Is_Pilot = true; // during one frame to this Slider, glyphSize is the master on glyphCount
-								vProjectFile->m_Preview_Glyph_Width = ct::maxi(vProjectFile->m_Preview_Glyph_Width, 1.0f); // can prevent bugs (like div by zero) everywhere when user input value
-							}
-							else
-							{
-								GlyphDisplayHelper::glyphWidth_Is_Pilot = false;
+								vProjectFile->m_GlyphDisplayTuningMode = GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_SIZE;
+								vProjectFile->m_Preview_Glyph_Width = ct::maxi(vProjectFile->m_Preview_Glyph_Width, 10.0f); // can prevent bugs (like div by zero) everywhere when user input value
 							}
 
+							ImGui::SameLine();
+							ImGui::RadioButtonLabeled_BitWize<GlyphDisplayTuningModeFlags>(
+								ICON_IGFS_USED "##GlypSizeIsMaster",
+								ICON_IGFS_NOT_USED "##GlypSizeIsMaster",
+								"Apply Glyph Width Policy on Resize",
+								&vProjectFile->m_GlyphDisplayTuningMode, GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_SIZE, radioButtonWidth, true);
+							
 							ImGui::FramedGroupSeparator();
 
 							ImGui::Checkbox("Show Range Colors", &vProjectFile->m_ShowRangeColoring);
@@ -643,7 +659,7 @@ void SourceFontPane::SelectFont(ProjectFile *vProjectFile, FontInfos *vFontInfos
 	}
 }
 
-bool SourceFontPane::IsFlagSet(SourceFontPaneFlags vFlag)
+bool SourceFontPane::IsFlagSet(ProjectFile* vProjectFile, SourceFontPaneFlags vFlag)
 {
-	return (m_FontPaneFlags & vFlag);
+	return (vProjectFile->m_SourceFontPaneFlags & vFlag);
 }

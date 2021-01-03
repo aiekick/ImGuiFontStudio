@@ -116,7 +116,7 @@ void GeneratorPane::DrawGeneratorPane(ProjectFile *vProjectFile)
 		{
 			if (vProjectFile && vProjectFile->IsLoaded())
 			{
-				if (SourceFontPane::Instance()->IsFlagSet(SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH))
+				if (SourceFontPane::Instance()->IsFlagSet(vProjectFile, SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH))
 				{
 					SelectionHelper::Instance()->DrawMenu(vProjectFile);
 

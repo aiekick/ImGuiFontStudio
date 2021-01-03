@@ -40,7 +40,6 @@ private: // private vars
 	ImGuiListClipper m_FontsClipper;
 
 private: // private enum
-	SourceFontPaneFlags m_FontPaneFlags = SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH;
 	float m_CurrentWindowWidth = 0.0f;
 
 public:
@@ -54,7 +53,7 @@ public:
 	void CloseSelectedFont(ProjectFile* vProjectFile);
 	void SelectFont(ProjectFile* vProjectFile, FontInfos* vFontInfos);
 
-	bool IsFlagSet(SourceFontPaneFlags vFlag);
+	bool IsFlagSet(ProjectFile* vProjectFile, SourceFontPaneFlags vFlag);
 
 private: 
 	void DrawFilterBar(ProjectFile* vProjectFile, FontInfos* vFontInfos);

@@ -204,7 +204,14 @@ void Generator::GenerateHeader_One(
 					}
 				}
 
-				for (const auto &it : glyphNames)
+				// convert first and let in map.
+				// like that they will be ordered by names
+				// the issue was to convert and write directly
+				// so the original tag "SetMode" was writen before the original tag "about".
+				// its not wanted, so we save and order the finla result we want
+				// and after we will write in header file
+				std::map<std::string, uint32_t> finalGlyphNames;
+				for (const auto& it : glyphNames)
 				{
 					std::string glyphName = it.first;
 					ct::replaceString(glyphName, " ", "_");
@@ -218,10 +225,15 @@ void Generator::GenerateHeader_One(
 					// because a define with '.' is a problem for the compiler
 					ct::replaceString(glyphName, ".", "DOT_");
 
-					for (auto & c : glyphName)
+					for (auto& c : glyphName)
 						c = (char)toupper((int)c);
 
-					glyphs += "#define ICON" + prefix + "_" + glyphName + " u8\"\\u" + ct::toHexStr(codePoint) + "\"\n";
+					finalGlyphNames[glyphName] = codePoint;
+				}
+
+				for (const auto& it : finalGlyphNames)
+				{
+					glyphs += "#define ICON" + prefix + "_" + it.first + " u8\"\\u" + ct::toHexStr(it.second) + "\"\n";
 				}
 			}
 			else if (vFlags & GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_CODEPOINT)
@@ -332,7 +344,14 @@ void Generator::GenerateHeader_Merged(
 					}
 				}
 
-				for (const auto &it : glyphNames)
+				// convert first and let in map.
+				// like that they will be ordered by names
+				// the issue was to convert and write directly
+				// so the original tag "SetMode" was writen before the original tag "about".
+				// its not wanted, so we save and order the finla result we want
+				// and after we will write in header file
+				std::map<std::string, uint32_t> finalGlyphNames;
+				for (const auto& it : glyphNames)
 				{
 					std::string glyphName = it.first;
 					ct::replaceString(glyphName, " ", "_");
@@ -346,10 +365,15 @@ void Generator::GenerateHeader_Merged(
 					// because a define with '.' is a problem for the compiler
 					ct::replaceString(glyphName, ".", "DOT_");
 
-					for (auto & c : glyphName)
+					for (auto& c : glyphName)
 						c = (char)toupper((int)c);
 
-					glyphs += "#define ICON" + prefix + "_" + glyphName + " u8\"\\u" + ct::toHexStr(codePoint) + "\"\n";
+					finalGlyphNames[glyphName] = codePoint;
+				}
+
+				for (const auto& it : finalGlyphNames)
+				{
+					glyphs += "#define ICON" + prefix + "_" + it.first + " u8\"\\u" + ct::toHexStr(it.second) + "\"\n";
 				}
 			}
 			else if (vFlags & GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_CODEPOINT)

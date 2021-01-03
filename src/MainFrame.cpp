@@ -605,9 +605,12 @@ std::string MainFrame::getXml(const std::string& vOffset)
 	str += ImGuiThemeHelper::Instance()->getXml(vOffset);
 	str += LayoutManager::Instance()->getXml(vOffset);
 	str += vOffset + "<bookmarks>" + igfd::ImGuiFileDialog::Instance()->SerializeBookmarks() + "</bookmarks>\n";
-	if (GetProject())
-		str += vOffset + "<project>" + GetProject()->m_ProjectFilePathName + "</project>\n";
-
+	str += vOffset + "<showaboutdialog>" + (m_ShowAboutDialog ? "true" : "false") + "</showaboutdialog>\n";
+	str += vOffset + "<showimgui>" + (m_ShowImGui ? "true" : "false") + "</showimgui>\n";
+	str += vOffset + "<showmetric>" + (m_ShowMetric ? "true" : "false") + "</showmetric>\n";
+	str += vOffset + "<showimguistyle>" + (m_ShowImGuiStyle ? "true" : "false") + "</showimguistyle>\n";
+	str += vOffset + "<project>" + m_ProjectFile.m_ProjectFilePathName + "</project>\n";
+	
 	return str;
 }
 
@@ -629,9 +632,16 @@ bool MainFrame::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 
 	if (strName == "bookmarks")
 		igfd::ImGuiFileDialog::Instance()->DeserializeBookmarks(strValue);
-
-	if (strName == "project")
+	else if (strName == "project")
 		LoadProject(strValue);
+	else if (strName == "showaboutdialog")
+		m_ShowAboutDialog = ct::ivariant(strValue).GetB();
+	else if (strName == "showimgui")
+		m_ShowImGui = ct::ivariant(strValue).GetB();
+	else if (strName == "showmetric")
+		m_ShowMetric = ct::ivariant(strValue).GetB();
+	else if (strName == "showimguistyle")
+		m_ShowImGuiStyle = ct::ivariant(strValue).GetB();
 
 	return true;
 }

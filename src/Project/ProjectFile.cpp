@@ -232,6 +232,9 @@ std::string ProjectFile::getXml(const std::string& vOffset)
 	str += vOffset + "\t<genmode>" + ct::toStr(m_GenMode) + "</genmode>\n";
 	str += vOffset + "\t<fonttomergein>" + m_FontToMergeIn + "</fonttomergein>\n";
 	
+	str += vOffset + "\t<glyphdisplaytuningmode>" + ct::toStr(m_GlyphDisplayTuningMode) + "</glyphdisplaytuningmode>\n";
+	str += vOffset + "\t<sourcefontpaneflags>" + ct::toStr(m_SourceFontPaneFlags) + "</sourcefontpaneflags>\n";
+
 	str += vOffset + "</project>\n";
 
 	return str;
@@ -299,6 +302,10 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 			m_GlyphPreview_ShowControlLines = ct::ivariant(strValue).GetB();
 		else if (strName == "glyphpreviewquadbeziercounsegment")
 			m_GlyphPreview_QuadBezierCountSegments = ct::ivariant(strValue).GetI();
+		else if (strName == "glyphdisplaytuningmode")
+			m_GlyphDisplayTuningMode = (GlyphDisplayTuningModeFlags)ct::ivariant(strValue).GetI();
+		else if (strName == "sourcefontpaneflags")
+			m_SourceFontPaneFlags = (SourceFontPaneFlags)ct::ivariant(strValue).GetI();
 	}
 
 	return true;
