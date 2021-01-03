@@ -53,8 +53,9 @@ void LayoutManager::Init()
 		m_FirstLayout = true; // need default layout
 		LogStr("We will apply default layout :)");
 	}
-
+#ifdef _DEBUG
 	DebugPane::Instance()->Init();
+#endif
 	FinalFontPane::Instance()->Init();
 	FontStructurePane::Instance()->Init();
 	GeneratorPane::Instance()->Init();
@@ -65,7 +66,9 @@ void LayoutManager::Init()
 
 void LayoutManager::Unit()
 {
+#ifdef _DEBUG
 	DebugPane::Instance()->Unit();
+#endif
 	FinalFontPane::Instance()->Unit();
 	FontStructurePane::Instance()->Unit();
 	GeneratorPane::Instance()->Unit();
@@ -281,7 +284,9 @@ PaneFlags LayoutManager::GetFocusedPanes()
 	if (IsSpecificPaneFocused(GLYPH_PANE))			flag = (PaneFlags)((int32_t)flag | (int32_t)PaneFlags::PANE_GLYPH);
 	if (IsSpecificPaneFocused(FONT_STRUCTURE_PANE))	flag = (PaneFlags)((int32_t)flag | (int32_t)PaneFlags::PANE_FONT_STRUCTURE);
 	if (IsSpecificPaneFocused(FONT_PREVIEW_PANE))	flag = (PaneFlags)((int32_t)flag | (int32_t)PaneFlags::PANE_FONT_PREVIEW);
+#ifdef _DEBUG
 	if (IsSpecificPaneFocused(DEBUG_PANE))			flag = (PaneFlags)((int32_t)flag | (int32_t)PaneFlags::PANE_DEBUG);
+#endif
 
 	return flag;
 }
@@ -296,7 +301,9 @@ void LayoutManager::SetFocusedPanes(PaneFlags vActivePanes)
 	if (vActivePanes & PaneFlags::PANE_GLYPH)			FocusSpecificPane(GLYPH_PANE);
 	if (vActivePanes & PaneFlags::PANE_FONT_STRUCTURE)	FocusSpecificPane(FONT_STRUCTURE_PANE);
 	if (vActivePanes & PaneFlags::PANE_FONT_PREVIEW)	FocusSpecificPane(FONT_PREVIEW_PANE);
+#ifdef _DEBUG
 	if (vActivePanes & PaneFlags::PANE_DEBUG)			FocusSpecificPane(DEBUG_PANE);
+#endif
 }
 
 ///////////////////////////////////////////////////////
