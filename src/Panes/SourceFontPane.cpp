@@ -344,7 +344,7 @@ void SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile)
 							radioButtonWidth = ImGui::GetItemRectSize().x;
 
 							if (ImGui::SliderFloatDefaultCompact(aw, "Glyph Width", &vProjectFile->m_Preview_Glyph_Width, 10.0f,
-								GlyphDisplayHelper::currentPaneAvailWidth, defaultProjectValues.m_Preview_Glyph_Width * 0.5f))
+								GlyphDisplayHelper::currentPaneAvailWidth * 0.5f, defaultProjectValues.m_Preview_Glyph_Width))
 							{
 								change = true;
 								vProjectFile->m_GlyphDisplayTuningMode = GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_SIZE;
