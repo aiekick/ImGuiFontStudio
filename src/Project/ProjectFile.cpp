@@ -45,6 +45,7 @@ void ProjectFile::Clear()
 	m_ShowRangeColoring = false;
 	m_RangeColoringHash = ImVec4(10, 15, 35, 0.5f);
 	m_Preview_Glyph_CountX = 20;
+	m_Preview_Glyph_Width = 50;
 	m_SelectedFont = nullptr;
 	m_CountSelectedGlyphs = 0; // for all fonts
 	m_IsLoaded = false;
@@ -218,7 +219,8 @@ std::string ProjectFile::getXml(const std::string& vOffset)
 		(m_ShowRangeColoring ? "true" : "false") + "\" hash=\"" + 
 		ct::fvec4(m_RangeColoringHash).string() + "\"/>\n";
 
-	str += vOffset + "\t<previewcountglyph_x>" + ct::toStr(m_Preview_Glyph_CountX) + "</previewcountglyph_x>\n";
+	str += vOffset + "\t<previewglyphcount>" + ct::toStr(m_Preview_Glyph_CountX) + "</previewglyphcount>\n";
+	str += vOffset + "\t<previewglyphwidth>" + ct::toStr(m_Preview_Glyph_Width) + "</previewglyphwidth>\n";
 	str += vOffset + "\t<mergedfontprefix>" + m_MergedFontPrefix + "</mergedfontprefix>\n";
 
 	str += vOffset + "\t<curglyphtooltip>" + (m_CurrentPane_ShowGlyphTooltip ? "true" : "false") + "</curglyphtooltip>\n";
@@ -282,8 +284,10 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 					m_RangeColoringHash = ct::toImVec4(ct::fvariant(attValue).GetV4());
 			}
 		}
-		else if (strName == "previewcountglyph_x")
+		else if (strName == "previewglyphcount")
 			m_Preview_Glyph_CountX = ct::ivariant(strValue).GetI();
+		else if (strName == "previewglyphwidth")
+			m_Preview_Glyph_Width = ct::ivariant(strValue).GetI();
 		else if (strName == "mergedfontprefix")
 			m_MergedFontPrefix = strValue;
 		else if (strName == "genmode")
