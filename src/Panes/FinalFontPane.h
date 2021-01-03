@@ -47,15 +47,6 @@ class ProjectFile;
 class FontInfos;
 class FinalFontPane : public AbstractPane
 {
-public:
-	static void CalcGlyphsCountAndSize(
-		ImVec2* vCellSize,						/* cell size						*/
-		ImVec2* vGlyphSize,						/* glyph size (cell - paddings)		*/
-		uint32_t* vGlyphCountX,					/* count glypoh ot show in X axis	*/
-		bool vGlyphEdited = false,				/* in edition						*/
-		bool vForceEditMode = false,			/* edition forced					*/
-		bool vForceEditModeOneColumn = false);	/* edition in one column			*/
-
 private:
 	std::vector<GlyphInfos*> m_GlyphsMergedNoOrder;
 	std::map<uint32_t, std::vector<GlyphInfos*>> m_GlyphsMergedOrderedByCodePoints;

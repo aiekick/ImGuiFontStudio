@@ -146,7 +146,7 @@ void DebugPane::DrawDebugGlyphPane(ProjectFile* /*vProjectFile*/)
 		for (auto &co : g->coords)
 		{
 			ImGui::PushID(++paneWidgetId);
-			bool res = ImGui::CollapsingHeader_SmallHeight("Contour", 0.5f, -1, true);
+			bool res = ImGui::CollapsingHeader_SmallHeight("Contour", 0.7f, -1, true);
 			ImGui::PopID();
 			if (res)
 			{

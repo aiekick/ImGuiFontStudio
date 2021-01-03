@@ -110,13 +110,13 @@ void LayoutManager::ApplyInitialDockingLayout(ImVec2 vSize)
 	float bottomWidth = 200.0f;
 
 	ImGuiID dockMainID = m_DockSpaceID; // This variable will track the document node, however we are not using it here as we aren't docking anything into it.
-	ImGuiID dockParamID = ImGui::DockBuilderSplitNode(dockMainID, ImGuiDir_Left, leftWidth / vSize.x, nullptr, &dockMainID);
+	ImGuiID dockLeftID = ImGui::DockBuilderSplitNode(dockMainID, ImGuiDir_Left, leftWidth / vSize.x, nullptr, &dockMainID);
 	ImGuiID dockRightID = ImGui::DockBuilderSplitNode(dockMainID, ImGuiDir_Right, rightWidth / vSize.x, nullptr, &dockMainID);
 	ImGuiID dockBottomID = ImGui::DockBuilderSplitNode(dockMainID, ImGuiDir_Down, bottomWidth / vSize.y, nullptr, &dockMainID);
 	//ImGuiID dockSelectionID = ImGui::DockBuilderSplitNode(dockRight, ImGuiDir_Up, 0.50f, NULL, &dockRight);
 	//ImGuiID dockGeneratorID = ImGui::DockBuilderSplitNode(dockRight, ImGuiDir_Down, 0.50f, NULL, &dockRight);
 
-	ImGui::DockBuilderDockWindow(PARAM_PANE, dockParamID);
+	ImGui::DockBuilderDockWindow(PARAM_PANE, dockLeftID);
 	ImGui::DockBuilderDockWindow(SOURCE_PANE, dockMainID);
 	ImGui::DockBuilderDockWindow(FINAL_PANE, dockMainID);
 	ImGui::DockBuilderDockWindow(GENERATOR_PANE, dockRightID); // dockGeneratorID
@@ -125,7 +125,7 @@ void LayoutManager::ApplyInitialDockingLayout(ImVec2 vSize)
 	ImGui::DockBuilderDockWindow(FONT_STRUCTURE_PANE, dockMainID);
 	ImGui::DockBuilderDockWindow(FONT_PREVIEW_PANE, dockBottomID);
 #ifdef _DEBUG
-	ImGui::DockBuilderDockWindow(DEBUG_PANE, dockRightID);
+	ImGui::DockBuilderDockWindow(DEBUG_PANE, dockLeftID);
 #endif
 	ImGui::DockBuilderFinish(m_DockSpaceID);
 

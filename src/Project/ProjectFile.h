@@ -29,6 +29,7 @@ public: // to save
 	bool m_ShowRangeColoring = false;
 	ImVec4 m_RangeColoringHash = ImVec4(10, 15, 35, 0.5f);
 	int m_Preview_Glyph_CountX = 20;
+	float m_Preview_Glyph_Width = 50;
 	std::string m_ProjectFilePathName;
 	std::string m_ProjectFilePath;
 	std::string m_MergedFontPrefix;

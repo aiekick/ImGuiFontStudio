@@ -18,7 +18,73 @@
  */
 #include "GlyphInfos.h"
 
+#include <Project/ProjectFile.h>
+
 #include <utility>
+
+#define IMGUI_DEFINE_MATH_OPERATORS
+#include <imgui/imgui_internal.h>
+
+ ///////////////////////////////////////////////////////////////////////////////////
+ //// PUBLIC : STATIC //////////////////////////////////////////////////////////////
+ ///////////////////////////////////////////////////////////////////////////////////
+
+float GlyphDisplayHelper::currentPaneAvailWidth = 0.0f;
+bool GlyphDisplayHelper::glyphWidth_Is_Pilot = false;
+
+int GlyphDisplayHelper::CalcGlyphsCountAndSize(
+	ProjectFile* vProjectFile,				/* project file for save some vars  */
+	ImVec2* vCellSize,						/* cell size						*/
+	ImVec2* vGlyphSize,						/* glyph size (cell - paddings)		*/
+	bool vGlyphEdited,						/* in edition						*/
+	bool vForceEditMode,					/* edition forced					*/
+	bool vForceEditModeOneColumn			/* edition in one column			*/)
+{
+	if (vProjectFile && vCellSize && vGlyphSize)
+	{
+		currentPaneAvailWidth = ImGui::GetContentRegionAvail().x;
+		
+		if (glyphWidth_Is_Pilot) // we have one frame for doing that
+		{
+			vProjectFile->m_Preview_Glyph_CountX = (int)(currentPaneAvailWidth / ct::maxi(vProjectFile->m_Preview_Glyph_Width, 1.0f));
+		}
+
+		vProjectFile->m_Preview_Glyph_Width = currentPaneAvailWidth / (float)ct::maxi(vProjectFile->m_Preview_Glyph_CountX, 1);
+
+		int glyphCount = vProjectFile->m_Preview_Glyph_CountX;
+		float glyphSize = (float)vProjectFile->m_Preview_Glyph_Width;
+		
+		if (glyphCount > 0)
+		{
+			*vCellSize = ImVec2(glyphSize, glyphSize);
+			*vGlyphSize = *vCellSize - ImGui::GetStyle().ItemSpacing - ImGui::GetStyle().FramePadding * 2.0f;
+
+			if (vGlyphEdited || vForceEditMode)
+			{
+				// we will forgot vGlyphCountX
+				// cell_size_y will be item height x 2 + padding_y
+				// cell_size_x will be cell_size_y + padding_x + 100
+				const ImVec2 label_size = ImGui::CalcTextSize("gt", nullptr, true);
+				const ImVec2 frame_size = ImGui::CalcItemSize(ImVec2(0, 0), ImGui::CalcItemWidth(),
+					label_size.y + ImGui::GetStyle().FramePadding.y * 2.0f);
+				float cell_size_y = frame_size.y * 2.0f + ImGui::GetStyle().FramePadding.y;
+				float cell_size_x = cell_size_y + ImGui::GetStyle().FramePadding.x + GLYH_EDIT_CONTROl_WIDTH;
+				glyphCount = ct::maxi(1, (int)ct::floor(currentPaneAvailWidth / cell_size_x));
+				*vGlyphSize = ImVec2(cell_size_y, cell_size_y);
+			}
+
+			if (vForceEditModeOneColumn && vForceEditMode)
+			{
+				glyphCount = 1;
+			}
+		}
+
+		return glyphCount;
+	}
+
+	assert(0);
+	return 0;
+}
 
  //////////////////////////////////////////////////////////
  //////////////////////////////////////////////////////////

@@ -41,6 +41,7 @@ private: // private vars
 
 private: // private enum
 	SourceFontPaneFlags m_FontPaneFlags = SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH;
+	float m_CurrentWindowWidth = 0.0f;
 
 public:
 	void Init() override;

@@ -393,7 +393,12 @@ void FontInfos::CreateFontTexture()
 		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
-		m_ImFontAtlas.TexID = reinterpret_cast<ImTextureID>(id);
+
+		// size_t is 4 bytes sized for x32 and 8 bytes sizes for x64.
+		// TexID is ImTextureID is a void so same size as size_t
+		// id is a uint so 4 bytes on x32 and x64
+		// so conversion first on size_t (uint32/64) and after on ImTextureID give no warnings
+		m_ImFontAtlas.TexID = (ImTextureID)(size_t)id; 
 
 		glBindTexture(GL_TEXTURE_2D, last_texture);
 	}
@@ -401,10 +406,11 @@ void FontInfos::CreateFontTexture()
 
 void FontInfos::DestroyFontTexture()
 {
-    // use (size_t) instead of (Gluint) for avoid error : 
-	// << Cast from pointer to smaller type 'int' loses information >> on MAcOs mojave..
-    // it weird than this trick work...
-    GLuint id = reinterpret_cast<GLuint>(m_ImFontAtlas.TexID);
+	// size_t is 4 bytes sized for x32 and 8 bytes sizes for x64.
+	// TexID is ImTextureID is a void so same size as size_t
+	// id is a uint so 4 bytes on x32 and x64
+	// so conversion first on size_t (uint32/64) and after on GLuint give no warnings
+    GLuint id = (GLuint)(size_t)m_ImFontAtlas.TexID;
 	if (id)
 	{
 		glDeleteTextures(1, &id);

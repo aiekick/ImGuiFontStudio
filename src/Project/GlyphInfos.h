@@ -23,6 +23,29 @@
 #include <ctools/cTools.h>
 #include <sfntly/table/truetype/glyph_table.h>
 
+#define GLYH_EDIT_CONTROl_WIDTH 180.0f
+
+class ProjectFile;
+class GlyphDisplayHelper
+{
+public:
+	static float currentPaneAvailWidth;
+	static bool glyphWidth_Is_Pilot;
+	// mean the current parameter glyphSize is going to be tuned at this moment
+	// the parameter glyphCount will be computed accroding to glyphSize
+	// the normal case, is glyphSize computed with glyphCount
+	// we have one frame for doing that
+
+public:
+	static int CalcGlyphsCountAndSize(			/* return new glyph count x				*/
+		ProjectFile* vProjectFile,				/* project file for save some vars		*/
+		ImVec2* vCellSize,						/* cell size							*/
+		ImVec2* vGlyphSize,						/* glyph size (cell - paddings)			*/
+		bool vGlyphEdited = false,				/* in edition							*/
+		bool vForceEditMode = false,			/* edition forced						*/
+		bool vForceEditModeOneColumn = false);	/* edition in one column				*/
+};
+
 class SimpleGlyph_Solo
 {
 public:
