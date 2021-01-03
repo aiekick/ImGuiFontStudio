@@ -29,3 +29,7 @@
 	path = 3rdparty/imgui
 	url = https://github.com/aiekick/imgui.git
 	branch = tables_merged_in_docking
+[submodule "3rdparty/stb"]
+	path = 3rdparty/stb
+	url = https://github.com/nothings/stb
+	branch = master

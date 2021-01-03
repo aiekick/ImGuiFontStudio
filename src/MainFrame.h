@@ -55,6 +55,8 @@ public:
 
 	void Display(ImVec2 vPos, ImVec2 vSize);
 
+	GLFWwindow* GetGLFWwindow() { return m_Window; }
+
 public: // save : on quit or project loading
 	void IWantToCloseTheApp(); // user want close app, but we want to ensure its saved
 

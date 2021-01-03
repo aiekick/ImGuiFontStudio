@@ -22,12 +22,12 @@
 #include <ImGuiFileDialog/ImGuiFileDialog/ImGuiFileDialog.h>
 
 #include <MainFrame.h>
-
-#include <Panes/Manager/LayoutManager.h>
-#include <Panes/FinalFontPane.h>
+#include <Generator/HeaderPictureGenerator.h>
 #include <Helper/SelectionHelper.h>
-#include <Project/ProjectFile.h>
+#include <Panes/FinalFontPane.h>
+#include <Panes/Manager/LayoutManager.h>
 #include <Project/FontInfos.h>
+#include <Project/ProjectFile.h>
 
 #include <cinttypes> // printf zu
 
@@ -79,6 +79,27 @@ void SourceFontPane::DrawDialogsAndPopups(ProjectFile * vProjectFile)
 			}
 
 			igfd::ImGuiFileDialog::Instance()->CloseDialog("OpenFontDlg");
+		}
+
+		if (igfd::ImGuiFileDialog::Instance()->FileDialog("SaveFontToPictureFile", ImGuiWindowFlags_NoDocking, min, max))
+		{
+			if (igfd::ImGuiFileDialog::Instance()->IsOk)
+			{
+				auto atlas = dynamic_cast<ImFontAtlas*>((ImFontAtlas*)igfd::ImGuiFileDialog::Instance()->GetUserDatas());
+				if (atlas)
+				{
+					GLuint textureToSave = (GLuint)(size_t)atlas->TexID;
+					if (textureToSave)
+					{
+						auto win = MainFrame::Instance()->GetGLFWwindow();
+						auto file = igfd::ImGuiFileDialog::Instance()->GetFilePathName();
+						HeaderPictureGenerator::SaveTextureToPng(win, file, textureToSave,
+							ct::uvec2(atlas->TexWidth, atlas->TexHeight), 4U);
+					}
+				}
+			}
+
+			igfd::ImGuiFileDialog::Instance()->CloseDialog("SaveFontToPictureFile");
 		}
 	}
 }
@@ -573,6 +594,17 @@ void SourceFontPane::DrawFontTexture(FontInfos *vFontInfos)
 		{
 			if (vFontInfos->m_ImFontAtlas.TexID)
 			{
+				if (ImGui::BeginMenuBar())
+				{
+					if (ImGui::MenuItem("Save to File"))
+					{
+						igfd::ImGuiFileDialog::Instance()->OpenModal("SaveFontToPictureFile", "Svae Font Testure to File", ".png", 
+							".", 0, igfd::UserDatas(&vFontInfos->m_ImFontAtlas), ImGuiFileDialogFlags_ConfirmOverwrite);
+					}
+
+					ImGui::EndMenuBar();
+				}
+
 				float w = ImGui::GetContentRegionAvail().x;
 				float h = w * (float)vFontInfos->m_ImFontAtlas.TexHeight;
 				if (vFontInfos->m_ImFontAtlas.TexWidth > 0)

@@ -185,6 +185,8 @@ void Generator::GenerateHeader_One(
 			uint32_t maxCodePoint = 0;
 			std::string glyphs;
 
+			std::map<std::string, uint32_t> finalGlyphNames;
+			
 			if (vFlags & GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES)
 			{
 				std::map<std::string, uint32_t> glyphNames;
@@ -210,7 +212,6 @@ void Generator::GenerateHeader_One(
 				// so the original tag "SetMode" was writen before the original tag "about".
 				// its not wanted, so we save and order the finla result we want
 				// and after we will write in header file
-				std::map<std::string, uint32_t> finalGlyphNames;
 				for (const auto& it : glyphNames)
 				{
 					std::string glyphName = it.first;
@@ -272,10 +273,17 @@ void Generator::GenerateHeader_One(
 					for (auto & c : glyphName)
 						c = (char)toupper((int)c);
 
+					finalGlyphNames[glyphName] = codePoint; 
+					
 					glyphs += "#define ICON" + prefix + "_" + glyphName + " u8\"\\u" + ct::toHexStr(codePoint) + "\"\n";
 				}
 			}
 
+			if (vFlags & GENERATOR_MODE_HEADER_PICTURE)
+			{
+				m_HeaderPictureGenerator.Generate(vFilePathName, vFontInfos);
+			}
+			
 			// code point range
 			header += "#define ICON_MIN" + prefix + " 0x" + ct::toHexStr(minCodePoint) + "\n";
 			header += "#define ICON_MAX" + prefix + " 0x" + ct::toHexStr(maxCodePoint) + "\n\n";
@@ -331,6 +339,8 @@ void Generator::GenerateHeader_Merged(
 			uint32_t maxCodePoint = 0;
 			std::string glyphs;
 
+			std::map<std::string, uint32_t> finalGlyphNames;
+
 			if (vFlags & GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES)
 			{
 				std::map<std::string, uint32_t> glyphNames;
@@ -350,7 +360,6 @@ void Generator::GenerateHeader_Merged(
 				// so the original tag "SetMode" was writen before the original tag "about".
 				// its not wanted, so we save and order the finla result we want
 				// and after we will write in header file
-				std::map<std::string, uint32_t> finalGlyphNames;
 				for (const auto& it : glyphNames)
 				{
 					std::string glyphName = it.first;
@@ -406,8 +415,15 @@ void Generator::GenerateHeader_Merged(
 					for (auto & c : glyphName)
 						c = (char)toupper((int)c);
 
+					finalGlyphNames[glyphName] = codePoint; 
+					
 					glyphs += "#define ICON" + prefix + "_" + glyphName + " u8\"\\u" + ct::toHexStr(codePoint) + "\"\n";
 				}
+			}
+
+			if (vFlags & GENERATOR_MODE_HEADER_PICTURE)
+			{
+				//m_HeaderPictureGenerator.Generate(vFilePathName, vFontInfos);
 			}
 
 			// code point range

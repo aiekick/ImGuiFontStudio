@@ -31,7 +31,8 @@
 			<fontsize>27</fontsize>
 		</font>
 		<rangecoloring show="false" hash="42.606;14.789;27.817;0.5"/>
-		<previewcountglyph_x>25</previewcountglyph_x>
+		<previewglyphcount>13</previewglyphcount>
+		<previewglyphwidth>53.0769</previewglyphwidth>
 		<mergedfontprefix></mergedfontprefix>
 		<curglyphtooltip>false</curglyphtooltip>
 		<srcglyphtooltip>true</srcglyphtooltip>
@@ -39,7 +40,9 @@
 		<glyphpreviewscale>0.193</glyphpreviewscale>
 		<glyphpreviewshowcontrollines>false</glyphpreviewshowcontrollines>
 		<glyphpreviewquadbeziercounsegment>5</glyphpreviewquadbeziercounsegment>
-		<genmode>653</genmode>
+		<genmode>402</genmode>
 		<fonttomergein>fontawesome-webfont.ttf</fonttomergein>
+		<glyphdisplaytuningmode>1</glyphdisplaytuningmode>
+		<sourcefontpaneflags>1</sourcefontpaneflags>
 	</project>
 </config>

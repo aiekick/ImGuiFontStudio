@@ -221,10 +221,14 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 				{
 					vProjectFile->RemoveGenMode(GENERATOR_MODE_HEADER);
 				}
-				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Header", "Header File",
-					&vProjectFile->m_GenMode, GENERATOR_MODE_HEADER, 50.0f, false, false,
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Header File", "Header File",
+					&vProjectFile->m_GenMode, GENERATOR_MODE_HEADER_FILE, 50.0f, false, false,
 					GENERATOR_MODE_NONE, headerModeDisabled);
 				ImGui::SameLine();
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Header Picture", "Header Picture",
+					&vProjectFile->m_GenMode, GENERATOR_MODE_HEADER_PICTURE, 50.0f, false, false,
+					GENERATOR_MODE_NONE, headerModeDisabled);
+
 				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Font", "Font File",
 					&vProjectFile->m_GenMode, GENERATOR_MODE_FONT, 50.0f, false, false,
 					GENERATOR_MODE_RADIO_FONT_CPP);
