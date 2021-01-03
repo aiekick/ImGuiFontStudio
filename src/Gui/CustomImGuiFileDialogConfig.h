@@ -44,6 +44,10 @@
 //#define buttonDriveString "Drives"
 //#define buttonResetPathString "Reset to current directory"
 //#define buttonCreateDirString "Create Directory"
+//#define OverWriteDialogTitleString "The file Already Exist !"
+//#define OverWriteDialogMessageString "Would you like to OverWrite it ?"
+#define OverWriteDialogConfirmButtonString ICON_IGFS_OK " Confirm"
+#define OverWriteDialogCancelButtonString ICON_IGFS_CANCEL " Cancel"
 
 // theses icons will appear in table headers
 #define USE_CUSTOM_SORTING_ICON

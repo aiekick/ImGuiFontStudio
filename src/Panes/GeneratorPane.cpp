@@ -320,7 +320,7 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 					vProjectFile->m_SelectedFont->m_FontFileName,
 					std::bind(&GeneratorPane::GeneratorFileDialogPane, this,
 						std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
-					200, 1, vProjectFile);
+					200, 1, vProjectFile, ImGuiFileDialogFlags_ConfirmOverwrite);
 			}
 		}
 		else

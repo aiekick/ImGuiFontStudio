@@ -208,7 +208,8 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 
 				if (ImGui::MenuItem(ICON_IGFS_SAVE " Save As"))
 				{
-					igfd::ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", "Project File{.ifs}", ".");
+					igfd::ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", "Project File{.ifs}", ".", 
+						1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
 				}
 
 				ImGui::Separator();
@@ -301,9 +302,8 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 
 void MainFrame::DisplayDialogsAndPopups()
 {
-	if (m_SaveDialogIfRequired)
-		ShowSaveDialogIfRequired();
-	
+	ShowSaveDialogIfRequired();
+
 	ImVec2 min = MainFrame::Instance()->m_DisplaySize * 0.5f;
 	ImVec2 max = MainFrame::Instance()->m_DisplaySize;
 
@@ -359,7 +359,15 @@ void MainFrame::DisplayDialogsAndPopups()
 	{
 		if (igfd::ImGuiFileDialog::Instance()->IsOk)
 		{
-			SaveAsProject(igfd::ImGuiFileDialog::Instance()->GetFilePathName());
+			auto file = igfd::ImGuiFileDialog::Instance()->GetFilePathName();
+			if (!FileHelper::Instance()->IsFileExist(file))
+			{
+				SaveAsProject(igfd::ImGuiFileDialog::Instance()->GetFilePathName());
+			}
+			else
+			{
+
+			}
 		}
 
 		igfd::ImGuiFileDialog::Instance()->CloseDialog("SaveProjectDlg");
@@ -483,8 +491,15 @@ void MainFrame::SetAppTitle(const std::string& vFilePathName)
 	}
 }
 
+///////////////////////////////////////////////////////
+//// SAVE DIALOG WHEN APP CLOSED //////////////////////
+///////////////////////////////////////////////////////
+
 void MainFrame::ShowSaveDialogIfRequired()
 {
+	if (!m_SaveDialogIfRequired)
+		return;
+
 	if (m_ProjectFile.IsLoaded())
 	{
 		if (m_ProjectFile.IsThereAnyNotSavedChanged())
@@ -517,7 +532,8 @@ void MainFrame::ShowSaveDialogIfRequired()
 					choiceMade = true;
 					m_SaveChangeDialogActions.push_front([this]()
 					{
-						igfd::ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", "Project File{.ifs}", ".");
+						igfd::ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", "Project File{.ifs}", 
+							".", 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
 						m_SaveDialogIfRequired = false;
 					});
 				}
