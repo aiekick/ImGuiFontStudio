@@ -203,7 +203,7 @@ void HeaderPictureGenerator::WriteEachGlyphsLabelToPicture(std::map<uint32_t, st
 					arr.clear();
 					std::string lblToRender = it.second;
 					uint32_t finalHeight = vHeight + 5U;
-					uint32_t finalWidth = lblToRender.size() * finalHeight;
+					uint32_t finalWidth = (uint32_t)lblToRender.size() * finalHeight;
 					arr.resize((size_t)finalWidth * (size_t)finalHeight);
 					auto text = lblToRender.c_str();
 
@@ -218,9 +218,90 @@ void HeaderPictureGenerator::WriteEachGlyphsLabelToPicture(std::map<uint32_t, st
 						//&screen[baseline + y0][(int) xpos + x0]
 						//arr of w * h
 						//arr[x][y] == arr[w * y + x]
-						int x = (int)xpos + x0;
-						int y = baseline + y0;
-						if (x >= 0 & y >= 0)
+						uint32_t x = (uint32_t)xpos + x0;
+						uint32_t y = baseline + y0;
+						if (x >= 0 && y >= 0)
+						{
+							uint8_t* ptr = arr.data() + finalWidth * y + x;
+							stbtt_MakeCodepointBitmapSubpixel(&fontInfo, ptr, x1 - x0, y1 - y0, finalWidth, scale, scale, x_shift, 0, text[ch]);
+						}
+						// note that this stomps the old data, so where character boxes overlap (e.g. 'lj') it's wrong
+						// because this API is really for baking character bitmaps into textures. if you want to render
+						// a sequence of characters, you really need to render each bitmap to a temp buffer, then
+						// "alpha blend" that into the working buffer
+						xpos += (advance * scale);
+						if (text[ch + 1])
+							xpos += scale * stbtt_GetCodepointKernAdvance(&fontInfo, text[ch], text[ch + 1]);
+						++ch;
+					}
+
+					std::string file = lblToRender + "_TEXT.png";
+
+					int res = stbi_write_png(
+						file.c_str(),
+						finalWidth,
+						finalHeight,
+						1,
+						arr.data(),
+						finalWidth);
+
+					if (res)
+					{
+						printf("Succes writing of a glyph label to %s\n", file.c_str());
+					}
+					else
+					{
+						printf("Failed writing of a glyph label to %s\n", file.c_str());
+					}
+				}
+			}
+		}
+	}
+}
+
+void HeaderPictureGenerator::WriteEachGlyphsLabeledToPicture(std::map<uint32_t, std::string> vLabels, FontInfos* vFontInfos, uint32_t vHeight)
+{
+	if (vFontInfos)
+	{
+		auto io = &ImGui::GetIO();
+		if (!io->Fonts->ConfigData.empty())
+		{
+			stbtt_fontinfo fontInfo;
+
+			const int font_offset = stbtt_GetFontOffsetForIndex(
+				(unsigned char*)io->Fonts->ConfigData[0].FontData,
+				io->Fonts->ConfigData[0].FontNo);
+			if (stbtt_InitFont(&fontInfo, (unsigned char*)io->Fonts->ConfigData[0].FontData, font_offset))
+			{
+				int ascent, baseline;
+				float scale = stbtt_ScaleForPixelHeight(&fontInfo, vHeight);
+				stbtt_GetFontVMetrics(&fontInfo, &ascent, 0, 0);
+				baseline = (int)(ascent * scale);
+
+				std::vector<uint8_t> arr;
+				for (const auto& it : vLabels)
+				{
+					arr.clear();
+					std::string lblToRender = it.second;
+					uint32_t finalHeight = vHeight + 5U;
+					uint32_t finalWidth = (uint32_t)lblToRender.size() * finalHeight;
+					arr.resize((size_t)finalWidth * (size_t)finalHeight);
+					auto text = lblToRender.c_str();
+
+					int ch = 0, xpos = 2; // leave a little padding in case the character extends left;
+					while (text[ch])
+					{
+						int advance, lsb, x0, y0, x1, y1;
+						float x_shift = xpos - (float)floor(xpos);
+						stbtt_GetCodepointHMetrics(&fontInfo, text[ch], &advance, &lsb);
+						stbtt_GetCodepointBitmapBoxSubpixel(&fontInfo, text[ch], scale, scale, x_shift, 0, &x0, &y0, &x1, &y1);
+
+						//&screen[baseline + y0][(int) xpos + x0]
+						//arr of w * h
+						//arr[x][y] == arr[w * y + x]
+						uint32_t x = (uint32_t)xpos + x0;
+						uint32_t y = baseline + y0;
+						if (x >= 0 && y >= 0)
 						{
 							uint8_t* ptr = arr.data() + finalWidth * y + x;
 							stbtt_MakeCodepointBitmapSubpixel(&fontInfo, ptr, x1 - x0, y1 - y0, finalWidth, scale, scale, x_shift, 0, text[ch]);
