@@ -126,14 +126,17 @@ void HeaderPictureGenerator::Generate(const std::string& vFilePathName, FontInfo
 			// write to texture
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			//WriteEachGlyphsToPicture(finalGlyphCodePoints, vFontInfos, 150U);
-			//WriteEachGlyphsLabelToPicture(finalGlyphCodePoints, vFontInfos, 50U);
-			WriteEachGlyphsLabeledToPicture(finalGlyphCodePoints, vFontInfos, 150U, 50U);
+			//WriteEachGlyphsToPicture("exports\\", finalGlyphCodePoints, vFontInfos, 150U);
+			//WriteEachGlyphsLabelToPicture("exports\\", finalGlyphCodePoints, vFontInfos, 50U);
+			//WriteEachGlyphsLabeledToPicture("exports\\", finalGlyphCodePoints, vFontInfos, 150U, 50U);
+			WriteGlyphCardToPicture(filePathName, finalGlyphCodePoints, vFontInfos, 150U, 10U);
 		}
 	}
 }
 
-void HeaderPictureGenerator::WriteEachGlyphsToPicture(std::map<uint32_t, std::string> vLabels, FontInfos* vFontInfos, uint32_t vHeight)
+void HeaderPictureGenerator::WriteEachGlyphsToPicture(
+	const std::string& vPath, std::map<uint32_t, std::string> vLabels, 
+	FontInfos* vFontInfos, uint32_t vHeight)
 {
 	if (vFontInfos)
 	{
@@ -152,7 +155,7 @@ void HeaderPictureGenerator::WriteEachGlyphsToPicture(std::map<uint32_t, std::st
 					uint8_t* buffer = stbtt_GetCodepointBitmap(&fontInfo, scale, scale, it.first, &w, &h, &ox, &oy);
 					if (buffer)
 					{
-						std::string file = "exports\\" + it.second + ".png";
+						std::string file = vPath + it.second + ".png";
 
 						int res = stbi_write_png(
 							file.c_str(),
@@ -179,7 +182,9 @@ void HeaderPictureGenerator::WriteEachGlyphsToPicture(std::map<uint32_t, std::st
 	}
 }
 
-void HeaderPictureGenerator::WriteEachGlyphsLabelToPicture(std::map<uint32_t, std::string> vLabels, FontInfos* vFontInfos, uint32_t vHeight)
+void HeaderPictureGenerator::WriteEachGlyphsLabelToPicture(
+	const std::string& vPath, std::map<uint32_t, std::string> vLabels, 
+	FontInfos* vFontInfos, uint32_t vHeight)
 {
 	if (vFontInfos)
 	{
@@ -236,7 +241,7 @@ void HeaderPictureGenerator::WriteEachGlyphsLabelToPicture(std::map<uint32_t, st
 						++ch;
 					}
 
-					std::string file = "exports\\" + lblToRender + "_TEXT.png";
+					std::string file = vPath + lblToRender + "_TEXT.png";
 
 					int res = stbi_write_png(
 						file.c_str(),
@@ -260,7 +265,9 @@ void HeaderPictureGenerator::WriteEachGlyphsLabelToPicture(std::map<uint32_t, st
 	}
 }
 
-void HeaderPictureGenerator::WriteEachGlyphsLabeledToPicture(std::map<uint32_t, std::string> vLabels, FontInfos* vFontInfos, uint32_t vGlyphHeight, uint32_t vLabelHeight)
+void HeaderPictureGenerator::WriteEachGlyphsLabeledToPicture(
+	const std::string& vPath, std::map<uint32_t, std::string> vLabels, 
+	FontInfos* vFontInfos, uint32_t vGlyphHeight, uint32_t vLabelHeight)
 {
 	if (vFontInfos)
 	{
@@ -302,16 +309,17 @@ void HeaderPictureGenerator::WriteEachGlyphsLabeledToPicture(std::map<uint32_t, 
 			for (const auto& it : vLabels)
 			{
 				uint32_t codePoint = it.first;
-				std::string finalLabelFile = "exports\\" + it.second + ".png";
+				std::string finalLabelFile = vPath + it.second + ".png";
 				std::string lblToRender = " " + it.second;
-				uint32_t finalHeight = ct::maxi(vGlyphHeight, vLabelHeight) * ;
+				uint32_t finalHeight = ct::maxi(vGlyphHeight, vLabelHeight);
 				uint32_t finalWidth = vGlyphHeight + (uint32_t)lblToRender.size() * vLabelHeight;
 				arr.resize((size_t)finalWidth * (size_t)finalHeight);
 				memset(arr.data(), 0, arr.size());
 				auto text = lblToRender.c_str();
 
 				int xpos = 2; // leave a little padding in case the character extends left;
-				
+				int ypos = 2; // leave a little padding in case the character extends left;
+
 				// one char for the glyph
 				float glyphScale = stbtt_ScaleForPixelHeight(&glyphFontInfo, (float)(vGlyphHeight));
 				int ascent, baseline;
@@ -319,7 +327,7 @@ void HeaderPictureGenerator::WriteEachGlyphsLabeledToPicture(std::map<uint32_t, 
 				baseline = (int)(ascent * glyphScale);
 				int advance, lsb, x0, y0, x1, y1;
 				float x_shift = xpos - (float)floor(xpos);
-				float y_shift = 0.0f;
+				float y_shift = ypos - (float)floor(ypos);
 				stbtt_GetCodepointHMetrics(&glyphFontInfo, codePoint, &advance, &lsb);
 				stbtt_GetCodepointBitmapBoxSubpixel(&glyphFontInfo, codePoint, glyphScale, glyphScale, x_shift, y_shift, &x0, &y0, &x1, &y1);
 				int32_t x = (uint32_t)xpos + x0;
@@ -331,10 +339,10 @@ void HeaderPictureGenerator::WriteEachGlyphsLabeledToPicture(std::map<uint32_t, 
 					x = (uint32_t)xpos + x0;
 					y = baseline + y0;
 				}
-				y_shift = finalHeight * 0.5f - (float)(y1 - y0) * 0.5f;
+				//y_shift = finalHeight * 0.5f - (float)(y1 - y0) * 0.5f;
 				if (x >= 0 && y >= 0)
 				{
-					uint8_t* ptr = arr.data() + (int32_t)finalWidth * (int32_t)y + (int32_t)x;
+					uint8_t* ptr = arr.data() + (size_t)finalWidth * (size_t)y + (size_t)x;
 					stbtt_MakeCodepointBitmapSubpixel(&glyphFontInfo, ptr, x1 - x0, y1 - y0, finalWidth, glyphScale, glyphScale, x_shift, y_shift, codePoint);
 				}
 				// note that this stomps the old data, so where character boxes overlap (e.g. 'lj') it's wrong
@@ -354,9 +362,9 @@ void HeaderPictureGenerator::WriteEachGlyphsLabeledToPicture(std::map<uint32_t, 
 				while (text[ch])
 				{
 					int advance, lsb, x0, y0, x1, y1;
-					float x_shift = xpos - (float)floor(xpos);
+					x_shift = xpos - (float)floor(xpos);
 					stbtt_GetCodepointHMetrics(&labelFontInfo, text[ch], &advance, &lsb);
-					float y_shift = vGlyphHeight * 0.5f - vLabelHeight * 0.5f;
+					y_shift = vGlyphHeight * 0.5f - vLabelHeight * 0.5f;
 					stbtt_GetCodepointBitmapBoxSubpixel(&labelFontInfo, text[ch], labelScale, labelScale, x_shift, y_shift, &x0, &y0, &x1, &y1);
 
 					//&screen[baseline + y0][(int) xpos + x0]
@@ -366,7 +374,7 @@ void HeaderPictureGenerator::WriteEachGlyphsLabeledToPicture(std::map<uint32_t, 
 					uint32_t y = baseline + y0;
 					if (x >= 0 && y >= 0)
 					{
-						uint8_t* ptr = arr.data() + (int32_t)finalWidth * (int32_t)y + (int32_t)x;
+						uint8_t* ptr = arr.data() + (size_t)finalWidth * (size_t)y + (size_t)x;
 						stbtt_MakeCodepointBitmapSubpixel(&labelFontInfo, ptr, x1 - x0, y1 - y0, finalWidth, labelScale, labelScale, x_shift, y_shift, text[ch]);
 					}
 					// note that this stomps the old data, so where character boxes overlap (e.g. 'lj') it's wrong
@@ -395,6 +403,161 @@ void HeaderPictureGenerator::WriteEachGlyphsLabeledToPicture(std::map<uint32_t, 
 				{
 					printf("Failed writing of a glyph + label to %s\n", finalLabelFile.c_str());
 				}
+			}
+		}
+	}
+}
+
+void HeaderPictureGenerator::WriteGlyphCardToPicture(
+	const std::string& vFilePathName, std::map<uint32_t, std::string> vLabels, 
+	FontInfos* vFontInfos, uint32_t vGlyphHeight, uint32_t vCountRows)
+{
+	if (vFontInfos)
+	{
+		stbtt_fontinfo glyphFontInfo;
+		stbtt_fontinfo labelFontInfo;
+
+		bool glyphFontLoaded = false;
+		bool labelFontLoaded = false;
+
+		if (!vFontInfos->m_ImFontAtlas.ConfigData.empty())
+		{
+			const int font_offset = stbtt_GetFontOffsetForIndex(
+				(unsigned char*)vFontInfos->m_ImFontAtlas.ConfigData[0].FontData,
+				vFontInfos->m_ImFontAtlas.ConfigData[0].FontNo);
+			if (stbtt_InitFont(&glyphFontInfo, (unsigned char*)vFontInfos->m_ImFontAtlas.ConfigData[0].FontData, font_offset))
+			{
+				glyphFontLoaded = true;
+			}
+		}
+
+		auto io = &ImGui::GetIO();
+		if (!io->Fonts->ConfigData.empty())
+		{
+			const int font_offset = stbtt_GetFontOffsetForIndex(
+				(unsigned char*)io->Fonts->ConfigData[0].FontData,
+				io->Fonts->ConfigData[0].FontNo);
+			if (stbtt_InitFont(&labelFontInfo, (unsigned char*)io->Fonts->ConfigData[0].FontData, font_offset))
+			{
+				labelFontLoaded = true;
+			}
+		}
+
+		if (glyphFontLoaded && labelFontLoaded)
+		{
+			// will write one glyph labeled
+
+			uint32_t labelHeight = (uint32_t)(vGlyphHeight * 0.6f);
+
+			// max width
+			uint32_t maxWidth = 0U;
+			for (const auto& it : vLabels)
+			{
+				maxWidth = ct::maxi(maxWidth, (uint32_t)it.second.size() * labelHeight);
+			}
+
+			// array of bytes
+			std::vector<uint8_t> arr;
+			uint32_t oneItemHeight = ct::maxi(vGlyphHeight, labelHeight);
+			uint32_t finalHeight = oneItemHeight * vLabels.size() + (uint32_t)(oneItemHeight * 0.5);
+			uint32_t finalWidth = vGlyphHeight + maxWidth;
+			arr.resize((size_t)finalWidth * (size_t)finalHeight);
+			memset(arr.data(), 0, arr.size());
+			
+			// iteration pof labels
+			int ypos = 2; // leave a little padding in case the character extends left;
+			for (const auto& it : vLabels)
+			{
+				uint32_t codePoint = it.first;
+				std::string lblToRender = " " + it.second;
+				auto text = lblToRender.c_str();
+
+				int xpos = (int)(vGlyphHeight * 0.1f); // leave a little padding in case the character extends left;
+
+				// one char for the glyph
+				float glyphScale = stbtt_ScaleForPixelHeight(&glyphFontInfo, (float)(vGlyphHeight));
+				int ascent, descent, baseline;
+				stbtt_GetFontVMetrics(&glyphFontInfo, &ascent, &descent, 0);
+				baseline = (int)(ascent * glyphScale);
+				int advance, lsb, x0, y0, x1, y1;
+				stbtt_GetCodepointHMetrics(&glyphFontInfo, codePoint, &advance, &lsb);
+				float x_shift = vGlyphHeight * 0.5f - (advance * glyphScale) * 0.5f + xpos;
+				float y_shift = vGlyphHeight * 0.5f - (ascent - descent) * glyphScale * 0.5f;
+				stbtt_GetCodepointBitmapBoxSubpixel(&glyphFontInfo, codePoint, glyphScale, glyphScale, x_shift, y_shift, &x0, &y0, &x1, &y1);
+				int32_t x = (uint32_t)xpos + x0;
+				int32_t y = baseline + y0;
+				while (x < 0 || y < 0) // we decrease scale until glyph can be added in picture
+				{
+					glyphScale *= 0.9f;
+					x_shift = vGlyphHeight * 0.5f - (advance * glyphScale) * 0.5f + xpos;
+					y_shift = vGlyphHeight * 0.5f - (ascent - descent) * glyphScale * 0.5f;
+					stbtt_GetCodepointBitmapBoxSubpixel(&glyphFontInfo, codePoint, glyphScale, glyphScale, x_shift, y_shift, &x0, &y0, &x1, &y1);
+					x = (uint32_t)xpos + x0;
+					y = baseline + y0;
+				}
+				if (x >= 0 && y >= 0)
+				{
+					uint8_t* ptr = arr.data() + finalWidth * (ypos + y) + x;
+					stbtt_MakeCodepointBitmapSubpixel(&glyphFontInfo, ptr, x1 - x0, y1 - y0, finalWidth, glyphScale, glyphScale, 0, 0, codePoint);
+				}
+				xpos += vGlyphHeight;
+
+				// the rest for the label
+				float labelScale = stbtt_ScaleForPixelHeight(&labelFontInfo, (float)(labelHeight));
+				stbtt_GetFontVMetrics(&labelFontInfo, &ascent, &descent, 0);
+				baseline = (int)(ascent * labelScale);
+
+				int ch = 0;
+				while (text[ch])
+				{
+					stbtt_GetCodepointHMetrics(&labelFontInfo, text[ch], &advance, &lsb);
+					float y_shift = vGlyphHeight * 0.5f - labelHeight * 0.5f;
+					stbtt_GetCodepointBitmapBoxSubpixel(&labelFontInfo, text[ch], labelScale, labelScale, 0, y_shift, &x0, &y0, &x1, &y1);
+					
+					x = (uint32_t)xpos + x0;
+					y = baseline + y0;
+					float newLabelScale = labelScale;
+					while (x < 0 || y < 0) // we decrease scale until glyph can be added in picture
+					{
+						newLabelScale *= 0.9f;
+						stbtt_GetCodepointBitmapBoxSubpixel(&labelFontInfo, codePoint, newLabelScale, newLabelScale, 0, y_shift, &x0, &y0, &x1, &y1);
+						x = (uint32_t)xpos + x0;
+						y = baseline + y0;
+					}
+					if (x >= 0 && y >= 0)
+					{
+						uint8_t* ptr = arr.data() + finalWidth * (ypos + y) + x;
+						stbtt_MakeCodepointBitmapSubpixel(&labelFontInfo, ptr, x1 - x0, y1 - y0, finalWidth, newLabelScale, newLabelScale, 0, 0, text[ch]);
+					}
+					// note that this stomps the old data, so where character boxes overlap (e.g. 'lj') it's wrong
+					// because this API is really for baking character bitmaps into textures. if you want to render
+					// a sequence of characters, you really need to render each bitmap to a temp buffer, then
+					// "alpha blend" that into the working buffer
+					xpos += (advance * newLabelScale);
+					if (text[ch + 1])
+						xpos += labelScale * stbtt_GetCodepointKernAdvance(&labelFontInfo, text[ch], text[ch + 1]);
+					++ch;
+				}
+
+				// next pos in big picture
+				ypos += oneItemHeight;
+			}
+
+			int res = stbi_write_png(
+				vFilePathName.c_str(),
+				finalWidth,
+				finalHeight,
+				1,
+				arr.data(),
+				finalWidth);
+
+			if (res)
+			{
+				printf("Succes writing of the card to %s\n", vFilePathName.c_str());
+			}
+			else
+			{
+				printf("Failed writing of the card to %s\n", vFilePathName.c_str());
 			}
 		}
 	}
