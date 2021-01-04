@@ -23,13 +23,11 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 
-// header
 #include <ios>
 #include <sfntly/font.h>
 #include <sfntly/port/file_input_stream.h>
 #include <sfntly/tag.h>
 
-// cpp
 #define _CRT_SECURE_NO_WARNINGS
 #include <stdio.h>
 #include <string.h>
