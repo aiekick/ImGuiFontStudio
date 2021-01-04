@@ -410,7 +410,7 @@ void HeaderPictureGenerator::WriteEachGlyphsLabeledToPicture(
 
 void HeaderPictureGenerator::WriteGlyphCardToPicture(
 	const std::string& vFilePathName, std::map<uint32_t, std::string> vLabels, 
-	FontInfos* vFontInfos, uint32_t vGlyphHeight, uint32_t vCountRows)
+	FontInfos* vFontInfos, const uint32_t& vGlyphHeight, const uint32_t& vCountRows)
 {
 	if (vFontInfos)
 	{
@@ -447,7 +447,8 @@ void HeaderPictureGenerator::WriteGlyphCardToPicture(
 		{
 			// will write one glyph labeled
 
-			uint32_t labelHeight = (uint32_t)(vGlyphHeight * 0.6f);
+			uint32_t labelHeight = (uint32_t)(vGlyphHeight * 0.5f);
+			uint32_t glyphHeight = (uint32_t)(vGlyphHeight * 0.8f);
 
 			// max width
 			uint32_t maxWidth = 0U;
@@ -458,8 +459,7 @@ void HeaderPictureGenerator::WriteGlyphCardToPicture(
 
 			// array of bytes
 			std::vector<uint8_t> arr;
-			uint32_t oneItemHeight = ct::maxi(vGlyphHeight, labelHeight);
-			uint32_t finalHeight = oneItemHeight * vLabels.size() + (uint32_t)(oneItemHeight * 0.5);
+			uint32_t finalHeight = vGlyphHeight * (vLabels.size() + 2U);
 			uint32_t finalWidth = vGlyphHeight + maxWidth;
 			arr.resize((size_t)finalWidth * (size_t)finalHeight);
 			memset(arr.data(), 0, arr.size());
@@ -475,7 +475,7 @@ void HeaderPictureGenerator::WriteGlyphCardToPicture(
 				int xpos = (int)(vGlyphHeight * 0.1f); // leave a little padding in case the character extends left;
 
 				// one char for the glyph
-				float glyphScale = stbtt_ScaleForPixelHeight(&glyphFontInfo, (float)(vGlyphHeight));
+				float glyphScale = stbtt_ScaleForPixelHeight(&glyphFontInfo, (float)(glyphHeight));
 				int ascent, descent, baseline;
 				stbtt_GetFontVMetrics(&glyphFontInfo, &ascent, &descent, 0);
 				baseline = (int)(ascent * glyphScale);
@@ -540,7 +540,7 @@ void HeaderPictureGenerator::WriteGlyphCardToPicture(
 				}
 
 				// next pos in big picture
-				ypos += oneItemHeight;
+				ypos += vGlyphHeight;
 			}
 
 			int res = stbi_write_png(

@@ -26,5 +26,5 @@ public:
 	void WriteEachGlyphsToPicture(const std::string& vPath, std::map<uint32_t, std::string> vLabels, FontInfos* vFontInfos, uint32_t vHeight);
 	void WriteEachGlyphsLabelToPicture(const std::string& vPath, std::map<uint32_t, std::string> vLabels, FontInfos* vFontInfos, uint32_t vHeight);
 	void WriteEachGlyphsLabeledToPicture(const std::string& vPath, std::map<uint32_t, std::string> vLabels, FontInfos* vFontInfos, uint32_t vGlyphHeight, uint32_t vLabelHeight);
-	void WriteGlyphCardToPicture(const std::string& vFilePathName, std::map<uint32_t, std::string> vLabels, FontInfos* vFontInfos, uint32_t vGlyphHeight, uint32_t vCountRows);
+	void WriteGlyphCardToPicture(const std::string& vFilePathName, std::map<uint32_t, std::string> vLabels, FontInfos* vFontInfos, const uint32_t& vGlyphHeight, const uint32_t& vCountRows);
 };
