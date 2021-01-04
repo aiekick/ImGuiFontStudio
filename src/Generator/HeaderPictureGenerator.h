@@ -7,6 +7,9 @@ to generate with stb. like imgui use stb for rasterize and write an image
 */
 #include <Project/FontInfos.h>
 
+#include <imgui/imgui.h>
+#include <ctools/cTools.h>
+#include <cstdint>
 #include <string>
 #include <map>
 
@@ -20,5 +23,6 @@ public:
 	~HeaderPictureGenerator();
 
 	void Generate(const std::string& vFilePathName, FontInfos* vFontInfos);
-	
+	void WriteEachGlyphsToPicture(std::map<uint32_t, std::string> vLabels, FontInfos* vFontInfos, uint32_t vHeight);
+	void WriteEachGlyphsLabelToPicture(std::map<uint32_t, std::string> vLabels, FontInfos* vFontInfos, uint32_t vHeight);
 };

@@ -74,9 +74,11 @@ int main(int, char**argv)
     }
 
 #ifdef MSVC
-	//#ifndef _DEBUG
-		ShowWindow(GetConsoleWindow(), SW_HIDE); // hide console
-	//#endif
+	#ifdef _DEBUG
+		ShowWindow(GetConsoleWindow(), SW_SHOW); // show 
+    #else
+        ShowWindow(GetConsoleWindow(), SW_HIDE); // hide 
+	#endif
 #endif
 
     IMGUI_CHECKVERSION();

@@ -24,8 +24,8 @@
 #include <Helper/Messaging.h>
 #include <ctools/Logger.h>
 
-#define STB_TRUETYPE_IMPLEMENTATION
-#include <Helper/stb_truetype.h>
+#define STB_TRUETYPE_IMPLEMENTATION  
+#include <imgui/imstb_truetype.h>
 
 #include <glad/glad.h>
 

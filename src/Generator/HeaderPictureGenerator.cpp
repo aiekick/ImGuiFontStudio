@@ -1,11 +1,14 @@
 #include "HeaderPictureGenerator.h"
-#define STB_IMAGE_WRITE_IMPLEMENTATION
-#include <stb/stb_image_write.h>
+
 #include <glad/glad.h>
 #include <GLFW/glfw3.h>
 #include <ctools/Logger.h>
 #include <MainFrame.h>
 #include <ctools/FileHelper.h>
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb/stb_image_write.h>
+#include <imgui/imstb_truetype.h>
 
 #include <map>
 
@@ -25,7 +28,7 @@ static std::vector<uint8_t> GetBytesFromTexture(GLFWwindow* vWin, GLuint vTextur
 
 	std::vector<uint8_t> buf;
 
-	buf.resize(vChannelCount * vTextureSize.x * vTextureSize.y); // 1 channel only
+	buf.resize((size_t)vTextureSize.x * (size_t)vTextureSize.y * (size_t)vChannelCount); // 1 channel only
 
 	GLenum format = GL_RGBA;
 	if (vChannelCount == 1) format = GL_RED;
@@ -78,26 +81,30 @@ void HeaderPictureGenerator::Generate(const std::string& vFilePathName, FontInfo
 			ct::replaceString(name, "-", "_");
 			filePathName = ps.GetFilePathWithNameExt(name, ".png");
 
+			std::string prefix = "";
+			if (!vFontInfos->m_FontPrefix.empty())
+				prefix = "ICON_" + vFontInfos->m_FontPrefix;
+
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			// prepare names and codepoint
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 			std::map<uint32_t, std::string> glyphCodePoints;
 
-			std::string prefix = "TEST";
-
-			for (auto& it : vFontInfos->m_SelectedGlyphs)
+			for (auto it : vFontInfos->m_SelectedGlyphs)
 			{
-				glyphCodePoints[it.second.newCodePoint] = it.second.newHeaderName;
+				glyphCodePoints[it.first] = it.second.newHeaderName;
 			}
 
 			uint32_t minCodePoint = 65535;
 			uint32_t maxCodePoint = 0;
-			std::string glyphs;
+
+			std::map<uint32_t, std::string> finalGlyphCodePoints;
 
 			for (const auto& it : glyphCodePoints)
 			{
 				uint32_t codePoint = it.first;
+
 				minCodePoint = ct::mini(minCodePoint, codePoint);
 				maxCodePoint = ct::maxi(maxCodePoint, codePoint);
 
@@ -112,46 +119,141 @@ void HeaderPictureGenerator::Generate(const std::string& vFilePathName, FontInfo
 				for (auto& c : glyphName)
 					c = (char)toupper((int)c);
 
-				glyphs += "#define ICON" + prefix + "_" + glyphName + " u8\"\\u" + ct::toHexStr(codePoint) + "\"\n";
+				finalGlyphCodePoints[codePoint] = prefix + "_" + glyphName;
 			}
 
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 			// write to texture
 			//////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-			// Build texture atlas
-			/*ImGuiIO& io = ImGui::GetIO();
-			unsigned char* pixels;
-			int width, height;
-			io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);   // Load as RGBA 32-bit (75% of the memory is wasted, but default font is so small) because it is more likely to be compatible with user's existing shaders. If your ImTextureId represent a higher-level concept than just a GL texture id, consider calling GetTexDataAsAlpha8() instead to save on GPU memory.
-			*/
-			// Upload texture to graphics system
-			/*GLint last_texture;
-			glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
-			glGenTextures(1, &g_FontTexture);
-			glBindTexture(GL_TEXTURE_2D, g_FontTexture);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-			glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	#ifdef GL_UNPACK_ROW_LENGTH
-			glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-	#endif
-			glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+			//WriteEachGlyphsToPicture(finalGlyphCodePoints, vFontInfos, 50U);
+			WriteEachGlyphsLabelToPicture(finalGlyphCodePoints, vFontInfos, 50U);
+		}
+	}
+}
 
-			// Store our identifier
-			io.Fonts->TexID = (ImTextureID)(intptr_t)g_FontTexture;
-
-			// Restore state
-			glBindTexture(GL_TEXTURE_2D, last_texture);*/
-
-			//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-			// 
-			//////////////////////////////////////////////////////////////////////////////////////////////////////////////
-
-			GLuint textureToSave = (GLuint)(size_t)vFontInfos->m_ImFontAtlas.TexID;
-			if (textureToSave)
+void HeaderPictureGenerator::WriteEachGlyphsToPicture(std::map<uint32_t, std::string> vLabels, FontInfos* vFontInfos, uint32_t vHeight)
+{
+	if (vFontInfos)
+	{
+		if (!vFontInfos->m_ImFontAtlas.ConfigData.empty())
+		{
+			stbtt_fontinfo fontInfo;
+			const int font_offset = stbtt_GetFontOffsetForIndex(
+				(unsigned char*)vFontInfos->m_ImFontAtlas.ConfigData[0].FontData,
+				vFontInfos->m_ImFontAtlas.ConfigData[0].FontNo);
+			if (stbtt_InitFont(&fontInfo, (unsigned char*)vFontInfos->m_ImFontAtlas.ConfigData[0].FontData, font_offset))
 			{
-				auto win = MainFrame::Instance()->GetGLFWwindow();
-				SaveTextureToPng(win, filePathName, textureToSave, ct::uvec2(vFontInfos->m_ImFontAtlas.TexWidth, vFontInfos->m_ImFontAtlas.TexHeight), 4U);
+				float scale = stbtt_ScaleForPixelHeight(&fontInfo, vHeight);
+				for (const auto& it : vLabels)
+				{
+					int w, h, ox, oy;
+					uint8_t* buffer = stbtt_GetCodepointBitmap(&fontInfo, scale, scale, it.first, &w, &h, &ox, &oy);
+					if (buffer)
+					{
+						std::string file = it.second + ".png";
+
+						int res = stbi_write_png(
+							file.c_str(),
+							w,
+							h,
+							1,
+							buffer,
+							w);
+
+						if (res)
+						{
+							printf("Succes writing of a glyph to %s\n", file.c_str());
+						}
+						else
+						{
+							printf("Failed writing of a glyph to %s\n", file.c_str());
+						}
+
+						stbtt_FreeBitmap(buffer, fontInfo.userdata);
+					}
+				}
+			}
+		}
+	}
+}
+
+void HeaderPictureGenerator::WriteEachGlyphsLabelToPicture(std::map<uint32_t, std::string> vLabels, FontInfos* vFontInfos, uint32_t vHeight)
+{
+	if (vFontInfos)
+	{
+		auto io = &ImGui::GetIO();
+		if (!io->Fonts->ConfigData.empty())
+		{
+			stbtt_fontinfo fontInfo;
+			
+			const int font_offset = stbtt_GetFontOffsetForIndex(
+				(unsigned char*)io->Fonts->ConfigData[0].FontData,
+				io->Fonts->ConfigData[0].FontNo);
+			if (stbtt_InitFont(&fontInfo, (unsigned char*)io->Fonts->ConfigData[0].FontData, font_offset))
+			{
+				int ascent, baseline;
+				float scale = stbtt_ScaleForPixelHeight(&fontInfo, vHeight);
+				stbtt_GetFontVMetrics(&fontInfo, &ascent, 0, 0);
+				baseline = (int)(ascent * scale);
+
+				std::vector<uint8_t> arr;
+				for (const auto& it : vLabels)
+				{
+					arr.clear();
+					std::string lblToRender = it.second;
+					uint32_t finalHeight = vHeight + 5U;
+					uint32_t finalWidth = lblToRender.size() * finalHeight;
+					arr.resize((size_t)finalWidth * (size_t)finalHeight);
+					auto text = lblToRender.c_str();
+
+					int ch = 0, xpos = 2; // leave a little padding in case the character extends left;
+					while (text[ch])
+					{
+						int advance, lsb, x0, y0, x1, y1;
+						float x_shift = xpos - (float)floor(xpos);
+						stbtt_GetCodepointHMetrics(&fontInfo, text[ch], &advance, &lsb);
+						stbtt_GetCodepointBitmapBoxSubpixel(&fontInfo, text[ch], scale, scale, x_shift, 0, &x0, &y0, &x1, &y1);
+
+						//&screen[baseline + y0][(int) xpos + x0]
+						//arr of w * h
+						//arr[x][y] == arr[w * y + x]
+						int x = (int)xpos + x0;
+						int y = baseline + y0;
+						if (x >= 0 & y >= 0)
+						{
+							uint8_t* ptr = arr.data() + finalWidth * y + x;
+							stbtt_MakeCodepointBitmapSubpixel(&fontInfo, ptr, x1 - x0, y1 - y0, finalWidth, scale, scale, x_shift, 0, text[ch]);
+						}
+						// note that this stomps the old data, so where character boxes overlap (e.g. 'lj') it's wrong
+						// because this API is really for baking character bitmaps into textures. if you want to render
+						// a sequence of characters, you really need to render each bitmap to a temp buffer, then
+						// "alpha blend" that into the working buffer
+						xpos += (advance * scale);
+						if (text[ch + 1])
+							xpos += scale * stbtt_GetCodepointKernAdvance(&fontInfo, text[ch], text[ch + 1]);
+						++ch;
+					}
+
+					std::string file = lblToRender + "_TEXT.png";
+
+					int res = stbi_write_png(
+						file.c_str(),
+						finalWidth,
+						finalHeight,
+						1,
+						arr.data(),
+						finalWidth);
+
+					if (res)
+					{
+						printf("Succes writing of a glyph label to %s\n", file.c_str());
+					}
+					else
+					{
+						printf("Failed writing of a glyph label to %s\n", file.c_str());
+					}
+				}
 			}
 		}
 	}
