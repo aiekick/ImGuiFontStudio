@@ -601,6 +601,9 @@ void MainFrame::IWantToCloseTheApp()
 	// some changes to save before closing
 	if (m_ProjectFile.IsLoaded() && m_ProjectFile.IsThereAnyNotSavedChanged())
 	{
+		// force close dialog
+		igfd::ImGuiFileDialog::Instance()->CloseDialog();
+
 		m_SaveDialogIfRequired = true;
 		m_NeedToCloseApp = true;
 	}

@@ -22,7 +22,6 @@
 #include <ImGuiFileDialog/ImGuiFileDialog/ImGuiFileDialog.h>
 
 #include <MainFrame.h>
-#include <Generator/HeaderPictureGenerator.h>
 #include <Helper/SelectionHelper.h>
 #include <Panes/FinalFontPane.h>
 #include <Panes/Manager/LayoutManager.h>
@@ -93,8 +92,9 @@ void SourceFontPane::DrawDialogsAndPopups(ProjectFile * vProjectFile)
 					{
 						auto win = MainFrame::Instance()->GetGLFWwindow();
 						auto file = igfd::ImGuiFileDialog::Instance()->GetFilePathName();
-						HeaderPictureGenerator::SaveTextureToPng(win, file, textureToSave,
+						Generator::SaveTextureToPng(win, file, textureToSave,
 							ct::uvec2(atlas->TexWidth, atlas->TexHeight), 4U);
+						FileHelper::Instance()->OpenFile(file);
 					}
 				}
 			}

@@ -38,13 +38,19 @@
 
 #include <ctools/cTools.h>
 #include <ctools/FileHelper.h>
+#include <ctools/Logger.h>
 #include <Helper/FontHelper.h>
 #include <Helper/Messaging.h>
-
+#include <MainFrame.h>
 #include <Panes/SourceFontPane.h>
 #include <Project/FontInfos.h>
 #include <Project/ProjectFile.h>
-#include <Helper/Messaging.h>
+
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb/stb_image_write.h>
+#include <imgui/imstb_truetype.h>
+
+//#define AUTO_OPEN_FONT_IN_APP_AFTER_GENERATION_FOR_DEBUG_PURPOSE
 
 Generator::Generator() = default;
 Generator::~Generator() = default;
@@ -61,7 +67,11 @@ void Generator::Generate(
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT))
 			{
 				std::string filePathName = vFilePath + "/" + vFileName;
-				GenerateCpp_One(filePathName, vProjectFile, vProjectFile->m_SelectedFont, vProjectFile->m_GenMode);
+				GenerateCpp_One(
+					filePathName, 
+					vProjectFile, 
+					vProjectFile->m_SelectedFont, 
+					vProjectFile->m_GenMode);
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
 			{
@@ -71,14 +81,21 @@ void Generator::Generate(
 					if (ps.isOk)
 					{
 						std::string filePathName = vFilePath + "/" + ps.name + "." + ps.ext;
-						GenerateCpp_One(filePathName, vProjectFile, &font.second, vProjectFile->m_GenMode);
+						GenerateCpp_One(
+							filePathName, 
+							vProjectFile, 
+							&font.second, 
+							vProjectFile->m_GenMode);
 					}
 				}
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED))
 			{
 				std::string filePathName = vFilePath + "/" + vFileName;
-				GenerateCpp_Merged(filePathName, vProjectFile, vProjectFile->GetGenMode());
+				GenerateCpp_Merged(
+					filePathName, 
+					vProjectFile, 
+					vProjectFile->GetGenMode());
 			}
 		}
 		else if (vProjectFile->IsGenMode(GENERATOR_MODE_FONT))
@@ -86,8 +103,12 @@ void Generator::Generate(
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT))
 			{
 				std::string filePathName = vFilePath + "/" + vFileName;
-				GenerateFontFile_One(filePathName, vProjectFile, vProjectFile->m_SelectedFont, vProjectFile->m_GenMode);
-#ifdef _DEBUG
+				GenerateFontFile_One(
+					filePathName, 
+					vProjectFile, 
+					vProjectFile->m_SelectedFont, 
+					vProjectFile->m_GenMode);
+#ifdef AUTO_OPEN_FONT_IN_APP_AFTER_GENERATION_FOR_DEBUG_PURPOSE
 				SourceFontPane::Instance()->OpenFont(vProjectFile, filePathName, false); // directly load the generated font file
 #endif
 			}
@@ -99,8 +120,12 @@ void Generator::Generate(
 					if (ps.isOk)
 					{
 						std::string filePathName = vFilePath + "/" + ps.name + "." + ps.ext;
-						GenerateFontFile_One(filePathName, vProjectFile, &font.second, vProjectFile->m_GenMode);
-#ifdef _DEBUG
+						GenerateFontFile_One(
+							filePathName, 
+							vProjectFile, 
+							&font.second, 
+							vProjectFile->m_GenMode);
+#ifdef AUTO_OPEN_FONT_IN_APP_AFTER_GENERATION_FOR_DEBUG_PURPOSE
 						SourceFontPane::Instance()->OpenFont(vProjectFile, filePathName, false); // directly load the generated font file
 #endif
 					}
@@ -109,8 +134,11 @@ void Generator::Generate(
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED))
 			{
 				std::string filePathName = vFilePath + "/" + vFileName;
-				GenerateFontFile_Merged(filePathName, vProjectFile, vProjectFile->m_GenMode);
-#ifdef _DEBUG
+				GenerateFontFile_Merged(
+					filePathName, 
+					vProjectFile, 
+					vProjectFile->m_GenMode);
+#ifdef AUTO_OPEN_FONT_IN_APP_AFTER_GENERATION_FOR_DEBUG_PURPOSE
 				SourceFontPane::Instance()->OpenFont(vProjectFile, filePathName, false); // directly load the generated font file
 #endif
 			}
@@ -120,7 +148,10 @@ void Generator::Generate(
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT))
 			{
 				std::string filePathName = vFilePath + "/" + vFileName;
-				GenerateHeader_One(filePathName, vProjectFile->m_SelectedFont, vProjectFile->m_GenMode);
+				GenerateHeader_One(
+					filePathName, 
+					vProjectFile->m_SelectedFont, 
+					vProjectFile->m_GenMode);
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
 			{
@@ -130,10 +161,414 @@ void Generator::Generate(
 					if (ps.isOk)
 					{
 						std::string filePathName = vFilePath + "/" + ps.name + ".h";
-						GenerateHeader_One(filePathName, &font.second, vProjectFile->m_GenMode);
+						GenerateHeader_One(
+							filePathName, 
+							&font.second, 
+							vProjectFile->m_GenMode);
 					}
 				}
 			}
+		}
+		else if (vProjectFile->IsGenMode(GENERATOR_MODE_CARD))
+		{
+			if (vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT))
+			{
+				std::string filePathName = vFilePath + "/" + vFileName;
+				GenerateCard_One(
+					filePathName, 
+					vProjectFile->m_SelectedFont, 
+					vProjectFile->m_GenMode,
+					vProjectFile->m_CardGlyphHeightInPixel, 
+					vProjectFile->m_CardCountRowsMax);
+			}
+			else if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
+			{
+				for (auto& font : vProjectFile->m_Fonts)
+				{
+					auto ps = FileHelper::Instance()->ParsePathFileName(font.second.m_FontFileName);
+					if (ps.isOk)
+					{
+						std::string filePathName = vFilePath + "/" + ps.name + ".h";
+						GenerateCard_One(
+							filePathName, 
+							&font.second, 
+							vProjectFile->m_GenMode,
+							vProjectFile->m_CardGlyphHeightInPixel, 
+							vProjectFile->m_CardCountRowsMax);
+					}
+				}
+			}
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+//// STATIC TEXTURE TO PICTURE FILE ///////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
+
+bool Generator::SaveTextureToPng(GLFWwindow* vWin, const std::string& vFilePathName, 
+	GLuint vTextureId, ct::uvec2 vTextureSize, uint32_t vChannelCount)
+{
+	bool res = false;
+
+	if (!vFilePathName.empty() && vWin)
+	{
+		glfwMakeContextCurrent(vWin);
+
+		std::vector<uint8_t> bytes;
+
+		bytes.resize((size_t)vTextureSize.x * (size_t)vTextureSize.y * (size_t)vChannelCount); // 1 channel only
+
+		GLenum format = GL_RGBA;
+		if (vChannelCount == 1) format = GL_RED;
+		if (vChannelCount == 2) format = GL_RG;
+		if (vChannelCount == 3) format = GL_RGB;
+		if (vChannelCount == 4) format = GL_RGBA;
+
+		// Upload texture to graphics system
+		GLint last_texture;
+		glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
+		glBindTexture(GL_TEXTURE_2D, vTextureId);
+		glPixelStorei(GL_PACK_ALIGNMENT, 1);
+		glGetTexImage(GL_TEXTURE_2D, 0, format, GL_UNSIGNED_BYTE, bytes.data());
+		glBindTexture(GL_TEXTURE_2D, last_texture);
+
+		int resWrite = stbi_write_png(
+			vFilePathName.c_str(),
+			vTextureSize.x,
+			vTextureSize.y,
+			vChannelCount,
+			bytes.data(),
+			vTextureSize.x * vChannelCount);
+
+		res = (resWrite > 0);
+	}
+
+	return res;
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+//// CARD GENERATION //////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
+
+static void WriteGlyphCardToPicture(
+	const std::string& vFilePathName, std::map<std::string, uint32_t> vLabels,
+	FontInfos* vFontInfos, const uint32_t& vGlyphHeight, const uint32_t& vMaxRows)
+{
+	if (vFontInfos && vGlyphHeight && vMaxRows)
+	{
+		stbtt_fontinfo glyphFontInfo;
+		stbtt_fontinfo labelFontInfo;
+
+		bool glyphFontLoaded = false;
+		bool labelFontLoaded = false;
+
+		if (!vFontInfos->m_ImFontAtlas.ConfigData.empty())
+		{
+			const int font_offset = stbtt_GetFontOffsetForIndex(
+				(unsigned char*)vFontInfos->m_ImFontAtlas.ConfigData[0].FontData,
+				vFontInfos->m_ImFontAtlas.ConfigData[0].FontNo);
+			if (stbtt_InitFont(&glyphFontInfo, (unsigned char*)vFontInfos->m_ImFontAtlas.ConfigData[0].FontData, font_offset))
+			{
+				glyphFontLoaded = true;
+			}
+		}
+
+		auto io = &ImGui::GetIO();
+		if (!io->Fonts->ConfigData.empty())
+		{
+			const int font_offset = stbtt_GetFontOffsetForIndex(
+				(unsigned char*)io->Fonts->ConfigData[0].FontData,
+				io->Fonts->ConfigData[0].FontNo);
+			if (stbtt_InitFont(&labelFontInfo, (unsigned char*)io->Fonts->ConfigData[0].FontData, font_offset))
+			{
+				labelFontLoaded = true;
+			}
+		}
+
+		if (glyphFontLoaded && labelFontLoaded)
+		{
+			// will write one glyph labeled
+
+			uint32_t labelHeight = (uint32_t)(vGlyphHeight * 0.5f);
+			uint32_t glyphHeight = (uint32_t)(vGlyphHeight * 0.8f);
+			uint32_t padding_x = (uint32_t)(vGlyphHeight * 0.1f);
+			uint32_t padding_y = 2U;
+			uint32_t columnCount = (uint32_t)ceil((double)vLabels.size() / (double)vMaxRows);
+
+			// max width of the labels
+			uint32_t maxLabelWidth = 0U;
+			for (const auto& it : vLabels)
+			{
+				maxLabelWidth = ct::maxi(maxLabelWidth, (uint32_t)it.first.size());
+			}
+			maxLabelWidth *= labelHeight; // one mult instead of many in loops for same result
+
+			// extend max width of the buffer for column count
+			uint32_t maxWidthOfOneItem = glyphHeight + maxLabelWidth;
+
+			// array of bytes
+			std::vector<uint8_t> buffer;
+			uint32_t bufferWidth = maxWidthOfOneItem * columnCount;
+			uint32_t bufferHeight = vGlyphHeight * (vMaxRows + 2U);
+			buffer.resize((size_t)bufferWidth * (size_t)bufferHeight);
+			memset(buffer.data(), 0, buffer.size());
+
+			// iteration pof labels
+			int32_t xpos = padding_x;
+			int32_t ypos = padding_y;
+			int32_t CurColumnOffset = 0;
+
+			// we will compute final size accoridng to the glyph and labels
+			int32_t finalWidth = 0;
+			int32_t finalHeight = 0;
+			int32_t columnMaxWidth = 0;
+
+			int32_t countRows = 0;
+			for (const auto& it : vLabels)
+			{
+				uint32_t codePoint = it.second;
+				std::string lblToRender = " " + it.first;
+				auto text = lblToRender.c_str();
+
+				xpos = CurColumnOffset + padding_x;
+
+				// one char for the glyph
+				float glyphScale = stbtt_ScaleForPixelHeight(&glyphFontInfo, (float)(glyphHeight));
+				int32_t ascent, descent, baseline;
+				stbtt_GetFontVMetrics(&glyphFontInfo, &ascent, &descent, 0);
+				baseline = (int)(ascent * glyphScale);
+				int32_t advance, lsb, x0, y0, x1, y1;
+				stbtt_GetCodepointHMetrics(&glyphFontInfo, codePoint, &advance, &lsb);
+				float x_shift = vGlyphHeight * 0.5f - (advance * glyphScale) * 0.5f;
+				float y_shift = vGlyphHeight * 0.5f - (ascent - descent) * glyphScale * 0.5f;
+				stbtt_GetCodepointBitmapBoxSubpixel(&glyphFontInfo, codePoint, glyphScale, glyphScale, x_shift, y_shift, &x0, &y0, &x1, &y1);
+				int32_t x = (uint32_t)xpos + x0;
+				int32_t y = baseline + y0;
+				while (x < 0 || y < 0) // we decrease scale until glyph can be added in picture
+				{
+					glyphScale *= 0.9f;
+					x_shift = vGlyphHeight * 0.5f - (advance * glyphScale) * 0.5f;
+					y_shift = vGlyphHeight * 0.5f - (ascent - descent) * glyphScale * 0.5f;
+					stbtt_GetCodepointBitmapBoxSubpixel(&glyphFontInfo, codePoint, glyphScale, glyphScale, x_shift, y_shift, &x0, &y0, &x1, &y1);
+					x = (uint32_t)xpos + x0;
+					y = baseline + y0;
+				}
+				if (x >= 0 && y >= 0)
+				{
+					uint8_t* ptr = buffer.data() + bufferWidth * (ypos + y) + x;
+					stbtt_MakeCodepointBitmapSubpixel(&glyphFontInfo, ptr, x1 - x0, y1 - y0, bufferWidth, glyphScale, glyphScale, 0, 0, codePoint);
+				}
+				xpos += vGlyphHeight;
+
+				// the rest for the label
+				float labelScale = stbtt_ScaleForPixelHeight(&labelFontInfo, (float)(labelHeight));
+				stbtt_GetFontVMetrics(&labelFontInfo, &ascent, &descent, 0);
+				baseline = (int32_t)(ascent * labelScale);
+
+				int32_t ch = 0;
+				while (text[ch])
+				{
+					stbtt_GetCodepointHMetrics(&labelFontInfo, text[ch], &advance, &lsb);
+					float y_shift = vGlyphHeight * 0.5f - labelHeight * 0.5f;
+					stbtt_GetCodepointBitmapBoxSubpixel(&labelFontInfo, text[ch], labelScale, labelScale, 0, y_shift, &x0, &y0, &x1, &y1);
+
+					x = (uint32_t)xpos + x0;
+					y = baseline + y0;
+					float newLabelScale = labelScale;
+					while (x < 0 || y < 0) // we decrease scale until glyph can be added in picture
+					{
+						newLabelScale *= 0.9f;
+						stbtt_GetCodepointBitmapBoxSubpixel(&labelFontInfo, codePoint, newLabelScale, newLabelScale, 0, y_shift, &x0, &y0, &x1, &y1);
+						x = (uint32_t)xpos + x0;
+						y = baseline + y0;
+					}
+					if (x >= 0 && y >= 0)
+					{
+						uint8_t* ptr = buffer.data() + bufferWidth * (ypos + y) + x;
+						stbtt_MakeCodepointBitmapSubpixel(&labelFontInfo, ptr, x1 - x0, y1 - y0, bufferWidth, newLabelScale, newLabelScale, 0, 0, text[ch]);
+					}
+					// note that this stomps the old data, so where character boxes overlap (e.g. 'lj') it's wrong
+					// because this API is really for baking character bitmaps into textures. if you want to render
+					// a sequence of characters, you really need to render each bitmap to a temp buffer, then
+					// "alpha blend" that into the working buffer
+					xpos += (advance * newLabelScale);
+					if (text[ch + 1])
+						xpos += labelScale * stbtt_GetCodepointKernAdvance(&labelFontInfo, text[ch], text[ch + 1]);
+					++ch;
+				}
+
+				// inc of the row count
+				countRows++;
+
+				// extra space
+				xpos += (advance * labelScale);
+				ypos += vGlyphHeight;
+
+				// max width of the current column
+				columnMaxWidth = ct::maxi(columnMaxWidth, xpos - CurColumnOffset);
+
+				// we compute final size according to the glyph and labels wrotes in buffer
+				finalWidth = ct::maxi(finalWidth, xpos);
+				finalHeight = ct::maxi(finalHeight, ypos);
+
+				// column change if needed
+				if (countRows % vMaxRows == 0) // we need to change the column
+				{
+					ypos = padding_y;
+					CurColumnOffset += columnMaxWidth + padding_x;
+					columnMaxWidth = 0;
+				}
+			}
+
+			if (finalWidth && finalHeight)
+			{
+				int32_t res = stbi_write_png(
+					vFilePathName.c_str(),
+					finalWidth + padding_x,
+					finalHeight,
+					1,
+					buffer.data(),
+					bufferWidth);
+
+				if (res)
+				{
+					FileHelper::Instance()->OpenFile(vFilePathName);
+					printf("Succes writing of the card to %s\n", vFilePathName.c_str());
+				}
+				else
+				{
+					printf("Failed writing of the card to %s\n", vFilePathName.c_str());
+				}
+			}
+			else
+			{
+				printf("Failed writing of the card to %s, final computed size not ok %i, %i\n", vFilePathName.c_str(), finalWidth, finalHeight);
+			}
+		}
+	}
+}
+
+static std::string GetNewHeaderName(const std::string& vPrefix, const std::string& vName)
+{
+	std::string glyphName = vName;
+	ct::replaceString(glyphName, " ", "_");
+	ct::replaceString(glyphName, "-", "_");
+
+	// by ex .notdef will become DOT_notdef
+	// because a define with '.' is a problem for the compiler
+	ct::replaceString(glyphName, ".", "DOT_");
+
+	// UpperCase
+	for (auto& c : glyphName)
+		c = (char)toupper((int)c);
+
+
+	return vPrefix + "_" + glyphName;
+}
+
+/*
+Generate Card pictureHeader file with glyphs and labels
+two modes :
+- if not glyph were selected => will generate header for all font glyphs
+- if glyph were selected => will generate header only for these glyphs
+*/
+void Generator::GenerateCard_One(
+	const std::string& vFilePathName,
+	FontInfos* vFontInfos,
+	const GenModeFlags& vFlags,
+	const uint32_t& vGlyphHeight,	// max height of glyph
+	const uint32_t& vMaxRows)		// max row count
+{
+	if (!vFilePathName.empty() && vFontInfos)
+	{
+		std::string filePathName = vFilePathName;
+		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
+		if (ps.isOk)
+		{
+			// file
+			std::string name = ps.name;
+			ct::replaceString(name, "-", "_");
+			filePathName = ps.GetFilePathWithNameExt(name, ".png");
+			
+			// Prefix
+			std::string prefix = "";
+			if (!vFontInfos->m_FontPrefix.empty())
+				prefix = "ICON_" + vFontInfos->m_FontPrefix;
+			
+			// generate bd of old codepoint and new string
+			// old codepoint because, we will get the glyph from te already loaded texture,
+			// so can only be accessed with old codepoints
+			std::map<std::string, uint32_t> glyphs;
+			if (vFontInfos->m_SelectedGlyphs.empty()) // no glyph selected so generate for whole font
+			{
+				for (auto& glyph : vFontInfos->m_GlyphCodePointToName)
+				{
+					glyphs[GetNewHeaderName(prefix, glyph.second)] = glyph.first;
+				}
+			}
+			else
+			{
+				for (auto& glyph : vFontInfos->m_SelectedGlyphs)
+				{
+					glyphs[GetNewHeaderName(prefix, glyph.second.newHeaderName)] = glyph.first;
+				}
+			}
+
+			WriteGlyphCardToPicture(filePathName, glyphs, vFontInfos, vGlyphHeight, vMaxRows);
+		}
+		else
+		{
+			Messaging::Instance()->AddError(true, 0, 0, "Invalid path : %s", vFilePathName.c_str());
+		}
+	}
+}
+
+void Generator::GenerateCard_Merged(
+	const std::string& vFilePathName,
+	ProjectFile* vProjectFile,
+	const GenModeFlags& vFlags,
+	const uint32_t& vGlyphHeight,	// max height of glyph
+	const uint32_t& vMaxRows)		// max row count
+{
+	return; // not work so for the moment we quit direct
+
+	if (vProjectFile &&
+		!vFilePathName.empty() &&
+		!vProjectFile->m_Fonts.empty())
+	{
+		std::string filePathName = vFilePathName;
+		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
+		if (ps.isOk)
+		{
+			// file
+			std::string name = ps.name;
+			ct::replaceString(name, "-", "_");
+			filePathName = ps.GetFilePathWithNameExt(name, ".png");
+
+			// Prefix
+			std::string prefix = "";
+			if (!vProjectFile->m_MergedFontPrefix.empty())
+				prefix = "ICON_" + vProjectFile->m_MergedFontPrefix;
+
+			// generate bd of old codepoint and new string
+			// old codepoint because, we will get the glyph from te already loaded texture,
+			// so can only be accessed with old codepoints
+			std::map<std::string, std::pair<uint32_t, FontInfos>> glyphs;
+			for (const auto& font : vProjectFile->m_Fonts)
+			{
+				for (const auto& glyph : font.second.m_SelectedGlyphs)
+				{
+					glyphs[GetNewHeaderName(prefix, glyph.second.newHeaderName)] = std::pair<uint32_t, FontInfos>(glyph.first, font.second);
+				}
+			}
+
+			assert(0);
+			//WriteMergedGlyphCardToPicture(filePathName, glyphs, vFontInfos, vGlyphHeight, vMaxRows);
+		}
+		else
+		{
+			Messaging::Instance()->AddError(true, 0, 0, "Invalid path : %s", vFilePathName.c_str());
 		}
 	}
 }
@@ -148,7 +583,6 @@ Generate Header file with glyphs code like in https://github.com/juliettef/IconF
 two modes :
 - if not glyph were selected => will generate header for all font glyphs
 - if glyph were selected => will generate header only for these glyphs
-todo : handle error code to a messagebox to display in app
 */
 void Generator::GenerateHeader_One(
 	const std::string& vFilePathName, 
@@ -187,101 +621,52 @@ void Generator::GenerateHeader_One(
 
 			std::map<std::string, uint32_t> finalGlyphNames;
 			
-			if (vFlags & GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES)
+			std::map<std::string, uint32_t> glyphNames;
+
+			if (vFontInfos->m_SelectedGlyphs.empty()) // no glyph selected so generate for whole font
 			{
-				std::map<std::string, uint32_t> glyphNames;
-
-				if (vFontInfos->m_SelectedGlyphs.empty()) // no glyph selected so generate for whole font
+				for (auto& it : vFontInfos->m_GlyphCodePointToName)
 				{
-					for (auto &it : vFontInfos->m_GlyphCodePointToName)
-					{
-						glyphNames[it.second] = it.first;
-					}
-				}
-				else
-				{
-					for (auto &it : vFontInfos->m_SelectedGlyphs)
-					{
-						glyphNames[it.second.newHeaderName] = it.second.newCodePoint;
-					}
-				}
-
-				// convert first and let in map.
-				// like that they will be ordered by names
-				// the issue was to convert and write directly
-				// so the original tag "SetMode" was writen before the original tag "about".
-				// its not wanted, so we save and order the finla result we want
-				// and after we will write in header file
-				for (const auto& it : glyphNames)
-				{
-					std::string glyphName = it.first;
-					ct::replaceString(glyphName, " ", "_");
-					ct::replaceString(glyphName, "-", "_");
-
-					uint32_t codePoint = it.second;
-					minCodePoint = ct::mini(minCodePoint, codePoint);
-					maxCodePoint = ct::maxi(maxCodePoint, codePoint);
-
-					// by ex .notdef will become DOT_notdef
-					// because a define with '.' is a problem for the compiler
-					ct::replaceString(glyphName, ".", "DOT_");
-
-					for (auto& c : glyphName)
-						c = (char)toupper((int)c);
-
-					finalGlyphNames[glyphName] = codePoint;
-				}
-
-				for (const auto& it : finalGlyphNames)
-				{
-					glyphs += "#define ICON" + prefix + "_" + it.first + " u8\"\\u" + ct::toHexStr(it.second) + "\"\n";
+					glyphNames[it.second] = it.first;
 				}
 			}
-			else if (vFlags & GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_CODEPOINT)
+			else
 			{
-				std::map<uint32_t, std::string> glyphCodePoints;
-
-				if (vFontInfos->m_SelectedGlyphs.empty()) // no glyph selected so generate for whole font
+				for (auto& it : vFontInfos->m_SelectedGlyphs)
 				{
-					for (auto &it : vFontInfos->m_GlyphCodePointToName)
-					{
-						glyphCodePoints[it.first] = it.second;
-					}
-				}
-				else
-				{
-					for (auto &it : vFontInfos->m_SelectedGlyphs)
-					{
-						glyphCodePoints[it.second.newCodePoint] = it.second.newHeaderName;
-					}
-				}
-
-				for (const auto &it : glyphCodePoints)
-				{
-					uint32_t codePoint = it.first;
-					minCodePoint = ct::mini(minCodePoint, codePoint);
-					maxCodePoint = ct::maxi(maxCodePoint, codePoint);
-
-					std::string glyphName = it.second;
-					ct::replaceString(glyphName, " ", "_");
-					ct::replaceString(glyphName, "-", "_");
-
-					// by ex .notdef will become DOT_notdef
-					// because a define with '.' is a problem for the compiler
-					ct::replaceString(glyphName, ".", "DOT_");
-
-					for (auto & c : glyphName)
-						c = (char)toupper((int)c);
-
-					finalGlyphNames[glyphName] = codePoint; 
-					
-					glyphs += "#define ICON" + prefix + "_" + glyphName + " u8\"\\u" + ct::toHexStr(codePoint) + "\"\n";
+					glyphNames[it.second.newHeaderName] = it.second.newCodePoint;
 				}
 			}
 
-			if (vFlags & GENERATOR_MODE_HEADER_PICTURE)
+			// convert first and let in map.
+			// like that they will be ordered by names
+			// the issue was to convert and write directly
+			// so the original tag "SetMode" was writen before the original tag "about".
+			// its not wanted, so we save and order the finla result we want
+			// and after we will write in header file
+			for (const auto& it : glyphNames)
 			{
-				m_HeaderPictureGenerator.Generate(vFilePathName, vFontInfos);
+				std::string glyphName = it.first;
+				ct::replaceString(glyphName, " ", "_");
+				ct::replaceString(glyphName, "-", "_");
+
+				uint32_t codePoint = it.second;
+				minCodePoint = ct::mini(minCodePoint, codePoint);
+				maxCodePoint = ct::maxi(maxCodePoint, codePoint);
+
+				// by ex .notdef will become DOT_notdef
+				// because a define with '.' is a problem for the compiler
+				ct::replaceString(glyphName, ".", "DOT_");
+
+				for (auto& c : glyphName)
+					c = (char)toupper((int)c);
+
+				finalGlyphNames[glyphName] = codePoint;
+			}
+
+			for (const auto& it : finalGlyphNames)
+			{
+				glyphs += "#define ICON" + prefix + "_" + it.first + " u8\"\\u" + ct::toHexStr(it.second) + "\"\n";
 			}
 			
 			// code point range
@@ -341,89 +726,46 @@ void Generator::GenerateHeader_Merged(
 
 			std::map<std::string, uint32_t> finalGlyphNames;
 
-			if (vFlags & GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES)
+			std::map<std::string, uint32_t> glyphNames;
+
+			// we take only selected glyphs of all fonts
+			for (const auto& font : vProjectFile->m_Fonts)
 			{
-				std::map<std::string, uint32_t> glyphNames;
-
-				// we take only selected glyphs of all fonts
-				for (const auto &font : vProjectFile->m_Fonts)
+				for (const auto& glyph : font.second.m_SelectedGlyphs)
 				{
-					for (const auto &glyph : font.second.m_SelectedGlyphs)
-					{
-						glyphNames[glyph.second.newHeaderName] = glyph.second.newCodePoint;
-					}
-				}
-
-				// convert first and let in map.
-				// like that they will be ordered by names
-				// the issue was to convert and write directly
-				// so the original tag "SetMode" was writen before the original tag "about".
-				// its not wanted, so we save and order the finla result we want
-				// and after we will write in header file
-				for (const auto& it : glyphNames)
-				{
-					std::string glyphName = it.first;
-					ct::replaceString(glyphName, " ", "_");
-					ct::replaceString(glyphName, "-", "_");
-
-					uint32_t codePoint = it.second;
-					minCodePoint = ct::mini(minCodePoint, codePoint);
-					maxCodePoint = ct::maxi(maxCodePoint, codePoint);
-
-					// by ex .notdef will become DOT_notdef
-					// because a define with '.' is a problem for the compiler
-					ct::replaceString(glyphName, ".", "DOT_");
-
-					for (auto& c : glyphName)
-						c = (char)toupper((int)c);
-
-					finalGlyphNames[glyphName] = codePoint;
-				}
-
-				for (const auto& it : finalGlyphNames)
-				{
-					glyphs += "#define ICON" + prefix + "_" + it.first + " u8\"\\u" + ct::toHexStr(it.second) + "\"\n";
-				}
-			}
-			else if (vFlags & GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_CODEPOINT)
-			{
-				std::map<uint32_t, std::string> glyphCodePoints;
-
-				// we take only selected glyphs of all fonts
-				for (const auto &font : vProjectFile->m_Fonts)
-				{
-					for (const auto &glyph : font.second.m_SelectedGlyphs)
-					{
-						glyphCodePoints[glyph.second.newCodePoint] = glyph.second.newHeaderName;
-					}
-				}
-
-				for (const auto &it : glyphCodePoints)
-				{
-					uint32_t codePoint = it.first;
-					minCodePoint = ct::mini(minCodePoint, codePoint);
-					maxCodePoint = ct::maxi(maxCodePoint, codePoint);
-
-					std::string glyphName = it.second;
-					ct::replaceString(glyphName, " ", "_");
-					ct::replaceString(glyphName, "-", "_");
-
-					// by ex .notdef will become DOT_notdef
-					// because a define with '.' is a problem for the compiler
-					ct::replaceString(glyphName, ".", "DOT_");
-
-					for (auto & c : glyphName)
-						c = (char)toupper((int)c);
-
-					finalGlyphNames[glyphName] = codePoint; 
-					
-					glyphs += "#define ICON" + prefix + "_" + glyphName + " u8\"\\u" + ct::toHexStr(codePoint) + "\"\n";
+					glyphNames[glyph.second.newHeaderName] = glyph.second.newCodePoint;
 				}
 			}
 
-			if (vFlags & GENERATOR_MODE_HEADER_PICTURE)
+			// convert first and let in map.
+			// like that they will be ordered by names
+			// the issue was to convert and write directly
+			// so the original tag "SetMode" was writen before the original tag "about".
+			// its not wanted, so we save and order the finla result we want
+			// and after we will write in header file
+			for (const auto& it : glyphNames)
 			{
-				//m_HeaderPictureGenerator.Generate(vFilePathName, vFontInfos);
+				std::string glyphName = it.first;
+				ct::replaceString(glyphName, " ", "_");
+				ct::replaceString(glyphName, "-", "_");
+
+				uint32_t codePoint = it.second;
+				minCodePoint = ct::mini(minCodePoint, codePoint);
+				maxCodePoint = ct::maxi(maxCodePoint, codePoint);
+
+				// by ex .notdef will become DOT_notdef
+				// because a define with '.' is a problem for the compiler
+				ct::replaceString(glyphName, ".", "DOT_");
+
+				for (auto& c : glyphName)
+					c = (char)toupper((int)c);
+
+				finalGlyphNames[glyphName] = codePoint;
+			}
+
+			for (const auto& it : finalGlyphNames)
+			{
+				glyphs += "#define ICON" + prefix + "_" + it.first + " u8\"\\u" + ct::toHexStr(it.second) + "\"\n";
 			}
 
 			// code point range
@@ -453,7 +795,6 @@ void Generator::GenerateHeader_Merged(
 Generate Font File with selected Glyphs 
 if vGenerateHeader is true, will Generate also a Header file with glyphs 
    code like in https://github.com/juliettef/IconFontCppHeaders
-todo : handle error code to a messagebox to display in app
 */
 void Generator::GenerateFontFile_One(
 	const std::string& vFilePathName, 
@@ -512,7 +853,19 @@ void Generator::GenerateFontFile_One(
 				{
 					if (vFlags & GENERATOR_MODE_HEADER)
 					{
-						GenerateHeader_One(filePathName, vFontInfos, vFlags);
+						GenerateHeader_One(
+							filePathName, 
+							vFontInfos, 
+							vFlags);
+					}
+					if (vFlags & GENERATOR_MODE_CARD)
+					{
+						GenerateCard_One(
+							filePathName, 
+							vFontInfos, 
+							vFlags,
+							vProjectFile->m_CardGlyphHeightInPixel, 
+							vProjectFile->m_CardCountRowsMax);
 					}
 				}
 				else
@@ -651,7 +1004,19 @@ void Generator::GenerateFontFile_Merged(
 				{
 					if (vFlags & GENERATOR_MODE_HEADER)
 					{
-						GenerateHeader_Merged(filePathName, vProjectFile, vFlags);
+						GenerateHeader_Merged(
+							filePathName, 
+							vProjectFile, 
+							vFlags);
+					}
+					if (vFlags & GENERATOR_MODE_CARD)
+					{
+						GenerateCard_Merged(
+							filePathName, 
+							vProjectFile, 
+							vFlags,
+							vProjectFile->m_CardGlyphHeightInPixel, 
+							vProjectFile->m_CardCountRowsMax);
 					}
 				}
 				else
@@ -728,7 +1093,7 @@ void Generator::GenerateCpp_One(
 				filePathName = ps.GetFilePathWithNameExt("temporary_" + name, ".ttf");
 
 				GenerateFontFile_One(filePathName, vProjectFile, vFontInfos,
-					(GenModeFlags)(vFlags & ~GENERATOR_MODE_HEADER)); // no header to generate
+					(GenModeFlags)(vFlags & ~GENERATOR_MODE_HEADER_CARD)); // no header or card to generate
 			}
 
 			if (FileHelper::Instance()->IsFileExist(filePathName))
@@ -761,7 +1126,22 @@ void Generator::GenerateCpp_One(
 						prefix = "FONT_ICON_BUFFER_NAME" + prefix;
 						ct::replaceString(res, vFontInfos->m_FontPrefix + "_compressed_data_base85", prefix);
 
-						GenerateHeader_One(filePathName, vFontInfos, vFlags, bufferName, bufferSize);
+						GenerateHeader_One(
+							filePathName, 
+							vFontInfos, 
+							vFlags, 
+							bufferName, 
+							bufferSize);
+					}
+
+					if (vFlags & GENERATOR_MODE_CARD)
+					{
+						GenerateCard_One(
+							filePathName, 
+							vFontInfos, 
+							vFlags,
+							vProjectFile->m_CardGlyphHeightInPixel, 
+							vProjectFile->m_CardCountRowsMax);
 					}
 
 					FileHelper::Instance()->SaveStringToFile(res, filePathName);
@@ -803,8 +1183,10 @@ void Generator::GenerateCpp_Merged(
 			ct::replaceString(ps.name, "-", "_");
 			filePathName = ps.GetFilePathWithNameExt("temporary_" + ps.name, ".ttf");
 
-			GenerateFontFile_Merged(filePathName, vProjectFile,
-				(GenModeFlags)(vFlags & ~GENERATOR_MODE_HEADER)); // no header to generate
+			GenerateFontFile_Merged(
+				filePathName, 
+				vProjectFile,
+				(GenModeFlags)(vFlags & ~GENERATOR_MODE_HEADER_CARD)); // no header to generate
 
 			if (FileHelper::Instance()->IsFileExist(filePathName))
 			{
@@ -833,7 +1215,22 @@ void Generator::GenerateCpp_Merged(
 						prefix = "FONT_ICON_BUFFER_NAME" + prefix;
 						ct::replaceString(res, vProjectFile->m_MergedFontPrefix + "_compressed_data_base85", prefix);
 
-						GenerateHeader_Merged(filePathName, vProjectFile, vFlags, bufferName, bufferSize);
+						GenerateHeader_Merged(
+							filePathName, 
+							vProjectFile, 
+							vFlags, 
+							bufferName, 
+							bufferSize);
+					}
+
+					if (vFlags & GENERATOR_MODE_CARD)
+					{
+						GenerateCard_Merged(
+							filePathName, 
+							vProjectFile, 
+							vFlags,
+							vProjectFile->m_CardGlyphHeightInPixel, 
+							vProjectFile->m_CardCountRowsMax);
 					}
 
 					FileHelper::Instance()->SaveStringToFile(res, filePathName);

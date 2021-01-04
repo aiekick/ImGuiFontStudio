@@ -17,7 +17,8 @@
 
 #include <imgui/imgui.h>
 
-#include <cstdarg>
+#include <cstdarg> // variadic
+#include <cstdint> // types like uint32_t
 
 struct ImGuiWindow;
 
@@ -234,6 +235,9 @@ namespace ImGui
 		const char* label, ImGuiDataType data_type, 
 		void* p_data, const void* p_min, const void* p_max, 
 		const char* format = NULL, float power = 1.0f);
+	IMGUI_API bool SliderUIntDefaultCompact(float width,
+		const char* label, uint32_t* v, uint32_t v_min,
+		uint32_t v_max, uint32_t v_default, const char* format = "%d");
 	IMGUI_API bool SliderIntDefaultCompact(float width,
 		const char* label, int* v, int v_min, 
 		int v_max, int v_default, const char* format = "%d");

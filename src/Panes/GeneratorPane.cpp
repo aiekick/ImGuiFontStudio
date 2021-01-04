@@ -39,6 +39,8 @@
 
 #include <cinttypes> // printf zu
 
+static ProjectFile defaultProjectFile;
+
 GeneratorPane::GeneratorPane() = default;
 GeneratorPane::~GeneratorPane() = default;
 
@@ -149,6 +151,24 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 				FileHelper::Instance()->CreateDirectoryIfNotExist(path);
 				Generator::Instance()->Generate(path, "test.ttf", vProjectFile);
 			}
+			if (ImGui::Button("Quick Header Font Current"))
+			{
+				vProjectFile->m_GenMode = (GenModeFlags)0;
+				vProjectFile->AddGenMode(GENERATOR_MODE_CURRENT_HEADER); // header
+				std::string path = FileHelper::Instance()->GetAppPath() + "/exports";
+				path = FileHelper::Instance()->CorrectFilePathName(path);
+				FileHelper::Instance()->CreateDirectoryIfNotExist(path);
+				Generator::Instance()->Generate(path, "test.h", vProjectFile);
+			}
+			if (ImGui::Button("Quick Card Font Current"))
+			{
+				vProjectFile->m_GenMode = (GenModeFlags)0;
+				vProjectFile->AddGenMode(GENERATOR_MODE_CURRENT_CARD); // card
+				std::string path = FileHelper::Instance()->GetAppPath() + "/exports";
+				path = FileHelper::Instance()->CorrectFilePathName(path);
+				FileHelper::Instance()->CreateDirectoryIfNotExist(path);
+				Generator::Instance()->Generate(path, "test.png", vProjectFile);
+			}
 			if (ImGui::Button("Quick Font Merged"))
 			{
 				bool disableGlyphReScale = vProjectFile->IsGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE);
@@ -220,13 +240,15 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 				else
 				{
 					vProjectFile->RemoveGenMode(GENERATOR_MODE_HEADER);
+					vProjectFile->RemoveGenMode(GENERATOR_MODE_CARD);
 				}
-				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Header File", "Header File",
-					&vProjectFile->m_GenMode, GENERATOR_MODE_HEADER_FILE, 50.0f, false, false,
+
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Header", "Header File",
+					&vProjectFile->m_GenMode, GENERATOR_MODE_HEADER, 50.0f, false, false,
 					GENERATOR_MODE_NONE, headerModeDisabled);
 				ImGui::SameLine();
-				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Header Picture", "Header Picture",
-					&vProjectFile->m_GenMode, GENERATOR_MODE_HEADER_PICTURE, 50.0f, false, false,
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Card", "Card Picture",
+					&vProjectFile->m_GenMode, GENERATOR_MODE_CARD, 50.0f, false, false,
 					GENERATOR_MODE_NONE, headerModeDisabled);
 
 				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Font", "Font File",
@@ -250,26 +272,6 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 						change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
 							"Disable Glyph Re Write", "if your fonts have same size,\nit can be more safe for the moment (bad generated font is some case)\nto disable glyph re write.\nonly needed if we must change glyph scale",
 							&vProjectFile->m_GenMode, GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE, 50.0f);
-					}
-					ImGui::Unindent();
-				}
-				ImGui::Unindent();
-			}
-			if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER))
-			{
-				ImGui::Indent();
-				{
-					ImGui::Text("Header : ");
-					ImGui::Indent();
-					{
-						ImGui::Text("Order Glyphs by :");
-						change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("CodePoint", "order by glyph CodePoint",
-							&vProjectFile->m_GenMode, GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_CODEPOINT, 50.0f, true, true,
-							GENERATOR_MODE_RADIO_CDP_NAMES);
-						ImGui::SameLine();
-						change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Names", "order by glyph Name",
-							&vProjectFile->m_GenMode, GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES, 50.0f, true, true,
-							GENERATOR_MODE_RADIO_CDP_NAMES);
 					}
 					ImGui::Unindent();
 				}
@@ -300,6 +302,7 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 					if (vProjectFile->IsGenMode(GENERATOR_MODE_FONT)) exts = ".ttf";
 					else if (vProjectFile->IsGenMode(GENERATOR_MODE_CPP)) exts = ".cpp";
 					else if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER)) exts = ".h";
+					else if (vProjectFile->IsGenMode(GENERATOR_MODE_CARD)) exts = ".png";
 				}
 
 				ImGui::Unindent();
@@ -341,6 +344,7 @@ bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
 	bool res = true;
 
 	if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER) ||
+		vProjectFile->IsGenMode(GENERATOR_MODE_CARD) ||
 		vProjectFile->IsGenMode(GENERATOR_MODE_FONT) ||
 		vProjectFile->IsGenMode(GENERATOR_MODE_CPP))
 	{
@@ -448,7 +452,7 @@ void GeneratorPane::GeneratorFileDialogPane(std::string /*vFilter*/, igfd::UserD
 	auto prj = (ProjectFile*)vUserDatas;
 	if (prj)
 	{
-		if (prj->IsGenMode(GENERATOR_MODE_HEADER))
+		if (prj->IsGenMode(GENERATOR_MODE_HEADER_CARD))
 		{
 			#define PREFIX_MAX_SIZE 49
 			static char prefixBuffer[PREFIX_MAX_SIZE + 1] = "\0";
@@ -457,15 +461,19 @@ void GeneratorPane::GeneratorFileDialogPane(std::string /*vFilter*/, igfd::UserD
 			{
 				if (prj->m_SelectedFont)
 				{
-					bool cond = !prj->m_SelectedFont->m_FontPrefix.empty();
-					snprintf(prefixBuffer, PREFIX_MAX_SIZE, "%s", prj->m_SelectedFont->m_FontPrefix.c_str());
-					ImGui::TextWrapped("Header Prefix for\n\t%s :", prj->m_SelectedFont->m_FontFileName.c_str());
-					if (ImGui::InputText_Validation("##FontPrefix", prefixBuffer, PREFIX_MAX_SIZE,
-						&cond, "You must Define a\nfont prefix for continue"))
+					if (ImGui::CollapsingHeader("Prefix", 0, ImGuiTreeNodeFlags_DefaultOpen))
 					{
-						prj->m_SelectedFont->m_FontPrefix = std::string(prefixBuffer);
-						prj->SetProjectChange();
+						bool cond = !prj->m_SelectedFont->m_FontPrefix.empty();
+						snprintf(prefixBuffer, PREFIX_MAX_SIZE, "%s", prj->m_SelectedFont->m_FontPrefix.c_str());
+						ImGui::TextWrapped("Header Prefix for\n%s", prj->m_SelectedFont->m_FontFileName.c_str());
+						if (ImGui::InputText_Validation("##FontPrefix", prefixBuffer, PREFIX_MAX_SIZE,
+							&cond, "You must Define a\nfont prefix for continue"))
+						{
+							prj->m_SelectedFont->m_FontPrefix = std::string(prefixBuffer);
+							prj->SetProjectChange();
+						}
 					}
+
 					canContinue = !prj->m_SelectedFont->m_FontPrefix.empty();
 				}
 				else
@@ -478,51 +486,70 @@ void GeneratorPane::GeneratorFileDialogPane(std::string /*vFilter*/, igfd::UserD
 			else if (prj->IsGenMode(GENERATOR_MODE_BATCH))
 			{
 				canContinue = true;
-				std::map<std::string, int> prefixs;
-				for (auto &font : prj->m_Fonts)
+				
+				if (ImGui::CollapsingHeader("Prefix", 0, ImGuiTreeNodeFlags_DefaultOpen))
 				{
-					snprintf(prefixBuffer, PREFIX_MAX_SIZE, "%s", font.second.m_FontPrefix.c_str());
-					
-					bool cond = !font.second.m_FontPrefix.empty(); // not empty
-					if (prefixs.find(font.second.m_FontPrefix) == prefixs.end())
+					std::map<std::string, int> prefixs;
+					for (auto& font : prj->m_Fonts)
 					{
-						prefixs[font.second.m_FontPrefix] = 1;
-					}
-					else
-					{
-						cond &= (prefixs[font.second.m_FontPrefix] == 0); // must be unique
-					}
-					ImGui::TextWrapped("Header Prefix for\n\t%s :", font.second.m_FontFileName.c_str());
+						snprintf(prefixBuffer, PREFIX_MAX_SIZE, "%s", font.second.m_FontPrefix.c_str());
 
-					ImGui::PushID(&font);
-					bool res = ImGui::InputText_Validation("##FontPrefix", prefixBuffer, PREFIX_MAX_SIZE,
-						&cond, "You must Define a\nfont prefix and unique for continue");
-					ImGui::PopID();
-					if (res)
-					{
-						font.second.m_FontPrefix = std::string(prefixBuffer);
-						prj->SetProjectChange();
+						bool cond = !font.second.m_FontPrefix.empty(); // not empty
+						if (prefixs.find(font.second.m_FontPrefix) == prefixs.end())
+						{
+							prefixs[font.second.m_FontPrefix] = 1;
+						}
+						else
+						{
+							cond &= (prefixs[font.second.m_FontPrefix] == 0); // must be unique
+						}
+						ImGui::TextWrapped("Header Prefix for\n\t%s :", font.second.m_FontFileName.c_str());
+
+						ImGui::PushID(&font);
+						bool res = ImGui::InputText_Validation("##FontPrefix", prefixBuffer, PREFIX_MAX_SIZE,
+							&cond, "You must Define a\nfont prefix and unique for continue");
+						ImGui::PopID();
+						if (res)
+						{
+							font.second.m_FontPrefix = std::string(prefixBuffer);
+							prj->SetProjectChange();
+						}
+						prefixs[font.second.m_FontPrefix]++;
+						canContinue &= cond;
 					}
-					prefixs[font.second.m_FontPrefix]++;
-					canContinue &= cond;
 				}
 			}
 			else if (prj->IsGenMode(GENERATOR_MODE_MERGED))
 			{
 				bool cond = !prj->m_MergedFontPrefix.empty();
 				
-				snprintf(prefixBuffer, PREFIX_MAX_SIZE, "%s", prj->m_MergedFontPrefix.c_str());
-				ImGui::Text("Header Font Prefix :");
-				if (ImGui::InputText_Validation("##FontPrefix", prefixBuffer, PREFIX_MAX_SIZE,
-					&cond, "You must Define a\nfont prefix for continue"))
+				if (ImGui::CollapsingHeader("Prefix", 0, ImGuiTreeNodeFlags_DefaultOpen))
 				{
-					prj->m_MergedFontPrefix = prefixBuffer;
-					prj->SetProjectChange();
+					snprintf(prefixBuffer, PREFIX_MAX_SIZE, "%s", prj->m_MergedFontPrefix.c_str());
+					ImGui::Text("Header Font Prefix :");
+					if (ImGui::InputText_Validation("##FontPrefix", prefixBuffer, PREFIX_MAX_SIZE,
+						&cond, "You must Define a\nfont prefix for continue"))
+					{
+						prj->m_MergedFontPrefix = prefixBuffer;
+						prj->SetProjectChange();
+					}
 				}
 
 				canContinue = !prj->m_MergedFontPrefix.empty();
 			}
-			
+
+			if (prj->IsGenMode(GENERATOR_MODE_CARD))
+			{
+				if (ImGui::CollapsingHeader("Card", 0, ImGuiTreeNodeFlags_DefaultOpen))
+				{
+					float aw = ImGui::GetContentRegionAvail().x;
+					bool ch = ImGui::SliderUIntDefaultCompact(aw, "Glyph Height", &prj->m_CardGlyphHeightInPixel, 1U, 200U, defaultProjectFile.m_CardGlyphHeightInPixel);
+					ch |= ImGui::SliderUIntDefaultCompact(aw, "Max Rows", &prj->m_CardCountRowsMax, 10U, 1000U, defaultProjectFile.m_CardCountRowsMax);
+					if (ch) prj->SetProjectChange();
+				}
+
+				canContinue &= (prj->m_CardGlyphHeightInPixel > 0) && (prj->m_CardCountRowsMax > 0);
+			}
 		}
 
 		if (vCantContinue)

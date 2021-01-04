@@ -110,21 +110,35 @@ int main(int, char**argv)
 
     // Main loop
 	int display_w, display_h;
+    int window_x, window_y;
+    ImVec2 pos, size;
 	while (!glfwWindowShouldClose(mainWindow))
     {
         // maintain active, prevent user change via imgui dialog
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
-        io.ConfigFlags |= ImGuiConfigFlags_ViewportsEnable;         // Enable Viewport
-
-		glfwGetFramebufferSize(mainWindow, &display_w, &display_h);
+       
+        glfwGetFramebufferSize(mainWindow, &display_w, &display_h);
         glfwPollEvents();
 
         ImGui_ImplOpenGL3_NewFrame();
         ImGui_ImplGlfw_NewFrame();
         ImGui::NewFrame();
         
-        ImGuiViewport* viewport = ImGui::GetMainViewport();
-		MainFrame::Instance()->Display(viewport->GetWorkPos(), viewport->GetWorkSize());
+        if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
+        {
+            ImGuiViewport* viewport = ImGui::GetMainViewport();
+            if (viewport)
+            {
+                pos = viewport->GetWorkPos();
+                size = viewport->GetWorkSize();
+            }
+        }
+        else
+        {
+            pos = ImVec2(0, 0);
+            size = ImVec2((float)display_w, (float)display_h);
+        }
+		MainFrame::Instance()->Display(pos, size);
 
         ImGui::Render();
 

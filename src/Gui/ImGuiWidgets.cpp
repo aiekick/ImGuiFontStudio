@@ -1032,6 +1032,29 @@ bool ImGui::SliderScalarDefaultCompact(float width, const char* label, ImGuiData
 	return value_changed;
 }
 
+bool ImGui::SliderUIntDefaultCompact(float width, const char* label, uint32_t* v, uint32_t v_min, uint32_t v_max, uint32_t v_default, const char* format)
+{
+	bool change = false;
+
+	float ax = ImGui::GetCursorPosX();
+
+	ImGui::PushID(label);
+	if (Button(ICON_IGFS_RESET))
+	{
+		*v = v_default;
+		change = true;
+	}
+	ImGui::PopID();
+
+	ImGui::SameLine();
+
+	float w = width - ImGui::GetCursorPosX() + ax;
+
+	change |= SliderScalarDefaultCompact(w, label, ImGuiDataType_U32, v, &v_min, &v_max, format);
+
+	return change;
+}
+
 bool ImGui::SliderIntDefaultCompact(float width, const char* label, int* v, int v_min, int v_max, int v_default, const char* format)
 {
 	bool change = false;

@@ -43,7 +43,7 @@ public: // to save
 	std::string m_MergedFontPrefix;
 	GenModeFlags m_GenMode =
 	        GENERATOR_MODE_CURRENT_HEADER |
-		    GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES |
+		    //GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES |
 		    GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES;
 	bool m_CurrentPane_ShowGlyphTooltip = true;
 	bool m_SourcePane_ShowGlyphTooltip = true;
@@ -56,7 +56,9 @@ public: // to save
 		GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT;
 	SourceFontPaneFlags m_SourceFontPaneFlags = 
 		SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH;
-	
+	uint32_t m_CardGlyphHeightInPixel = 40U; // ine item height in card
+	uint32_t m_CardCountRowsMax = 20U; // after this max, new columns
+
 public: // dont save
 	FontInfos *m_SelectedFont = nullptr;
 	size_t m_CountSelectedGlyphs = 0; // for all fonts

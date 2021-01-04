@@ -46,12 +46,14 @@ void ProjectFile::Clear()
 	m_RangeColoringHash = ImVec4(10, 15, 35, 0.5f);
 	m_Preview_Glyph_CountX = 20;
 	m_Preview_Glyph_Width = 50;
+	m_CardGlyphHeightInPixel = 40U; // ine item height in card
+	m_CardCountRowsMax = 20U; // after this max, new columns
 	m_SelectedFont = nullptr;
 	m_CountSelectedGlyphs = 0; // for all fonts
 	m_IsLoaded = false;
 	m_IsThereAnyNotSavedChanged = false;
-	m_GenMode = GENERATOR_MODE_CURRENT_HEADER |
-		GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES |
+	m_GenMode = GENERATOR_MODE_CURRENT_HEADER_CARD |
+		//GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES |
 		GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES;
 	m_SourcePane_ShowGlyphTooltip = true;
 	m_FinalPane_ShowGlyphTooltip = true;
@@ -236,6 +238,9 @@ std::string ProjectFile::getXml(const std::string& vOffset)
 	
 	str += vOffset + "\t<glyphdisplaytuningmode>" + ct::toStr(m_GlyphDisplayTuningMode) + "</glyphdisplaytuningmode>\n";
 	str += vOffset + "\t<sourcefontpaneflags>" + ct::toStr(m_SourceFontPaneFlags) + "</sourcefontpaneflags>\n";
+	
+	str += vOffset + "\t<cardglyhpheight>" + ct::toStr(m_CardGlyphHeightInPixel) + "</cardglyhpheight>\n";
+	str += vOffset + "\t<cardcountrowsmax>" + ct::toStr(m_CardCountRowsMax) + "</cardcountrowsmax>\n";
 
 	str += vOffset + "</project>\n";
 
@@ -310,6 +315,10 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 			m_GlyphDisplayTuningMode = (GlyphDisplayTuningModeFlags)ct::ivariant(strValue).GetI();
 		else if (strName == "sourcefontpaneflags")
 			m_SourceFontPaneFlags = (SourceFontPaneFlags)ct::ivariant(strValue).GetI();
+		else if (strName == "cardglyhpheight")
+			m_CardGlyphHeightInPixel = ct::uvariant(strValue).GetU();
+		else if (strName == "cardcountrowsmax")
+			m_CardCountRowsMax = ct::uvariant(strValue).GetU();
 	}
 
 	return true;
