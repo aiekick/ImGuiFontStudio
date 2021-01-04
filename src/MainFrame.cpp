@@ -194,6 +194,24 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 				}
 			}
 
+			if (ImGui::MenuItem(ICON_IGFS_FOLDER_OPEN " Re Open"))
+			{
+				// if change maybe save before open other
+				if (m_ProjectFile.IsLoaded() && m_ProjectFile.IsThereAnyNotSavedChanged())
+				{
+					m_SaveDialogIfRequired = true;
+					m_SaveChangeDialogActions.push_front([this]()
+						{
+							LoadProject(m_ProjectFile.m_ProjectFilePathName);
+							m_SaveDialogIfRequired = false;
+						});
+				}
+				else
+				{
+					LoadProject(m_ProjectFile.m_ProjectFilePathName);
+				}
+			}
+
 			if (m_ProjectFile.IsLoaded())
 			{
 				ImGui::Separator();
