@@ -87,7 +87,9 @@ bool ProjectFile::Load()
 	return LoadAs(m_ProjectFilePathName);
 }
 
-bool ProjectFile::LoadAs(const std::string& vFilePathName)
+// ils wanted to not pass the adress for re open case
+// elwse, the clear will set vFilePathName to empty because with re open, target m_ProjectFilePathName
+bool ProjectFile::LoadAs(const std::string vFilePathName)  
 {
 	Clear();
 	std::string filePathName = FileHelper::Instance()->SimplifyFilePath(vFilePathName);

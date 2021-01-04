@@ -80,7 +80,7 @@ public:
 	void New();
 	void New(const std::string& vFilePathName);
 	bool Load();
-	bool LoadAs(const std::string& vFilePathName);
+	bool LoadAs(const std::string vFilePathName); // ils wanted to not pass the adress for re open case
 	bool Save();
 	bool SaveAs(const std::string& vFilePathName);
 	bool IsLoaded() const;
