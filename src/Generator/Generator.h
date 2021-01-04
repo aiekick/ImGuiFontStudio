@@ -68,7 +68,7 @@ class ProjectFile;
 class Generator
 {
 public:
-	static bool Generator::SaveTextureToPng(GLFWwindow* vWin, const std::string& vFilePathName,
+	static bool SaveTextureToPng(GLFWwindow* vWin, const std::string& vFilePathName,
 		GLuint vTextureId, ct::uvec2 vTextureSize, uint32_t vChannelCount);
 
 public:
