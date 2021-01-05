@@ -43,6 +43,7 @@
 
 #include <ctools/FileHelper.h>
 #include <ctools/cTools.h>
+#include <ctools/Logger.h>
 
 #include <set>
 #include <map>
@@ -265,7 +266,7 @@ int32_t FontHelper::MergeCharacterMaps()
 	m_ResolvedSet.clear();
 	m_GlyphNames.clear();
 	
-	size_t fontId = 0;
+	FontId fontId = 0;
 	for (auto &font : m_Fonts)
 	{
 		for (auto &cm : font.m_CharMap)
@@ -407,7 +408,7 @@ bool FontHelper::Assemble_Glyf_Loca_Maxp_Tables()
 		sfntly::Ptr<sfntly::MaximumProfileTable::Builder> maxpBuilder =
 			down_cast<sfntly::MaximumProfileTable::Builder*>(m_FontBuilder->NewTableBuilder(sfntly::Tag::maxp, rFontData));
 
-		maxpBuilder->SetNumGlyphs(loca_list.size() - 1);
+		maxpBuilder->SetNumGlyphs((uint32_t)loca_list.size() - 1);
 		//maxpBuilder->SetNumGlyphs(m_ResolvedSet.size());
 		//maxpBuilder->SetNumGlyphs(loca_table_builder->NumGlyphs());
 
@@ -551,21 +552,21 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 
 					sfntly::Ptr<sfntly::WritableFontData> finalStream;
 					size_t new_lengthInBytes = headerStream.Size() + flagStream.Size() + xCoordStream.Size() + yCoordStream.Size();
-					finalStream.Attach(sfntly::WritableFontData::CreateWritableFontData(new_lengthInBytes));
+					finalStream.Attach(sfntly::WritableFontData::CreateWritableFontData((int32_t)new_lengthInBytes));
 
 					int32_t offset = 0;
-					finalStream->WriteBytes(offset, headerStream.Get(), 0, headerStream.Size()); offset += (int32_t)headerStream.Size();
-					finalStream->WriteBytes(offset, flagStream.Get(), 0, flagStream.Size()); offset += (int32_t)flagStream.Size();
-					finalStream->WriteBytes(offset, xCoordStream.Get(), 0, xCoordStream.Size()); offset += (int32_t)xCoordStream.Size();
-					finalStream->WriteBytes(offset, yCoordStream.Get(), 0, yCoordStream.Size());
+					finalStream->WriteBytes(offset, headerStream.Get(), 0, (int32_t)headerStream.Size()); offset += (int32_t)headerStream.Size();
+					finalStream->WriteBytes(offset, flagStream.Get(), 0, (int32_t)flagStream.Size()); offset += (int32_t)flagStream.Size();
+					finalStream->WriteBytes(offset, xCoordStream.Get(), 0, (int32_t)xCoordStream.Size()); offset += (int32_t)xCoordStream.Size();
+					finalStream->WriteBytes(offset, yCoordStream.Get(), 0, (int32_t)yCoordStream.Size());
 
 					/////////////////////////////////////////////////////////////////////////////////////////////
 					/////////////////////////////////////////////////////////////////////////////////////////////
 
 					//we will not do Component glyph for the moment
 
-					size_t originalLen = vReadableFontData->Length();
-					size_t minelen = finalStream->Length();
+					//size_t originalLen = vReadableFontData->Length();
+					//size_t minelen = finalStream->Length();
 
 					return finalStream;
 				}
@@ -573,7 +574,7 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 		}
 		else if (glyph->GlyphType() == sfntly::GlyphType::kComposite)
 		{
-			int i = 0;
+			LogStr("No support of Compositie glyph for the moment");
 		}
 	}
 		
@@ -649,7 +650,7 @@ bool FontHelper::Assemble_CMap_Table()
 	}
 
 	// Updating the id_range_offset for every segment.
-	for (int32_t i = 0, num_segs = segment_list->size(); i < num_segs; ++i)
+	for (int32_t i = 0, num_segs = (int32_t)segment_list->size(); i < num_segs; ++i)
 	{
 		sfntly::Ptr<sfntly::CMapTable::CMapFormat4::Builder::Segment> segment = segment_list->at(i);
 		segment->set_id_range_offset(segment->id_range_offset()
@@ -688,7 +689,7 @@ bool FontHelper::Assemble_Hmtx_Hhea_Tables()
 	{
 		std::vector<LongHorMetric> metrics;
 
-		size_t fontId = 0;
+		FontId fontId = 0;
 		for (auto &font : m_Fonts)
 		{
 			if (m_NewToOldGlyfId.find(fontId) != m_NewToOldGlyfId.end())
@@ -771,7 +772,7 @@ bool FontHelper::Assemble_Post_Table(std::map<CodePoint, std::string> vSelection
 	}
 
 	std::vector<std::string> names;
-	for (size_t fontId = 0; fontId < m_Fonts.size(); fontId++)
+	for (FontId fontId = 0; fontId < (FontId)m_Fonts.size(); fontId++)
 	{
 		if (m_NewToOldGlyfId.find(fontId) != m_NewToOldGlyfId.end())
 		{
@@ -844,7 +845,7 @@ bool FontHelper::Assemble_Post_Table(std::map<CodePoint, std::string> vSelection
 	}
 	if (!str.empty())
 	{
-		offset += header->WriteBytes(offset, (uint8_t*)str.c_str(), 0, str.size());
+		offset += header->WriteBytes(offset, (uint8_t*)str.c_str(), 0, (int32_t)str.size());
 	}
 
 	m_FontBuilder->NewTableBuilder(sfntly::Tag::post, header);

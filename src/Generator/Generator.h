@@ -76,16 +76,17 @@ public:
 		const std::string& vFilePath,
 		const std::string& vFileName,
 		ProjectFile* vProjectFile);
+
 private:
 	void GenerateCard_One(const std::string& vFilePathName, FontInfos* vFontInfos,
-		const GenModeFlags& vFlags, const uint32_t& vGlyphHeight, const uint32_t& vMaxRows);
+		const uint32_t& vGlyphHeight, const uint32_t& vMaxRows);
 	void GenerateCard_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
-		const GenModeFlags& vFlags, const uint32_t& vGlyphHeight, const uint32_t& vMaxRows);
+		const uint32_t& vGlyphHeight, const uint32_t& vMaxRows);
 	
 	void GenerateHeader_One(const std::string& vFilePathName, FontInfos *vFontInfos,
-		const GenModeFlags& vFlags, std::string vFontBufferName = "", size_t vFontBufferSize = 0);
+		std::string vFontBufferName = "", size_t vFontBufferSize = 0);
 	void GenerateHeader_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
-		const GenModeFlags& vFlags, std::string vFontBufferName = "", size_t vFontBufferSize = 0);
+		std::string vFontBufferName = "", size_t vFontBufferSize = 0);
 	
 	void GenerateFontFile_One(const std::string& vFilePathName, ProjectFile* vProjectFile, 
 		FontInfos *vFontInfos, const GenModeFlags& vFlags);
@@ -97,10 +98,6 @@ private:
 	void GenerateCpp_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
 		const GenModeFlags& vFlags);
 
-private: // cpp generation imported from ImGui
-	std::string get_Compressed_Base85_BytesArray(const std::string& vFilePathName, 
-		const std::string& vPrefix, std::string *vBufferName = 0, size_t *vBufferSize = 0);
-	
 public: // singleton
 	static Generator *Instance()
 	{
