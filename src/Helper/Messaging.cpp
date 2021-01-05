@@ -43,7 +43,7 @@ void Messaging::AddMessage(const std::string& vMsg, MessageTypeEnum vType, bool 
 {
 	if (vSelect)
 	{
-		currentMsgIdx = m_Messages.size();
+		currentMsgIdx = (int32_t)m_Messages.size();
 	}
 
 	m_Messages.emplace_back(vMsg, vType, vDatas, vFunction);
@@ -143,11 +143,11 @@ void Messaging::Draw(ProjectFile *vProjectFile)
 		{
 			if (ImGui::MenuItem(ICON_IGFS_MENU_LEFT "##left"))
 			{
-				currentMsgIdx = ct::maxi<int>(--currentMsgIdx, 0);
+				currentMsgIdx = ct::maxi<int32_t>(--currentMsgIdx, 0);
 			}
 			if (ImGui::MenuItem(ICON_IGFS_MENU_RIGHT "##right"))
 			{
-				currentMsgIdx = ct::maxi<int>(++currentMsgIdx, m_Messages.size() - 1);
+				currentMsgIdx = ct::maxi<int32_t>(++currentMsgIdx, (int32_t)m_Messages.size() - 1);
 			}
 			if (ImGui::BeginMenu(ICON_IGFS_MENU_UP "##up"))
 			{
@@ -159,7 +159,7 @@ void Messaging::Draw(ProjectFile *vProjectFile)
 				ImGui::EndMenu();
 			}
 		}
-		currentMsgIdx = ct::clamp<int>(currentMsgIdx, 0, m_Messages.size() - 1);
+		currentMsgIdx = ct::clamp<int32_t>(currentMsgIdx, 0, (int32_t)m_Messages.size() - 1);
 		DrawMessage(currentMsgIdx);
 	}
 }

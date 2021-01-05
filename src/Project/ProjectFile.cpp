@@ -294,7 +294,7 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 		else if (strName == "previewglyphcount")
 			m_Preview_Glyph_CountX = ct::ivariant(strValue).GetI();
 		else if (strName == "previewglyphwidth")
-			m_Preview_Glyph_Width = ct::ivariant(strValue).GetI();
+			m_Preview_Glyph_Width = ct::fvariant(strValue).GetF();
 		else if (strName == "mergedfontprefix")
 			m_MergedFontPrefix = strValue;
 		else if (strName == "genmode")

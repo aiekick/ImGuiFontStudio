@@ -151,7 +151,7 @@ int32_t MemoryStream::ReadShort()
 
 MemoryStream::FWord MemoryStream::ReadFWord()
 {
-	return ReadShort();
+	return (int16_t)ReadShort();
 }
 
 uint32_t MemoryStream::ReadUInt24()

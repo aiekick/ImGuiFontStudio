@@ -49,7 +49,7 @@ private:
     typedef int MessageExistFlags;
     MessageExistFlags m_MessageExistFlags = MESSAGE_EXIST_NONE;
 
-	size_t currentMsgIdx = 0;
+	int32_t currentMsgIdx = 0;
 	typedef std::function<void(void*)> MessageFunc;
 	typedef std::tuple<std::string, MessageTypeEnum, void*, MessageFunc> Messagekey;
 	std::vector<Messagekey> m_Messages;

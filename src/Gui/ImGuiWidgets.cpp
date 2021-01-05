@@ -955,7 +955,7 @@ void ImGui::ShowCustomStyleEditor(bool *vOpen, ImGuiStyle* ref)
 // Read code of e.g. SliderFloat(), SliderInt() etc. or examples in 'Demo->Widgets->Data Types' to understand how to use this function directly.
 // text on the left in the box for keep space
 // value on the right in the box
-bool ImGui::SliderScalarDefaultCompact(float width, const char* label, ImGuiDataType data_type, void* p_data, const void* p_min, const void* p_max, const char* format, float power)
+bool ImGui::SliderScalarDefaultCompact(float width, const char* label, ImGuiDataType data_type, void* p_data, const void* p_min, const void* p_max, const char* format)
 {
 	ImGuiWindow* window = GetCurrentWindow();
 	if (window->SkipItems)
@@ -1078,7 +1078,7 @@ bool ImGui::SliderIntDefaultCompact(float width, const char* label, int* v, int 
 	return change;
 }
 
-bool ImGui::SliderFloatDefaultCompact(float width, const char* label, float* v, float v_min, float v_max, float v_default, const char* format, float power)
+bool ImGui::SliderFloatDefaultCompact(float width, const char* label, float* v, float v_min, float v_max, float v_default, const char* format)
 {
 	bool change = false;
 
@@ -1094,7 +1094,7 @@ bool ImGui::SliderFloatDefaultCompact(float width, const char* label, float* v, 
 
 	float w = width - ImGui::GetCursorPosX() + ax;
 
-	change |= SliderScalarDefaultCompact(w, label, ImGuiDataType_Float, v, &v_min, &v_max, format, power);
+	change |= SliderScalarDefaultCompact(w, label, ImGuiDataType_Float, v, &v_min, &v_max, format);
 
 	return change;
 }

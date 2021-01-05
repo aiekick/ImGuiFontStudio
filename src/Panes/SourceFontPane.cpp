@@ -347,7 +347,7 @@ void SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile)
 						{
 							const auto style = &ImGui::GetStyle();
 							static float radioButtonWidth = ImGui::GetFrameHeight();
-							float aw = ImGui::GetContentRegionAvail().x - style->ItemSpacing.x - radioButtonWidth;
+							aw = ImGui::GetContentRegionAvail().x - style->ItemSpacing.x - radioButtonWidth;
 
 							bool change = false;
 							if (ImGui::SliderIntDefaultCompact(aw, "Glyph Count X", &vProjectFile->m_Preview_Glyph_CountX, 50, 1, defaultProjectValues.m_Preview_Glyph_CountX))

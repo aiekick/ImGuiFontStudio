@@ -110,7 +110,6 @@ int main(int, char**argv)
 
     // Main loop
 	int display_w, display_h;
-    int window_x, window_y;
     ImVec2 pos, size;
 	while (!glfwWindowShouldClose(mainWindow))
     {

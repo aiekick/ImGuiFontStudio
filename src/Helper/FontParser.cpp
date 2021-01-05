@@ -16,6 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
+
  
 #include "FontParser.h"
 #include <ctools/FileHelper.h>
@@ -54,10 +55,10 @@ void FontAnalyser::HeaderStruct::parse(MemoryStream *vMem)
 		scalerType = vMem->ReadString(4);
 		if (scalerType[0] == 1)  scalerType = "TrueType 1"; // TrueType 1
 		if (scalerType[1] == 1)  scalerType = "OpenType 1"; // TrueType 1
-		numTables = vMem->ReadUShort();
-		searchRange = vMem->ReadUShort();
-		entrySelector = vMem->ReadUShort();
-		rangeShift = vMem->ReadUShort();
+		numTables = (uint16_t)vMem->ReadUShort();
+		searchRange = (uint16_t)vMem->ReadUShort();
+		entrySelector = (uint16_t)vMem->ReadUShort();
+		rangeShift = (uint16_t)vMem->ReadUShort();
 	}
 }
 
@@ -88,16 +89,16 @@ void FontAnalyser::TableStruct::parse(MemoryStream *vMem)
 {
 	if (vMem)
 	{
-		uint32_t _tag = vMem->ReadULong();
+		uint32_t _tag = (uint32_t)vMem->ReadULong();
 		tag[0] = (uint8_t)((_tag >> 24) & 0xff);
 		tag[1] = (uint8_t)((_tag >> 16) & 0xff);
 		tag[2] = (uint8_t)((_tag >> 8) & 0xff);
 		tag[3] = (uint8_t)(_tag & 0xff);
 		tag[4] = '\0';
 
-		checkSum = vMem->ReadULong();
-		offset = vMem->ReadULong();
-		length = vMem->ReadULong();
+		checkSum = (uint32_t)vMem->ReadULong();
+		offset = (uint32_t)vMem->ReadULong();
+		length = (uint32_t)vMem->ReadULong();
 	}
 }
 
@@ -139,7 +140,7 @@ int FontAnalyser::locaTableStruct::draw(int vWidgetId)
 	return vWidgetId;
 }
 
-void FontAnalyser::locaTableStruct::parse(MemoryStream *vMem, size_t vOffset, size_t vLength)
+void FontAnalyser::locaTableStruct::parse(MemoryStream *vMem, size_t vOffset, size_t /*vLength*/)
 {
 	if (vMem && head && maxp)
 	{
@@ -156,7 +157,7 @@ void FontAnalyser::locaTableStruct::parse(MemoryStream *vMem, size_t vOffset, si
 		{
 			for (int i = 0; i < maxp->numGlyphs; i++)
 			{
-				offsets.push_back(vMem->ReadULong());
+				offsets.push_back((uint32_t)vMem->ReadULong());
 			}
 		}
 	}
@@ -198,27 +199,27 @@ int FontAnalyser::maxpTableStruct::draw(int vWidgetId)
 	return vWidgetId;
 }
 
-void FontAnalyser::maxpTableStruct::parse(MemoryStream *vMem, size_t vOffset, size_t vLength)
+void FontAnalyser::maxpTableStruct::parse(MemoryStream *vMem, size_t vOffset, size_t /*vLength*/)
 {
 	if (vMem)
 	{
 		vMem->SetPos(vOffset);
 
 		version = vMem->ReadFixed();
-		numGlyphs = vMem->ReadUShort();
-		maxPoints = vMem->ReadUShort();
-		maxContours = vMem->ReadUShort();
-		maxComponentPoints = vMem->ReadUShort();
-		maxComponentContours = vMem->ReadUShort();
-		maxZones = vMem->ReadUShort();
-		maxTwilightPoints = vMem->ReadUShort();
-		maxStorage = vMem->ReadUShort();
-		maxFunctionDefs = vMem->ReadUShort();
-		maxInstructionDefs = vMem->ReadUShort();
-		maxStackElements = vMem->ReadUShort();
-		maxSizeOfInstructions = vMem->ReadUShort();
-		maxComponentElements = vMem->ReadUShort();
-		maxComponentDepth = vMem->ReadUShort();
+		numGlyphs = (uint16_t)vMem->ReadUShort();
+		maxPoints = (uint16_t)vMem->ReadUShort();
+		maxContours = (uint16_t)vMem->ReadUShort();
+		maxComponentPoints = (uint16_t)vMem->ReadUShort();
+		maxComponentContours = (uint16_t)vMem->ReadUShort();
+		maxZones = (uint16_t)vMem->ReadUShort();
+		maxTwilightPoints = (uint16_t)vMem->ReadUShort();
+		maxStorage = (uint16_t)vMem->ReadUShort();
+		maxFunctionDefs = (uint16_t)vMem->ReadUShort();
+		maxInstructionDefs = (uint16_t)vMem->ReadUShort();
+		maxStackElements = (uint16_t)vMem->ReadUShort();
+		maxSizeOfInstructions = (uint16_t)vMem->ReadUShort();
+		maxComponentElements = (uint16_t)vMem->ReadUShort();
+		maxComponentDepth = (uint16_t)vMem->ReadUShort();
 	}
 }
 
@@ -316,7 +317,7 @@ int FontAnalyser::simpleGlyphTableStruct::draw(int vWidgetId)
 	return vWidgetId;
 }
 
-void FontAnalyser::simpleGlyphTableStruct::parse(MemoryStream *vMem, size_t vOffset, size_t vLength, int16_t vCountContours)
+void FontAnalyser::simpleGlyphTableStruct::parse(MemoryStream *vMem, size_t /*vOffset*/, size_t /*vLength*/, int16_t vCountContours)
 {
 	if (vMem)
 	{
@@ -326,10 +327,10 @@ void FontAnalyser::simpleGlyphTableStruct::parse(MemoryStream *vMem, size_t vOff
 			
 			for (int i = 0; i < vCountContours; i++)
 			{
-				endPtsOfContours.push_back(vMem->ReadShort());
+				endPtsOfContours.push_back((uint16_t)vMem->ReadShort());
 			}
 
-			instructionLength = vMem->ReadUShort();
+			instructionLength = (uint16_t)vMem->ReadUShort();
 			
 			for (int i = 0; i < instructionLength; i++)
 			{
@@ -339,7 +340,7 @@ void FontAnalyser::simpleGlyphTableStruct::parse(MemoryStream *vMem, size_t vOff
 			if (!endPtsOfContours.empty())
 			{
 				int countPoints = endPtsOfContours[endPtsOfContours.size() - 1];
-				if (countPoints > 0);
+				if (countPoints > 0)
 				{
 					uint32_t flag_repeat = 0;
 					int flag = 0;
@@ -357,7 +358,7 @@ void FontAnalyser::simpleGlyphTableStruct::parse(MemoryStream *vMem, size_t vOff
 						{
 							flag_repeat--;
 						}
-						flags.push_back(flag);
+						flags.push_back((uint8_t)flag);
 					}
 					int shortX = (1 << 1);
 					int shortY = (1 << 2);
@@ -366,12 +367,12 @@ void FontAnalyser::simpleGlyphTableStruct::parse(MemoryStream *vMem, size_t vOff
 						if (it & shortX)
 							xCoordinates.push_back((int16_t)vMem->ReadByte());
 						else
-							xCoordinates.push_back(vMem->ReadShort());
+							xCoordinates.push_back((int16_t)vMem->ReadShort());
 
 						if (it & shortY)
 							yCoordinates.push_back((int16_t)vMem->ReadByte());
 						else
-							yCoordinates.push_back(vMem->ReadShort());
+							yCoordinates.push_back((int16_t)vMem->ReadShort());
 					}
 				}
 			}
@@ -411,7 +412,7 @@ void FontAnalyser::glyfStruct::parse(MemoryStream *vMem, size_t vOffset, size_t 
 	{
 		vMem->SetPos(vOffset);
 
-		numberOfContours = vMem->ReadUShort();
+		numberOfContours = (uint16_t)vMem->ReadUShort();
 		xMin = vMem->ReadFWord();
 		yMin = vMem->ReadFWord();
 		xMax = vMem->ReadFWord();
@@ -453,13 +454,12 @@ int FontAnalyser::glyfTableStruct::draw(int vWidgetId)
 	return vWidgetId;
 }
 
-void FontAnalyser::glyfTableStruct::parse(MemoryStream *vMem, size_t vOffset, size_t vLength)
+void FontAnalyser::glyfTableStruct::parse(MemoryStream *vMem, size_t vOffset, size_t /*vLength*/)
 {
 	if (vMem && loca)
 	{
 		int offset = 0;
 		int length = 0;
-		bool start = false;
 		for (auto & it : loca->offsets)
 		{
 			offset = it;
@@ -553,35 +553,35 @@ int FontAnalyser::cmapSubTableF4Struct::draw(int vWidgetId)
 	return vWidgetId;
 }
 
-void FontAnalyser::cmapSubTableF4Struct::parse(MemoryStream *vMem, size_t vOffset, size_t vLength)
+void FontAnalyser::cmapSubTableF4Struct::parse(MemoryStream *vMem, size_t /*vOffset*/, size_t /*vLength*/)
 {
 	if (vMem)
 	{
 		filled = true;
 
-		language = vMem->ReadUShort();
-		segCountX2 = vMem->ReadUShort();
-		searchRange = vMem->ReadUShort();
-		entrySelector = vMem->ReadUShort();
-		rangeShift = vMem->ReadUShort();
+		language = (uint16_t)vMem->ReadUShort();
+		segCountX2 = (uint16_t)vMem->ReadUShort();
+		searchRange = (uint16_t)vMem->ReadUShort();
+		entrySelector = (uint16_t)vMem->ReadUShort();
+		rangeShift = (uint16_t)vMem->ReadUShort();
 
 		int segCount = segCountX2 / 2;
 		for (int i = 0; i < segCount; i++)
 		{
-			endCode.push_back(vMem->ReadUShort());
+			endCode.push_back((uint16_t)vMem->ReadUShort());
 		}
-		uint16_t reservedPad = vMem->ReadUShort();
+		reservedPad = (uint16_t)vMem->ReadUShort();
 		for (int i = 0; i < segCount; i++)
 		{
-			startCode.push_back(vMem->ReadUShort());
-		}
-		for (int i = 0; i < segCount; i++)
-		{
-			idDelta.push_back(vMem->ReadShort());
+			startCode.push_back((uint16_t)vMem->ReadUShort());
 		}
 		for (int i = 0; i < segCount; i++)
 		{
-			idRangeOffset.push_back(vMem->ReadUShort());
+			idDelta.push_back((uint16_t)vMem->ReadShort());
+		}
+		for (int i = 0; i < segCount; i++)
+		{
+			idRangeOffset.push_back((uint16_t)vMem->ReadUShort());
 		}
 
 		//std::vector<uint16_t> glyphIdArray;
@@ -623,12 +623,12 @@ int FontAnalyser::cmapSubTableF0Struct::draw(int vWidgetId)
 	return vWidgetId;
 }
 
-void FontAnalyser::cmapSubTableF0Struct::parse(MemoryStream *vMem, size_t vOffset, size_t vLength)
+void FontAnalyser::cmapSubTableF0Struct::parse(MemoryStream *vMem, size_t /*vOffset*/, size_t /*vLength*/)
 {
 	if (vMem)
 	{
 		filled = true;
-		language = vMem->ReadUShort();
+		language = (uint16_t)vMem->ReadUShort();
 
 		for (int i = 0; i < 256; i++)
 		{
@@ -662,16 +662,16 @@ int FontAnalyser::cmapEncodingRecordStruct::draw(int vWidgetId)
 	return vWidgetId;
 }
 
-void FontAnalyser::cmapEncodingRecordStruct::parse(MemoryStream *vMem, size_t vOffset, size_t vLength)
+void FontAnalyser::cmapEncodingRecordStruct::parse(MemoryStream *vMem, size_t /*vOffset*/, size_t /*vLength*/)
 {
 	if (vMem)
 	{
-		platformID = vMem->ReadUShort();
-		encodingID = vMem->ReadUShort();
-		offset = vMem->ReadULong();
+		platformID = (uint16_t)vMem->ReadUShort();
+		encodingID = (uint16_t)vMem->ReadUShort();
+		offset = (uint16_t)vMem->ReadULong();
 
-		uint16_t format = vMem->ReadUShort();
-		uint16_t length = vMem->ReadUShort();
+		uint16_t format = (uint16_t)vMem->ReadUShort();
+		uint16_t length = (uint16_t)vMem->ReadUShort();
 
 		if (format == 0)
 		{
@@ -720,14 +720,14 @@ int FontAnalyser::cmapTableStruct::draw(int vWidgetId)
 	return vWidgetId;
 }
 
-void FontAnalyser::cmapTableStruct::parse(MemoryStream *vMem, size_t vOffset, size_t vLength)
+void FontAnalyser::cmapTableStruct::parse(MemoryStream *vMem, size_t vOffset, size_t /*vLength*/)
 {
 	if (vMem)
 	{
 		vMem->SetPos(vOffset);
 
-		version = vMem->ReadUShort();
-		numEncodingRecords = vMem->ReadUShort();
+		version = (uint16_t)vMem->ReadUShort();
+		numEncodingRecords = (uint16_t)vMem->ReadUShort();
 
 		for (int i = 0; i < numEncodingRecords; i++)
 		{
@@ -776,7 +776,7 @@ int FontAnalyser::headTableStruct::draw(int vWidgetId)
 	return vWidgetId;
 }
 
-void FontAnalyser::headTableStruct::parse(MemoryStream *vMem, size_t vOffset, size_t vLength)
+void FontAnalyser::headTableStruct::parse(MemoryStream *vMem, size_t vOffset, size_t /*vLength*/)
 {
 	if (vMem)
 	{
@@ -784,21 +784,21 @@ void FontAnalyser::headTableStruct::parse(MemoryStream *vMem, size_t vOffset, si
 
 		version = vMem->ReadFixed();
 		fontRevision = vMem->ReadFixed();
-		checkSumAdjustment = vMem->ReadULong();
-		magicNumber = vMem->ReadULong();
-		flags = vMem->ReadUShort(); // bitset
-		unitsPerEm = vMem->ReadUShort();
+		checkSumAdjustment = (uint32_t)vMem->ReadULong();
+		magicNumber = (uint32_t)vMem->ReadULong();
+		flags = (uint16_t)vMem->ReadUShort(); // bitset
+		unitsPerEm = (uint16_t)vMem->ReadUShort();
 		created = vMem->ReadDateTime();
 		modified = vMem->ReadDateTime();
 		xMin = vMem->ReadFWord();
 		yMin = vMem->ReadFWord();
 		xMax = vMem->ReadFWord();
 		yMax = vMem->ReadFWord();
-		macStyle = vMem->ReadUShort(); // bitset
-		lowestRecPPEM = vMem->ReadUShort();
-		fontDirectionHint = vMem->ReadShort();
-		indexToLocFormat = vMem->ReadShort();
-		glyphDataFormat = vMem->ReadShort();
+		macStyle = (uint16_t)vMem->ReadUShort(); // bitset
+		lowestRecPPEM = (uint16_t)vMem->ReadUShort();
+		fontDirectionHint = (int16_t)vMem->ReadShort();
+		indexToLocFormat = (int16_t)vMem->ReadShort();
+		glyphDataFormat = (int16_t)vMem->ReadShort();
 	}
 }
 
@@ -864,12 +864,12 @@ void FontAnalyser::postTableF2Struct::parse(MemoryStream *vMem, size_t vOffset, 
 {
 	if (vMem)
 	{
-		numberOfGlyphs = vMem->ReadUShort();
+		numberOfGlyphs = (uint16_t)vMem->ReadUShort();
 		if (numberOfGlyphs)
 		{
 			for (int i = 0; i < numberOfGlyphs; i++)
 			{
-				glyphNameIndex.push_back(vMem->ReadUShort());
+				glyphNameIndex.push_back((uint16_t)vMem->ReadUShort());
 			}
 
 			size_t endPos = vOffset + vLength;
@@ -942,13 +942,13 @@ void FontAnalyser::postTableStruct::parse(MemoryStream *vMem, size_t vOffset, si
 
 		format = vMem->ReadFixed();;
 		italicAngle = vMem->ReadFixed();
-		underlinePosition = vMem->ReadUShort();
-		underlineThickness = vMem->ReadUShort();
-		isFixedPitch = vMem->ReadULong();
-		minMemType42 = vMem->ReadULong();
-		maxMemType42 = vMem->ReadULong();
-		minMemType1 = vMem->ReadULong();
-		maxMemType1 = vMem->ReadULong();
+		underlinePosition = (int16_t)vMem->ReadUShort();
+		underlineThickness = (int16_t)vMem->ReadUShort();
+		isFixedPitch = (uint32_t)vMem->ReadULong();
+		minMemType42 = (uint32_t)vMem->ReadULong();
+		maxMemType42 = (uint32_t)vMem->ReadULong();
+		minMemType1 = (uint32_t)vMem->ReadULong();
+		maxMemType1 = (uint32_t)vMem->ReadULong();
 
 		if (format.high == 2)
 			tableF2.parse(vMem, vOffset, vLength);
