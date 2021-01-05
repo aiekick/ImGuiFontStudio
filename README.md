@@ -35,6 +35,7 @@ Succesfully tested on my side :
 * can open ttf or otf font file
 * can subset font file (one file same time or by batch)
 * can generate header with corresponding glyph names and codepoint
+* can generate a card picture file who show the content (icon + name of the header)
 * can generate cpp file with compressed data or for embedded use
 * can merge many font file in one (the glyphs will be resized)
 * can edit codepoint and glyph names
@@ -122,12 +123,12 @@ for instance here in this example for load embedded font, we have (with font Pre
 
 In both cases, the use in code is the same :
 
-After that step, when you have a ImGui widgett with test you just need to put int he label field,
+After that step, when you have a ImGui widget to test, you just need to put in the label field,
 the glyph you want, defined in the header file :
 ```cpp
  ImGui::Button(ICON_IGFS_FOLDER_OPEN " Open Font");
 ```
-and you will have this reult : 
+and you will have this result : 
 ![Button_With_Icons](doc/Button_With_Icons.png)
 
 ## Contributions / Issues / Features request
@@ -166,7 +167,7 @@ Main View : Final pane for edition
 
 Let me know your project wiht a pciture and i can add it here :
 
-For the moment, there is :
+For the moment (as i know), there is :
 
 [ImGuiFontStudio](https://github.com/aiekick/ImGuiFontStudio) himself :)
 
