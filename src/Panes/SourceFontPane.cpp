@@ -204,14 +204,14 @@ void SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile)
 
 						static int selection = 0;
 						static ImGuiTableFlags flags =
-							ImGuiTableFlags_ColumnsWidthFixed |	ImGuiTableFlags_RowBg |
+							ImGuiTableFlags_SizingPolicyFixed |	ImGuiTableFlags_RowBg |
 							ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
 							ImGuiTableFlags_NoHostExtendY | ImGuiTableFlags_Borders;
 						if (ImGui::BeginTable("##fileTable", 2, flags, ImVec2(aw, 100)))
 						{
 							ImGui::TableSetupScrollFreeze(0, 1); // Make header always visible
 							ImGui::TableSetupColumn("Font Files", ImGuiTableColumnFlags_WidthStretch, -1, 0);
-							ImGui::TableSetupColumn("Act", ImGuiTableColumnFlags_WidthAutoResize, -1, 1);
+							ImGui::TableSetupColumn("Act", ImGuiTableColumnFlags_WidthAuto, -1, 1);
 							//ImGui::TableHeadersRow(); not needed
 							
 							for (auto & itFont : vProjectFile->m_Fonts)

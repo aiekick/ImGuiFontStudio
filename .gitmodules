@@ -27,8 +27,8 @@
 	url = https://github.com/aiekick/cTools.git
 [submodule "3rdparty/imgui"]
 	path = 3rdparty/imgui
-	url = https://github.com/aiekick/imgui.git
-	branch = tables_merged_in_docking
+	url = https://github.com/ocornut/imgui
+	branch = docking
 [submodule "3rdparty/stb"]
 	path = 3rdparty/stb
 	url = https://github.com/nothings/stb
