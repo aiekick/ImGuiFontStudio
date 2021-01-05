@@ -23,7 +23,7 @@
 #include <ctools/cTools.h>
 #include <sfntly/table/truetype/glyph_table.h>
 
-#define GLYH_EDIT_CONTROl_WIDTH 180.0f
+#define GLYPH_EDIT_CONTROl_WIDTH 180.0f
 
 class ProjectFile;
 class GlyphDisplayHelper

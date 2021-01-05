@@ -60,7 +60,7 @@ int GlyphDisplayHelper::CalcGlyphsCountAndSize(
 		if (glyphCount > 0)
 		{
 			*vCellSize = ImVec2(glyphSize, glyphSize);
-			*vGlyphSize = *vCellSize - ImGui::GetStyle().ItemSpacing - ImGui::GetStyle().FramePadding * 2.0f;
+			*vGlyphSize = *vCellSize - ImGui::GetStyle().ItemSpacing;
 
 			if (vGlyphEdited || vForceEditMode)
 			{
@@ -71,7 +71,7 @@ int GlyphDisplayHelper::CalcGlyphsCountAndSize(
 				const ImVec2 frame_size = ImGui::CalcItemSize(ImVec2(0, 0), ImGui::CalcItemWidth(),
 					label_size.y + ImGui::GetStyle().FramePadding.y * 2.0f);
 				float cell_size_y = frame_size.y * 2.0f + ImGui::GetStyle().FramePadding.y;
-				float cell_size_x = cell_size_y + ImGui::GetStyle().FramePadding.x + GLYH_EDIT_CONTROl_WIDTH;
+				float cell_size_x = cell_size_y + ImGui::GetStyle().FramePadding.x + GLYPH_EDIT_CONTROl_WIDTH;
 				glyphCount = ct::maxi(1, (int)ct::floor(currentPaneAvailWidth / cell_size_x));
 				*vGlyphSize = ImVec2(cell_size_y, cell_size_y);
 			}
@@ -80,6 +80,8 @@ int GlyphDisplayHelper::CalcGlyphsCountAndSize(
 			{
 				glyphCount = 1;
 			}
+
+			*vGlyphSize -= ImGui::GetStyle().FramePadding * 2.0f;
 		}
 
 		return glyphCount;
