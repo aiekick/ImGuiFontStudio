@@ -42,6 +42,7 @@ static char Encode85Byte(unsigned int x)
 // based on https://github.com/ocornut/imgui/tree/master/misc/fonts/binary_to_compressed_c.cpp
 // and modified for export bytes Array (for avoid compiler limitation with char array of more than 2^16 (65536) chars)
 std::string Compress::GetCompressedBase85BytesArray(
+	const std::string& vLang,
 	const std::string& vFilePathName, 
 	const std::string& vPrefix, 
 	std::string *vBufferName, 
@@ -73,23 +74,42 @@ std::string Compress::GetCompressedBase85BytesArray(
 	memset(compressed + compressed_sz, 0, maxlen - compressed_sz);
 
 	// Output as Base85 encoded
-	size_t bufferSize = (int)((compressed_sz + 3) / 4) * 5;
-	bool generateByteArray = (bufferSize >= 65536);
-	if (vBufferSize)
-		*vBufferSize = bufferSize; // export buffer size
-	std::string bufferName = vPrefix + "_compressed_data_base85";
-	if (vBufferName)
-		*vBufferName = bufferName;
-	res += "static const char " + bufferName + "[" + ct::toStr(bufferSize) + "+1] =";
-	if (generateByteArray)
-	{
-		res += "{\n";
-	}
-	else
-	{
-		res += "\n    \"";
-	}
 	
+	size_t bufferSize = (int)((compressed_sz + 3) / 4) * 5;
+	bool generateByteArray = (bufferSize >= 65536); // not sure if needed for C#
+	if (vBufferSize) *vBufferSize = bufferSize; // export buffer size
+	std::string bufferName;
+	if (vLang == "c#")
+	{
+		bufferName = "compressed_data_base85";
+		if (generateByteArray)
+		{
+			res += ct::toStr("\t\tpublic static readonly IReadOnlyList<byte> %s = new byte[] {", bufferName.c_str());
+			res += "\n\t\t\t";
+		}
+		else
+		{
+			res += ct::toStr("\t\tpublic static readonly string %s = ", bufferName.c_str());
+			res += "\n\t\t\t\"";
+		}
+		
+	}
+	else if (vLang == "cpp")
+	{
+		bufferName = vPrefix + "_compressed_data_base85";
+		res += "static const char " + bufferName + "[" + ct::toStr(bufferSize) + "+1] =";
+		if (generateByteArray)
+		{
+			res += "{\n";
+		}
+		else
+		{
+			res += "\n    \"";
+		}
+	}
+
+	if (vBufferName) *vBufferName = bufferName;
+
 	std::string content;
 
 	char prev_c = 0;
@@ -121,10 +141,21 @@ std::string Compress::GetCompressedBase85BytesArray(
 			if (generateByteArray)
 			{
 				content += "\n";
+				if (vLang == "c#")
+				{
+					content += "\t\t\t";
+				}
 			}
 			else
 			{
-				content += "\"\n    \"";
+				if (vLang == "c#")
+				{
+					content += "\" +\n\t\t\t\"";
+				}
+				else if (vLang == "cpp")
+				{
+					content += "\"\n    \"";
+				}
 			}
 		}
 	}
@@ -132,16 +163,30 @@ std::string Compress::GetCompressedBase85BytesArray(
 	if (generateByteArray)
 	{
 		content = content.substr(0, content.size() - 2);
-		res += content + "};\n";
+		if (vLang == "cpp")
+		{
+			res += content + "};\n";
+		}
+		else if (vLang == "c#")
+		{
+			res += content + "\n\t\t};\n";
+		}
 	}
 	else
 	{
-		res += content + "\";\n\n";
+		if (vLang == "cpp")
+		{
+			res += content + "\";\n\n";
+		}
+		else if (vLang == "c#")
+		{
+			res += content + "\";\n";
+		}
 	}
 
 	// Cleanup
-	delete[] data;
-	delete[] compressed;
+	SAFE_DELETE_ARRAY(data);
+	SAFE_DELETE_ARRAY(compressed);
 
 	return res;
 }

@@ -37,19 +37,40 @@
 //// HEADER GENERATION ////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-static std::string GetHeader(std::string vLang)
+static std::string GetHeader(std::string vLang, std::string vPrefix)
 {
 	std::string header;
 	header += "//Header Generated with https://github.com/aiekick/ImGuiFontStudio\n";
 	header += "//Based on https://github.com/juliettef/IconFontCppHeaders\n";
-	header += "\n";
-	header += "#pragma once\n";
+	
+	if (vLang == "cpp")
+	{
+		header += "//for Language c++\n";
+		header += "\n";
+		header += "#pragma once\n\n";
+	}
+	else if (vLang == "c#")
+	{
+		header += "//for Language c#\n\n";
+		header += "namespace IconFonts\n";
+		header += "{\n";
+		header += ct::toStr("\tpublic class %s_Labels\n", vPrefix.c_str());
+		header += "\t{\n";
+	}
+
 	return header;
 }
 
 static std::string GetFooter(std::string vLang)
 {
 	std::string header;
+
+	if (vLang == "c#")
+	{
+		header += "\t}\n";
+		header += "}\n";
+	}
+
 	return header;
 }
 
@@ -59,26 +80,66 @@ static std::string GetFontInfos(std::string vLang, std::string vPrefix, std::str
 
 	if (vFontBufferSize > 0)
 	{
-		header += ct::toStr("#define FONT_ICON_BUFFER_NAME_%s %s\n", vPrefix.c_str(), vFontBufferName.c_str());
-		header += ct::toStr("#define FONT_ICON_BUFFER_SIZE_%s 0x%s\n", vPrefix.c_str(), ct::toHexStr(vFontBufferSize).c_str());
+		if (vLang == "cpp")
+		{
+			header += ct::toStr("#define FONT_ICON_BUFFER_NAME_%s %s\n", vPrefix.c_str(), vFontBufferName.c_str());
+			header += ct::toStr("#define FONT_ICON_BUFFER_SIZE_%s 0x%s\n", vPrefix.c_str(), ct::toHexStr(vFontBufferSize).c_str());
+		}
+		else if (vLang == "c#")
+		{
+			//header += ct::toStr("\t\tpublic const int FONT_ICON_ARRAY_SIZE = 0x%s;\n", ct::toHexStr(vFontBufferSize).c_str());
+		}
 	}
 	else
 	{
-		header += ct::toStr("#define FONT_ICON_FILE_NAME_%s \"%s\"\n", vPrefix.c_str(), vFontFileName.c_str());
+		if (vLang == "cpp")
+		{
+			header += ct::toStr("#define FONT_ICON_FILE_NAME_%s \"%s\"\n", vPrefix.c_str(), vFontFileName.c_str());
+		}
+		else if (vLang == "c#")
+		{
+			header += ct::toStr("\t\tpublic const string FONT_ICON_FILE_NAME = \"%s\";\n", vFontFileName.c_str());
+		}
 	}
-	return header;
-}
 
-static std::string GetGlyphItem(std::string vLang, std::string vType, std::string vPrefix, std::string vLabel, uint32_t vCodePoint)
-{
-	return ct::toStr("#define %s_%s_%s u8\"\\u%s\"\n", vType.c_str(), vPrefix.c_str(), vLabel.c_str(), ct::toHexStr(vCodePoint).c_str());
+	header += "\n";
+
+	return header;
 }
 
 static std::string GetGlyphTableMinMax(std::string vLang, std::string vPrefix, ct::uvec2 vCodePointRange)
 {
 	std::string header;
-	header += ct::toStr("#define ICON_MIN_%s 0x%s\n", vPrefix.c_str(), ct::toHexStr(vCodePointRange.x).c_str());
-	header += ct::toStr("#define ICON_MAX_%s 0x%s\n", vPrefix.c_str(), ct::toHexStr(vCodePointRange.y).c_str());
+
+	if (vLang == "cpp")
+	{
+		header += ct::toStr("#define ICON_MIN_%s 0x%s\n", vPrefix.c_str(), ct::toHexStr(vCodePointRange.x).c_str());
+		header += ct::toStr("#define ICON_MAX_%s 0x%s\n", vPrefix.c_str(), ct::toHexStr(vCodePointRange.y).c_str());
+	}
+	else if (vLang == "c#")
+	{
+		header += ct::toStr("\t\tpublic const int ICON_MIN = 0x%s;\n", ct::toHexStr(vCodePointRange.x).c_str());
+		header += ct::toStr("\t\tpublic const int ICON_MAX = 0x%s;\n", ct::toHexStr(vCodePointRange.y).c_str());
+	}
+
+	header += "\n";
+
+	return header;
+}
+
+static std::string GetGlyphItem(std::string vLang, std::string vType, std::string vPrefix, std::string vLabel, uint32_t vCodePoint)
+{
+	std::string header;
+	
+	if (vLang == "cpp")
+	{
+		header += ct::toStr("#define %s_%s u8\"\\u%s\"\n", vType.c_str(), vLabel.c_str(), ct::toHexStr(vCodePoint).c_str());
+	}
+	else if (vLang == "c#")
+	{
+		header += ct::toStr("\t\tpublic const string %s_%s = \"\\u%s\";\n", vType.c_str(), vLabel.c_str(), ct::toHexStr(vCodePoint).c_str());
+	}
+
 	return header;
 }
 
@@ -92,17 +153,13 @@ static std::string GetGlyphTableMinMax(std::string vLang, std::string vPrefix, c
 std::string HeaderGenerator::GenerateHeaderFile(std::string vLang, std::string vPrefix, std::string vFontFileName, std::string vFontBufferName, size_t vFontBufferSize)
 {
 	std::string headerFile;
-	headerFile += GetHeader(vLang);
-	headerFile += "\n";
+	headerFile += GetHeader(vLang, vPrefix);
 	headerFile += GetFontInfos(vLang, vPrefix, vFontFileName, vFontBufferName, vFontBufferSize);
-	headerFile += "\n";
 	headerFile += GetGlyphTableMinMax(vLang, vPrefix, m_FinalCodePointRange);
-	headerFile += "\n";
 	for (const auto& it : m_FinalGlyphNames)
 	{
 		headerFile += GetGlyphItem(vLang, "ICON", vPrefix, it.first, it.second);
 	}
-	headerFile += "\n";
 	headerFile += GetFooter(vLang);
 	return headerFile;
 }
@@ -128,7 +185,6 @@ static std::string GetNewHeaderName(const std::string& vName)
 	for (auto& c : glyphName)
 		c = (char)toupper((int32_t)c);
 
-
 	return glyphName;
 }
 
@@ -141,7 +197,8 @@ two modes :
 */
 void HeaderGenerator::GenerateHeader_One(
 	const std::string& vFilePathName, 
-	FontInfos *vFontInfos, 
+	ProjectFile* vProjectFile,
+	FontInfos *vFontInfos,
 	std::string vFontBufferName, // for header generation wehn using a cpp bytes array instead of a file
 	size_t vFontBufferSize) // for header generation wehn using a cpp bytes array instead of a file
 {
@@ -151,10 +208,6 @@ void HeaderGenerator::GenerateHeader_One(
 		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
 		if (ps.isOk)
 		{
-			std::string name = ps.name;
-			ct::replaceString(name, "-", "_");
-			filePathName = ps.GetFPNE_WithNameExt(name, ".h");
-			
 			std::map<std::string, uint32_t> glyphNames;
 			if (vFontInfos->m_SelectedGlyphs.empty()) // no glyph selected so generate for whole font
 				for (auto& it : vFontInfos->m_GlyphCodePointToName)
@@ -171,14 +224,36 @@ void HeaderGenerator::GenerateHeader_One(
 				m_FinalGlyphNames[GetNewHeaderName(it.first)] = it.second;
 			}
 
-			/////////////////////
-			// header generation
-			std::string headerFile = GenerateHeaderFile(
-				"cpp", vFontInfos->m_FontPrefix, 
-				vFontInfos->m_FontFileName, 
-				vFontBufferName, vFontBufferSize);
-			FileHelper::Instance()->SaveStringToFile(headerFile, filePathName);
-			/////////////////////
+			std::string lang, headerExt;
+			if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
+			{
+				lang = "cpp";
+				headerExt = ".h";
+			}
+			else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
+			{
+				lang = "c#";
+				headerExt = ".cs";
+			}
+			if (!lang.empty())
+			{
+				std::string name = ps.name;
+				ct::replaceString(name, "-", "_");
+				filePathName = ps.GetFPNE_WithNameExt(name, headerExt);
+
+				/////////////////////
+				// header generation
+				std::string headerFile = GenerateHeaderFile(
+					lang, vFontInfos->m_FontPrefix,
+					vFontInfos->m_FontFileName,
+					vFontBufferName, vFontBufferSize);
+				FileHelper::Instance()->SaveStringToFile(headerFile, filePathName);
+				/////////////////////
+			}
+			else
+			{
+				Messaging::Instance()->AddError(true, 0, 0, "Language not set for : %s", vFilePathName.c_str());
+			}
 
 			FileHelper::Instance()->OpenFile(filePathName);
 		}
@@ -221,14 +296,36 @@ void HeaderGenerator::GenerateHeader_Merged(
 				m_FinalGlyphNames[GetNewHeaderName(it.first)] = it.second;
 			}
 
-			/////////////////////
-			// header generation
-			std::string headerFile = GenerateHeaderFile(
-				"cpp", vProjectFile->m_MergedFontPrefix,
-				ps.name + "." + ps.ext,
-				vFontBufferName, vFontBufferSize);
-			FileHelper::Instance()->SaveStringToFile(headerFile, filePathName);
-			/////////////////////
+			std::string lang, headerExt;
+			if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
+			{
+				lang = "cpp";
+				headerExt = ".h";
+			}
+			else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
+			{
+				lang = "c#";
+				headerExt = ".cs";
+			}
+			if (!lang.empty())
+			{
+				std::string name = ps.name;
+				ct::replaceString(name, "-", "_");
+				filePathName = ps.GetFPNE_WithNameExt(name, headerExt);
+
+				/////////////////////
+				// header generation
+				std::string headerFile = GenerateHeaderFile(
+					lang, vProjectFile->m_MergedFontPrefix,
+					ps.name + "." + ps.ext,
+					vFontBufferName, vFontBufferSize);
+				FileHelper::Instance()->SaveStringToFile(headerFile, filePathName);
+				/////////////////////
+			}
+			else
+			{
+				Messaging::Instance()->AddError(true, 0, 0, "Language not set for : %s", vFilePathName.c_str());
+			}
 
 			FileHelper::Instance()->OpenFile(filePathName);
 		}

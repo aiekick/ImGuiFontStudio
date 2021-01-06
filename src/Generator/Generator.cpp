@@ -67,11 +67,11 @@ void Generator::Generate(
 		if (!vFilePath.empty()) mainPS.path = vFilePath;
 		if (!vFileName.empty()) mainPS.name = vFileName;
 
-		if (vProjectFile->IsGenMode(GENERATOR_MODE_CPP))
+		if (vProjectFile->IsGenMode(GENERATOR_MODE_SRC))
 		{
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT))
 			{
-				GenerateCpp_One(
+				GenerateSource_One(
 					mainPS.GetFPNE(),
 					vProjectFile, 
 					vProjectFile->m_SelectedFont, 
@@ -84,7 +84,7 @@ void Generator::Generate(
 					auto ps = FileHelper::Instance()->ParsePathFileName(font.second.m_FontFileName);
 					if (ps.isOk)
 					{
-						GenerateCpp_One(
+						GenerateSource_One(
 							ps.GetFPNE_WithPath(vFilePath),
 							vProjectFile, 
 							&font.second, 
@@ -94,7 +94,7 @@ void Generator::Generate(
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED))
 			{
-				GenerateCpp_Merged(
+				GenerateSource_Merged(
 					mainPS.GetFPNE(),
 					vProjectFile, 
 					vProjectFile->GetGenMode());
@@ -627,7 +627,8 @@ void Generator::GenerateFontFile_One(
 					if (vFlags & GENERATOR_MODE_HEADER)
 					{
 						m_HeaderGenerator.GenerateHeader_One(
-							filePathName, 
+							filePathName,
+							vProjectFile,
 							vFontInfos);
 					}
 					if (vFlags & GENERATOR_MODE_CARD)
@@ -814,15 +815,13 @@ void Generator::GenerateFontFile_Merged(
 //// CPP GENERATION ///////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-
-
 /* 03/03/2020 23h38 it work like a charm (Wouhoooooo!!)
 will generate cpp fille with/without header
 two modes :
 - no glyph selected => export whole font file to cpp (and header is asked)
 - some glyohs selectef => export glyph selection in a new temporary font file, then exported in cpp (and header if asked)
 */
-void Generator::GenerateCpp_One(
+void Generator::GenerateSource_One(
 	const std::string& vFilePathName, 
 	ProjectFile* vProjectFile,
 	FontInfos *vFontInfos,
@@ -858,57 +857,105 @@ void Generator::GenerateCpp_One(
 
 			if (FileHelper::Instance()->IsFileExist(filePathName))
 			{
-				std::string bufferName;
-				size_t bufferSize = 0;
-				res = Compress::GetCompressedBase85BytesArray(
-					filePathName,
-					vFontInfos->m_FontPrefix,
-					&bufferName,
-					&bufferSize);
-
-				if (generateTemporaryFontFile)
+				std::string lang;
+				if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) lang = "cpp";
+				else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP)) lang = "c#";
+				if (!lang.empty())
 				{
-					// we have the result, if empty or not we need to destroy the temporary font file
-					FileHelper::Instance()->DestroyFile(filePathName);
-				}
+					std::string bufferName;
+					size_t bufferSize = 0;
+					res = Compress::GetCompressedBase85BytesArray(
+						lang,
+						filePathName,
+						vFontInfos->m_FontPrefix,
+						&bufferName,
+						&bufferSize);
 
-				// if ok, serialization
-				if (!res.empty() && !bufferName.empty() && bufferSize > 0)
-				{
-					filePathName = ps.path + FileHelper::Instance()->m_SlashType + ps.name + ".cpp";
-
-					if (vFlags & GENERATOR_MODE_HEADER)
+					if (generateTemporaryFontFile)
 					{
-						res = "#include \"" + ps.name + ".h\"\n\n" + res;
-						std::string prefix = "";
-						if (!vFontInfos->m_FontPrefix.empty())
-							prefix = "_" + vFontInfos->m_FontPrefix;
-						prefix = "FONT_ICON_BUFFER_NAME" + prefix;
-						ct::replaceString(res, vFontInfos->m_FontPrefix + "_compressed_data_base85", prefix);
-
-						m_HeaderGenerator.GenerateHeader_One(
-							filePathName, 
-							vFontInfos, 
-							bufferName, 
-							bufferSize);
+						// we have the result, if empty or not we need to destroy the temporary font file
+						FileHelper::Instance()->DestroyFile(filePathName);
 					}
 
-					if (vFlags & GENERATOR_MODE_CARD)
+					// if ok, serialization
+					if (!res.empty() && !bufferName.empty() && bufferSize > 0)
 					{
-						GenerateCard_One(
-							filePathName, 
-							vFontInfos, 
-							vProjectFile->m_CardGlyphHeightInPixel, 
-							vProjectFile->m_CardCountRowsMax);
-					}
+						PathStruct psSource = ps;
 
-					FileHelper::Instance()->SaveStringToFile(res, filePathName);
-					FileHelper::Instance()->OpenFile(filePathName);
+						std::string sourceExt;
+						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) sourceExt = ".cpp";
+						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
+						{
+							psSource.name += "_Bytes";
+							sourceExt = ".cs";
+						}
+						
+						std::string sourceFile;
+
+						if (vFlags & GENERATOR_MODE_HEADER)
+						{
+							PathStruct psHeader = ps;
+
+							std::string headerExt;
+							if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) headerExt = ".h";
+							else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
+							{
+								psHeader.name += "_Labels";
+								headerExt = ".cs";
+							}
+
+							if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
+							{
+								sourceFile = "#include \"" + ps.name + headerExt + "\"\n\n";
+								std::string prefix = "";
+								prefix = "FONT_ICON_BUFFER_NAME_" + vProjectFile->m_MergedFontPrefix;
+								ct::replaceString(res, vProjectFile->m_MergedFontPrefix + "_compressed_data_base85", prefix);
+							}
+
+							m_HeaderGenerator.GenerateHeader_One(
+								psHeader.GetFPNE_WithExt(headerExt),
+								vProjectFile,
+								vFontInfos,
+								bufferName,
+								bufferSize);
+						}
+
+						if (vFlags & GENERATOR_MODE_CARD)
+						{
+							GenerateCard_One(
+								filePathName,
+								vFontInfos,
+								vProjectFile->m_CardGlyphHeightInPixel,
+								vProjectFile->m_CardCountRowsMax);
+						}
+
+						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
+						{
+							sourceFile += "using System;\n";
+							sourceFile += "using System.Collections.Generic;\n\n";
+							sourceFile += ct::toStr("namespace IconFonts\n{\n\tpublic static class %s_Bytes\n\t{ \n", vProjectFile->m_MergedFontPrefix.c_str());
+							sourceFile += res;
+							sourceFile += "\t}\n}\n";
+						}
+						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
+						{
+							sourceFile += res;
+						}
+
+						filePathName = psSource.GetFPNE_WithExt(sourceExt);
+						FileHelper::Instance()->SaveStringToFile(sourceFile, filePathName);
+						FileHelper::Instance()->OpenFile(filePathName);
+					}
+					else
+					{
+						Messaging::Instance()->AddError(true, 0, 0,
+							"Error opening or reading file %s", filePathName.c_str());
+					}
 				}
 				else
 				{
 					Messaging::Instance()->AddError(true, 0, 0,
-						"Error opening or reading file %s", filePathName.c_str());
+						"Language not set for : %s", vFilePathName.c_str());
 				}
 			}
 			else
@@ -925,7 +972,7 @@ void Generator::GenerateCpp_One(
 	}
 }
 
-void Generator::GenerateCpp_Merged(
+void Generator::GenerateSource_Merged(
 	const std::string& vFilePathName, 
 	ProjectFile* vProjectFile,
 	const GenModeFlags& vFlags)
@@ -948,60 +995,102 @@ void Generator::GenerateCpp_Merged(
 
 			if (FileHelper::Instance()->IsFileExist(filePathName))
 			{
-				std::string bufferName;
-				size_t bufferSize = 0;
-				res = Compress::GetCompressedBase85BytesArray(
-					filePathName,
-					vProjectFile->m_MergedFontPrefix,
-					&bufferName,
-					&bufferSize);
-
-				// we have the result, if empty or not we need to destroy the temporary font file
-				FileHelper::Instance()->DestroyFile(filePathName);
-
-				// if ok, serialization
-				if (!res.empty() && !bufferName.empty() && bufferSize > 0)
+				std::string lang;
+				if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) lang = "cpp";
+				else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP)) lang = "c#";
+				if (!lang.empty())
 				{
-					filePathName = ps.GetFPNE_WithNameExt(ps.name, ".cpp");
+					std::string bufferName;
+					size_t bufferSize = 0;
+					res = Compress::GetCompressedBase85BytesArray(
+						lang,
+						filePathName,
+						vProjectFile->m_MergedFontPrefix,
+						&bufferName,
+						&bufferSize);
 
-					if (vFlags & GENERATOR_MODE_HEADER)
+					// we have the result, if empty or not we need to destroy the temporary font file
+					FileHelper::Instance()->DestroyFile(filePathName);
+
+					// if ok, serialization
+					if (!res.empty() && !bufferName.empty() && bufferSize > 0)
 					{
-						res = "#include \"" + ps.name + ".h\"\n\n" + res;
-						std::string prefix = "";
-						if (!vProjectFile->m_MergedFontPrefix.empty())
-							prefix = "_" + vProjectFile->m_MergedFontPrefix;
-						prefix = "FONT_ICON_BUFFER_NAME" + prefix;
-						ct::replaceString(res, vProjectFile->m_MergedFontPrefix + "_compressed_data_base85", prefix);
+						PathStruct psSource = ps;
+						
+						std::string sourceExt;
+						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) sourceExt = ".cpp";
+						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
+						{
+							psSource.name += "_Bytes";
+							sourceExt = ".cs";
+						}
+						
+						std::string sourceFile;
+						
+						if (vFlags & GENERATOR_MODE_HEADER)
+						{
+							PathStruct psHeader = ps;
+							
+							std::string headerExt;
+							if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) headerExt = ".h";
+							else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
+							{
+								psHeader.name += "_Labels";
+								headerExt = ".cs";
+							}
 
-						m_HeaderGenerator.GenerateHeader_Merged(
-							filePathName, 
-							vProjectFile, 
-							bufferName, 
-							bufferSize);
+							if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
+							{
+								sourceFile = "#include \"" + ps.name + headerExt + "\"\n\n";
+								std::string prefix = "";
+								prefix = "FONT_ICON_BUFFER_NAME_" + vProjectFile->m_MergedFontPrefix;
+								ct::replaceString(res, vProjectFile->m_MergedFontPrefix + "_compressed_data_base85", prefix);
+							}
+
+							m_HeaderGenerator.GenerateHeader_Merged(
+								psHeader.GetFPNE_WithExt(headerExt),
+								vProjectFile,
+								bufferName,
+								bufferSize);
+						}
+
+						if (vFlags & GENERATOR_MODE_CARD)
+						{
+							GenerateCard_Merged(
+								filePathName,
+								vProjectFile,
+								vProjectFile->m_CardGlyphHeightInPixel,
+								vProjectFile->m_CardCountRowsMax);
+						}
+
+						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
+						{
+							sourceFile += "using System;\n";
+							sourceFile += "using System.Collections.Generic;\n\n";
+							sourceFile += ct::toStr("namespace IconFonts\n{\n\tpublic static class %s_Bytes\n\t{ \n", vProjectFile->m_MergedFontPrefix.c_str());
+							sourceFile += res;
+							sourceFile += "\t}\n}\n";
+						}
+						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
+						{
+							sourceFile += res;
+						}
+
+						filePathName = psSource.GetFPNE_WithExt(sourceExt);
+						FileHelper::Instance()->SaveStringToFile(sourceFile, filePathName);
+						FileHelper::Instance()->OpenFile(filePathName);
 					}
-
-					if (vFlags & GENERATOR_MODE_CARD)
+					else
 					{
-						GenerateCard_Merged(
-							filePathName, 
-							vProjectFile, 
-							vProjectFile->m_CardGlyphHeightInPixel, 
-							vProjectFile->m_CardCountRowsMax);
+						Messaging::Instance()->AddError(true, 0, 0,
+							"Error opening or reading file %s", filePathName.c_str());
 					}
-
-					FileHelper::Instance()->SaveStringToFile(res, filePathName);
-					FileHelper::Instance()->OpenFile(filePathName);
 				}
 				else
 				{
 					Messaging::Instance()->AddError(true, 0, 0,
-						"Error opening or reading file %s", filePathName.c_str());
+						"Language not set for : %s", vFilePathName.c_str());
 				}
-			}
-			else
-			{
-				Messaging::Instance()->AddError(true, 0, 0,
-					"Cant open file %s", filePathName.c_str());
 			}
 		}
 		else

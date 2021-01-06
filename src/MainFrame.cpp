@@ -380,14 +380,7 @@ void MainFrame::DisplayDialogsAndPopups()
 		if (igfd::ImGuiFileDialog::Instance()->IsOk)
 		{
 			auto file = igfd::ImGuiFileDialog::Instance()->GetFilePathName();
-			if (!FileHelper::Instance()->IsFileExist(file))
-			{
-				SaveAsProject(igfd::ImGuiFileDialog::Instance()->GetFilePathName());
-			}
-			else
-			{
-
-			}
+			SaveAsProject(igfd::ImGuiFileDialog::Instance()->GetFilePathName());
 		}
 
 		igfd::ImGuiFileDialog::Instance()->CloseDialog("SaveProjectDlg");

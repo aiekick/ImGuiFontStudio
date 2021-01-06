@@ -44,8 +44,9 @@ public: // to save
 	std::string m_LastGeneratedFileName = "Generated_Font";
 	std::string m_MergedFontPrefix;
 	GenModeFlags m_GenMode =
-	        GENERATOR_MODE_CURRENT_HEADER |
-		    GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES;
+		GENERATOR_MODE_CURRENT_HEADER |					// current font + header
+		GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES |	// tables exported in font
+		GENERATOR_MODE_LANG_CPP;						// cpp style for header or source
 	bool m_CurrentPane_ShowGlyphTooltip = true;
 	bool m_SourcePane_ShowGlyphTooltip = true;
 	bool m_FinalPane_ShowGlyphTooltip = true;

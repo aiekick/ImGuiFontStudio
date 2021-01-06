@@ -1,10 +1,71 @@
 <config>
 	<project>
 		<font name="fontawesome-webfont.ttf">
+			<glyphs>
+				<glyph orgId="61442" newId="61442" orgName="search" newName="search"/>
+				<glyph orgId="61450" newId="61443" orgName="th" newName="glyphs"/>
+				<glyph orgId="61452" newId="61452" orgName="ok" newName="ok"/>
+				<glyph orgId="61453" newId="61453" orgName="remove" newName="cancel"/>
+				<glyph orgId="61460" newId="61460" orgName="trash" newName="destroy"/>
+				<glyph orgId="61462" newId="61462" orgName="file_alt" newName="file"/>
+				<glyph orgId="61470" newId="61470" orgName="repeat" newName="redo"/>
+				<glyph orgId="61473" newId="61473" orgName="refresh" newName="refresh"/>
+				<glyph orgId="61485" newId="61485" orgName="book" newName="project"/>
+				<glyph orgId="61486" newId="61486" orgName="bookmark" newName="bookmark"/>
+				<glyph orgId="61489" newId="61489" orgName="font" newName="by_font"/>
+				<glyph orgId="61502" newId="61502" orgName="picture" newName="texture"/>
+				<glyph orgId="61504" newId="61504" orgName="pencil" newName="edit"/>
+				<glyph orgId="61527" newId="61527" orgName="remove_sign" newName="error"/>
+				<glyph orgId="61530" newId="61530" orgName="info_sign" newName="infos"/>
+				<glyph orgId="61531" newId="61531" orgName="screenshot" newName="target"/>
+				<glyph orgId="61540" newId="61540" orgName="share_alt" newName="reset"/>
+				<glyph orgId="61543" newId="61543" orgName="plus" newName="add"/>
+				<glyph orgId="61544" newId="61544" orgName="minus" newName="remove"/>
+				<glyph orgId="61553" newId="61553" orgName="warning_sign" newName="warning"/>
+				<glyph orgId="61559" newId="61559" orgName="chevron_up" newName="sort_asc"/>
+				<glyph orgId="61560" newId="61560" orgName="chevron_down" newName="sort_desc"/>
+				<glyph orgId="61573" newId="61573" orgName="cogs" newName="generate"/>
+				<glyph orgId="61616" newId="61616" orgName="filter" newName="filter"/>
+				<glyph orgId="61618" newId="61618" orgName="fullscreen" newName="fullscreen"/>
+				<glyph orgId="61636" newId="61636" orgName="cut" newName="cut"/>
+				<glyph orgId="61637" newId="61637" orgName="copy" newName="copy"/>
+				<glyph orgId="61639" newId="61639" orgName="save" newName="save"/>
+				<glyph orgId="61640" newId="61640" orgName="sign_blank" newName="icon_view"/>
+				<glyph orgId="61648" newId="61648" orgName="magic" newName="select_path"/>
+				<glyph orgId="61656" newId="61656" orgName="caret_up" newName="menu_up"/>
+				<glyph orgId="61657" newId="61657" orgName="caret_left" newName="menu_left"/>
+				<glyph orgId="61658" newId="61658" orgName="caret_right" newName="menu_right"/>
+				<glyph orgId="61659" newId="61659" orgName="columns" newName="columns"/>
+				<glyph orgId="61666" newId="61666" orgName="undo" newName="undo"/>
+				<glyph orgId="61674" newId="61674" orgName="paste" newName="paste"/>
+				<glyph orgId="61686" newId="61686" orgName="file_text_alt" newName="file_type_text"/>
+				<glyph orgId="61716" newId="61716" orgName="folder_close_alt" newName="folder"/>
+				<glyph orgId="61717" newId="61717" orgName="folder_open_alt" newName="folder_open"/>
+				<glyph orgId="61736" newId="61736" orgName="question" newName="help"/>
+				<glyph orgId="61737" newId="61737" orgName="_279" newName="about"/>
+				<glyph orgId="61738" newId="61738" orgName="exclamation" newName="exclamation"/>
+				<glyph orgId="61771" newId="61771" orgName="edit_sign" newName="icon_edit"/>
+				<glyph orgId="61892" newId="61892" orgName="_424" newName="file_type_project"/>
+				<glyph orgId="61897" newId="61897" orgName="_429" newName="link"/>
+				<glyph orgId="61918" newId="61918" orgName="_449" newName="settings"/>
+				<glyph orgId="62003" newId="62003" orgName="_528" newName="drives"/>
+				<glyph orgId="62021" newId="62021" orgName="_545" newName="select"/>
+				<glyph orgId="62060" newId="62060" orgName="_582" newName="layout"/>
+			</glyphs>
 			<prefix>IGFS</prefix>
 			<pathfilename>..\samples_Fonts\fontawesome-webfont.ttf</pathfilename>
 			<oversample>2</oversample>
 			<fontsize>21</fontsize>
+		</font>
+		<font name="materialdesignicons-webfont.ttf">
+			<glyphs>
+				<glyph orgId="61484" newId="61484" orgName="alphabetical" newName="by_name"/>
+				<glyph orgId="62368" newId="62368" orgName="numeric" newName="by_codepoint"/>
+			</glyphs>
+			<prefix></prefix>
+			<pathfilename>..\samples_Fonts\materialdesignicons-webfont.ttf</pathfilename>
+			<oversample>1</oversample>
+			<fontsize>32</fontsize>
 		</font>
 		<rangecoloring show="false" hash="42.606;14.789;27.817;0.5"/>
 		<previewglyphcount>15</previewglyphcount>
@@ -16,11 +77,13 @@
 		<glyphpreviewscale>0.193</glyphpreviewscale>
 		<glyphpreviewshowcontrollines>false</glyphpreviewshowcontrollines>
 		<glyphpreviewquadbeziercounsegment>5</glyphpreviewquadbeziercounsegment>
-		<genmode>146</genmode>
+		<genmode>4377</genmode>
 		<fonttomergein>fontawesome-webfont.ttf</fonttomergein>
 		<glyphdisplaytuningmode>2</glyphdisplaytuningmode>
 		<sourcefontpaneflags>1</sourcefontpaneflags>
 		<cardglyhpheight>40</cardglyhpheight>
 		<cardcountrowsmax>20</cardcountrowsmax>
+		<lastgeneratedpath>.</lastgeneratedpath>
+		<lastgeneratedfilename>Generated_Font</lastgeneratedfilename>
 	</project>
 </config>
