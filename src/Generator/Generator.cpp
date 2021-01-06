@@ -560,217 +560,6 @@ void Generator::GenerateCard_Merged(
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
-//// HEADER GENERATION ////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////
-
-/* 03/03/2020 22h20 it work like a charm for the two modes */
-/*
-Generate Header file with glyphs code like in https://github.com/juliettef/IconFontCppHeaders
-two modes :
-- if not glyph were selected => will generate header for all font glyphs
-- if glyph were selected => will generate header only for these glyphs
-*/
-void Generator::GenerateHeader_One(
-	const std::string& vFilePathName, 
-	FontInfos *vFontInfos, 
-	std::string vFontBufferName, // for header generation wehn using a cpp bytes array instead of a file
-	size_t vFontBufferSize) // for header generation wehn using a cpp bytes array instead of a file
-{
-	if (!vFilePathName.empty() && vFontInfos)
-	{
-		std::string filePathName = vFilePathName;
-		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
-		if (ps.isOk)
-		{
-			std::string header;
-			header += "//Header Generated with https://github.com/aiekick/ImGuiFontStudio\n";
-			header += "//Based on https://github.com/juliettef/IconFontCppHeaders\n";
-			header += "\n#pragma once\n\n";
-
-			std::string prefix = "";
-			if (!vFontInfos->m_FontPrefix.empty())
-				prefix = "_" + vFontInfos->m_FontPrefix;
-			if (vFontBufferSize > 0)
-			{
-				header += "#define FONT_ICON_BUFFER_NAME" + prefix + " " + vFontBufferName + "\n";
-				header += "#define FONT_ICON_BUFFER_SIZE" + prefix + " 0x" + ct::toHexStr(vFontBufferSize) + "\n\n";
-			}
-			else
-			{
-				header += "#define FONT_ICON_FILE_NAME" + prefix + " \"" + vFontInfos->m_FontFileName + "\"\n\n";
-			}
-
-			uint32_t minCodePoint = 65535;
-			uint32_t maxCodePoint = 0;
-			std::string glyphs;
-
-			std::map<std::string, uint32_t> finalGlyphNames;
-			
-			std::map<std::string, uint32_t> glyphNames;
-
-			if (vFontInfos->m_SelectedGlyphs.empty()) // no glyph selected so generate for whole font
-			{
-				for (auto& it : vFontInfos->m_GlyphCodePointToName)
-				{
-					glyphNames[it.second] = it.first;
-				}
-			}
-			else
-			{
-				for (auto& it : vFontInfos->m_SelectedGlyphs)
-				{
-					glyphNames[it.second.newHeaderName] = it.second.newCodePoint;
-				}
-			}
-
-			// convert first and let in map.
-			// like that they will be ordered by names
-			// the issue was to convert and write directly
-			// so the original tag "SetMode" was writen before the original tag "about".
-			// its not wanted, so we save and order the finla result we want
-			// and after we will write in header file
-			for (const auto& it : glyphNames)
-			{
-				std::string glyphName = it.first;
-				ct::replaceString(glyphName, " ", "_");
-				ct::replaceString(glyphName, "-", "_");
-
-				uint32_t codePoint = it.second;
-				minCodePoint = ct::mini(minCodePoint, codePoint);
-				maxCodePoint = ct::maxi(maxCodePoint, codePoint);
-
-				// by ex .notdef will become DOT_notdef
-				// because a define with '.' is a problem for the compiler
-				ct::replaceString(glyphName, ".", "DOT_");
-
-				for (auto& c : glyphName)
-					c = (char)toupper((int32_t)c);
-
-				finalGlyphNames[glyphName] = codePoint;
-			}
-
-			for (const auto& it : finalGlyphNames)
-			{
-				glyphs += "#define ICON" + prefix + "_" + it.first + " u8\"\\u" + ct::toHexStr(it.second) + "\"\n";
-			}
-			
-			// code point range
-			header += "#define ICON_MIN" + prefix + " 0x" + ct::toHexStr(minCodePoint) + "\n";
-			header += "#define ICON_MAX" + prefix + " 0x" + ct::toHexStr(maxCodePoint) + "\n\n";
-
-			std::string name = ps.name;
-			ct::replaceString(name, "-", "_");
-			filePathName = ps.GetFPNE_WithNameExt(name, ".h");
-
-			FileHelper::Instance()->SaveStringToFile(header + glyphs, filePathName);
-			FileHelper::Instance()->OpenFile(filePathName);
-		}
-		else
-		{
-			Messaging::Instance()->AddError(true, 0, 0, "Invalid path : %s", vFilePathName.c_str());
-		}
-	}
-}
-
-void Generator::GenerateHeader_Merged(
-	const std::string& vFilePathName,
-	ProjectFile* vProjectFile,
-	std::string vFontBufferName, // for header generation wehn using a cpp bytes array instead of a file
-	size_t vFontBufferSize) // for header generation wehn using a cpp bytes array instead of a file
-{
-	if (vProjectFile &&
-		!vFilePathName.empty() &&
-		!vProjectFile->m_Fonts.empty())
-	{
-		std::string filePathName = vFilePathName;
-		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
-		if (ps.isOk)
-		{
-			std::string header;
-			header += "//Header Generated with https://github.com/aiekick/ImGuiFontStudio\n";
-			header += "//Based on https://github.com/juliettef/IconFontCppHeaders\n";
-			header += "\n#pragma once\n\n";
-
-			std::string prefix = "";
-			if (!vProjectFile->m_MergedFontPrefix.empty())
-				prefix = "_" + vProjectFile->m_MergedFontPrefix;
-			if (vFontBufferSize > 0)
-			{
-				header += "#define FONT_ICON_BUFFER_NAME" + prefix + " " + vFontBufferName + "\n";
-				header += "#define FONT_ICON_BUFFER_SIZE" + prefix + " 0x" + ct::toHexStr(vFontBufferSize) + "\n\n";
-			}
-			else
-			{
-				header += "#define FONT_ICON_FILE_NAME" + prefix + " \"" + ps.name + "." + ps.ext + "\"\n\n";
-			}
-
-			uint32_t minCodePoint = 65535;
-			uint32_t maxCodePoint = 0;
-			std::string glyphs;
-
-			std::map<std::string, uint32_t> finalGlyphNames;
-
-			std::map<std::string, uint32_t> glyphNames;
-
-			// we take only selected glyphs of all fonts
-			for (const auto& font : vProjectFile->m_Fonts)
-			{
-				for (const auto& glyph : font.second.m_SelectedGlyphs)
-				{
-					glyphNames[glyph.second.newHeaderName] = glyph.second.newCodePoint;
-				}
-			}
-
-			// convert first and let in map.
-			// like that they will be ordered by names
-			// the issue was to convert and write directly
-			// so the original tag "SetMode" was writen before the original tag "about".
-			// its not wanted, so we save and order the finla result we want
-			// and after we will write in header file
-			for (const auto& it : glyphNames)
-			{
-				std::string glyphName = it.first;
-				ct::replaceString(glyphName, " ", "_");
-				ct::replaceString(glyphName, "-", "_");
-
-				uint32_t codePoint = it.second;
-				minCodePoint = ct::mini(minCodePoint, codePoint);
-				maxCodePoint = ct::maxi(maxCodePoint, codePoint);
-
-				// by ex .notdef will become DOT_notdef
-				// because a define with '.' is a problem for the compiler
-				ct::replaceString(glyphName, ".", "DOT_");
-
-				for (auto& c : glyphName)
-					c = (char)toupper((int32_t)c);
-
-				finalGlyphNames[glyphName] = codePoint;
-			}
-
-			for (const auto& it : finalGlyphNames)
-			{
-				glyphs += "#define ICON" + prefix + "_" + it.first + " u8\"\\u" + ct::toHexStr(it.second) + "\"\n";
-			}
-
-			// code point range
-			header += "#define ICON_MIN" + prefix + " 0x" + ct::toHexStr(minCodePoint) + "\n";
-			header += "#define ICON_MAX" + prefix + " 0x" + ct::toHexStr(maxCodePoint) + "\n\n";
-
-			std::string name = ps.name;
-			ct::replaceString(name, "-", "_");
-			filePathName = ps.GetFPNE_WithNameExt(name, ".h");
-			
-			FileHelper::Instance()->SaveStringToFile(header + glyphs, filePathName);
-			FileHelper::Instance()->OpenFile(filePathName);
-		}
-		else
-		{
-			Messaging::Instance()->AddError(true, 0, 0, "Invalid path : %s", vFilePathName.c_str());
-		}
-	}
-}
-
-///////////////////////////////////////////////////////////////////////////////////
 //// FONT GENERATION //////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
@@ -837,7 +626,7 @@ void Generator::GenerateFontFile_One(
 				{
 					if (vFlags & GENERATOR_MODE_HEADER)
 					{
-						GenerateHeader_One(
+						m_HeaderGenerator.GenerateHeader_One(
 							filePathName, 
 							vFontInfos);
 					}
@@ -986,7 +775,7 @@ void Generator::GenerateFontFile_Merged(
 				{
 					if (vFlags & GENERATOR_MODE_HEADER)
 					{
-						GenerateHeader_Merged(
+						m_HeaderGenerator.GenerateHeader_Merged(
 							filePathName, 
 							vProjectFile);
 					}
@@ -1097,7 +886,7 @@ void Generator::GenerateCpp_One(
 						prefix = "FONT_ICON_BUFFER_NAME" + prefix;
 						ct::replaceString(res, vFontInfos->m_FontPrefix + "_compressed_data_base85", prefix);
 
-						GenerateHeader_One(
+						m_HeaderGenerator.GenerateHeader_One(
 							filePathName, 
 							vFontInfos, 
 							bufferName, 
@@ -1184,7 +973,7 @@ void Generator::GenerateCpp_Merged(
 						prefix = "FONT_ICON_BUFFER_NAME" + prefix;
 						ct::replaceString(res, vProjectFile->m_MergedFontPrefix + "_compressed_data_base85", prefix);
 
-						GenerateHeader_Merged(
+						m_HeaderGenerator.GenerateHeader_Merged(
 							filePathName, 
 							vProjectFile, 
 							bufferName, 

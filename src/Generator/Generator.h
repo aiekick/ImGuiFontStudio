@@ -18,6 +18,8 @@
 #include <GLFW/glfw3.h>
 #include <ctools/cTools.h>
 
+#include "HeaderGenerator.h"
+
 #include <stdint.h>
 #include <string>
 
@@ -68,6 +70,9 @@ public:
 	static bool SaveTextureToPng(GLFWwindow* vWin, const std::string& vFilePathName,
 		GLuint vTextureId, ct::uvec2 vTextureSize, uint32_t vChannelCount);
 
+private:
+	HeaderGenerator m_HeaderGenerator;
+
 public:
 	void Generate(
 		ProjectFile *vProjectFile,
@@ -80,10 +85,10 @@ private:
 	void GenerateCard_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
 		const uint32_t& vGlyphHeight, const uint32_t& vMaxRows);
 	
-	void GenerateHeader_One(const std::string& vFilePathName, FontInfos *vFontInfos,
+	/*void GenerateHeader_One(const std::string& vFilePathName, FontInfos *vFontInfos,
 		std::string vFontBufferName = "", size_t vFontBufferSize = 0);
 	void GenerateHeader_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
-		std::string vFontBufferName = "", size_t vFontBufferSize = 0);
+		std::string vFontBufferName = "", size_t vFontBufferSize = 0);*/
 	
 	void GenerateFontFile_One(const std::string& vFilePathName, ProjectFile* vProjectFile, 
 		FontInfos *vFontInfos, const GenModeFlags& vFlags);

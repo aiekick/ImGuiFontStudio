@@ -15,10 +15,10 @@
  */
 #pragma once
 
-class RibbonBar
+class GenerationSummaryDialog
 {
 public:
-	RibbonBar();
-	~RibbonBar();
+	GenerationSummaryDialog();
+	~GenerationSummaryDialog();
 };
 

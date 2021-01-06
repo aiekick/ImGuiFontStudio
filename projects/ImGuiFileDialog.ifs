@@ -52,18 +52,20 @@
 		<rangecoloring show="false" hash="42.606;14.789;27.817;0.5"/>
 		<previewglyphcount>12</previewglyphcount>
 		<previewglyphwidth>60.5</previewglyphwidth>
-		<mergedfontprefix></mergedfontprefix>
+		<mergedfontprefix>TEST</mergedfontprefix>
 		<curglyphtooltip>false</curglyphtooltip>
 		<srcglyphtooltip>true</srcglyphtooltip>
 		<dstglyphtooltip>true</dstglyphtooltip>
 		<glyphpreviewscale>0.193</glyphpreviewscale>
 		<glyphpreviewshowcontrollines>false</glyphpreviewshowcontrollines>
 		<glyphpreviewquadbeziercounsegment>5</glyphpreviewquadbeziercounsegment>
-		<genmode>459</genmode>
+		<genmode>1481</genmode>
 		<fonttomergein>materialdesignicons-webfont.ttf</fonttomergein>
 		<glyphdisplaytuningmode>2</glyphdisplaytuningmode>
 		<sourcefontpaneflags>1</sourcefontpaneflags>
 		<cardglyhpheight>40</cardglyhpheight>
 		<cardcountrowsmax>20</cardcountrowsmax>
+		<lastgeneratedpath>C:\gamedev\github\ImGuiFontStudio\build</lastgeneratedpath>
+		<lastgeneratedfilename>Generated_Font.cpp</lastgeneratedfilename>
 	</project>
 </config>

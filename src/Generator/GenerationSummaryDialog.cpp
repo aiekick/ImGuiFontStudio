@@ -16,7 +16,7 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include "RibbonBar.h"
+#include "GenerationSummaryDialog.h"
 
-RibbonBar::RibbonBar() = default;
-RibbonBar::~RibbonBar() = default;
+GenerationSummaryDialog::GenerationSummaryDialog() = default;
+GenerationSummaryDialog::~GenerationSummaryDialog() = default;
