@@ -35,6 +35,7 @@ public:
 	
 private:
 	void DrawFontPreviewPane(ProjectFile *vProjectFile);
+	void GenerateLabelsList();
 
 public: // singleton
 	static FontPreviewPane *Instance()

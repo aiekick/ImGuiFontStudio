@@ -90,9 +90,20 @@ void FontPreviewPane::DrawFontPreviewPane(ProjectFile *vProjectFile)
 				{
 					ImGui::EndMenuBar();
 				}
+
+				static char buffer[500] = "test\0";
+				ImGui::InputText("test", buffer, 499);
+
+
+
 			}
 		}
 
 		ImGui::End();
 	}
+}
+
+void FontPreviewPane::GenerateLabelsList()
+{
+
 }

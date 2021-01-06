@@ -195,7 +195,7 @@ namespace ImGui
 		bool res = Begin(name, &check, flags);
 		//if (res)
 		//{
-			// si on fait que quand c'est ouvert, alors on peut pas fermer un onglet qui 'nest pas focused
+			// si on fait que quand c'est ouvert, alors on peut pas fermer un onglet qui n'est pas focused
 			// alors on le sort de la boucle
 			if (check)
 				*vContainer = (T)(*vContainer | vFlag); // add

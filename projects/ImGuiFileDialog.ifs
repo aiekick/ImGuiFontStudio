@@ -30,9 +30,28 @@
 			<oversample>3</oversample>
 			<fontsize>27</fontsize>
 		</font>
+		<font name="materialdesignicons-webfont.ttf">
+			<glyphs>
+				<glyph orgId="64400" newId="64400" orgName="pan" newName="pan"/>
+				<glyph orgId="64401" newId="64401" orgName="pan-bottom-left" newName="pan-bottom-left"/>
+				<glyph orgId="64402" newId="64402" orgName="pan-bottom-right" newName="pan-bottom-right"/>
+				<glyph orgId="64403" newId="64403" orgName="pan-down" newName="pan-down"/>
+				<glyph orgId="64404" newId="64404" orgName="pan-horizontal" newName="pan-horizontal"/>
+				<glyph orgId="64405" newId="64405" orgName="pan-left" newName="pan-left"/>
+				<glyph orgId="64406" newId="64406" orgName="pan-right" newName="pan-right"/>
+				<glyph orgId="64407" newId="64407" orgName="pan-top-left" newName="pan-top-left"/>
+				<glyph orgId="64408" newId="64408" orgName="pan-top-right" newName="pan-top-right"/>
+				<glyph orgId="64409" newId="64409" orgName="pan-up" newName="pan-up"/>
+				<glyph orgId="64410" newId="64410" orgName="pan-vertical" newName="pan-vertical"/>
+			</glyphs>
+			<prefix></prefix>
+			<pathfilename>..\samples_Fonts\materialdesignicons-webfont.ttf</pathfilename>
+			<oversample>1</oversample>
+			<fontsize>33</fontsize>
+		</font>
 		<rangecoloring show="false" hash="42.606;14.789;27.817;0.5"/>
-		<previewglyphcount>13</previewglyphcount>
-		<previewglyphwidth>53.0769</previewglyphwidth>
+		<previewglyphcount>12</previewglyphcount>
+		<previewglyphwidth>60.5</previewglyphwidth>
 		<mergedfontprefix></mergedfontprefix>
 		<curglyphtooltip>false</curglyphtooltip>
 		<srcglyphtooltip>true</srcglyphtooltip>
@@ -40,9 +59,11 @@
 		<glyphpreviewscale>0.193</glyphpreviewscale>
 		<glyphpreviewshowcontrollines>false</glyphpreviewshowcontrollines>
 		<glyphpreviewquadbeziercounsegment>5</glyphpreviewquadbeziercounsegment>
-		<genmode>402</genmode>
-		<fonttomergein>fontawesome-webfont.ttf</fonttomergein>
-		<glyphdisplaytuningmode>1</glyphdisplaytuningmode>
+		<genmode>459</genmode>
+		<fonttomergein>materialdesignicons-webfont.ttf</fonttomergein>
+		<glyphdisplaytuningmode>2</glyphdisplaytuningmode>
 		<sourcefontpaneflags>1</sourcefontpaneflags>
+		<cardglyhpheight>40</cardglyhpheight>
+		<cardcountrowsmax>20</cardcountrowsmax>
 	</project>
 </config>

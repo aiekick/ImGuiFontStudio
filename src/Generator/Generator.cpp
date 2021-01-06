@@ -248,27 +248,18 @@ bool Generator::SaveTextureToPng(GLFWwindow* vWin, const std::string& vFilePathN
 ///////////////////////////////////////////////////////////////////////////////////
 
 static void WriteGlyphCardToPicture(
-	const std::string& vFilePathName, std::map<std::string, uint32_t> vLabels,
-	FontInfos* vFontInfos, const uint32_t& vGlyphHeight, const uint32_t& vMaxRows)
+	const std::string& vFilePathName, 
+	std::map<std::string, std::pair<uint32_t, size_t>> vLabels, // lable, codepoint, FontInfos ptr
+	const uint32_t& vGlyphHeight, const uint32_t& vMaxRows)
 {
-	if (vFontInfos && vGlyphHeight && vMaxRows)
+	if (vGlyphHeight && vMaxRows)
 	{
-		stbtt_fontinfo glyphFontInfo;
 		stbtt_fontinfo labelFontInfo;
 
-		bool glyphFontLoaded = false;
 		bool labelFontLoaded = false;
 
-		if (!vFontInfos->m_ImFontAtlas.ConfigData.empty())
-		{
-			const int32_t font_offset = stbtt_GetFontOffsetForIndex(
-				(unsigned char*)vFontInfos->m_ImFontAtlas.ConfigData[0].FontData,
-				vFontInfos->m_ImFontAtlas.ConfigData[0].FontNo);
-			if (stbtt_InitFont(&glyphFontInfo, (unsigned char*)vFontInfos->m_ImFontAtlas.ConfigData[0].FontData, font_offset))
-			{
-				glyphFontLoaded = true;
-			}
-		}
+		// FontInfos ptr, stbtt_fontinfo
+		std::unordered_map<size_t, stbtt_fontinfo> fonts;
 
 		auto io = &ImGui::GetIO();
 		if (!io->Fonts->ConfigData.empty())
@@ -278,168 +269,186 @@ static void WriteGlyphCardToPicture(
 				io->Fonts->ConfigData[0].FontNo);
 			if (stbtt_InitFont(&labelFontInfo, (unsigned char*)io->Fonts->ConfigData[0].FontData, font_offset))
 			{
-				labelFontLoaded = true;
-			}
-		}
+				// will write one glyph labeled
 
-		if (glyphFontLoaded && labelFontLoaded)
-		{
-			// will write one glyph labeled
+				uint32_t labelHeight = (uint32_t)(vGlyphHeight * 0.5f);
+				uint32_t glyphHeight = (uint32_t)(vGlyphHeight * 0.8f);
+				uint32_t padding_x = (uint32_t)(vGlyphHeight * 0.1f);
+				uint32_t padding_y = 2U;
+				uint32_t columnCount = (uint32_t)ceil((double)vLabels.size() / (double)vMaxRows);
 
-			uint32_t labelHeight = (uint32_t)(vGlyphHeight * 0.5f);
-			uint32_t glyphHeight = (uint32_t)(vGlyphHeight * 0.8f);
-			uint32_t padding_x = (uint32_t)(vGlyphHeight * 0.1f);
-			uint32_t padding_y = 2U;
-			uint32_t columnCount = (uint32_t)ceil((double)vLabels.size() / (double)vMaxRows);
-
-			// max width of the labels
-			uint32_t maxLabelWidth = 0U;
-			for (const auto& it : vLabels)
-			{
-				maxLabelWidth = ct::maxi(maxLabelWidth, (uint32_t)it.first.size());
-			}
-
-			maxLabelWidth *= labelHeight; // one mult instead of many in loops for same result
-
-			// extend max width of the buffer for column count
-			uint32_t maxWidthOfOneItem = glyphHeight + maxLabelWidth;
-
-			// array of bytes
-			std::vector<uint8_t> buffer;
-			uint32_t bufferWidth = maxWidthOfOneItem * columnCount;
-			uint32_t bufferHeight = vGlyphHeight * (vMaxRows + 2U);
-			buffer.resize((size_t)bufferWidth * (size_t)bufferHeight);
-			memset(buffer.data(), 0, buffer.size());
-
-			// iteration pof labels
-			int32_t xpos = padding_x;
-			int32_t ypos = padding_y;
-			int32_t CurColumnOffset = 0;
-
-			// we will compute final size accoridng to the glyph and labels
-			int32_t finalWidth = 0;
-			int32_t finalHeight = 0;
-			int32_t columnMaxWidth = 0;
-
-			int32_t countRows = 0;
-			for (const auto& it : vLabels)
-			{
-				uint32_t codePoint = it.second;
-				std::string lblToRender = " " + it.first;
-				auto text = lblToRender.c_str();
-
-				xpos = CurColumnOffset + padding_x;
-
-				// one char for the glyph
-				float glyphScale = stbtt_ScaleForPixelHeight(&glyphFontInfo, (float)(glyphHeight));
-				int32_t ascent, descent, baseline;
-				stbtt_GetFontVMetrics(&glyphFontInfo, &ascent, &descent, 0);
-				baseline = (int32_t)(ascent * glyphScale);
-				int32_t advance, lsb, x0, y0, x1, y1;
-				stbtt_GetCodepointHMetrics(&glyphFontInfo, codePoint, &advance, &lsb);
-				float x_shift = vGlyphHeight * 0.5f - (advance * glyphScale) * 0.5f;
-				float y_shift = vGlyphHeight * 0.5f - (ascent - descent) * glyphScale * 0.5f;
-				stbtt_GetCodepointBitmapBoxSubpixel(&glyphFontInfo, codePoint, glyphScale, glyphScale, x_shift, y_shift, &x0, &y0, &x1, &y1);
-				int32_t x = (uint32_t)xpos + x0;
-				int32_t y = baseline + y0;
-				while (x < 0 || y < 0) // we decrease scale until glyph can be added in picture
+				// max width of the labels
+				uint32_t maxLabelWidth = 0U;
+				for (const auto& it : vLabels)
 				{
-					glyphScale *= 0.9f;
-					x_shift = vGlyphHeight * 0.5f - (advance * glyphScale) * 0.5f;
-					y_shift = vGlyphHeight * 0.5f - (ascent - descent) * glyphScale * 0.5f;
-					stbtt_GetCodepointBitmapBoxSubpixel(&glyphFontInfo, codePoint, glyphScale, glyphScale, x_shift, y_shift, &x0, &y0, &x1, &y1);
-					x = (uint32_t)xpos + x0;
-					y = baseline + y0;
+					maxLabelWidth = ct::maxi(maxLabelWidth, (uint32_t)it.first.size());
 				}
-				if (x >= 0 && y >= 0)
+
+				maxLabelWidth *= labelHeight; // one mult instead of many in loops for same result
+
+				// extend max width of the buffer for column count
+				uint32_t maxWidthOfOneItem = glyphHeight + maxLabelWidth;
+
+				// array of bytes
+				std::vector<uint8_t> buffer;
+				uint32_t bufferWidth = maxWidthOfOneItem * columnCount;
+				uint32_t bufferHeight = vGlyphHeight * (vMaxRows + 2U);
+				buffer.resize((size_t)bufferWidth * (size_t)bufferHeight);
+				memset(buffer.data(), 0, buffer.size());
+
+				// iteration pof labels
+				int32_t xpos = padding_x;
+				int32_t ypos = padding_y;
+				int32_t CurColumnOffset = 0;
+
+				// we will compute final size accoridng to the glyph and labels
+				int32_t finalWidth = 0;
+				int32_t finalHeight = 0;
+				int32_t columnMaxWidth = 0;
+
+				int32_t countRows = 0;
+				for (const auto& it : vLabels)
 				{
-					uint8_t* ptr = buffer.data() + (size_t)(bufferWidth * ((size_t)ypos + (size_t)y) + (size_t)x);
-					stbtt_MakeCodepointBitmapSubpixel(&glyphFontInfo, ptr, x1 - x0, y1 - y0, bufferWidth, glyphScale, glyphScale, 0, 0, codePoint);
-				}
-				xpos += vGlyphHeight;
-
-				// the rest for the label
-				float labelScale = stbtt_ScaleForPixelHeight(&labelFontInfo, (float)(labelHeight));
-				stbtt_GetFontVMetrics(&labelFontInfo, &ascent, &descent, 0);
-				baseline = (int32_t)(ascent * labelScale);
-
-				int32_t ch = 0;
-				while (text[ch])
-				{
-					stbtt_GetCodepointHMetrics(&labelFontInfo, text[ch], &advance, &lsb);
-					y_shift = vGlyphHeight * 0.5f - labelHeight * 0.5f;
-					stbtt_GetCodepointBitmapBoxSubpixel(&labelFontInfo, text[ch], labelScale, labelScale, 0, y_shift, &x0, &y0, &x1, &y1);
-
-					x = (uint32_t)xpos + x0;
-					y = baseline + y0;
-					float newLabelScale = labelScale;
-					while (x < 0 || y < 0) // we decrease scale until glyph can be added in picture
+					uint32_t codePoint = it.second.first;
+					auto fontPtr = (FontInfos*)it.second.second;
+					if (fonts.find((size_t)fontPtr) == fonts.end())
 					{
-						newLabelScale *= 0.9f;
-						stbtt_GetCodepointBitmapBoxSubpixel(&labelFontInfo, codePoint, newLabelScale, newLabelScale, 0, y_shift, &x0, &y0, &x1, &y1);
-						x = (uint32_t)xpos + x0;
-						y = baseline + y0;
+						stbtt_fontinfo fontInfos;
+						// not exist so we will load the stbtt_fontinfo
+						if (!fontPtr->m_ImFontAtlas.ConfigData.empty())
+						{
+							const int32_t font_offset = stbtt_GetFontOffsetForIndex(
+								(unsigned char*)fontPtr->m_ImFontAtlas.ConfigData[0].FontData,
+								fontPtr->m_ImFontAtlas.ConfigData[0].FontNo);
+							if (stbtt_InitFont(&fontInfos, (unsigned char*)fontPtr->m_ImFontAtlas.ConfigData[0].FontData, font_offset))
+							{
+								fonts[(size_t)fontPtr] = fontInfos;
+							}
+						}
 					}
-					if (x >= 0 && y >= 0)
+
+					if (fonts.find((size_t)fontPtr) != fonts.end())
 					{
-						uint8_t* ptr = buffer.data() + (size_t)(bufferWidth * ((size_t)ypos + (size_t)y) + (size_t)x);
-						stbtt_MakeCodepointBitmapSubpixel(&labelFontInfo, ptr, x1 - x0, y1 - y0, bufferWidth, newLabelScale, newLabelScale, 0, 0, text[ch]);
+						auto glyphFontInfos = fonts[(size_t)fontPtr];
+
+						std::string lblToRender = " " + it.first;
+						auto text = lblToRender.c_str();
+
+						xpos = CurColumnOffset + padding_x;
+
+						// one char for the glyph
+						float glyphScale = stbtt_ScaleForPixelHeight(&glyphFontInfos, (float)(glyphHeight));
+						int32_t ascent, descent, baseline;
+						stbtt_GetFontVMetrics(&glyphFontInfos, &ascent, &descent, 0);
+						baseline = (int32_t)(ascent * glyphScale);
+						int32_t advance, lsb, x0, y0, x1, y1;
+						stbtt_GetCodepointHMetrics(&glyphFontInfos, codePoint, &advance, &lsb);
+						float x_shift = vGlyphHeight * 0.5f - (advance * glyphScale) * 0.5f;
+						float y_shift = vGlyphHeight * 0.5f - (ascent - descent) * glyphScale * 0.5f;
+						stbtt_GetCodepointBitmapBoxSubpixel(&glyphFontInfos, codePoint, glyphScale, glyphScale, x_shift, y_shift, &x0, &y0, &x1, &y1);
+						int32_t x = (uint32_t)xpos + x0;
+						int32_t y = baseline + y0;
+						while (x < 0 || y < 0) // we decrease scale until glyph can be added in picture
+						{
+							glyphScale *= 0.9f;
+							x_shift = vGlyphHeight * 0.5f - (advance * glyphScale) * 0.5f;
+							y_shift = vGlyphHeight * 0.5f - (ascent - descent) * glyphScale * 0.5f;
+							stbtt_GetCodepointBitmapBoxSubpixel(&glyphFontInfos, codePoint, glyphScale, glyphScale, x_shift, y_shift, &x0, &y0, &x1, &y1);
+							x = (uint32_t)xpos + x0;
+							y = baseline + y0;
+						}
+						if (x >= 0 && y >= 0)
+						{
+							uint8_t* ptr = buffer.data() + (size_t)(bufferWidth * ((size_t)ypos + (size_t)y) + (size_t)x);
+							stbtt_MakeCodepointBitmapSubpixel(&glyphFontInfos, ptr, x1 - x0, y1 - y0, bufferWidth, glyphScale, glyphScale, 0, 0, codePoint);
+						}
+						xpos += vGlyphHeight;
+
+						// the rest for the label
+						float labelScale = stbtt_ScaleForPixelHeight(&labelFontInfo, (float)(labelHeight));
+						stbtt_GetFontVMetrics(&labelFontInfo, &ascent, &descent, 0);
+						baseline = (int32_t)(ascent * labelScale);
+
+						int32_t ch = 0;
+						while (text[ch])
+						{
+							stbtt_GetCodepointHMetrics(&labelFontInfo, text[ch], &advance, &lsb);
+							y_shift = vGlyphHeight * 0.5f - labelHeight * 0.5f;
+							stbtt_GetCodepointBitmapBoxSubpixel(&labelFontInfo, text[ch], labelScale, labelScale, 0, y_shift, &x0, &y0, &x1, &y1);
+
+							x = (uint32_t)xpos + x0;
+							y = baseline + y0;
+							float newLabelScale = labelScale;
+							while (x < 0 || y < 0) // we decrease scale until glyph can be added in picture
+							{
+								newLabelScale *= 0.9f;
+								stbtt_GetCodepointBitmapBoxSubpixel(&labelFontInfo, codePoint, newLabelScale, newLabelScale, 0, y_shift, &x0, &y0, &x1, &y1);
+								x = (uint32_t)xpos + x0;
+								y = baseline + y0;
+							}
+							if (x >= 0 && y >= 0)
+							{
+								uint8_t* ptr = buffer.data() + (size_t)(bufferWidth * ((size_t)ypos + (size_t)y) + (size_t)x);
+								stbtt_MakeCodepointBitmapSubpixel(&labelFontInfo, ptr, x1 - x0, y1 - y0, bufferWidth, newLabelScale, newLabelScale, 0, 0, text[ch]);
+							}
+
+							xpos += (int32_t)(advance * newLabelScale);
+							if (text[ch + 1])
+								xpos += (int32_t)(labelScale * stbtt_GetCodepointKernAdvance(&labelFontInfo, text[ch], text[ch + 1]));
+							++ch;
+						}
+
+						// inc of the row count
+						countRows++;
+
+						// extra space
+						xpos += (int32_t)(advance * labelScale);
+						ypos += vGlyphHeight;
+
+						// max width of the current column
+						columnMaxWidth = ct::maxi(columnMaxWidth, xpos - CurColumnOffset);
+
+						// we compute final size according to the glyph and labels wrotes in buffer
+						finalWidth = ct::maxi(finalWidth, xpos);
+						finalHeight = ct::maxi(finalHeight, ypos);
+
+						// column change if needed
+						if (countRows % vMaxRows == 0) // we need to change the column
+						{
+							ypos = padding_y;
+							CurColumnOffset += columnMaxWidth + padding_x;
+							columnMaxWidth = 0;
+						}
 					}
-					
-					xpos += (int32_t)(advance * newLabelScale);
-					if (text[ch + 1])
-						xpos += (int32_t)(labelScale * stbtt_GetCodepointKernAdvance(&labelFontInfo, text[ch], text[ch + 1]));
-					++ch;
+
 				}
 
-				// inc of the row count
-				countRows++;
-
-				// extra space
-				xpos += (int32_t)(advance * labelScale);
-				ypos += vGlyphHeight;
-
-				// max width of the current column
-				columnMaxWidth = ct::maxi(columnMaxWidth, xpos - CurColumnOffset);
-
-				// we compute final size according to the glyph and labels wrotes in buffer
-				finalWidth = ct::maxi(finalWidth, xpos);
-				finalHeight = ct::maxi(finalHeight, ypos);
-
-				// column change if needed
-				if (countRows % vMaxRows == 0) // we need to change the column
+				if (finalWidth && finalHeight)
 				{
-					ypos = padding_y;
-					CurColumnOffset += columnMaxWidth + padding_x;
-					columnMaxWidth = 0;
-				}
-			}
+					int32_t res = stbi_write_png(
+						vFilePathName.c_str(),
+						finalWidth + padding_x,
+						finalHeight,
+						1,
+						buffer.data(),
+						bufferWidth);
 
-			if (finalWidth && finalHeight)
-			{
-				int32_t res = stbi_write_png(
-					vFilePathName.c_str(),
-					finalWidth + padding_x,
-					finalHeight,
-					1,
-					buffer.data(),
-					bufferWidth);
-
-				if (res)
-				{
-					FileHelper::Instance()->OpenFile(vFilePathName);
+					if (res)
+					{
+						FileHelper::Instance()->OpenFile(vFilePathName);
+					}
+					else
+					{
+						Messaging::Instance()->AddError(true, 0, 0,
+							"Png Writing Fail for path : %s", vFilePathName.c_str());
+					}
 				}
 				else
 				{
-					Messaging::Instance()->AddError(true, 0, 0, 
-						"Png Write Faile for path : %s", vFilePathName.c_str());
+					Messaging::Instance()->AddError(true, 0, 0,
+						"Png Writing Fail for path : %s, final computed size not ok %i, %i\n",
+						vFilePathName.c_str(), finalWidth, finalHeight);
 				}
-			}
-			else
-			{
-				Messaging::Instance()->AddError(true, 0, 0, 
-					"Png Write Faile for path : %s, final computed size not ok %i, %i\n", 
-					vFilePathName.c_str(), finalWidth, finalHeight);
 			}
 		}
 	}
@@ -494,23 +503,23 @@ void Generator::GenerateCard_One(
 			// generate bd of old codepoint and new string
 			// old codepoint because, we will get the glyph from te already loaded texture,
 			// so can only be accessed with old codepoints
-			std::map<std::string, uint32_t> glyphs;
+			std::map<std::string, std::pair<uint32_t, size_t>> glyphs;
 			if (vFontInfos->m_SelectedGlyphs.empty()) // no glyph selected so generate for whole font
 			{
 				for (auto& glyph : vFontInfos->m_GlyphCodePointToName)
 				{
-					glyphs[GetNewHeaderName(prefix, glyph.second)] = glyph.first;
+					glyphs[GetNewHeaderName(prefix, glyph.second)] = std::pair<uint32_t, size_t>(glyph.first, (size_t)vFontInfos);
 				}
 			}
 			else
 			{
 				for (auto& glyph : vFontInfos->m_SelectedGlyphs)
 				{
-					glyphs[GetNewHeaderName(prefix, glyph.second.newHeaderName)] = glyph.first;
+					glyphs[GetNewHeaderName(prefix, glyph.second.newHeaderName)] = std::pair<uint32_t, size_t>(glyph.first, (size_t)vFontInfos);
 				}
 			}
 
-			WriteGlyphCardToPicture(filePathName, glyphs, vFontInfos, vGlyphHeight, vMaxRows);
+			WriteGlyphCardToPicture(filePathName, glyphs, vGlyphHeight, vMaxRows);
 		}
 		else
 		{
@@ -530,7 +539,7 @@ void Generator::GenerateCard_Merged(
 	UNUSED(vGlyphHeight);
 	UNUSED(vMaxRows);
 
-	/*if (vProjectFile &&
+	if (vProjectFile &&
 		!vFilePathName.empty() &&
 		!vProjectFile->m_Fonts.empty())
 	{
@@ -551,23 +560,22 @@ void Generator::GenerateCard_Merged(
 			// generate bd of old codepoint and new string
 			// old codepoint because, we will get the glyph from te already loaded texture,
 			// so can only be accessed with old codepoints
-			std::map<std::string, std::pair<uint32_t, FontInfos>> glyphs;
+			std::map<std::string, std::pair<uint32_t, size_t>> glyphs;
 			for (const auto& font : vProjectFile->m_Fonts)
 			{
 				for (const auto& glyph : font.second.m_SelectedGlyphs)
 				{
-					glyphs[GetNewHeaderName(prefix, glyph.second.newHeaderName)] = std::pair<uint32_t, FontInfos>(glyph.first, font.second);
+					glyphs[GetNewHeaderName(prefix, glyph.second.newHeaderName)] = std::pair<uint32_t, size_t>(glyph.first, (size_t)&font.second);
 				}
 			}
 
-			assert(0);
-			//WriteMergedGlyphCardToPicture(filePathName, glyphs, vFontInfos, vGlyphHeight, vMaxRows);
+			WriteGlyphCardToPicture(filePathName, glyphs, vGlyphHeight, vMaxRows);
 		}
 		else
 		{
 			Messaging::Instance()->AddError(true, 0, 0, "Invalid path : %s", vFilePathName.c_str());
 		}
-	}*/
+	}
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
