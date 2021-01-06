@@ -83,19 +83,22 @@ int GeneratorPane::DrawPanes(ProjectFile* vProjectFile, int vWidgetId)
 
 void GeneratorPane::DrawDialogsAndPopups(ProjectFile* vProjectFile)
 {
-	ImVec2 min = MainFrame::Instance()->m_DisplaySize * 0.5f;
-	ImVec2 max = MainFrame::Instance()->m_DisplaySize;
-
-	if (igfd::ImGuiFileDialog::Instance()->FileDialog("GenerateFileDlg", ImGuiWindowFlags_NoDocking, min, max))
+	if (vProjectFile)
 	{
-		if (igfd::ImGuiFileDialog::Instance()->IsOk)
-		{
-			std::string filePath = igfd::ImGuiFileDialog::Instance()->GetCurrentPath();
-			std::string fileName = igfd::ImGuiFileDialog::Instance()->GetCurrentFileName();
-			Generator::Instance()->Generate(filePath, fileName, vProjectFile);
-		}
+		ImVec2 min = MainFrame::Instance()->m_DisplaySize * 0.5f;
+		ImVec2 max = MainFrame::Instance()->m_DisplaySize;
 
-		igfd::ImGuiFileDialog::Instance()->CloseDialog("GenerateFileDlg");
+		if (igfd::ImGuiFileDialog::Instance()->FileDialog("GenerateFileDlg", ImGuiWindowFlags_NoDocking, min, max))
+		{
+			if (igfd::ImGuiFileDialog::Instance()->IsOk)
+			{
+				vProjectFile->m_LastGeneratedPath = igfd::ImGuiFileDialog::Instance()->GetCurrentPath();
+				vProjectFile->m_LastGeneratedFileName = igfd::ImGuiFileDialog::Instance()->GetCurrentFileName();
+				Generator::Instance()->Generate( vProjectFile);
+			}
+
+			igfd::ImGuiFileDialog::Instance()->CloseDialog("GenerateFileDlg");
+		}
 	}
 }
 
@@ -147,27 +150,9 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 				vProjectFile->AddGenMode(GENERATOR_MODE_CURRENT_FONT); // font + header
 				vProjectFile->AddGenMode(GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
 				std::string path = FileHelper::Instance()->GetAppPath() + "/exports";
-				path = FileHelper::Instance()->CorrectFilePathName(path);
+				path = FileHelper::Instance()->CorrectSlashTypeForFilePathName(path);
 				FileHelper::Instance()->CreateDirectoryIfNotExist(path);
-				Generator::Instance()->Generate(path, "test.ttf", vProjectFile);
-			}
-			if (ImGui::Button("Quick Header Font Current"))
-			{
-				vProjectFile->m_GenMode = (GenModeFlags)0;
-				vProjectFile->AddGenMode(GENERATOR_MODE_CURRENT_HEADER); // header
-				std::string path = FileHelper::Instance()->GetAppPath() + "/exports";
-				path = FileHelper::Instance()->CorrectFilePathName(path);
-				FileHelper::Instance()->CreateDirectoryIfNotExist(path);
-				Generator::Instance()->Generate(path, "test.h", vProjectFile);
-			}
-			if (ImGui::Button("Quick Card Font Current"))
-			{
-				vProjectFile->m_GenMode = (GenModeFlags)0;
-				vProjectFile->AddGenMode(GENERATOR_MODE_CURRENT_CARD); // card
-				std::string path = FileHelper::Instance()->GetAppPath() + "/exports";
-				path = FileHelper::Instance()->CorrectFilePathName(path);
-				FileHelper::Instance()->CreateDirectoryIfNotExist(path);
-				Generator::Instance()->Generate(path, "test.png", vProjectFile);
+				Generator::Instance()->Generate(vProjectFile, path, "test.ttf");
 			}
 			if (ImGui::Button("Quick Font Merged"))
 			{
@@ -178,10 +163,30 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 				if (disableGlyphReScale)
 					vProjectFile->AddGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE);
 				std::string path = FileHelper::Instance()->GetAppPath() + "/exports";
-				path = FileHelper::Instance()->CorrectFilePathName(path);
+				path = FileHelper::Instance()->CorrectSlashTypeForFilePathName(path);
 				FileHelper::Instance()->CreateDirectoryIfNotExist(path);
-				Generator::Instance()->Generate(path, "test.ttf", vProjectFile);
+				Generator::Instance()->Generate(vProjectFile, path, "test.ttf");
 			}
+			if (ImGui::Button("Quick Header Font Current"))
+			{
+				vProjectFile->m_GenMode = (GenModeFlags)0;
+				vProjectFile->AddGenMode(GENERATOR_MODE_CURRENT_HEADER); // header
+				std::string path = FileHelper::Instance()->GetAppPath() + "/exports";
+				path = FileHelper::Instance()->CorrectSlashTypeForFilePathName(path);
+				FileHelper::Instance()->CreateDirectoryIfNotExist(path);
+				Generator::Instance()->Generate(vProjectFile, path, "test.h");
+			}
+			if (ImGui::Button("Quick Card Font Current"))
+			{
+				vProjectFile->m_GenMode = (GenModeFlags)0;
+				vProjectFile->AddGenMode(GENERATOR_MODE_CURRENT_CARD); // card
+				std::string path = FileHelper::Instance()->GetAppPath() + "/exports";
+				path = FileHelper::Instance()->CorrectSlashTypeForFilePathName(path);
+				FileHelper::Instance()->CreateDirectoryIfNotExist(path);
+				Generator::Instance()->Generate(vProjectFile, path, "test.png");
+			}
+
+			ImGui::FramedGroupSeparator();
 #endif
 			bool change = false;
 			ImGui::Text("Modes : ");
@@ -251,6 +256,8 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 					&vProjectFile->m_GenMode, GENERATOR_MODE_CARD, 50.0f, false, false,
 					GENERATOR_MODE_NONE, headerModeDisabled);
 
+				// un header est lié a un TTF ou un CPP ne petu aps etre les deux
+				// donc on fait soit l'un soit l'autre
 				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Font", "Font File",
 					&vProjectFile->m_GenMode, GENERATOR_MODE_FONT, 50.0f, false, false,
 					GENERATOR_MODE_RADIO_FONT_CPP);
@@ -292,7 +299,7 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 				ImGui::Unindent();
 			}
 			
-			if (CheckGeneratioConditions(vProjectFile))
+			if (CheckGenerationConditions(vProjectFile))
 			{
 				ImGui::Indent();
 
@@ -323,8 +330,8 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 #endif
 				igfd::ImGuiFileDialog::Instance()->OpenModal(
 					"GenerateFileDlg",
-					"Location and name where create the file", extTypes, ".",
-					vProjectFile->m_SelectedFont->m_FontFileName,
+					"Location and name where create the file", extTypes, vProjectFile->m_LastGeneratedPath,
+					vProjectFile->m_LastGeneratedFileName,
 					std::bind(&GeneratorPane::GeneratorFileDialogPane, this,
 						std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
 					200, 1, vProjectFile, ImGuiFileDialogFlags_ConfirmOverwrite);
@@ -339,10 +346,17 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 	}
 }
 
-bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
+/*
+Always on feature must be selected : Header or Card or Font or CPP
+Card can be alone
+header need cpp or font
+Cpp and Font cant be generated both at same time
+*/
+bool GeneratorPane::CheckGenerationConditions(ProjectFile *vProjectFile)
 {
 	bool res = true;
 
+	// always on efatrue must be selected
 	if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER) ||
 		vProjectFile->IsGenMode(GENERATOR_MODE_CARD) ||
 		vProjectFile->IsGenMode(GENERATOR_MODE_FONT) ||
@@ -356,14 +370,25 @@ bool GeneratorPane::CheckGeneratioConditions(ProjectFile *vProjectFile)
 		ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "Can't generate.\n\tSelect one feature at least");
 	}
 
-	if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED) &&
+	// not remembered why i done that.. so disabled for the moment
+	/*if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED) &&
 		!(vProjectFile->IsGenMode(GENERATOR_MODE_FONT) ||
 			vProjectFile->IsGenMode(GENERATOR_MODE_CPP)))
 	{
 		res = false;
 		ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "Merged mode require the\ngeneration of font or cpp.\nPlease Select one of\nthese two at least");
+	}*/
+
+	// header need CPP or Font at least
+	if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER) &&
+		!(vProjectFile->IsGenMode(GENERATOR_MODE_FONT) ||
+			vProjectFile->IsGenMode(GENERATOR_MODE_CPP)))
+	{
+		res = false;
+		ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "the Header is linked ot a font or a cpp.\nPlease Select Cpp or Font at least");
 	}
 
+	// check of codepoint/name in double 
 	if (res)
 	{
 		size_t errorsCount = 0;

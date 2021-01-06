@@ -56,19 +56,23 @@ Generator::Generator() = default;
 Generator::~Generator() = default;
 
 void Generator::Generate(
+	ProjectFile *vProjectFile,
 	const std::string& vFilePath,
-	const std::string& vFileName,
-	ProjectFile* vProjectFile)
+	const std::string& vFileName)
 {
 	if (vProjectFile)
 	{
+		PathStruct mainPS(vProjectFile->m_LastGeneratedPath, vProjectFile->m_LastGeneratedFileName, "");
+		
+		if (!vFilePath.empty()) mainPS.path = vFilePath;
+		if (!vFileName.empty()) mainPS.name = vFileName;
+
 		if (vProjectFile->IsGenMode(GENERATOR_MODE_CPP))
 		{
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT))
 			{
-				std::string filePathName = vFilePath + "/" + vFileName;
 				GenerateCpp_One(
-					filePathName, 
+					mainPS.GetFPNE(),
 					vProjectFile, 
 					vProjectFile->m_SelectedFont, 
 					vProjectFile->m_GenMode);
@@ -80,9 +84,8 @@ void Generator::Generate(
 					auto ps = FileHelper::Instance()->ParsePathFileName(font.second.m_FontFileName);
 					if (ps.isOk)
 					{
-						std::string filePathName = vFilePath + "/" + ps.name + "." + ps.ext;
 						GenerateCpp_One(
-							filePathName, 
+							ps.GetFPNE_WithPath(vFilePath),
 							vProjectFile, 
 							&font.second, 
 							vProjectFile->m_GenMode);
@@ -91,9 +94,8 @@ void Generator::Generate(
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED))
 			{
-				std::string filePathName = vFilePath + "/" + vFileName;
 				GenerateCpp_Merged(
-					filePathName, 
+					mainPS.GetFPNE(),
 					vProjectFile, 
 					vProjectFile->GetGenMode());
 			}
@@ -102,9 +104,8 @@ void Generator::Generate(
 		{
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT))
 			{
-				std::string filePathName = vFilePath + "/" + vFileName;
 				GenerateFontFile_One(
-					filePathName, 
+					mainPS.GetFPNE(),
 					vProjectFile, 
 					vProjectFile->m_SelectedFont, 
 					vProjectFile->m_GenMode);
@@ -119,9 +120,8 @@ void Generator::Generate(
 					auto ps = FileHelper::Instance()->ParsePathFileName(font.second.m_FontFileName);
 					if (ps.isOk)
 					{
-						std::string filePathName = vFilePath + "/" + ps.name + "." + ps.ext;
 						GenerateFontFile_One(
-							filePathName, 
+							ps.GetFPNE_WithPath(vFilePath),
 							vProjectFile, 
 							&font.second, 
 							vProjectFile->m_GenMode);
@@ -133,49 +133,23 @@ void Generator::Generate(
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED))
 			{
-				std::string filePathName = vFilePath + "/" + vFileName;
 				GenerateFontFile_Merged(
-					filePathName, 
-					vProjectFile, 
+					mainPS.GetFPNE(),
+					vProjectFile,
 					vProjectFile->m_GenMode);
 #ifdef AUTO_OPEN_FONT_IN_APP_AFTER_GENERATION_FOR_DEBUG_PURPOSE
 				SourceFontPane::Instance()->OpenFont(vProjectFile, filePathName, false); // directly load the generated font file
 #endif
 			}
 		}
-		else if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER))
-		{
-			if (vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT))
-			{
-				std::string filePathName = vFilePath + "/" + vFileName;
-				GenerateHeader_One(
-					filePathName, 
-					vProjectFile->m_SelectedFont);
-			}
-			else if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
-			{
-				for (auto &font : vProjectFile->m_Fonts)
-				{
-					auto ps = FileHelper::Instance()->ParsePathFileName(font.second.m_FontFileName);
-					if (ps.isOk)
-					{
-						std::string filePathName = vFilePath + "/" + ps.name + ".h";
-						GenerateHeader_One(
-							filePathName, 
-							&font.second);
-					}
-				}
-			}
-		}
 		else if (vProjectFile->IsGenMode(GENERATOR_MODE_CARD))
 		{
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT))
 			{
-				std::string filePathName = vFilePath + "/" + vFileName;
 				GenerateCard_One(
-					filePathName, 
-					vProjectFile->m_SelectedFont, 
-					vProjectFile->m_CardGlyphHeightInPixel, 
+					mainPS.GetFPNE_WithExt(".png"),
+					vProjectFile->m_SelectedFont,
+					vProjectFile->m_CardGlyphHeightInPixel,
 					vProjectFile->m_CardCountRowsMax);
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
@@ -185,14 +159,21 @@ void Generator::Generate(
 					auto ps = FileHelper::Instance()->ParsePathFileName(font.second.m_FontFileName);
 					if (ps.isOk)
 					{
-						std::string filePathName = vFilePath + "/" + ps.name + ".h";
 						GenerateCard_One(
-							filePathName, 
-							&font.second, 
-							vProjectFile->m_CardGlyphHeightInPixel, 
+							ps.GetFPNE_WithPathExt(vFilePath, ".png"),
+							&font.second,
+							vProjectFile->m_CardGlyphHeightInPixel,
 							vProjectFile->m_CardCountRowsMax);
 					}
 				}
+			}
+			else if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED))
+			{
+				GenerateCard_Merged(
+					mainPS.GetFPNE_WithExt(".png"),
+					vProjectFile,
+					vProjectFile->m_CardGlyphHeightInPixel,
+					vProjectFile->m_CardCountRowsMax);
 			}
 		}
 	}
@@ -493,7 +474,7 @@ void Generator::GenerateCard_One(
 			// file
 			std::string name = ps.name;
 			ct::replaceString(name, "-", "_");
-			filePathName = ps.GetFilePathWithNameExt(name, ".png");
+			filePathName = ps.GetFPNE_WithNameExt(name, ".png");
 			
 			// Prefix
 			std::string prefix = "";
@@ -550,7 +531,7 @@ void Generator::GenerateCard_Merged(
 			// file
 			std::string name = ps.name;
 			ct::replaceString(name, "-", "_");
-			filePathName = ps.GetFilePathWithNameExt(name, ".png");
+			filePathName = ps.GetFPNE_WithNameExt(name, ".png");
 
 			// Prefix
 			std::string prefix = "";
@@ -679,7 +660,7 @@ void Generator::GenerateHeader_One(
 
 			std::string name = ps.name;
 			ct::replaceString(name, "-", "_");
-			filePathName = ps.GetFilePathWithNameExt(name, ".h");
+			filePathName = ps.GetFPNE_WithNameExt(name, ".h");
 
 			FileHelper::Instance()->SaveStringToFile(header + glyphs, filePathName);
 			FileHelper::Instance()->OpenFile(filePathName);
@@ -777,7 +758,7 @@ void Generator::GenerateHeader_Merged(
 
 			std::string name = ps.name;
 			ct::replaceString(name, "-", "_");
-			filePathName = ps.GetFilePathWithNameExt(name, ".h");
+			filePathName = ps.GetFPNE_WithNameExt(name, ".h");
 			
 			FileHelper::Instance()->SaveStringToFile(header + glyphs, filePathName);
 			FileHelper::Instance()->OpenFile(filePathName);
@@ -850,7 +831,7 @@ void Generator::GenerateFontFile_One(
 			{
 				std::string name = ps.name;
 				ct::replaceString(name, "-", "_");
-				filePathName = ps.GetFilePathWithNameExt(name, ".ttf");
+				filePathName = ps.GetFPNE_WithNameExt(name, ".ttf");
 				
 				if (fontHelper.GenerateFontFile(filePathName, vFlags & GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES))
 				{
@@ -999,7 +980,7 @@ void Generator::GenerateFontFile_Merged(
 			{
 				std::string name = ps.name;
 				ct::replaceString(name, "-", "_");
-				filePathName = ps.GetFilePathWithNameExt(name, ".ttf");
+				filePathName = ps.GetFPNE_WithNameExt(name, ".ttf");
 
 				if (fontHelper.GenerateFontFile(vFilePathName, vFlags & GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES))
 				{
@@ -1080,7 +1061,7 @@ void Generator::GenerateCpp_One(
 				
 				std::string name = ps.name;
 				ct::replaceString(name, "-", "_");
-				filePathName = ps.GetFilePathWithNameExt("temporary_" + name, ".ttf");
+				filePathName = ps.GetFPNE_WithNameExt("temporary_" + name, ".ttf");
 
 				GenerateFontFile_One(filePathName, vProjectFile, vFontInfos,
 					(GenModeFlags)(vFlags & ~GENERATOR_MODE_HEADER_CARD)); // no header or card to generate
@@ -1169,7 +1150,7 @@ void Generator::GenerateCpp_Merged(
 			std::string res;
 
 			ct::replaceString(ps.name, "-", "_");
-			filePathName = ps.GetFilePathWithNameExt("temporary_" + ps.name, ".ttf");
+			filePathName = ps.GetFPNE_WithNameExt("temporary_" + ps.name, ".ttf");
 
 			GenerateFontFile_Merged(
 				filePathName, 
@@ -1192,7 +1173,7 @@ void Generator::GenerateCpp_Merged(
 				// if ok, serialization
 				if (!res.empty() && !bufferName.empty() && bufferSize > 0)
 				{
-					filePathName = ps.GetFilePathWithNameExt(ps.name, ".cpp");
+					filePathName = ps.GetFPNE_WithNameExt(ps.name, ".cpp");
 
 					if (vFlags & GENERATOR_MODE_HEADER)
 					{

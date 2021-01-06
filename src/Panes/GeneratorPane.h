@@ -57,7 +57,7 @@ private:
 	void DrawFontsGenerator(ProjectFile *vProjectFile);
 	void GeneratorFileDialogPane(std::string vFilter, igfd::UserDatas vUserDatas, bool* vCantContinue);
 
-	bool CheckGeneratioConditions(ProjectFile *vProjectFile);
+	bool CheckGenerationConditions(ProjectFile *vProjectFile);
 	
 public: // singleton
 	static GeneratorPane *Instance()

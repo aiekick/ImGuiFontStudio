@@ -40,10 +40,11 @@ public: // to save
 	float m_Preview_Glyph_Width = 50;
 	std::string m_ProjectFilePathName;
 	std::string m_ProjectFilePath;
+	std::string m_LastGeneratedPath = ".";
+	std::string m_LastGeneratedFileName = "Generated_Font";
 	std::string m_MergedFontPrefix;
 	GenModeFlags m_GenMode =
 	        GENERATOR_MODE_CURRENT_HEADER |
-		    //GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES |
 		    GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES;
 	bool m_CurrentPane_ShowGlyphTooltip = true;
 	bool m_SourcePane_ShowGlyphTooltip = true;
@@ -107,5 +108,11 @@ public:
 
 public: // utils
 	ImVec4 GetColorFromInteger(uint32_t vInteger) const;
+
+#ifdef _DEBUG
+public:
+	std::string m_QuickGenerationCustomPath;
+	std::string m_QuickGenerationCustomFileName;
+#endif
 };
 

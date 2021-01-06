@@ -84,7 +84,7 @@ void FontStructurePane::DrawFontStructurePane(ProjectFile *vProjectFile)
             {
                 if (ImGui::Button("Analyse Font"))
                 {
-					std::string fontFilePathName = FileHelper::Instance()->CorrectFilePathName(vProjectFile->m_SelectedFont->m_FontFilePathName);
+					std::string fontFilePathName = FileHelper::Instance()->CorrectSlashTypeForFilePathName(vProjectFile->m_SelectedFont->m_FontFilePathName);
 
 					if (!FileHelper::Instance()->IsAbsolutePath(fontFilePathName))
 					{

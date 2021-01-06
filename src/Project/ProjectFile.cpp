@@ -53,7 +53,6 @@ void ProjectFile::Clear()
 	m_IsLoaded = false;
 	m_IsThereAnyNotSavedChanged = false;
 	m_GenMode = GENERATOR_MODE_CURRENT_HEADER_CARD |
-		//GENERATOR_MODE_HEADER_SETTINGS_ORDER_BY_NAMES |
 		GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES;
 	m_SourcePane_ShowGlyphTooltip = true;
 	m_FinalPane_ShowGlyphTooltip = true;
@@ -100,6 +99,10 @@ bool ProjectFile::LoadAs(const std::string vFilePathName)
 		if (ps.isOk)
 		{
 			m_ProjectFilePath = ps.path;
+		}
+		if (m_SelectedFont)
+		{
+			m_LastGeneratedFileName = m_SelectedFont->m_FontFileName;
 		}
 		m_IsLoaded = true;
 		SetProjectChange(false);
@@ -244,6 +247,9 @@ std::string ProjectFile::getXml(const std::string& vOffset)
 	str += vOffset + "\t<cardglyhpheight>" + ct::toStr(m_CardGlyphHeightInPixel) + "</cardglyhpheight>\n";
 	str += vOffset + "\t<cardcountrowsmax>" + ct::toStr(m_CardCountRowsMax) + "</cardcountrowsmax>\n";
 
+	str += vOffset + "\t<lastgeneratedpath>" + m_LastGeneratedPath + "</lastgeneratedpath>\n";
+	str += vOffset + "\t<lastgeneratedfilename>" + m_LastGeneratedFileName + "</lastgeneratedfilename>\n";
+
 	str += vOffset + "</project>\n";
 
 	return str;
@@ -321,6 +327,10 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 			m_CardGlyphHeightInPixel = ct::uvariant(strValue).GetU();
 		else if (strName == "cardcountrowsmax")
 			m_CardCountRowsMax = ct::uvariant(strValue).GetU();
+		else if (strName == "lastgeneratedpath")
+			m_LastGeneratedPath = strValue;
+		else if (strName == "lastgeneratedfilename")
+			m_LastGeneratedFileName = strValue;
 	}
 
 	return true;
