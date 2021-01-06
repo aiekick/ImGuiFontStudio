@@ -92,21 +92,21 @@ ImGuiFontStudio will generate, 4 file types, depending of your needs.
  | File Type | Description |
  | --------- | ----------- |
  | Font file TTF | Vector Font File needed for external mode |
- | Source Code | .cpp/.cs for c++/c# who will contain conpressed font data for embedded mode |
- | Header code | .h/.cs for c++/c# who will contain infos like (glyph labels/codepoint min/max ranges)]
- | Card | .png this cars is a pictrue file who show each glyph and the corresponding label.|
+ | Source Code | .cpp/.cs for c++/c# with conpressed font data for embedded mode |
+ | Header code | .h/.cs for c++/c# with infos like (glyph labels/codepoint min/max ranges)]
+ | Card | .png this card is a picture file who show each glyph and the corresponding labels|
  
  1) If you want to have no external dependencie, 
 the embbedded mode is for you, but your binary file can have a bigger size if you have a big font.
  2) If you want to have a external font file and more compact binary file, the external mode is for you.
  
-For loading that in ImGui, you need to merge the font icon inot the current main font used in your ImGui App.
-But we just need to load some codepoint, not all the unicode table.
-this is why you have in the header file the min/max range infos.
+For loading that in ImGui, you need to merge the font icon into the current main font used in your ImGui App.
+But we just need to load some codepoints, not all the unicode table.
+This is why you have in the header file the min/max range infos.
 
 ## External Font File Use :
 
-for instance here in this example for load embedded font, we have (with font Prefxi IGFS) :
+for instance here in this example for load embedded font, we have (with font Prefix IGFS) :
 * ICON_MIN_IGFS => min range
 * ICON_MAX_IGFS => max range
 * FONT_ICON_FILE_NAME_IGFS => the font file name to load (ex: fontawesome.ttf)
@@ -166,7 +166,7 @@ unsafe
 In both cases, the use in code is the same :
 
 After that step, when you have a ImGui widget to test, you just need to put in the label field,
-the glyph you want, defined in the header file :
+the glyph you want, defined in the header file for labels :
 
 ### For C++
 
@@ -177,7 +177,7 @@ the glyph you want, defined in the header file :
 ### For C#
 
 ```cpp
- ImGui::Button(ICON_IGFS_FOLDER_OPEN + " Open Font");
+ ImGui::Button(IconFonts.IGFS_Labels.FOLDER_OPEN + " Open Font");
 ```
 
 and you will have this result : 
