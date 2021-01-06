@@ -258,7 +258,7 @@ static void WriteGlyphCardToPicture(
 
 		bool labelFontLoaded = false;
 
-		// FontInfos ptr, stbtt_fontinfo
+		// FontInfos ptr (size_t), stbtt_fontinfo // size_t is alwasy the size of the address (uint32_t for x32, uint64_t for x64)
 		std::unordered_map<size_t, stbtt_fontinfo> fonts;
 
 		auto io = &ImGui::GetIO();
@@ -329,7 +329,7 @@ static void WriteGlyphCardToPicture(
 
 					if (fonts.find((size_t)fontPtr) != fonts.end())
 					{
-						auto glyphFontInfos = fonts[(size_t)fontPtr];
+						const auto& glyphFontInfos = fonts[(size_t)fontPtr];
 
 						std::string lblToRender = " " + it.first;
 						auto text = lblToRender.c_str();
