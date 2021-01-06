@@ -97,7 +97,7 @@ ImGuiFontStudio will generate, 4 file types, depending of your needs.
  | Card | .png this card is a picture file who show each glyph and the corresponding labels|
  
  1) If you want to have no external dependencie, 
-the embbedded mode is for you, but your binary file can have a bigger size if you have a big font.
+the embedded mode is for you, but your binary file can have a bigger size if you have a big font.
  2) If you want to have a external font file and more compact binary file, the external mode is for you.
  
 For loading that in ImGui, you need to merge the font icon into the current main font used in your ImGui App.
@@ -132,7 +132,7 @@ unsafe
 }
 ```
 
-## Embeddded Font File Use :
+## Embedded Font File Use :
 
 for instance here in this example for load embedded font, we have (with font Prefxi IGFS) :
 * ICON_MIN_IGFS => min range
