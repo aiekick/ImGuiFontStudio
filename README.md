@@ -87,15 +87,31 @@ you need many lib : opengl and cocoa framework
 
 ## How to use generated font 
 
-the idea is to merge the icons from your font file into the ImGui current font
-you have in the generated header file, many defines 
+ImGuiFontStudio will generate, 4 file types, depending of your needs.
 
-### External Font File Use :
+ | File Type | Description |
+ | --------- | ----------- |
+ | Font file TTF | Vector Font File needed for external mode |
+ | Source Code | .cpp/.cs for c++/c# who will contain conpressed font data for embedded mode |
+ | Header code | .h/.cs for c++/c# who will contain infos like (glyph labels/codepoint min/max ranges)]
+ | Card | .png this cars is a pictrue file who show each glyph and the corresponding label.|
+ 
+ 1) If you want to have no external dependencie, 
+the embbedded mode is for you, but your binary file can have a bigger size if you have a big font.
+ 2) If you want to have a external font file and more compact binary file, the external mode is for you.
+ 
+For loading that in ImGui, you need to merge the font icon inot the current main font used in your ImGui App.
+But we just need to load some codepoint, not all the unicode table.
+this is why you have in the header file the min/max range infos.
+
+## External Font File Use :
 
 for instance here in this example for load embedded font, we have (with font Prefxi IGFS) :
 * ICON_MIN_IGFS => min range
 * ICON_MAX_IGFS => max range
 * FONT_ICON_FILE_NAME_IGFS => the font file name to load (ex: fontawesome.ttf)
+
+### For C++
 
 ```cpp
  ImGui::GetIO().Fonts->AddFontDefault();
@@ -104,13 +120,27 @@ static const ImWchar icons_ranges[] = { ICON_MIN_IGFS, ICON_MAX_IGFS, 0 };
  ImGui::GetIO().Fonts->AddFontFromFileTTF(FONT_ICON_FILE_NAME_IGFS, 15.0f, &icons_config, icons_ranges);
 ```
 
-### Embeddded Font File Use :
+### For C# (ImGui.NET)
+
+```cpp
+ImGui.GetIO().Fonts.AddFontDefault();
+unsafe
+{
+	ImFontConfigPtr config = ImGuiNative.ImFontConfig_ImFontConfig(); config.MergeMode = true; config.PixelSnapH = true;
+	GCHandle rangeHandle = GCHandle.Alloc(new ushort[]{IconFonts.IGFS_Labels.ICON_MIN, IconFonts.IGFS_Labels.ICON_MAX,0}, GCHandleType.Pinned);
+	ImGui.GetIO().Fonts.AddFontFromFileTTF(IconFonts.IGFS_Labels.FONT_ICON_FILE_NAME, 15, config, rangeHandle.AddrOfPinnedObject());
+}
+```
+
+## Embeddded Font File Use :
 
 for instance here in this example for load embedded font, we have (with font Prefxi IGFS) :
 * ICON_MIN_IGFS => min range
 * ICON_MAX_IGFS => max range
 * FONT_ICON_BUFFER_NAME_IGFS => the compressed buffer name you have in your_embedded_font.cpp to load 
 (ex: IGFS_compressed_data_base85)
+
+### For C++
 
 ```cpp
  ImGui::GetIO().Fonts->AddFontDefault();
@@ -119,15 +149,37 @@ for instance here in this example for load embedded font, we have (with font Pre
  ImGui::GetIO().Fonts->AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_IGFS, 15.0f, &icons_config, icons_ranges);
 ```
 
-### Boths cases :
+### For C# (ImGui.NET)
+
+```cpp
+ImGui.GetIO().Fonts.AddFontDefault();
+unsafe
+{
+	ImFontConfigPtr config = ImGuiNative.ImFontConfig_ImFontConfig(); config.MergeMode = true; config.PixelSnapH = true;
+	GCHandle rangeHandle = GCHandle.Alloc(new ushort[]{IconFonts.IGFS_Labels.ICON_MIN, IconFonts.IGFS_Labels.ICON_MAX,0}, GCHandleType.Pinned);
+	ImGui.GetIO().Fonts.AddFontFromMemoryCompressedBase85TTF(IconFonts.IGFS_Bytes.compressed_data_base85, 15, config, rangeHandle.AddrOfPinnedObject());
+}
+```
+
+## Boths cases :
 
 In both cases, the use in code is the same :
 
 After that step, when you have a ImGui widget to test, you just need to put in the label field,
 the glyph you want, defined in the header file :
+
+### For C++
+
 ```cpp
  ImGui::Button(ICON_IGFS_FOLDER_OPEN " Open Font");
 ```
+
+### For C#
+
+```cpp
+ ImGui::Button(ICON_IGFS_FOLDER_OPEN + " Open Font");
+```
+
 and you will have this result : 
 ![Button_With_Icons](doc/Button_With_Icons.png)
 
