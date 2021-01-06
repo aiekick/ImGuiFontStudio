@@ -174,7 +174,7 @@ the glyph you want, defined in the header file for labels :
  ImGui::Button(ICON_IGFS_FOLDER_OPEN " Open Font");
 ```
 
-### For C#
+### For C# (ImGui.NET)
 
 ```cpp
  ImGui::Button(IconFonts.IGFS_Labels.FOLDER_OPEN + " Open Font");
