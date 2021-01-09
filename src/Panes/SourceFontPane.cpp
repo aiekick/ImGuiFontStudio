@@ -77,7 +77,7 @@ void SourceFontPane::DrawDialogsAndPopups(ProjectFile * vProjectFile)
 				OpenFonts(vProjectFile, igfd::ImGuiFileDialog::Instance()->GetSelection());
 			}
 
-			igfd::ImGuiFileDialog::Instance()->CloseDialog("OpenFontDlg");
+			igfd::ImGuiFileDialog::Instance()->CloseDialog();
 		}
 
 		if (igfd::ImGuiFileDialog::Instance()->FileDialog("SaveFontToPictureFile", ImGuiWindowFlags_NoDocking, min, max))
@@ -99,7 +99,7 @@ void SourceFontPane::DrawDialogsAndPopups(ProjectFile * vProjectFile)
 				}
 			}
 
-			igfd::ImGuiFileDialog::Instance()->CloseDialog("SaveFontToPictureFile");
+			igfd::ImGuiFileDialog::Instance()->CloseDialog();
 		}
 	}
 }
@@ -186,7 +186,7 @@ void SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile)
 				{
 					if (ImGui::Button(ICON_IGFS_FOLDER_OPEN " Open Font"))
 					{
-						igfd::ImGuiFileDialog::Instance()->OpenModal("OpenFontDlg", "Open Font File", "Font File (*.ttf *.otf){.ttf,.otf}", ".", 0);
+						Action_Menu_OpenFont();
 					}
 
 					if (!vProjectFile->m_Fonts.empty())
@@ -195,7 +195,7 @@ void SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile)
 
 						if (ImGui::Button(ICON_IGFS_DESTROY " Close Font"))
 						{
-							CloseSelectedFont(vProjectFile);
+							Action_Menu_CloseFont();
 						}
 
 						ImGui::Text("Opened Fonts :");
@@ -402,6 +402,124 @@ void SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile)
 
 		ImGui::End();
 	}
+}
+
+///////////////////////////////////////////////////////////////////////////////////
+//// PRIVATE : ACTIONS, DIALOGS ///////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////////
+
+void SourceFontPane::Action_Menu_OpenFont()
+{
+/*
+open font :
+	-	add action : open font
+*/
+	MainFrame::Instance()->GetActionSystem()->Clear();
+	MainFrame::Instance()->GetActionSystem()->Add([this]()
+		{
+			igfd::ImGuiFileDialog::Instance()->OpenModal(
+				"OpenFontDlg", "Open Font File", "Font File (*.ttf *.otf){.ttf,.otf}", ".", 0);
+			return true;
+		});
+}
+
+void SourceFontPane::Action_Menu_CloseFont()
+{
+/*
+close font :
+-	ok :
+	-	glyphs selected :
+		-	add action : show a confirmation dialog (ok/cancel for lose glyph selection)
+		-	add action : close font
+	-	no glyph selected :
+		-	add action : close font
+-	cancel :
+	-	clear actions
+*/
+	MainFrame::Instance()->GetActionSystem()->Clear();
+	Open_ConfirmToCloseFont_Dialog();
+	MainFrame::Instance()->GetActionSystem()->Add([this]()
+		{
+			return Display_ConfirmToCloseFont_Dialog();
+		});
+
+	MainFrame::Instance()->GetActionSystem()->Add([this]()
+		{
+			// close font
+			auto prj = MainFrame::Instance()->GetProject();
+			if (prj)
+			{
+				if (prj->m_SelectedFont)
+				{
+					prj->m_SelectedFont->Clear();
+					prj->m_Fonts.erase(prj->m_SelectedFont->m_FontFileName);
+					if (!prj->m_Fonts.empty())
+					{
+						SelectFont(prj, &prj->m_Fonts.begin()->second);
+					}
+					else
+					{
+						SelectFont(prj, nullptr);
+					}
+					prj->SetProjectChange();
+				}
+			}
+			
+			return true;
+		});
+}
+
+void SourceFontPane::Action_Cancel()
+{
+	MainFrame::Instance()->GetActionSystem()->Clear();
+}
+
+void SourceFontPane::Open_ConfirmToCloseFont_Dialog()
+{
+	m_Show_ConfirmToCloseFont_Dialog = true;
+}
+
+void SourceFontPane::Close_ConfirmToCloseFont_Dialog()
+{
+	m_Show_ConfirmToCloseFont_Dialog = false;
+}
+
+bool SourceFontPane::Display_ConfirmToCloseFont_Dialog()
+{
+	bool res = false;
+
+	if (m_Show_ConfirmToCloseFont_Dialog)
+	{
+		ImGui::OpenPopup("Are you sure to close this font ?");
+		if (ImGui::BeginPopupModal("Are you sure to close this font ?", (bool*)0,
+			ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking))
+		{
+			ImGui::Text("You will lose your glyph selection / tuning");
+
+			/*
+			confirmation dialog for close font :
+			-	ok :
+				-	quit the dialog
+			-	cancel :
+				-	clear actions
+			*/
+			if (ImGui::Button("Confirm"))
+			{
+				res = true; // quit the action
+			}
+			ImGui::SameLine();
+			if (ImGui::Button("Cancel"))
+			{
+				Action_Cancel();
+			}
+
+			ImGui::EndPopup();
+		}
+
+		return res; // quit if true, else continue on the next frame
+	}
+	
+	return true; // quit the action
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
@@ -653,27 +771,6 @@ void SourceFontPane::OpenFont(ProjectFile *vProjectFile, const std::string& vFon
 				if (vUpdateCount)
 					vProjectFile->UpdateCountSelectedGlyphs();
 			}
-		}
-	}
-}
-
-void SourceFontPane::CloseSelectedFont(ProjectFile *vProjectFile)
-{
-	if (vProjectFile && vProjectFile->IsLoaded())
-	{
-		if (vProjectFile->m_SelectedFont)
-		{
-			vProjectFile->m_SelectedFont->Clear();			
-			vProjectFile->m_Fonts.erase(vProjectFile->m_SelectedFont->m_FontFileName);
-			if (!vProjectFile->m_Fonts.empty())
-			{
-				SelectFont(vProjectFile, &vProjectFile->m_Fonts.begin()->second);
-			}
-			else
-			{
-				SelectFont(vProjectFile, nullptr);
-			}
-			vProjectFile->SetProjectChange();
 		}
 	}
 }

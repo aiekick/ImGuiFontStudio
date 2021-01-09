@@ -148,6 +148,11 @@ bool ProjectFile::IsLoaded() const
 	return m_IsLoaded;
 }
 
+bool ProjectFile::IsNeverSaved() const
+{
+	return m_NeverSaved;
+}
+
 bool ProjectFile::IsThereAnyNotSavedChanged() const
 {
 	return m_IsThereAnyNotSavedChanged;

@@ -86,6 +86,7 @@ public:
 	bool Save();
 	bool SaveAs(const std::string& vFilePathName);
 	bool IsLoaded() const;
+	bool IsNeverSaved() const;
 
 	bool IsThereAnyNotSavedChanged() const;
 	void SetProjectChange(bool vChange = true);

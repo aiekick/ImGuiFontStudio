@@ -8,11 +8,14 @@
 				<glyph orgId="61453" newId="61453" orgName="remove" newName="cancel"/>
 				<glyph orgId="61460" newId="61460" orgName="trash" newName="destroy"/>
 				<glyph orgId="61462" newId="61462" orgName="file_alt" newName="file"/>
+				<glyph orgId="61469" newId="61469" orgName="play_circle" newName="play_circle"/>
 				<glyph orgId="61470" newId="61470" orgName="repeat" newName="redo"/>
 				<glyph orgId="61473" newId="61473" orgName="refresh" newName="refresh"/>
+				<glyph orgId="61482" newId="61482" orgName="barcode" newName="barcode"/>
 				<glyph orgId="61485" newId="61485" orgName="book" newName="project"/>
 				<glyph orgId="61486" newId="61486" orgName="bookmark" newName="bookmark"/>
 				<glyph orgId="61489" newId="61489" orgName="font" newName="by_font"/>
+				<glyph orgId="61498" newId="61498" orgName="list" newName="list"/>
 				<glyph orgId="61502" newId="61502" orgName="picture" newName="texture"/>
 				<glyph orgId="61504" newId="61504" orgName="pencil" newName="edit"/>
 				<glyph orgId="61527" newId="61527" orgName="remove_sign" newName="error"/>

@@ -40,7 +40,7 @@ private: // private vars
 	ImGuiListClipper m_FontsClipper;
 
 private: // private enum
-	float m_CurrentWindowWidth = 0.0f;
+	bool m_Show_ConfirmToCloseFont_Dialog = false;  // show confirm to close font dialog
 
 public:
 	void Init() override;
@@ -50,7 +50,6 @@ public:
 
 	void OpenFonts(ProjectFile* vProjectFile, const std::map<std::string, std::string>& vFontFilePathNames);
 	void OpenFont(ProjectFile* vProjectFile, const std::string& vFontFilePathName, bool vUpdateCount);
-	void CloseSelectedFont(ProjectFile* vProjectFile);
 	void SelectFont(ProjectFile* vProjectFile, FontInfos* vFontInfos);
 
 	bool IsFlagSet(ProjectFile* vProjectFile, SourceFontPaneFlags vFlag);
@@ -64,7 +63,16 @@ private:
 	// panes
 	void DrawSourceFontPane(ProjectFile *vProjectFile);
 	void DrawParamsPane(ProjectFile *vProjectFile);
-    
+
+private: // actions
+	// via menu
+	void Action_Menu_OpenFont();
+	void Action_Menu_CloseFont();
+	void Action_Cancel();
+	void Open_ConfirmToCloseFont_Dialog(); // dialog
+	void Close_ConfirmToCloseFont_Dialog(); // dialog
+	bool Display_ConfirmToCloseFont_Dialog(); // dialog
+
 public: // singleton
 	static SourceFontPane* Instance()
 	{

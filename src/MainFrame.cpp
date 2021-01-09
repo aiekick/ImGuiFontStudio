@@ -97,9 +97,9 @@ void MainFrame::LoadProject(const std::string& vFilePathName)
 	}
 }
 
-void MainFrame::SaveProject()
+bool MainFrame::SaveProject()
 {
-	m_ProjectFile.Save();
+	return m_ProjectFile.Save();
 }
 
 void MainFrame::SaveAsProject(const std::string& vFilePathName)
@@ -173,25 +173,12 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 		{
 			if (ImGui::MenuItem(ICON_IGFS_FILE " New"))
 			{
-				m_ProjectFile.New();
+				Action_Menu_NewProject();
 			}
 
 			if (ImGui::MenuItem(ICON_IGFS_FOLDER_OPEN " Open"))
 			{
-				// if change maybe save before open other
-				if (m_ProjectFile.IsLoaded() && m_ProjectFile.IsThereAnyNotSavedChanged())
-				{
-					m_SaveDialogIfRequired = true;
-					m_SaveChangeDialogActions.push_front([this]()
-					{
-						igfd::ImGuiFileDialog::Instance()->OpenModal("OpenProjectDlg", "Open Project File", "Project File{.ifs}", ".");
-						m_SaveDialogIfRequired = false;
-					});
-				}
-				else
-				{
-					igfd::ImGuiFileDialog::Instance()->OpenModal("OpenProjectDlg", "Open Project File", "Project File{.ifs}", ".");
-				}
+				Action_Menu_OpenProject();
 			}
 
 			if (m_ProjectFile.IsLoaded())
@@ -200,56 +187,26 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 
 				if (ImGui::MenuItem(ICON_IGFS_FOLDER_OPEN " Re Open"))
 				{
-					// if change maybe save before open other
-					if (m_ProjectFile.IsLoaded() && m_ProjectFile.IsThereAnyNotSavedChanged())
-					{
-						m_SaveDialogIfRequired = true;
-						m_SaveChangeDialogActions.push_front([this]()
-							{
-								LoadProject(m_ProjectFile.m_ProjectFilePathName);
-								m_SaveDialogIfRequired = false;
-							});
-					}
-					else
-					{
-						LoadProject(m_ProjectFile.m_ProjectFilePathName);
-					}
+					Action_Menu_ReOpenProject();
 				}
 				
 				ImGui::Separator();
 
 				if (ImGui::MenuItem(ICON_IGFS_SAVE " Save"))
 				{
-					if (!m_ProjectFile.Save())
-					{
-						igfd::ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", "Project File{.ifs}", ".");
-					}
+					Action_Menu_SaveProject();
 				}
 
 				if (ImGui::MenuItem(ICON_IGFS_SAVE " Save As"))
 				{
-					igfd::ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", "Project File{.ifs}", ".", 
-						1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
+					Action_Menu_SaveAsProject();
 				}
 
 				ImGui::Separator();
 
 				if (ImGui::MenuItem(ICON_IGFS_DESTROY " Close"))
 				{
-					// if change maybe save before close
-					if (m_ProjectFile.IsThereAnyNotSavedChanged())
-					{
-						m_SaveDialogIfRequired = true;
-						m_SaveChangeDialogActions.push_front([this]()
-						{
-							m_ProjectFile.Clear();
-							m_SaveDialogIfRequired = false;
-						});
-					}
-					else
-					{
-						m_ProjectFile.Clear();
-					}
+					Action_Menu_CloseProject();
 				}
 			}
 
@@ -298,10 +255,7 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 
 			if (ImGui::MenuItem(ICON_IGFS_SAVE " Save"))
 			{
-				if (!m_ProjectFile.Save())
-				{
-					igfd::ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", "Project File{.ifs}", ".", 0);
-				}
+				Action_Menu_SaveProject();
 			}
 		}
 
@@ -322,15 +276,15 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 
 void MainFrame::DisplayDialogsAndPopups()
 {
-	ShowSaveDialogIfRequired();
-
-	ImVec2 min = MainFrame::Instance()->m_DisplaySize * 0.5f;
-	ImVec2 max = MainFrame::Instance()->m_DisplaySize;
+	m_ActionSystem.Apply();
 
 	if (m_ProjectFile.IsLoaded())
 	{
 		LayoutManager::Instance()->DrawDialogsAndPopups(&m_ProjectFile);
 
+		ImVec2 min = MainFrame::Instance()->m_DisplaySize * 0.5f;
+		ImVec2 max = MainFrame::Instance()->m_DisplaySize;
+		
 		if (igfd::ImGuiFileDialog::Instance()->FileDialog("SolveBadFilePathName",
 			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking, min, max))
 		{
@@ -348,42 +302,8 @@ void MainFrame::DisplayDialogsAndPopups()
 				}
 			}
 
-			igfd::ImGuiFileDialog::Instance()->CloseDialog("SolveBadFilePathName");
+			igfd::ImGuiFileDialog::Instance()->CloseDialog();
 		}
-	}
-
-	if (igfd::ImGuiFileDialog::Instance()->FileDialog("NewProjectDlg",
-		ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking, min, max))
-	{
-		if (igfd::ImGuiFileDialog::Instance()->IsOk)
-		{
-			NewProject(igfd::ImGuiFileDialog::Instance()->GetFilePathName());
-		}
-
-		igfd::ImGuiFileDialog::Instance()->CloseDialog("NewProjectDlg");
-	}
-
-	if (igfd::ImGuiFileDialog::Instance()->FileDialog("OpenProjectDlg",
-		ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking, min, max))
-	{
-		if (igfd::ImGuiFileDialog::Instance()->IsOk)
-		{
-			LoadProject(igfd::ImGuiFileDialog::Instance()->GetFilePathName());
-		}
-
-		igfd::ImGuiFileDialog::Instance()->CloseDialog("OpenProjectDlg");
-	}
-
-	if (igfd::ImGuiFileDialog::Instance()->FileDialog("SaveProjectDlg",
-		ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking, min, max))
-	{
-		if (igfd::ImGuiFileDialog::Instance()->IsOk)
-		{
-			auto file = igfd::ImGuiFileDialog::Instance()->GetFilePathName();
-			SaveAsProject(igfd::ImGuiFileDialog::Instance()->GetFilePathName());
-		}
-
-		igfd::ImGuiFileDialog::Instance()->CloseDialog("SaveProjectDlg");
 	}
 
 	if (m_ShowAboutDialog)
@@ -505,90 +425,362 @@ void MainFrame::SetAppTitle(const std::string& vFilePathName)
 }
 
 ///////////////////////////////////////////////////////
-//// SAVE DIALOG WHEN APP CLOSED //////////////////////
+//// SAVE DIALOG WHEN UN SAVED CHANGES ////////////////
 ///////////////////////////////////////////////////////
 
-void MainFrame::ShowSaveDialogIfRequired()
+void MainFrame::OpenUnSavedDialog()
 {
-	if (!m_SaveDialogIfRequired)
-		return;
+	// force close dialog if any dialog is opened
+	igfd::ImGuiFileDialog::Instance()->CloseDialog();
 
-	if (m_ProjectFile.IsLoaded())
+	m_SaveDialogIfRequired = true;
+}
+void MainFrame::CloseUnSavedDialog()
+{
+	m_SaveDialogIfRequired = false;
+}
+
+bool MainFrame::ShowUnSavedDialog()
+{
+	bool res = false;
+
+	if (m_SaveDialogIfRequired)
 	{
-		if (m_ProjectFile.IsThereAnyNotSavedChanged())
+		if (m_ProjectFile.IsLoaded())
 		{
-			bool choiceMade = false;
-
-			ImGui::OpenPopup("Do you want to save before ?");
-			if (ImGui::BeginPopupModal("Do you want to save before ?", (bool*)0,
-				ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking))
+			if (m_ProjectFile.IsThereAnyNotSavedChanged())
 			{
-				if (ImGui::Button("Save"))
-				{
-					choiceMade = true;
-					m_SaveChangeDialogActions.push_front([this]()
-					{
-						SaveProject();
-						m_SaveDialogIfRequired = false;
-					});
-					if (m_NeedToCloseApp)
-					{
-						m_SaveChangeDialogActions.push_front([this]()
-						{
-							glfwSetWindowShouldClose(m_Window, GL_TRUE); // close app
-						});
-					}
-				}
-				ImGui::SameLine();
-				if (ImGui::Button("Save As"))
-				{
-					choiceMade = true;
-					m_SaveChangeDialogActions.push_front([this]()
-					{
-						igfd::ImGuiFileDialog::Instance()->OpenModal("SaveProjectDlg", "Save Project File", "Project File{.ifs}", 
-							".", 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
-						m_SaveDialogIfRequired = false;
-					});
-				}
-				
-				if (ImGui::Button("Continue without saving"))
-				{
-					choiceMade = true;
-					if (m_NeedToCloseApp)
-					{
-						m_SaveChangeDialogActions.push_front([this]()
-						{
-							glfwSetWindowShouldClose(m_Window, GL_TRUE); // close app
-						});
-					}
-				}
-				ImGui::SameLine();
-				if (ImGui::Button("Cancel"))
-				{
-					choiceMade = true;
-					m_SaveChangeDialogActions.clear();
-				}
+				/*
+				Unsaved dialog behavior :
+				-	save :
+					-	insert action : save project
+				-	save as :
+					-	insert action : save as project
+				-	continue without saving :
+					-	quit unsaved dialog
+				-	cancel :
+					-	clear actions
+				*/
 
-				ImGui::EndPopup();
-
-				if (choiceMade)
+				ImGui::CloseCurrentPopup();
+				ImGui::OpenPopup("Do you want to save before ?");
+				if (ImGui::BeginPopupModal("Do you want to save before ?", (bool*)0,
+					ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking))
 				{
-					if (!m_SaveChangeDialogActions.empty())
+					if (ImGui::Button("Save"))
 					{
-						for (auto &action : m_SaveChangeDialogActions)
-						{
-							action();
-						}
+						Action_UnSavedDialog_SaveProject();
 					}
-					else
+					ImGui::SameLine();
+					if (ImGui::Button("Save As"))
 					{
-						m_SaveDialogIfRequired = false;
+						Action_UnSavedDialog_SaveAsProject();
 					}
+
+					if (ImGui::Button("Continue without saving"))
+					{
+						res = true; // quit the action
+					}
+					ImGui::SameLine();
+					if (ImGui::Button("Cancel"))
+					{
+						Action_Cancel();
+					}
+
+					ImGui::EndPopup();
 				}
 			}
 		}
+
+		return res; // quit if true, else continue on the next frame
+	}
+
+	return true; // quit the action
+}
+
+///////////////////////////////////////////////////////
+//// ACTIONS //////////////////////////////////////////
+///////////////////////////////////////////////////////
+
+void MainFrame::Action_Menu_NewProject()
+{
+/*
+new project :
+-	unsaved :
+	-	add action : show unsaved dialog
+	-	add action : new project
+-	saved :
+	-	add action : new project
+*/
+	m_ActionSystem.Clear();
+	Action_OpenUnSavedDialogçIfNeeded();
+	m_ActionSystem.Add([this]()
+		{
+			m_ProjectFile.New();
+			return true; // one time action
+		});
+}
+
+void MainFrame::Action_Menu_OpenProject()
+{
+/*
+open project : 
+-	unsaved :
+	-	add action : show unsaved dialog
+	-	add action : open project
+-	saved :
+	-	add action : open project
+*/
+	m_ActionSystem.Clear();
+	Action_OpenUnSavedDialogçIfNeeded();
+	m_ActionSystem.Add([this]()
+		{
+			CloseUnSavedDialog();
+			igfd::ImGuiFileDialog::Instance()->OpenModal(
+				"OpenProjectDlg", "Open Project File", "Project File{.ifs}", ".");
+			return true;
+		});
+	m_ActionSystem.Add([this]()
+		{
+			return Display_OpenProjectDialog();
+		});
+}
+
+void MainFrame::Action_Menu_ReOpenProject()
+{
+/*
+re open project : 
+-	unsaved :
+	-	add action : show unsaved dialog
+	-	add action : re open project
+-	saved :
+	-	add action : re open project
+*/
+	m_ActionSystem.Clear();
+	Action_OpenUnSavedDialogçIfNeeded();
+	m_ActionSystem.Add([this]()
+		{
+			LoadProject(m_ProjectFile.m_ProjectFilePathName);
+			return true;
+		});
+}
+
+void MainFrame::Action_Menu_SaveProject()
+{
+/*
+save project :
+-	never saved :
+	-	add action : save as project
+-	saved in a file beofre :
+	-	add action : save project
+*/
+	m_ActionSystem.Clear();
+	m_ActionSystem.Add([this]()
+		{
+			if (!SaveProject())
+			{
+				CloseUnSavedDialog();
+				igfd::ImGuiFileDialog::Instance()->OpenModal(
+					"SaveProjectDlg", "Save Project File", "Project File{.ifs}", ".");
+			}
+			return true;
+		});
+	m_ActionSystem.Add([this]()
+		{
+			return Display_SaveProjectDialog();
+		});
+}
+
+void MainFrame::Action_Menu_SaveAsProject()
+{
+/*
+save as project :
+-	add action : save as project
+*/
+	m_ActionSystem.Clear();
+	m_ActionSystem.Add([this]()
+		{
+			CloseUnSavedDialog();
+			igfd::ImGuiFileDialog::Instance()->OpenModal(
+				"SaveProjectDlg", "Save Project File", "Project File{.ifs}", ".",
+				1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
+			return true;
+		});
+	m_ActionSystem.Add([this]()
+		{
+			return Display_SaveProjectDialog();
+		});
+}
+
+void MainFrame::Action_Menu_CloseProject()
+{
+/*
+Close project :
+-	unsaved :
+	-	add action : show unsaved dialog
+	-	add action : Close project
+-	saved :
+	-	add action : Close project
+*/
+	m_ActionSystem.Clear();
+	Action_OpenUnSavedDialogçIfNeeded();
+	m_ActionSystem.Add([this]()
+		{
+			m_ProjectFile.Clear();
+			return true;
+		});
+}
+
+void MainFrame::Action_Window_CloseApp()
+{
+	if (m_NeedToCloseApp) return; // block next call to close app when running
+/*
+Close app :
+-	unsaved :
+	-	add action : show unsaved dialog
+	-	add action : Close app
+-	saved :
+	-	add action : Close app
+*/
+	m_NeedToCloseApp = true;
+
+	m_ActionSystem.Clear();
+	Action_OpenUnSavedDialogçIfNeeded();
+	m_ActionSystem.Add([this]()
+		{
+			glfwSetWindowShouldClose(m_Window, GL_TRUE); // close app
+			return true;
+		});
+}
+
+void MainFrame::Action_OpenUnSavedDialogçIfNeeded()
+{
+	if (m_ProjectFile.IsLoaded() &&
+		m_ProjectFile.IsThereAnyNotSavedChanged())
+	{
+		OpenUnSavedDialog();
+		m_ActionSystem.Add([this]()
+			{
+				return ShowUnSavedDialog();
+			});
 	}
 }
+
+void MainFrame::Action_Cancel()
+{
+/*
+-	cancel :
+	-	clear actions
+*/
+	CloseUnSavedDialog();
+	m_ActionSystem.Clear();
+	m_NeedToCloseApp = false;
+}
+
+void MainFrame::Action_UnSavedDialog_SaveProject()
+{
+	if (!SaveProject())
+	{
+		m_ActionSystem.Insert([this]()
+			{
+				return Display_SaveProjectDialog();
+			});
+		m_ActionSystem.Insert([this]()
+			{
+				CloseUnSavedDialog();
+				igfd::ImGuiFileDialog::Instance()->OpenModal(
+					"SaveProjectDlg", "Save Project File", "Project File{.ifs}",
+					".", 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
+				return true;
+			});
+	}
+}
+
+void MainFrame::Action_UnSavedDialog_SaveAsProject()
+{
+	m_ActionSystem.Insert([this]()
+		{
+			return Display_SaveProjectDialog();
+		});
+	m_ActionSystem.Insert([this]()
+		{
+			CloseUnSavedDialog();
+			igfd::ImGuiFileDialog::Instance()->OpenModal(
+				"SaveProjectDlg", "Save Project File", "Project File{.ifs}",
+				".", 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
+			return true;
+		});
+}
+
+void MainFrame::Action_UnSavedDialog_Cancel()
+{
+	Action_Cancel();
+}
+
+///////////////////////////////////////////////////////
+//// DIALOG FUNCS /////////////////////////////////////
+///////////////////////////////////////////////////////
+
+bool MainFrame::Display_OpenProjectDialog()
+{
+	// need to return false to continue to be displayed next frame
+
+	ImVec2 min = MainFrame::Instance()->m_DisplaySize * 0.5f;
+	ImVec2 max = MainFrame::Instance()->m_DisplaySize;
+	
+	if (igfd::ImGuiFileDialog::Instance()->FileDialog("OpenProjectDlg",
+		ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking, min, max))
+	{
+		if (igfd::ImGuiFileDialog::Instance()->IsOk)
+		{
+			CloseUnSavedDialog();
+			LoadProject(igfd::ImGuiFileDialog::Instance()->GetFilePathName());
+		}
+		else // cancel
+		{
+			Action_Cancel(); // we interrupts all actions
+		}
+
+		igfd::ImGuiFileDialog::Instance()->CloseDialog();
+
+		return true;
+	}
+
+	return false;
+}
+
+bool MainFrame::Display_SaveProjectDialog()
+{
+	// need to return false to continue to be displayed next frame
+
+	ImVec2 min = MainFrame::Instance()->m_DisplaySize * 0.5f;
+	ImVec2 max = MainFrame::Instance()->m_DisplaySize;
+	
+	if (igfd::ImGuiFileDialog::Instance()->FileDialog("SaveProjectDlg",
+		ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking, min, max))
+	{
+		if (igfd::ImGuiFileDialog::Instance()->IsOk)
+		{
+			CloseUnSavedDialog();
+			auto file = igfd::ImGuiFileDialog::Instance()->GetFilePathName();
+			SaveAsProject(igfd::ImGuiFileDialog::Instance()->GetFilePathName());
+		}
+		else // cancel
+		{
+			Action_Cancel(); // we interrupts all actions
+		}
+
+		igfd::ImGuiFileDialog::Instance()->CloseDialog();
+
+		return true;
+	}
+
+	return false;
+}
+
+///////////////////////////////////////////////////////
+//// RE ROUTE /////////////////////////////////////////
+///////////////////////////////////////////////////////
 
 void MainFrame::ReRouteFontToFile(const std::string& vFontNameToReRoute, const std::string& vGoodFilePathName)
 {
@@ -606,24 +798,12 @@ void MainFrame::ReRouteFontToFile(const std::string& vFontNameToReRoute, const s
 }
 
 ///////////////////////////////////////////////////////
-//// CONFIGURATION ////////////////////////////////////
+//// APP CLSING ///////////////////////////////////////
 ///////////////////////////////////////////////////////
 
 void MainFrame::IWantToCloseTheApp()
 {
-	// some changes to save before closing
-	if (m_ProjectFile.IsLoaded() && m_ProjectFile.IsThereAnyNotSavedChanged())
-	{
-		// force close dialog
-		igfd::ImGuiFileDialog::Instance()->CloseDialog();
-
-		m_SaveDialogIfRequired = true;
-		m_NeedToCloseApp = true;
-	}
-	else
-	{
-		glfwSetWindowShouldClose(m_Window, GL_TRUE); // close app
-	}
+	Action_Window_CloseApp();
 }
 
 ///////////////////////////////////////////////////////

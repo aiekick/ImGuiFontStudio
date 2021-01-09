@@ -97,7 +97,7 @@ void GeneratorPane::DrawDialogsAndPopups(ProjectFile* vProjectFile)
 				Generator::Instance()->Generate( vProjectFile);
 			}
 
-			igfd::ImGuiFileDialog::Instance()->CloseDialog("GenerateFileDlg");
+			igfd::ImGuiFileDialog::Instance()->CloseDialog();
 		}
 	}
 }
