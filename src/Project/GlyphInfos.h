@@ -19,7 +19,7 @@
 #include <tinyxml2/tinyxml2.h>
 #include <imgui/imgui.h>
 #include <string>
-
+#include <memory>
 #include <ctools/cTools.h>
 #include <sfntly/table/truetype/glyph_table.h>
 
@@ -66,13 +66,15 @@ public:
 class FontInfos;
 class GlyphInfos
 {
+private:
+	std::weak_ptr<FontInfos> fontInfos;
+
 public:
 	ImFontGlyph glyph{};
 	int glyphIndex = 0;
 	std::string oldHeaderName;
 	std::string newHeaderName;
 	uint32_t newCodePoint = 0;
-	std::shared_ptr<FontInfos> fontAtlas = 0;
 	SimpleGlyph_Solo simpleGlyph;
 	ct::ivec4 m_FontBoundingBox;
 	int m_FontAscent = 0;
@@ -90,4 +92,7 @@ public:
 		ImFontGlyph vGlyph, std::string vOldName, 
 		std::string vNewName, uint32_t vNewCodePoint = 0);
 	~GlyphInfos();
+
+	std::shared_ptr<FontInfos> GetFontInfos();
+	void SetFontInfos(std::shared_ptr<FontInfos> vFontInfos);
 };

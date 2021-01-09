@@ -201,3 +201,20 @@ GlyphInfos::GlyphInfos(
 }
 
 GlyphInfos::~GlyphInfos() = default;
+
+std::shared_ptr<FontInfos> GlyphInfos::GetFontInfos()
+{
+	if (!fontInfos.expired())
+	{
+		return fontInfos.lock();
+	}
+
+	return 0;
+}
+
+void GlyphInfos::SetFontInfos(std::shared_ptr<FontInfos> vFontInfos)
+{
+	fontInfos = vFontInfos;
+	if (!vFontInfos)
+		fontInfos.reset();
+}

@@ -656,19 +656,15 @@ void FinalFontPane::PrepareSelectionByFontOrderedByCodePoint(ProjectFile *vProje
 {
 	if (vProjectFile)
 	{
-		for (auto & itFont : vProjectFile->m_Fonts)
+		for (auto& itFont : vProjectFile->m_Fonts)
 		{
 			itFont.second->m_GlyphsOrderedByCodePoints.clear();
 
-			auto glyphs = itFont.second;
-			for (auto &itGlyph : glyphs->m_SelectedGlyphs)
+			for (auto& itGlyph : itFont.second->m_SelectedGlyphs)
 			{
-				uint32_t codePoint = itGlyph.second.newCodePoint;
 				auto glyphInfo = &itGlyph.second;
-
-				glyphInfo->fontAtlas = itFont.second;
-
-				itFont.second->m_GlyphsOrderedByCodePoints[codePoint].push_back(glyphInfo);
+				glyphInfo->SetFontInfos(itFont.second);
+				itFont.second->m_GlyphsOrderedByCodePoints[itGlyph.second.newCodePoint].push_back(glyphInfo);
 			}
 		}
 	}
@@ -825,17 +821,14 @@ void FinalFontPane::PrepareSelectionByFontOrderedByGlyphNames(ProjectFile *vProj
 {
 	if (vProjectFile)
 	{
-		for (auto & itFont : vProjectFile->m_Fonts)
+		for (auto& itFont : vProjectFile->m_Fonts)
 		{
 			itFont.second->m_GlyphsOrderedByGlyphName.clear();
 
-			auto glyphs = itFont.second;
-			for (auto &itGlyph : glyphs->m_SelectedGlyphs)
+			for (auto& itGlyph : itFont.second->m_SelectedGlyphs)
 			{
 				auto glyphInfo = &itGlyph.second;
-
-				glyphInfo->fontAtlas = itFont.second;
-
+				glyphInfo->SetFontInfos(itFont.second);
 				itFont.second->m_GlyphsOrderedByGlyphName[glyphInfo->newHeaderName].push_back(glyphInfo);
 			}
 		}
@@ -994,15 +987,12 @@ void FinalFontPane::PrepareSelectionMergedNoOrder(ProjectFile *vProjectFile)
 
 	if (vProjectFile)
 	{
-		for (auto & itFont : vProjectFile->m_Fonts)
+		for (auto& itFont : vProjectFile->m_Fonts)
 		{
-			auto glyphs = itFont.second;
-			for (auto &itGlyph : glyphs->m_SelectedGlyphs)
+			for (auto& itGlyph : itFont.second->m_SelectedGlyphs)
 			{
 				auto glyphInfo = &itGlyph.second;
-
-				glyphInfo->fontAtlas = itFont.second;
-
+				glyphInfo->SetFontInfos(itFont.second);
 				m_GlyphsMergedNoOrder.push_back(glyphInfo);
 			}
 		}
@@ -1030,8 +1020,7 @@ void FinalFontPane::DrawSelectionMergedNoOrder(ProjectFile *vProjectFile)
 
 			for (auto& glyphInfo : m_GlyphsMergedNoOrder)
 			{
-				std::shared_ptr<FontInfos> vFontInfos = glyphInfo->fontAtlas;
-
+				auto vFontInfos = glyphInfo->GetFontInfos();
 				if (vFontInfos && glyphCountX)
 				{
 					if (vFontInfos->m_ImFontAtlas.IsBuilt())
@@ -1110,17 +1099,14 @@ void FinalFontPane::PrepareSelectionMergedOrderedByCodePoint(ProjectFile *vProje
 
 	if (vProjectFile)
 	{
-		for (auto & itFont : vProjectFile->m_Fonts)
+		for (auto& itFont : vProjectFile->m_Fonts)
 		{
-			auto glyphs = itFont.second;
-			for (auto &itGlyph : glyphs->m_SelectedGlyphs)
+			for (auto& itGlyph : itFont.second->m_SelectedGlyphs)
 			{
 				uint32_t codePoint = itGlyph.second.newCodePoint;
 				auto glyphInfo = &itGlyph.second;
-
-				glyphInfo->fontAtlas = itFont.second;
-
-				m_GlyphsMergedOrderedByCodePoints[codePoint].push_back(glyphInfo);
+				glyphInfo->SetFontInfos(itFont.second);
+				m_GlyphsMergedOrderedByCodePoints[itGlyph.second.newCodePoint].push_back(glyphInfo);
 			}
 		}
 	}
@@ -1155,8 +1141,7 @@ void FinalFontPane::DrawSelectionMergedOrderedByCodePoint(ProjectFile *vProjectF
 				// un rerange sera necesaire
 				for (auto& glyphInfo : glyphVector)
 				{
-					std::shared_ptr<FontInfos> vFontInfos = glyphInfo->fontAtlas;
-
+					auto vFontInfos = glyphInfo->GetFontInfos();
 					if (vFontInfos && glyphCountX)
 					{
 						if (vFontInfos->m_ImFontAtlas.IsBuilt())
@@ -1236,12 +1221,12 @@ void FinalFontPane::PrepareSelectionMergedOrderedByGlyphNames(ProjectFile *vProj
 
 	if (vProjectFile)
 	{
-		for (auto itFont : vProjectFile->m_Fonts)
+		for (auto& itFont : vProjectFile->m_Fonts)
 		{
-			for (auto itGlyph : itFont.second->m_SelectedGlyphs)
+			for (auto& itGlyph : itFont.second->m_SelectedGlyphs)
 			{
 				auto glyphInfo = &itGlyph.second;
-				glyphInfo->fontAtlas = itFont.second;
+				glyphInfo->SetFontInfos(itFont.second);
 
 				m_GlyphsMergedOrderedByGlyphName[glyphInfo->newHeaderName].push_back(glyphInfo);
 			}
@@ -1277,8 +1262,7 @@ void FinalFontPane::DrawSelectionMergedOrderedByGlyphNames(ProjectFile *vProject
 				// un rerange sera necesaire
 				for (auto& glyphInfo : glyphVector)
 				{
-					std::shared_ptr<FontInfos> vFontInfos = glyphInfo->fontAtlas;
-
+					auto vFontInfos = glyphInfo->GetFontInfos();
 					if (vFontInfos && glyphCountX)
 					{
 						if (vFontInfos->m_ImFontAtlas.IsBuilt())
