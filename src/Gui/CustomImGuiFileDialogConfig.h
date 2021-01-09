@@ -36,9 +36,9 @@
 #define resetButtonString ICON_IGFS_RESET
 #define drivesButtonString ICON_IGFS_DRIVES
 #define searchString ICON_IGFS_SEARCH
-#define dirEntryString ICON_IGFS_FOLDER
-#define linkEntryString ICON_IGFS_LINK
-#define fileEntryString ICON_IGFS_FILE
+#define dirEntryString " " ICON_IGFS_FOLDER
+#define linkEntryString " " ICON_IGFS_LINK
+#define fileEntryString " " ICON_IGFS_FILE
 //#define fileNameString "File Name : "
 //#define buttonResetSearchString "Reset search"
 //#define buttonDriveString "Drives"

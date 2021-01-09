@@ -276,7 +276,7 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 
 void MainFrame::DisplayDialogsAndPopups()
 {
-	m_ActionSystem.Apply();
+	m_ActionSystem.RunActions();
 
 	if (m_ProjectFile.IsLoaded())
 	{

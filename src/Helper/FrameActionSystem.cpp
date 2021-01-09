@@ -18,7 +18,7 @@ void FrameActionSystem::Clear()
 	m_Actions.clear();
 }
 
-void FrameActionSystem::Apply()
+void FrameActionSystem::RunActions()
 {
 	if (!m_Actions.empty())
 	{

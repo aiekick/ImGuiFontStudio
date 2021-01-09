@@ -30,5 +30,5 @@ public:
 	// if return true, erase action
 	// let the next frame call the next action
 	// il false, action executed until true
-	void Apply();
+	void RunActions();
 };
