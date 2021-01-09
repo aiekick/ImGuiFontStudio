@@ -9,6 +9,7 @@
 #include <ctools/FileHelper.h>
 #include <MainFrame.h>
 #include <Res/CustomFont.cpp>
+#include <Res/Roboto_Medium.cpp>
 
 #include <glad/glad.h> 
 #include <GLFW/glfw3.h>
@@ -34,7 +35,9 @@ static void glfw_window_close_callback(GLFWwindow* window)
 int main(int, char**argv)
 {
 	FileHelper::Instance()->SetAppPath(std::string(argv[0]));
-#ifndef _DEBUG
+#ifdef _DEBUG
+    FileHelper::Instance()->SetCurDirectory(PROJECT_PATH);
+#else
 	FileHelper::Instance()->SetCurDirectory(FileHelper::Instance()->GetAppPath());
 #endif
 
@@ -101,8 +104,9 @@ int main(int, char**argv)
     ImGui_ImplOpenGL3_Init(glsl_version);
 
 	// load memory font file
-	ImGui::GetIO().Fonts->AddFontDefault();
-	static const ImWchar icons_ranges[] = { ICON_MIN_IGFS, ICON_MAX_IGFS, 0 };
+	//ImGui::GetIO().Fonts->AddFontDefault();
+    ImGui::GetIO().Fonts->AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_RM, 15.0f);
+    static const ImWchar icons_ranges[] = { ICON_MIN_IGFS, ICON_MAX_IGFS, 0 };
 	ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
 	ImGui::GetIO().Fonts->AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_IGFS, 15.0f, &icons_config, icons_ranges);
 
