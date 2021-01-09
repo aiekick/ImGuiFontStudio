@@ -288,11 +288,11 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 	{
 		if (strName == "font")
 		{
-			auto f = std::make_shared<FontInfos>();
-			f->setFromXml(vElem, vParent);
-			if (!f->m_FontFileName.empty())
+			FontInfos f;
+			f.setFromXml(vElem, vParent);
+			if (!f.m_FontFileName.empty())
 			{
-				m_Fonts[f->m_FontFileName] = f;
+				m_Fonts[f.m_FontFileName] = std::make_shared<FontInfos>(f);
 			}
 		}
 		else if (strName == "rangecoloring")

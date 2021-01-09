@@ -23,6 +23,7 @@
 #include <utility> // std::pair
 #include <list>
 #include <vector>
+#include <memory>
 
 class MessageData
 {

@@ -1103,7 +1103,6 @@ void FinalFontPane::PrepareSelectionMergedOrderedByCodePoint(ProjectFile *vProje
 		{
 			for (auto& itGlyph : itFont.second->m_SelectedGlyphs)
 			{
-				uint32_t codePoint = itGlyph.second.newCodePoint;
 				auto glyphInfo = &itGlyph.second;
 				glyphInfo->SetFontInfos(itFont.second);
 				m_GlyphsMergedOrderedByCodePoints[itGlyph.second.newCodePoint].push_back(glyphInfo);
