@@ -58,7 +58,7 @@
 #define tableHeaderFileDateString " Date"
 
 #define USE_BOOKMARK
-#define bookmarkPaneWith 200.0f
+#define defaultBookmarkPaneWith 200.0f
 //#define IMGUI_TOGGLE_BUTTON ToggleButton
 #define bookmarksButtonString ICON_IGFS_BOOKMARK
 //#define bookmarksButtonHelpString "Bookmark"

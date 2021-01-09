@@ -163,7 +163,7 @@ private: // actions
 	void Action_UnSavedDialog_SaveAsProject();
 	void Action_UnSavedDialog_Cancel();
 	// others
-	void Action_OpenUnSavedDialogçIfNeeded();
+	void Action_OpenUnSavedDialog_IfNeeded();
 	void Action_Cancel();
 	// dialog funcs to be in actions
 	bool Display_OpenProjectDialog();

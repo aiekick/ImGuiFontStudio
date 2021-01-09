@@ -513,7 +513,7 @@ new project :
 	-	add action : new project
 */
 	m_ActionSystem.Clear();
-	Action_OpenUnSavedDialogçIfNeeded();
+	Action_OpenUnSavedDialog_IfNeeded();
 	m_ActionSystem.Add([this]()
 		{
 			m_ProjectFile.New();
@@ -532,7 +532,7 @@ open project :
 	-	add action : open project
 */
 	m_ActionSystem.Clear();
-	Action_OpenUnSavedDialogçIfNeeded();
+	Action_OpenUnSavedDialog_IfNeeded();
 	m_ActionSystem.Add([this]()
 		{
 			CloseUnSavedDialog();
@@ -557,7 +557,7 @@ re open project :
 	-	add action : re open project
 */
 	m_ActionSystem.Clear();
-	Action_OpenUnSavedDialogçIfNeeded();
+	Action_OpenUnSavedDialog_IfNeeded();
 	m_ActionSystem.Add([this]()
 		{
 			LoadProject(m_ProjectFile.m_ProjectFilePathName);
@@ -623,7 +623,7 @@ Close project :
 	-	add action : Close project
 */
 	m_ActionSystem.Clear();
-	Action_OpenUnSavedDialogçIfNeeded();
+	Action_OpenUnSavedDialog_IfNeeded();
 	m_ActionSystem.Add([this]()
 		{
 			m_ProjectFile.Clear();
@@ -645,7 +645,7 @@ Close app :
 	m_NeedToCloseApp = true;
 
 	m_ActionSystem.Clear();
-	Action_OpenUnSavedDialogçIfNeeded();
+	Action_OpenUnSavedDialog_IfNeeded();
 	m_ActionSystem.Add([this]()
 		{
 			glfwSetWindowShouldClose(m_Window, GL_TRUE); // close app
@@ -653,7 +653,7 @@ Close app :
 		});
 }
 
-void MainFrame::Action_OpenUnSavedDialogçIfNeeded()
+void MainFrame::Action_OpenUnSavedDialog_IfNeeded()
 {
 	if (m_ProjectFile.IsLoaded() &&
 		m_ProjectFile.IsThereAnyNotSavedChanged())
