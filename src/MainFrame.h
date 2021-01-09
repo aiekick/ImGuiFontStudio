@@ -137,17 +137,18 @@ public:
 public: // save : on quit or project loading
 	void IWantToCloseTheApp(); // user want close app, but we want to ensure its saved
 
+
+private: // imgui pane / dialogs
+	void DrawDockPane(ImVec2 vPos, ImVec2 vSize);
+	void DisplayDialogsAndPopups();
+	void ShowAboutDialog(bool *vOpen);
+
 private: // save : on quit or project loading
 	void OpenUnSavedDialog(); // show a dialog because the project file is not saved
 	void CloseUnSavedDialog(); // show a dialog because the project file is not saved
 	bool ShowUnSavedDialog(); // show a dilaog because the project file is not saved
 	void ReRouteFontToFile(const std::string& vFontNameToReRoute, const std::string& vGoodFilePathName);
 
-private: // imgui pane / dialogs
-	void DrawDockPane(ImVec2 vPos, ImVec2 vSize);
-	void DisplayDialogsAndPopups();
-	void ShowAboutDialog(bool *vOpen);
-	
 private: // actions
 	// via menu
 	void Action_Menu_NewProject();

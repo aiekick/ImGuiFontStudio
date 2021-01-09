@@ -131,7 +131,7 @@ void GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile)
 
 static int limitContour = 0;
 
-bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, GlyphInfos *vGlyphInfos)
+bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, GlyphInfos *vGlyphInfos)
 {
 	bool res = false;
 
@@ -191,7 +191,7 @@ bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, Glyp
 
 // https://github.com/rillig/sfntly/tree/master/java/src/com/google/typography/font/tools/fontviewer
 bool GlyphPane::DrawSimpleGlyph(
-        GlyphInfos *vGlyph, FontInfos* vFontInfos,
+        GlyphInfos *vGlyph, std::shared_ptr<FontInfos> vFontInfos,
         float vScale, int vCountSegments, bool vControlLines)
 {
 	if (vGlyph && vFontInfos)

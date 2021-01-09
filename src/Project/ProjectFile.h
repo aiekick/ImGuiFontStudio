@@ -18,6 +18,7 @@
 #include <ctools/ConfigAbstract.h>
 #include <imgui/imgui.h>
 #include <string>
+#include <memory>
 
 #include <Project/FontInfos.h>
 #include <Generator/Generator.h>
@@ -33,7 +34,7 @@ enum GlyphDisplayTuningModeFlags
 class ProjectFile : public conf::ConfigAbstract
 {
 public: // to save
-	std::map<std::string, FontInfos> m_Fonts;
+	std::map<std::string, std::shared_ptr<FontInfos>> m_Fonts;
 	bool m_ShowRangeColoring = false;
 	ImVec4 m_RangeColoringHash = ImVec4(10, 15, 35, 0.5f);
 	int m_Preview_Glyph_CountX = 20;
@@ -62,7 +63,7 @@ public: // to save
 	uint32_t m_CardCountRowsMax = 20U; // after this max, new columns
 
 public: // dont save
-	FontInfos *m_SelectedFont = nullptr;
+	std::shared_ptr<FontInfos> m_SelectedFont = nullptr;
 	size_t m_CountSelectedGlyphs = 0; // for all fonts
 	size_t m_CountFontWithSelectedGlyphs = 0; // for all fonts
     bool m_NameFoundInDouble = false;

@@ -50,15 +50,15 @@ public:
 
 	void OpenFonts(ProjectFile* vProjectFile, const std::map<std::string, std::string>& vFontFilePathNames);
 	void OpenFont(ProjectFile* vProjectFile, const std::string& vFontFilePathName, bool vUpdateCount);
-	void SelectFont(ProjectFile* vProjectFile, FontInfos* vFontInfos);
+	void SelectFont(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos);
 
 	bool IsFlagSet(ProjectFile* vProjectFile, SourceFontPaneFlags vFlag);
 
 private: 
-	void DrawFilterBar(ProjectFile* vProjectFile, FontInfos* vFontInfos);
-	bool IfCatchedByFilters(FontInfos* vFontInfos, const std::string& vSymbolName);
-	void DrawFontTexture(FontInfos* vFontInfos);
-	void DrawFontAtlas_Virtual(ProjectFile* vProjectFile, FontInfos* vFontInfos);
+	void DrawFilterBar(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos);
+	bool IfCatchedByFilters(std::shared_ptr<FontInfos> vFontInfos, const std::string& vSymbolName);
+	void DrawFontTexture(std::shared_ptr<FontInfos> vFontInfos);
+	void DrawFontAtlas_Virtual(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos);
 
 	// panes
 	void DrawSourceFontPane(ProjectFile *vProjectFile);

@@ -78,7 +78,7 @@ private:
 	void DrawSelectedFontPane(ProjectFile* vProjectFile);
 
 	bool DrawGlyph(ProjectFile *vProjectFile, 
-		FontInfos *vFontInfos, const ImVec2& vSize,
+		std::shared_ptr<FontInfos> vFontInfos, const ImVec2& vSize,
 		GlyphInfos *vGlyph, bool vShowRect,
 		bool *vNameupdated, bool *vCodePointUpdated,
 		bool vForceEditMode = false) const;
@@ -86,7 +86,7 @@ private:
 	void DrawSelectionsByFontNoOrder(ProjectFile *vProjectFile,
 		bool vShowTooltipInfos = false);
 	void DrawSelectionsByFontNoOrder_OneFontOnly(
-		ProjectFile *vProjectFile, FontInfos *vFontInfos,
+		ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
 		bool vWithFramedGroup = true, 
 		bool vForceEditMode = false, 
 		bool vForceEditModeOneColumn = false,
@@ -96,7 +96,7 @@ private:
 	void DrawSelectionsByFontOrderedByCodePoint(ProjectFile *vProjectFile,
 		bool vShowTooltipInfos = false);
 	void DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
-		ProjectFile *vProjectFile, FontInfos *vFontInfos,
+		ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
 		bool vWithFramedGroup = true, 
 		bool vForceEditMode = false, 
 		bool vForceEditModeOneColumn = false,
@@ -106,7 +106,7 @@ private:
 	void DrawSelectionsByFontOrderedByGlyphNames(ProjectFile *vProjectFile,
 		bool vShowTooltipInfos = false);
 	void DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(
-		ProjectFile *vProjectFile, FontInfos *vFontInfos,
+		ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
 		bool vWithFramedGroup = true, 
 		bool vForceEditMode = false, 
 		bool vForceEditModeOneColumn = false,

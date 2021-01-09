@@ -198,7 +198,7 @@ two modes :
 void HeaderGenerator::GenerateHeader_One(
 	const std::string& vFilePathName, 
 	ProjectFile* vProjectFile,
-	FontInfos *vFontInfos,
+	std::shared_ptr<FontInfos> vFontInfos,
 	std::string vFontBufferName, // for header generation wehn using a cpp bytes array instead of a file
 	size_t vFontBufferSize) // for header generation wehn using a cpp bytes array instead of a file
 {
@@ -252,14 +252,14 @@ void HeaderGenerator::GenerateHeader_One(
 			}
 			else
 			{
-				Messaging::Instance()->AddError(true, 0, 0, "Language not set for : %s", vFilePathName.c_str());
+				Messaging::Instance()->AddError(true, nullptr, nullptr, "Language not set for : %s", vFilePathName.c_str());
 			}
 
 			FileHelper::Instance()->OpenFile(filePathName);
 		}
 		else
 		{
-			Messaging::Instance()->AddError(true, 0, 0, "Invalid path : %s", vFilePathName.c_str());
+			Messaging::Instance()->AddError(true, nullptr, nullptr, "Invalid path : %s", vFilePathName.c_str());
 		}
 	}
 }
@@ -285,7 +285,7 @@ void HeaderGenerator::GenerateHeader_Merged(
 			// we take only selected glyphs of all fonts
 			std::map<std::string, uint32_t> glyphNames;
 			for (const auto& font : vProjectFile->m_Fonts)
-				for (const auto& glyph : font.second.m_SelectedGlyphs)
+				for (const auto& glyph : font.second->m_SelectedGlyphs)
 					glyphNames[glyph.second.newHeaderName] = glyph.second.newCodePoint;
 			m_FinalGlyphNames.clear();
 			m_FinalCodePointRange = ct::uvec2(65535, 0);
@@ -309,9 +309,9 @@ void HeaderGenerator::GenerateHeader_Merged(
 			}
 			if (!lang.empty())
 			{
-				std::string name = ps.name;
-				ct::replaceString(name, "-", "_");
-				filePathName = ps.GetFPNE_WithNameExt(name, headerExt);
+				std::string _name = ps.name;
+				ct::replaceString(_name, "-", "_");
+				filePathName = ps.GetFPNE_WithNameExt(_name, headerExt);
 
 				/////////////////////
 				// header generation
@@ -324,14 +324,14 @@ void HeaderGenerator::GenerateHeader_Merged(
 			}
 			else
 			{
-				Messaging::Instance()->AddError(true, 0, 0, "Language not set for : %s", vFilePathName.c_str());
+				Messaging::Instance()->AddError(true, nullptr, nullptr, "Language not set for : %s", vFilePathName.c_str());
 			}
 
 			FileHelper::Instance()->OpenFile(filePathName);
 		}
 		else
 		{
-			Messaging::Instance()->AddError(true, 0, 0, "Invalid path : %s", vFilePathName.c_str());
+			Messaging::Instance()->AddError(true, nullptr, nullptr, "Invalid path : %s", vFilePathName.c_str());
 		}
 	}
 }

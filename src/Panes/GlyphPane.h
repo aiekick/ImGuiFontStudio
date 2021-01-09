@@ -43,10 +43,10 @@ public:
 	void DrawDialogsAndPopups(ProjectFile* vProjectFile) override;
 
 	void DrawGlyphPane(ProjectFile *vProjectFile);
-	bool LoadGlyph(ProjectFile *vProjectFile, FontInfos* vFontInfos, GlyphInfos *vGlyphInfos);
+	bool LoadGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, GlyphInfos *vGlyphInfos);
 
 private:
-	static bool DrawSimpleGlyph(GlyphInfos *vGlyph, FontInfos* vFontInfos,
+	static bool DrawSimpleGlyph(GlyphInfos *vGlyph, std::shared_ptr<FontInfos> vFontInfos,
 		float vScale, int vCountSegments, bool vControlLines);
 
 public: // singleton

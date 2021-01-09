@@ -19,6 +19,7 @@
 
 #include <string>
 #include <set>
+#include <memory>
 
 enum GlyphSelectionTypeFlags
 {
@@ -58,7 +59,7 @@ struct ReRangeStruct
 
 class FontInfos;
 struct ImGuiWindow;
-typedef std::pair<uint32_t, FontInfos*> FontInfosCodePoint;
+typedef std::pair<uint32_t, std::shared_ptr<FontInfos>> FontInfosCodePoint;
 struct TemporarySelectionStruct
 {
 	// for avoid selection apply if seletion ended outside of start window
@@ -67,30 +68,30 @@ struct TemporarySelectionStruct
 	std::set<FontInfosCodePoint> tmpSel;
 	std::set<FontInfosCodePoint> tmpUnSel;
 
-	bool isSelected(uint32_t c, FontInfos* f)
+	bool isSelected(uint32_t c, std::shared_ptr<FontInfos> f)
 	{
 		auto p = FontInfosCodePoint(c, f);
 		return (tmpSel.find(p) != tmpSel.end()); // found
 	}
 	
-	bool isUnSelected(uint32_t c, FontInfos* f)
+	bool isUnSelected(uint32_t c, std::shared_ptr<FontInfos> f)
 	{
 		auto p = FontInfosCodePoint(c, f);
 		return (tmpUnSel.find(p) != tmpUnSel.end()); // found
 	}
-	void Select(uint32_t c, FontInfos* f)
+	void Select(uint32_t c, std::shared_ptr<FontInfos> f)
 	{
 		auto p = FontInfosCodePoint(c, f);
 		tmpSel.emplace(p);
 		tmpUnSel.erase(p);
 	}
-	void UnSelect(uint32_t c, FontInfos* f)
+	void UnSelect(uint32_t c, std::shared_ptr<FontInfos> f)
 	{
 		auto p = FontInfosCodePoint(c, f);
 		tmpSel.erase(p);
 		tmpUnSel.emplace(p);
 	}
-	void Clear(uint32_t c, FontInfos* f)
+	void Clear(uint32_t c, std::shared_ptr<FontInfos> f)
 	{
 		auto p = FontInfosCodePoint(c, f);
 		tmpSel.erase(p);
@@ -128,7 +129,7 @@ private: // structs / classes
 private:
 	TemporarySelectionStruct* getSelStruct(SelectionContainerEnum vSelectionContainerEnum);
 	bool IsGlyphSelected(
-		FontInfos *vFontInfos,
+		std::shared_ptr<FontInfos> vFontInfos,
 		SelectionContainerEnum vSelectionContainerEnum,
 		uint32_t vCodePoint);
 	void StartSelection(SelectionContainerEnum vSelectionContainerEnum);
@@ -149,14 +150,14 @@ public:
 		SelectionContainerEnum vSelectionContainerEnum);
 	void SelectWithToolOrApplyOnGlyph(
 		ProjectFile *vProjectFile, 
-		FontInfos *vFontInfos, 
+		std::shared_ptr<FontInfos> vFontInfos, 
 		ImFontGlyph vGlyph,
         uint32_t vGlyphIdx,
 		bool vGlypSelected,
 		bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 	bool IsGlyphIntersectedAndSelected(
-		FontInfos *vFontInfos,
+		std::shared_ptr<FontInfos> vFontInfos,
 		ImVec2 vCellSize, 
 		uint32_t vCodePoint,
 		bool *vSelected,
@@ -166,22 +167,22 @@ public:
 	void AnalyseSourceSelection(ProjectFile *vProjectFile);
 
 private:
-	void SelectAllGlyphs(ProjectFile *vProjectFile, FontInfos *vFontInfos,
+	void SelectAllGlyphs(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
 		SelectionContainerEnum vSelectionContainerEnum);
-	void SelectGlyph(ProjectFile *vProjectFile, FontInfos *vFontInfos, ImFontGlyph vGlyph, bool vUpdateMaps,
+	void SelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, ImFontGlyph vGlyph, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 	void SelectGlyph(ProjectFile *vProjectFile, FontInfosCodePoint vFontInfosCodePoint, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
-	void SelectGlyph(ProjectFile *vProjectFile, FontInfos *vFontInfos, uint32_t vCodePoint, bool vUpdateMaps,
+	void SelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, uint32_t vCodePoint, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 	
-	void UnSelectAllGlyphs(ProjectFile *vProjectFile, FontInfos *vFontInfos,
+	void UnSelectAllGlyphs(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
 		SelectionContainerEnum vSelectionContainerEnum);
-	void UnSelectGlyph(ProjectFile *vProjectFile, FontInfos *vFontInfos, ImFontGlyph vGlyph, bool vUpdateMaps,
+	void UnSelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, ImFontGlyph vGlyph, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 	void UnSelectGlyph(ProjectFile *vProjectFile, FontInfosCodePoint vFontInfosCodePoint, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
-	void UnSelectGlyph(ProjectFile *vProjectFile, FontInfos *vFontInfos, uint32_t vCodePoint, bool vUpdateMaps,
+	void UnSelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, uint32_t vCodePoint, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 
 private:
@@ -198,7 +199,7 @@ private: // ReRange
 
 private: // selections mode common
 	void GlyphSelectionIfIntersected(
-		FontInfos *vFontInfos,
+		std::shared_ptr<FontInfos> vFontInfos,
 		ImVec2 vCaseSize, uint32_t vCodePoint,
 		bool *vSelected,
 		SelectionContainerEnum vSelectionContainerEnum);
@@ -209,7 +210,7 @@ private: // selection by line
 	void SelectByLine(ProjectFile *vProjectFile, 
 		SelectionContainerEnum vSelectionContainerEnum);
 	bool DrawGlyphSelectionByLine(
-		FontInfos *vFontInfos,
+		std::shared_ptr<FontInfos> vFontInfos,
 		ImVec2 vCaseSize, uint32_t vCodePoint,
 		bool *vSelected,
 		SelectionContainerEnum vSelectionContainerEnum);
@@ -218,7 +219,7 @@ private: // selection by zone
 	void SelectByZone(ProjectFile *vProjectFile, 
 		SelectionContainerEnum vSelectionContainerEnum);
 	bool DrawGlyphSelectionByZone(
-		FontInfos *vFontInfos,
+		std::shared_ptr<FontInfos> vFontInfos,
 		ImVec2 vCaseSize, uint32_t vCodePoint,
 		bool *vSelected,
 		SelectionContainerEnum vSelectionContainerEnum);
@@ -226,21 +227,21 @@ private: // selection by zone
 private: // selection by range
 	void SelectGlyphByRangeFromStartCodePoint(
 		ProjectFile *vProjectFile,
-		FontInfos *vFontInfos, 
+		std::shared_ptr<FontInfos> vFontInfos, 
 		ImFontGlyph vGlyph,
         uint32_t vFontGlyphIndex,
 		bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 	void UnSelectGlyphByRangeFromStartCodePoint(
 		ProjectFile *vProjectFile,
-		FontInfos *vFontInfos, 
+		std::shared_ptr<FontInfos> vFontInfos, 
 		ImFontGlyph vGlyph,
         uint32_t vFontGlyphIndex,
 		bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 	void UnSelectGlyphByRangeFromStartCodePoint(
 		ProjectFile *vProjectFile,
-		FontInfos *vFontInfos, 
+		std::shared_ptr<FontInfos> vFontInfos, 
 		ImFontGlyph vGlyph, 
 		bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);

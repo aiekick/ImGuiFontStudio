@@ -29,6 +29,8 @@ namespace ImGui
 	IMGUI_API bool BeginFramedGroup(const char *vLabel, bool vSpacing = false, ImVec4 vCol = ImVec4(0.0f, 0.0f, 0.0f, 0.5f), ImVec4 vHoveredCol = ImVec4(0.15f, 0.15f, 0.15f, 0.5f));
 	IMGUI_API void EndFramedGroup(bool vSpacing = false);
 	IMGUI_API void FramedGroupSeparator();
+	IMGUI_API void FramedGroupText(const char* vFmt, ...);
+	IMGUI_API void FramedGroupText(ImVec4 vTextColor, const char* vFmt, ...);
 	IMGUI_API bool CollapsingHeader_SmallHeight(const char *vName, float vHeightRatio, float vWidth, bool vDefaulExpanded, bool *vIsOpen = 0);
 	IMGUI_API bool RadioButtonLabeled(const char* label, bool active, bool disabled);
 	IMGUI_API bool RadioButtonLabeled(const char* label, const char* help, bool active, bool disabled = false);
@@ -231,10 +233,19 @@ namespace ImGui
 
 	////////////////////////////////////////////////////////////////////////////
 
-	IMGUI_API bool SliderScalarDefaultCompact(float width,
+	IMGUI_API bool SliderScalarCompact(float width,
 		const char* label, ImGuiDataType data_type, 
 		void* p_data, const void* p_min, const void* p_max, 
 		const char* format = NULL);
+	IMGUI_API bool SliderUIntCompact(float width,
+		const char* label, uint32_t* v, uint32_t v_min,
+		uint32_t v_max, const char* format = "%d");
+	IMGUI_API bool SliderIntCompact(float width,
+		const char* label, int* v, int v_min,
+		int v_max, const char* format = "%d");
+	IMGUI_API bool SliderFloatCompact(float width,
+		const char* label, float* v, float v_min,
+		float v_max, const char* format = "%.3f");
 	IMGUI_API bool SliderUIntDefaultCompact(float width,
 		const char* label, uint32_t* v, uint32_t v_min,
 		uint32_t v_max, uint32_t v_default, const char* format = "%d");

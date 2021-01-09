@@ -182,9 +182,12 @@ void SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile)
 		{
 			if (vProjectFile && vProjectFile->IsLoaded())
 			{
+				const float maxWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 4.0f;
+				const float mrw = maxWidth / 2.0f - ImGui::GetStyle().FramePadding.x;
+				
 				if (ImGui::BeginFramedGroup("Font File"))
 				{
-					if (ImGui::Button(ICON_IGFS_FOLDER_OPEN " Open Font"))
+					if (ImGui::Button(ICON_IGFS_FOLDER_OPEN " Open Font", ImVec2(mrw, 0.0f)))
 					{
 						Action_Menu_OpenFont();
 					}
@@ -193,25 +196,25 @@ void SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile)
 					{
 						ImGui::SameLine();
 
-						if (ImGui::Button(ICON_IGFS_DESTROY " Close Font"))
+						if (ImGui::Button(ICON_IGFS_DESTROY " Close Font", ImVec2(mrw, 0.0f)))
 						{
 							Action_Menu_CloseFont();
 						}
 
-						ImGui::Text("Opened Fonts :");
+						ImGui::FramedGroupSeparator();
 
-						const float aw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 2.0f;
+						ImGui::FramedGroupText("Opened Fonts");
 
 						static int selection = 0;
 						static ImGuiTableFlags flags =
 							ImGuiTableFlags_SizingPolicyFixed |	ImGuiTableFlags_RowBg |
 							ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
 							ImGuiTableFlags_NoHostExtendY | ImGuiTableFlags_Borders;
-						if (ImGui::BeginTable("##fileTable", 2, flags, ImVec2(aw, 100)))
+						if (ImGui::BeginTable("##fileTable", 2, flags, ImVec2(maxWidth - ImGui::GetStyle().FramePadding.x, 100)))
 						{
 							ImGui::TableSetupScrollFreeze(0, 1); // Make header always visible
 							ImGui::TableSetupColumn("Font Files", ImGuiTableColumnFlags_WidthStretch, -1, 0);
-							ImGui::TableSetupColumn("Edit", ImGuiTableColumnFlags_WidthAuto, 32, 1);
+							ImGui::TableSetupColumn("Edit", ImGuiTableColumnFlags_WidthFixed, 32, 1);
 							ImGui::TableHeadersRow();
 							
 							for (auto & itFont : vProjectFile->m_Fonts)
@@ -222,15 +225,15 @@ void SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile)
 								
 								if (ImGui::TableSetColumnIndex(0)) // first column
 								{
-									if (itFont.second.m_NeedFilePathResolve)
+									if (itFont.second->m_NeedFilePathResolve)
 										ImGui::PushStyleColor(ImGuiCol_HeaderHovered, ImVec4(0.8f, 0.5f, 0.2f, 0.6f));
 
 									ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_AllowDoubleClick;
 									selectableFlags |= ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
-									sel = ImGui::Selectable(itFont.first.c_str(), vProjectFile->m_SelectedFont == &itFont.second, 
+									sel = ImGui::Selectable(itFont.first.c_str(), vProjectFile->m_SelectedFont == itFont.second, 
 										selectableFlags, ImVec2(0, ImGui::GetTextLineHeightWithSpacing()));
 
-									if (itFont.second.m_NeedFilePathResolve)
+									if (itFont.second->m_NeedFilePathResolve)
 										ImGui::PopStyleColor();
 
 									float cw = ImGui::GetContentRegionAvail().x;
@@ -244,27 +247,27 @@ void SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile)
 								if (ImGui::TableSetColumnIndex(1)) // second column
 								{
 									ImGui::PushID(++paneWidgetId);
-									if (itFont.second.m_NeedFilePathResolve)
+									if (itFont.second->m_NeedFilePathResolve)
 										ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 0.8f));
-									if (ImGui::TransparentButton((itFont.second.m_NeedFilePathResolve ? ICON_IGFS_WARNING : ICON_IGFS_EDIT), 
+									if (ImGui::TransparentButton((itFont.second->m_NeedFilePathResolve ? ICON_IGFS_WARNING : ICON_IGFS_EDIT), 
 										ImVec2(24, ImGui::GetTextLineHeightWithSpacing())))
 									{
 										std::string label;
-										if (itFont.second.m_NeedFilePathResolve)
-											label = "Search good file for Font " + itFont.first;
+										if (itFont.second->m_NeedFilePathResolve)
+											label = "Search the good font file path " + itFont.first;
 										else
-											label = "Search an alternative file for Font " + itFont.first;
+											label = "Search an alternative font file " + itFont.first;
 
 										igfd::ImGuiFileDialog::Instance()->OpenModal(
 											"SolveBadFilePathName",
 											label.c_str(), "Font File (*.ttf *.otf){.ttf,.otf}", ".",
 											itFont.first, 1, (igfd::UserDatas)itFont.first.c_str());
 									}
-									if (itFont.second.m_NeedFilePathResolve)
+									if (itFont.second->m_NeedFilePathResolve)
 										ImGui::PopStyleColor();
 									if (ImGui::IsItemHovered())
 									{
-										if (itFont.second.m_NeedFilePathResolve)
+										if (itFont.second->m_NeedFilePathResolve)
 											ImGui::SetTooltip("Font file Not Found\nClick for search the good file");
 										else
 											ImGui::SetTooltip("Click for search an alternative file\nbut keep selected glyphs");
@@ -274,9 +277,9 @@ void SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile)
 
 								if (sel)
 								{
-									if (!itFont.second.m_NeedFilePathResolve)
+									if (!itFont.second->m_NeedFilePathResolve)
 									{
-										SelectFont(vProjectFile, &itFont.second);
+										SelectFont(vProjectFile, itFont.second);
 									}
 								}
 							}
@@ -295,13 +298,13 @@ void SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile)
 					{
 						ImGui::RadioButtonLabeled_BitWize<SourceFontPaneFlags>(
 							ICON_IGFS_GLYPHS " Glyphs", "Show Font Glyphs", 
-							&vProjectFile->m_SourceFontPaneFlags, SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH, 0.0f, true);
+							&vProjectFile->m_SourceFontPaneFlags, SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH, mrw, true);
 						
 						ImGui::SameLine();
 
 						ImGui::RadioButtonLabeled_BitWize<SourceFontPaneFlags>(
 							ICON_IGFS_TEXTURE " Texture", "Show Font Texture", 
-							&vProjectFile->m_SourceFontPaneFlags, SourceFontPaneFlags::SOURCE_FONT_PANE_TEXTURE, 0.0f, true);
+							&vProjectFile->m_SourceFontPaneFlags, SourceFontPaneFlags::SOURCE_FONT_PANE_TEXTURE, mrw, true);
 						
 						ImGui::EndFramedGroup(true);
 					}
@@ -435,7 +438,7 @@ close font :
 					prj->m_Fonts.erase(prj->m_SelectedFont->m_FontFileName);
 					if (!prj->m_Fonts.empty())
 					{
-						SelectFont(prj, &prj->m_Fonts.begin()->second);
+						SelectFont(prj, prj->m_Fonts.begin()->second);
 					}
 					else
 					{
@@ -474,6 +477,9 @@ bool SourceFontPane::Display_ConfirmToCloseFont_Dialog()
 		if (ImGui::BeginPopupModal("Are you sure to close this font ?", (bool*)0,
 			ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking))
 		{
+			ImGui::SetWindowPos(MainFrame::Instance()->m_DisplaySize * 0.5f - 
+				ImGui::GetWindowSize() * 0.5f); // put the dlg in center of the frame
+
 			ImGui::Text("You will lose your glyph selection / tuning");
 
 			/*
@@ -506,11 +512,11 @@ bool SourceFontPane::Display_ConfirmToCloseFont_Dialog()
 //// PRIVATE : WIDGETS, VIEW //////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void SourceFontPane::DrawFilterBar(ProjectFile *vProjectFile, FontInfos *vFontInfos)
+void SourceFontPane::DrawFilterBar(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos)
 {
 	if (vProjectFile && vFontInfos)
 	{
-		ImGui::PushID(vFontInfos);
+		ImGui::PushID(vFontInfos.get());
 		ImGui::Text("Filters");
 		ImGui::Text("(?)");
 		if (ImGui::IsItemHovered())
@@ -539,7 +545,7 @@ void SourceFontPane::DrawFilterBar(ProjectFile *vProjectFile, FontInfos *vFontIn
 	}
 }
 
-bool SourceFontPane::IfCatchedByFilters(FontInfos *vFontInfos, const std::string& vSymbolName)
+bool SourceFontPane::IfCatchedByFilters(std::shared_ptr<FontInfos> vFontInfos, const std::string& vSymbolName)
 {
 	if (vFontInfos)
 	{
@@ -562,7 +568,7 @@ bool SourceFontPane::IfCatchedByFilters(FontInfos *vFontInfos, const std::string
 	return false;
 }
 
-void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, FontInfos *vFontInfos)
+void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos)
 {
     if (vProjectFile && vProjectFile->IsLoaded() &&
         vFontInfos && vProjectFile->m_Preview_Glyph_CountX)
@@ -684,7 +690,7 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, FontInfos 
     }
 }
 
-void SourceFontPane::DrawFontTexture(FontInfos *vFontInfos)
+void SourceFontPane::DrawFontTexture(std::shared_ptr<FontInfos> vFontInfos)
 {
 	if (vFontInfos)
 	{
@@ -739,7 +745,7 @@ void SourceFontPane::OpenFont(ProjectFile *vProjectFile, const std::string& vFon
 		if (ps.isOk)
 		{
 			std::string fontName = ps.name + "." + ps.ext;
-			FontInfos *font = &vProjectFile->m_Fonts[fontName];
+			std::shared_ptr<FontInfos> font = vProjectFile->m_Fonts[fontName];
 			if (font->LoadFont(vProjectFile, vFontFilePathName))
 			{
 				if (vProjectFile->m_FontToMergeIn.empty() ||
@@ -755,7 +761,7 @@ void SourceFontPane::OpenFont(ProjectFile *vProjectFile, const std::string& vFon
 	}
 }
 
-void SourceFontPane::SelectFont(ProjectFile *vProjectFile, FontInfos *vFontInfos)
+void SourceFontPane::SelectFont(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos)
 {
 	if (vProjectFile && vProjectFile->IsLoaded())
 	{

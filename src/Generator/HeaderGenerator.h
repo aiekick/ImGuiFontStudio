@@ -20,6 +20,7 @@
 
 #include <stdint.h>
 #include <string>
+#include <memory>
 
 class FontInfos;
 class ProjectFile;
@@ -31,7 +32,7 @@ private:
 
 public:
 	void GenerateHeader_One(const std::string& vFilePathName, ProjectFile* vProjectFile,
-		FontInfos *vFontInfos, std::string vFontBufferName = "", size_t vFontBufferSize = 0);
+		std::shared_ptr<FontInfos> vFontInfos, std::string vFontBufferName = "", size_t vFontBufferSize = 0);
 	void GenerateHeader_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
 		std::string vFontBufferName = "", size_t vFontBufferSize = 0);
 

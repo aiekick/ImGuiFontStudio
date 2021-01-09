@@ -51,7 +51,7 @@ TemporarySelectionStruct* SelectionHelper::getSelStruct(SelectionContainerEnum v
 }
 
 bool SelectionHelper::IsGlyphSelected(
-	FontInfos *vFontInfos,
+	std::shared_ptr<FontInfos> vFontInfos,
 	SelectionContainerEnum vSelectionContainerEnum,
 	uint32_t vCodePoint)
 {
@@ -150,69 +150,65 @@ bool SelectionHelper::IsSelectionMode(GlyphSelectionModeFlags vGlyphSelectionMod
 
 void SelectionHelper::DrawMenu(ProjectFile *vProjectFile)
 {
+	float maxWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 3.0f;
+	ImVec2 btnSize = ImVec2(maxWidth - ImGui::GetStyle().FramePadding.x, 0.0f);
+	
 	if (!m_SelectionForOperation.empty())
 	{
 		if (ImGui::BeginFramedGroup("Selection Operations"))
 		{
-			ImGui::Text("Selection : %u Glyphs", m_SelectionForOperation.size());
+			ImGui::FramedGroupText("Selection : %u Glyphs", m_SelectionForOperation.size());
 
-			if (ImGui::Button("Remove From Final"))
+			if (ImGui::Button("Remove From Final", btnSize))
 			{
 				RemoveSelectionFromFinal(vProjectFile);
 			}
 
-			ImGui::Text("Re Range Code Points :");
+			ImGui::FramedGroupText("Re Range Code Points");
 
-			ImGui::Indent();
+			if (!m_ReRangeStruct.startCodePoint.valid)
+				ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.8f, 0.2f, 0.2f, 0.8f));
+			bool edited = ImGui::SliderUIntCompact(maxWidth + ImGui::GetStyle().FramePadding.x,
+				"Start CodePoint", &m_ReRangeStruct.startCodePoint.codePoint, 0U, 65535U);
+			if (!m_ReRangeStruct.startCodePoint.valid)
+				ImGui::PopStyleColor();
+			if (edited)
 			{
-				ImGui::Text("Max Range : 0 > 65535");
-				if (!m_ReRangeStruct.startCodePoint.valid)
-					ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.8f, 0.2f, 0.2f, 0.8f));
-				ImGui::PushItemWidth(100.0f);
-				bool edited = ImGui::InputScalar("Start CodePoint", ImGuiDataType_U32, &m_ReRangeStruct.startCodePoint.codePoint);
-				ImGui::PopItemWidth();
-				if (!m_ReRangeStruct.startCodePoint.valid)
-					ImGui::PopStyleColor();
-				if (edited)
-				{
-                    m_ReRangeStruct.startCodePoint.valid =
-                            m_ReRangeStruct.startCodePoint.codePoint + (int) m_SelectionForOperation.size() <=
-                            m_ReRangeStruct.MaxCodePoint;
-				}
+				m_ReRangeStruct.startCodePoint.valid =
+					m_ReRangeStruct.startCodePoint.codePoint + (int)m_SelectionForOperation.size() <=
+					m_ReRangeStruct.MaxCodePoint;
+			}
 
-				if (!m_ReRangeStruct.endCodePoint.valid)
-					ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.8f, 0.2f, 0.2f, 0.8f));
-				ImGui::PushItemWidth(100.0f);
-				edited = ImGui::InputScalar("End CodePoint", ImGuiDataType_U32, &m_ReRangeStruct.endCodePoint.codePoint);
-				ImGui::PopItemWidth();
-				if (!m_ReRangeStruct.endCodePoint.valid)
-					ImGui::PopStyleColor();
-				if (edited)
-				{
-                    m_ReRangeStruct.endCodePoint.valid =
-                            m_ReRangeStruct.endCodePoint.codePoint - (int) m_SelectionForOperation.size() >=
-                            m_ReRangeStruct.MinCodePoint;
-				}
+			if (!m_ReRangeStruct.endCodePoint.valid)
+				ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.8f, 0.2f, 0.2f, 0.8f));
+			edited = ImGui::SliderUIntCompact(maxWidth + ImGui::GetStyle().FramePadding.x,
+				"End CodePoint", &m_ReRangeStruct.endCodePoint.codePoint, 0U, 65535U); 
+			if (!m_ReRangeStruct.endCodePoint.valid)
+				ImGui::PopStyleColor();
+			if (edited)
+			{
+				m_ReRangeStruct.endCodePoint.valid =
+					m_ReRangeStruct.endCodePoint.codePoint - (int)m_SelectionForOperation.size() >=
+					m_ReRangeStruct.MinCodePoint;
+			}
 
-				if (m_ReRangeStruct.startCodePoint.codePoint + (int)m_SelectionForOperation.size() <=
-					m_ReRangeStruct.MaxCodePoint)
+			if (m_ReRangeStruct.startCodePoint.codePoint + (int)m_SelectionForOperation.size() <=
+				m_ReRangeStruct.MaxCodePoint)
+			{
+				if (ImGui::Button("ReRange after start", btnSize))
 				{
-					if (ImGui::Button("ReRange after start"))
-					{
-						ReRange_Offset_After_Start(vProjectFile, (uint32_t)m_ReRangeStruct.startCodePoint.codePoint);
-					}
-				}
-
-				if (m_ReRangeStruct.endCodePoint.codePoint - (int)m_SelectionForOperation.size() >=
-					m_ReRangeStruct.MinCodePoint)
-				{
-					if (ImGui::Button("ReRange before end"))
-					{
-						ReRange_Offset_Before_End(vProjectFile, (uint32_t)m_ReRangeStruct.endCodePoint.codePoint);
-					}
+					ReRange_Offset_After_Start(vProjectFile, (uint32_t)m_ReRangeStruct.startCodePoint.codePoint);
 				}
 			}
-			ImGui::Unindent();
+
+			if (m_ReRangeStruct.endCodePoint.codePoint - (int)m_SelectionForOperation.size() >=
+				m_ReRangeStruct.MinCodePoint)
+			{
+				if (ImGui::Button("ReRange before end", btnSize))
+				{
+					ReRange_Offset_Before_End(vProjectFile, (uint32_t)m_ReRangeStruct.endCodePoint.codePoint);
+				}
+			}
 
 			ImGui::EndFramedGroup(true);
 		}
@@ -220,7 +216,7 @@ void SelectionHelper::DrawMenu(ProjectFile *vProjectFile)
 
 	if (ImGui::BeginFramedGroup("Tools"))
 	{
-		ImGui::Text("Selection Type by Mouse : ");
+		ImGui::FramedGroupText("Selection Type by Mouse");
 
 #ifdef _DEBUG 
 		/*ImGui::Text("FirstClick Selected : %i", m_GlyphSelectedStateFirstClick);
@@ -230,52 +226,33 @@ void SelectionHelper::DrawMenu(ProjectFile *vProjectFile)
 		ImGui::Text("Dst UnSel Count : %zu", m_TmpSelectionDst.tmpUnSel.size());*/
 #endif
 
-		ImGui::Indent();
-		{
-			ImGui::RadioButtonLabeled_BitWize<GlyphSelectionTypeFlags>("Zone", "by Zone",
-				&m_GlyphSelectionTypeFlags, GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_ZONE, 50.0f, true);
-			ImGui::SameLine();
-			ImGui::RadioButtonLabeled_BitWize<GlyphSelectionTypeFlags>("Range", "by Range",
-				&m_GlyphSelectionTypeFlags, GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_RANGE, 50.0f, true);
-			ImGui::SameLine();
-			ImGui::RadioButtonLabeled_BitWize<GlyphSelectionTypeFlags>("Line", "by Line",
-				&m_GlyphSelectionTypeFlags, GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_LINE, 50.0f, true);
+		float mrw = maxWidth / 3.0f - ImGui::GetStyle().FramePadding.x;
+		ImGui::RadioButtonLabeled_BitWize<GlyphSelectionTypeFlags>("Zone", "by Zone",
+			&m_GlyphSelectionTypeFlags, GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_ZONE, mrw, true);
+		ImGui::SameLine();
+		ImGui::RadioButtonLabeled_BitWize<GlyphSelectionTypeFlags>("Range", "by Range",
+			&m_GlyphSelectionTypeFlags, GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_RANGE, mrw, true);
+		ImGui::SameLine();
+		ImGui::RadioButtonLabeled_BitWize<GlyphSelectionTypeFlags>("Line", "by Line",
+			&m_GlyphSelectionTypeFlags, GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_LINE, mrw, true);
 
-			if (IsSelectionType(GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_ZONE))
-			{
-				ImGui::Indent();
-				{
-					ImGui::Text("Zone Radius :");
-					ImGui::Indent();
-					{
-						if (ImGui::Button("R##Radius"))
-							m_Zone.z = m_Zone.w;
-						ImGui::SameLine();
-						ImGui::PushItemWidth(60.0f);
-						ImGui::SliderFloat("##radius", &m_Zone.z, 0.5f, 150.0f);
-						ImGui::PopItemWidth();
-					}
-					ImGui::Unindent();
-				}
-				ImGui::Unindent();
-			}
+		if (IsSelectionType(GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_ZONE))
+		{
+			ImGui::SliderFloatDefaultCompact(maxWidth + ImGui::GetStyle().FramePadding.x,
+				"Zone Radius", &m_Zone.z, 0.5f, 150.0f, m_Zone.w);
 		}
-		ImGui::Unindent();
 
 		if (!IsSelectionType(GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_RANGE))
 		{
-			ImGui::Text("Selection Mode : ");
-			ImGui::Indent();
-			{
-				ImGui::RadioButtonLabeled_BitWize<GlyphSelectionModeFlags>(
-					"Add", "Select glyphs in additive mode",
-					&m_GlyphSelectionModeFlags, GlyphSelectionModeFlags::GLYPH_SELECTION_MODE_ADD, 50.0f, true);
-				ImGui::SameLine();
-				ImGui::RadioButtonLabeled_BitWize<GlyphSelectionModeFlags>(
-					"Inv", "Select glyphs in inverse mode",
-					&m_GlyphSelectionModeFlags, GlyphSelectionModeFlags::GLYPH_SELECTION_MODE_INVERSE, 50.0f, true);
-			}
-			ImGui::Unindent();
+			ImGui::FramedGroupText("Selection Mode");
+			mrw = maxWidth / 2.0f - ImGui::GetStyle().FramePadding.x;
+			ImGui::RadioButtonLabeled_BitWize<GlyphSelectionModeFlags>(
+				"Add", "Select glyphs in additive mode",
+				&m_GlyphSelectionModeFlags, GlyphSelectionModeFlags::GLYPH_SELECTION_MODE_ADD, mrw, true);
+			ImGui::SameLine();
+			ImGui::RadioButtonLabeled_BitWize<GlyphSelectionModeFlags>(
+				"Inv", "Select glyphs in inverse mode",
+				&m_GlyphSelectionModeFlags, GlyphSelectionModeFlags::GLYPH_SELECTION_MODE_INVERSE, mrw, true);
 		}
 
 		ImGui::EndFramedGroup(true);
@@ -299,7 +276,7 @@ void SelectionHelper::DrawSelectionMenu(ProjectFile *vProjectFile, SelectionCont
 				for (auto & font : vProjectFile->m_Fonts)
 				{
 					SelectAllGlyphs(
-						vProjectFile, &font.second,
+						vProjectFile, font.second,
 						vSelectionContainerEnum);
 				}
 
@@ -320,7 +297,7 @@ void SelectionHelper::DrawSelectionMenu(ProjectFile *vProjectFile, SelectionCont
 				for (auto & font : vProjectFile->m_Fonts)
 				{
 					UnSelectAllGlyphs(
-						vProjectFile, &font.second,
+						vProjectFile, font.second,
 						vSelectionContainerEnum);
 				}
 
@@ -348,7 +325,7 @@ void SelectionHelper::SelectWithToolOrApply(
 
 void SelectionHelper::SelectWithToolOrApplyOnGlyph(
 	ProjectFile *vProjectFile, 
-	FontInfos *vFontInfos, 
+	std::shared_ptr<FontInfos> vFontInfos, 
 	ImFontGlyph vGlyph, 
 	uint32_t vGlyphIdx,
 	bool vGlypSelected,
@@ -371,7 +348,7 @@ void SelectionHelper::SelectWithToolOrApplyOnGlyph(
 }
 
 bool SelectionHelper::IsGlyphIntersectedAndSelected(
-	FontInfos *vFontInfos, ImVec2 vCellSize, uint32_t vCodePoint, bool *vSelected,
+	std::shared_ptr<FontInfos> vFontInfos, ImVec2 vCellSize, uint32_t vCodePoint, bool *vSelected,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
 	bool intersected = false;
@@ -423,7 +400,7 @@ bool SelectionHelper::IsGlyphIntersectedAndSelected(
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 void SelectionHelper::GlyphSelectionIfIntersected(
-	FontInfos *vFontInfos, ImVec2 
+	std::shared_ptr<FontInfos> vFontInfos, ImVec2 
 #ifdef _DEBUG 
 	vCaseSize
 #endif
@@ -523,7 +500,7 @@ void SelectionHelper::SelectByLine(ProjectFile *vProjectFile,
 
 // return true if intersected by line
 bool SelectionHelper::DrawGlyphSelectionByLine(
-	FontInfos *vFontInfos,
+	std::shared_ptr<FontInfos> vFontInfos,
 	ImVec2 vCaseSize, 
 	uint32_t vCodePoint,
 	bool *vSelected,
@@ -571,7 +548,7 @@ void SelectionHelper::SelectByZone(
 }
 
 bool SelectionHelper::DrawGlyphSelectionByZone(
-	FontInfos *vFontInfos,
+	std::shared_ptr<FontInfos> vFontInfos,
 	ImVec2 vCaseSize, 
 	uint32_t vCodePoint,
 	bool *vSelected,
@@ -725,7 +702,7 @@ void SelectionHelper::ApplySelection(ProjectFile *vProjectFile,
 //// GLYPH SELECTION /////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-void SelectionHelper::SelectAllGlyphs(ProjectFile *vProjectFile, FontInfos *vFontInfos,
+void SelectionHelper::SelectAllGlyphs(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
 	if (vProjectFile &&  vProjectFile->IsLoaded())
@@ -764,7 +741,7 @@ void SelectionHelper::SelectAllGlyphs(ProjectFile *vProjectFile, FontInfos *vFon
 	}
 }
 
-void SelectionHelper::UnSelectAllGlyphs(ProjectFile *vProjectFile, FontInfos *vFontInfos,
+void SelectionHelper::UnSelectAllGlyphs(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
 	if (vProjectFile &&  vProjectFile->IsLoaded())
@@ -803,7 +780,7 @@ void SelectionHelper::UnSelectAllGlyphs(ProjectFile *vProjectFile, FontInfos *vF
 	}
 }
 
-void SelectionHelper::SelectGlyph(ProjectFile *vProjectFile, FontInfos *vFontInfos, ImFontGlyph vGlyph, bool vUpdateMaps,
+void SelectionHelper::SelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, ImFontGlyph vGlyph, bool vUpdateMaps,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
 	if (vProjectFile &&  vProjectFile->IsLoaded())
@@ -845,7 +822,7 @@ void SelectionHelper::SelectGlyph(ProjectFile *vProjectFile, FontInfosCodePoint 
 		vFontInfosCodePoint.first, vUpdateMaps,	vSelectionContainerEnum);
 }
 
-void SelectionHelper::SelectGlyph(ProjectFile *vProjectFile, FontInfos *vFontInfos, uint32_t vCodePoint, bool /*vUpdateMaps*/,
+void SelectionHelper::SelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, uint32_t vCodePoint, bool /*vUpdateMaps*/,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
 	if (vProjectFile &&  vProjectFile->IsLoaded())
@@ -870,7 +847,7 @@ void SelectionHelper::SelectGlyph(ProjectFile *vProjectFile, FontInfos *vFontInf
 	}
 }
 
-void SelectionHelper::UnSelectGlyph(ProjectFile *vProjectFile, FontInfos *vFontInfos, ImFontGlyph vGlyph, bool vUpdateMaps,
+void SelectionHelper::UnSelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, ImFontGlyph vGlyph, bool vUpdateMaps,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
 	UnSelectGlyph(vProjectFile, vFontInfos, 
@@ -884,7 +861,7 @@ void SelectionHelper::UnSelectGlyph(ProjectFile *vProjectFile, FontInfosCodePoin
 		vFontInfosCodePoint.first, vUpdateMaps,	vSelectionContainerEnum);
 }
 
-void SelectionHelper::UnSelectGlyph(ProjectFile *vProjectFile, FontInfos *vFontInfos, uint32_t vCodePoint, bool vUpdateMaps,
+void SelectionHelper::UnSelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, uint32_t vCodePoint, bool vUpdateMaps,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
 	if (vProjectFile &&  vProjectFile->IsLoaded())
@@ -936,7 +913,7 @@ void SelectionHelper::ReRange_Offset_After_Start(ProjectFile *vProjectFile, uint
 	std::set<uint32_t> codePoints;
 	for (auto &font : vProjectFile->m_Fonts)
 	{
-		for (auto &selection : font.second.m_SelectedGlyphs)
+		for (auto &selection : font.second->m_SelectedGlyphs)
 		{
 			codePoints.emplace(selection.first);
 		}
@@ -978,7 +955,7 @@ void SelectionHelper::ReRange_Offset_Before_End(ProjectFile *vProjectFile, uint3
 	std::set<uint32_t> codePoints;
 	for (auto &font : vProjectFile->m_Fonts)
 	{
-		for (auto &selection : font.second.m_SelectedGlyphs)
+		for (auto &selection : font.second->m_SelectedGlyphs)
 		{
 			codePoints.emplace(selection.first);
 		}
@@ -1017,7 +994,7 @@ void SelectionHelper::ReRange_Offset_Before_End(ProjectFile *vProjectFile, uint3
 
 void SelectionHelper::SelectGlyphByRangeFromStartCodePoint(
 	ProjectFile *vProjectFile,
-	FontInfos *vFontInfos, 
+	std::shared_ptr<FontInfos> vFontInfos, 
 	ImFontGlyph vGlyph,
     uint32_t vFontGlyphIndex,
 	bool vUpdateMaps,
@@ -1154,7 +1131,7 @@ void SelectionHelper::SelectGlyphByRangeFromStartCodePoint(
 
 void SelectionHelper::UnSelectGlyphByRangeFromStartCodePoint(
 	ProjectFile *vProjectFile,
-	FontInfos *vFontInfos, 
+	std::shared_ptr<FontInfos> vFontInfos, 
 	ImFontGlyph vGlyph, 
 	bool vUpdateMaps,
 	SelectionContainerEnum vSelectionContainerEnum)
@@ -1205,7 +1182,7 @@ void SelectionHelper::UnSelectGlyphByRangeFromStartCodePoint(
 
 void SelectionHelper::UnSelectGlyphByRangeFromStartCodePoint(
 	ProjectFile *vProjectFile, 
-	FontInfos *vFontInfos, 
+	std::shared_ptr<FontInfos> vFontInfos, 
 	ImFontGlyph vGlyph,
     uint32_t vFontGlyphIndex,
 	bool vUpdateMaps,
@@ -1362,15 +1339,15 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile *vProjectFile)
 		std::set<uint32_t> codePointsLocal;
 		for (auto &font : vProjectFile->m_Fonts)
 		{
-			font.second.m_NameInDoubleFound = false;
-			font.second.m_CodePointInDoubleFound = false;
+			font.second->m_NameInDoubleFound = false;
+			font.second->m_CodePointInDoubleFound = false;
 			namesLocal.clear();
 			codePointsLocal.clear();
 
-			for (auto &selection : font.second.m_SelectedGlyphs)
+			for (auto &selection : font.second->m_SelectedGlyphs)
 			{
 				// local in current font
-				if (!font.second.m_CodePointInDoubleFound)
+				if (!font.second->m_CodePointInDoubleFound)
 				{
 					if (codePointsLocal.find(selection.second.newCodePoint) == codePointsLocal.end()) // not found 
 					{
@@ -1379,12 +1356,12 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile *vProjectFile)
 					else
 					{
 						// double detected => cast an error
-						font.second.m_CodePointInDoubleFound = true;
+						font.second->m_CodePointInDoubleFound = true;
 					}
 				}
 
 				// local in current font
-				if (!font.second.m_NameInDoubleFound)
+				if (!font.second->m_NameInDoubleFound)
 				{
 					if (namesLocal.find(selection.second.newHeaderName) == namesLocal.end()) // not found 
 					{
@@ -1393,7 +1370,7 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile *vProjectFile)
 					else
 					{
 						// double detected => cast an error
-						font.second.m_NameInDoubleFound = true;
+						font.second->m_NameInDoubleFound = true;
 					}
 				}
 
@@ -1427,15 +1404,15 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile *vProjectFile)
 
 				if (vProjectFile->m_CodePointFoundInDouble &&
 				    vProjectFile->m_NameFoundInDouble &&
-				    font.second.m_CodePointInDoubleFound &&
-					font.second.m_NameInDoubleFound)
+				    font.second->m_CodePointInDoubleFound &&
+					font.second->m_NameInDoubleFound)
 					break;
 			}
 		}
 
 		if (vProjectFile->m_NameFoundInDouble)
 		{
-			Messaging::Instance()->AddError(true, nullptr, [this](void*)
+			Messaging::Instance()->AddError(true, nullptr, [this](MessageData)
 			{
 				ImGui::SetWindowFocus(FINAL_PANE);
 				FinalFontPane::Instance()->SetFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_ORDERED_BY_NAMES);
@@ -1450,7 +1427,7 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile *vProjectFile)
 
 		if (vProjectFile->m_CodePointFoundInDouble)
 		{
-			Messaging::Instance()->AddError(true, nullptr, [this](void*)
+			Messaging::Instance()->AddError(true, nullptr, [this](MessageData)
 			{
 				ImGui::SetWindowFocus(FINAL_PANE);
 				FinalFontPane::Instance()->SetFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_ORDERED_BY_CODEPOINT);
@@ -1465,26 +1442,26 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile *vProjectFile)
 
 		for (auto &font : vProjectFile->m_Fonts)
 		{
-			if (font.second.m_CodePointInDoubleFound)
+			if (font.second->m_CodePointInDoubleFound)
 			{
-				Messaging::Instance()->AddError(true, &font.second, [this](void *vDatas)
+				Messaging::Instance()->AddError(true, font.second, [this](MessageData vDatas)
 				{
 					ImGui::SetWindowFocus(FINAL_PANE);
-					MainFrame::Instance()->GetProject()->m_SelectedFont = (FontInfos*)vDatas;
+					MainFrame::Instance()->GetProject()->m_SelectedFont = vDatas.GetUserDatas<FontInfos>();
 					FinalFontPane::Instance()->SetFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_CODEPOINT);
 					FinalFontPane::Instance()->PrepareSelection(MainFrame::Instance()->GetProject());
-				}, "Glyph codePoint found in double in font %s ! Font generation solo is prohibited until solved.", font.second.m_FontFileName.c_str());
+				}, "Glyph codePoint found in double in font %s ! Font generation solo is prohibited until solved.", font.second->m_FontFileName.c_str());
 			}
 
-			if (font.second.m_NameInDoubleFound)
+			if (font.second->m_NameInDoubleFound)
 			{
-				Messaging::Instance()->AddError(true, &font.second, [this](void *vDatas)
+				Messaging::Instance()->AddError(true, font.second, [this](MessageData vDatas)
 				{
 					ImGui::SetWindowFocus(FINAL_PANE);
-					MainFrame::Instance()->GetProject()->m_SelectedFont = (FontInfos*)vDatas;
+					MainFrame::Instance()->GetProject()->m_SelectedFont = vDatas.GetUserDatas<FontInfos>();
 					FinalFontPane::Instance()->SetFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_NAMES);
 					FinalFontPane::Instance()->PrepareSelection(MainFrame::Instance()->GetProject());
-				}, "Glyph name found in double in font %s ! Font generation solo is prohibited until solved.", font.second.m_FontFileName.c_str());
+				}, "Glyph name found in double in font %s ! Font generation solo is prohibited until solved.", font.second->m_FontFileName.c_str());
 			}
 		}
 	}

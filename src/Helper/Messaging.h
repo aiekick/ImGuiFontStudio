@@ -24,6 +24,31 @@
 #include <list>
 #include <vector>
 
+class MessageData
+{
+private:
+	std::shared_ptr<void> m_Datas;
+
+public:
+	MessageData() {}
+	MessageData(std::nullptr_t) {}
+	template<typename T>
+	MessageData(const std::shared_ptr<T>& vDatas)
+	{
+		SetUserDatas(vDatas);
+	}
+	template<typename T>
+	void SetUserDatas(const std::shared_ptr<T>& vDatas)
+	{
+		m_Datas = vDatas;
+	}
+	template<typename T>
+	std::shared_ptr<T> GetUserDatas()
+	{
+		return std::static_pointer_cast<T>(m_Datas);
+	}
+};
+
 class ProjectFile;
 class Messaging
 {
@@ -50,21 +75,21 @@ private:
     MessageExistFlags m_MessageExistFlags = MESSAGE_EXIST_NONE;
 
 	int32_t currentMsgIdx = 0;
-	typedef std::function<void(void*)> MessageFunc;
-	typedef std::tuple<std::string, MessageTypeEnum, void*, MessageFunc> Messagekey;
+	typedef std::function<void(MessageData)> MessageFunc;
+	typedef std::tuple<std::string, MessageTypeEnum, MessageData, MessageFunc> Messagekey;
 	std::vector<Messagekey> m_Messages;
 
 private:
-	void AddMessage(const std::string& vMsg, MessageTypeEnum vType, bool vSelect, void* vDatas, const MessageFunc& vFunction);
-	void AddMessage(MessageTypeEnum vType, bool vSelect, void* vDatas, const MessageFunc& vFunction, const char* fmt, va_list args);
+	void AddMessage(const std::string& vMsg, MessageTypeEnum vType, bool vSelect, MessageData vDatas, const MessageFunc& vFunction);
+	void AddMessage(MessageTypeEnum vType, bool vSelect, MessageData vDatas, const MessageFunc& vFunction, const char* fmt, va_list args);
 	bool DrawMessage(const size_t& vMsgIdx);
 	bool DrawMessage(const Messagekey& vMsg);
 
 public:
 	void Draw(ProjectFile *vProjectFile);
-	void AddInfos(bool vSelect, void* vDatas, const MessageFunc& vFunction, const char* fmt, ...); // select => set currentMsgIdx to this msg idx
-	void AddWarning(bool vSelect, void* vDatas, const MessageFunc& vFunction, const char* fmt, ...); // select => set currentMsgIdx to this msg idx
-	void AddError(bool vSelect, void* vDatas, const MessageFunc& vFunction, const char* fmt, ...); // select => set currentMsgIdx to this msg idx
+	void AddInfos(bool vSelect, MessageData vDatas, const MessageFunc& vFunction, const char* fmt, ...); // select => set currentMsgIdx to this msg idx
+	void AddWarning(bool vSelect, MessageData vDatas, const MessageFunc& vFunction, const char* fmt, ...); // select => set currentMsgIdx to this msg idx
+	void AddError(bool vSelect, MessageData vDatas, const MessageFunc& vFunction, const char* fmt, ...); // select => set currentMsgIdx to this msg idx
 	void ClearErrors();
 	void ClearWarnings();
 	void ClearInfos();

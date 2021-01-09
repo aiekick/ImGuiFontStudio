@@ -83,23 +83,23 @@ public:
 		const std::string& vFileName = "");
 
 private:
-	void GenerateCard_One(const std::string& vFilePathName, FontInfos* vFontInfos,
+	void GenerateCard_One(const std::string& vFilePathName, std::shared_ptr<FontInfos> vFontInfos,
 		const uint32_t& vGlyphHeight, const uint32_t& vMaxRows);
 	void GenerateCard_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
 		const uint32_t& vGlyphHeight, const uint32_t& vMaxRows);
 	
-	/*void GenerateHeader_One(const std::string& vFilePathName, FontInfos *vFontInfos,
+	/*void GenerateHeader_One(const std::string& vFilePathName, std::shared_ptr<FontInfos> vFontInfos,
 		std::string vFontBufferName = "", size_t vFontBufferSize = 0);
 	void GenerateHeader_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
 		std::string vFontBufferName = "", size_t vFontBufferSize = 0);*/
 	
 	void GenerateFontFile_One(const std::string& vFilePathName, ProjectFile* vProjectFile, 
-		FontInfos *vFontInfos, const GenModeFlags& vFlags);
+		std::shared_ptr<FontInfos> vFontInfos, const GenModeFlags& vFlags);
 	void GenerateFontFile_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
 		const GenModeFlags& vFlags);
 	
 	void GenerateSource_One(const std::string& vFilePathName, ProjectFile* vProjectFile,
-		FontInfos *vFontInfos, const GenModeFlags& vFlags);
+		std::shared_ptr<FontInfos> vFontInfos, const GenModeFlags& vFlags);
 	void GenerateSource_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
 		const GenModeFlags& vFlags);
 

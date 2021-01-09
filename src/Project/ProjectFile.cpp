@@ -170,10 +170,13 @@ void ProjectFile::UpdateCountSelectedGlyphs()
 
 	for (auto &it : m_Fonts)
 	{
-		m_CountSelectedGlyphs += it.second.m_SelectedGlyphs.size();
-		if (!it.second.m_SelectedGlyphs.empty())
+		if (it.second)
 		{
-			m_CountFontWithSelectedGlyphs++;
+			m_CountSelectedGlyphs += it.second->m_SelectedGlyphs.size();
+			if (!it.second->m_SelectedGlyphs.empty())
+			{
+				m_CountFontWithSelectedGlyphs++;
+			}
 		}
 	}
 
@@ -223,7 +226,10 @@ std::string ProjectFile::getXml(const std::string& vOffset)
 	{
 		for (auto &it : m_Fonts)
 		{
-			str += it.second.getXml(vOffset + "\t");
+			if (it.second)
+			{
+				str += it.second->getXml(vOffset + "\t");
+			}
 		}
 	}
 
@@ -282,11 +288,11 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 	{
 		if (strName == "font")
 		{
-			FontInfos f;
-			f.setFromXml(vElem, vParent);
-			if (!f.m_FontFileName.empty())
+			auto f = std::make_shared<FontInfos>();
+			f->setFromXml(vElem, vParent);
+			if (!f->m_FontFileName.empty())
 			{
-				m_Fonts[f.m_FontFileName] = f;
+				m_Fonts[f->m_FontFileName] = f;
 			}
 		}
 		else if (strName == "rangecoloring")

@@ -81,14 +81,17 @@ void Generator::Generate(
 			{
 				for (auto &font : vProjectFile->m_Fonts)
 				{
-					auto ps = FileHelper::Instance()->ParsePathFileName(font.second.m_FontFileName);
-					if (ps.isOk)
+					if (font.second)
 					{
-						GenerateSource_One(
-							ps.GetFPNE_WithPath(vFilePath),
-							vProjectFile, 
-							&font.second, 
-							vProjectFile->m_GenMode);
+						auto ps = FileHelper::Instance()->ParsePathFileName(font.second->m_FontFileName);
+						if (ps.isOk)
+						{
+							GenerateSource_One(
+								ps.GetFPNE_WithPath(vFilePath),
+								vProjectFile,
+								font.second,
+								vProjectFile->m_GenMode);
+						}
 					}
 				}
 			}
@@ -117,17 +120,20 @@ void Generator::Generate(
 			{
 				for (auto &font : vProjectFile->m_Fonts)
 				{
-					auto ps = FileHelper::Instance()->ParsePathFileName(font.second.m_FontFileName);
-					if (ps.isOk)
+					if (font.second)
 					{
-						GenerateFontFile_One(
-							ps.GetFPNE_WithPath(vFilePath),
-							vProjectFile, 
-							&font.second, 
-							vProjectFile->m_GenMode);
+						auto ps = FileHelper::Instance()->ParsePathFileName(font.second->m_FontFileName);
+						if (ps.isOk)
+						{
+							GenerateFontFile_One(
+								ps.GetFPNE_WithPath(vFilePath),
+								vProjectFile,
+								font.second,
+								vProjectFile->m_GenMode);
 #ifdef AUTO_OPEN_FONT_IN_APP_AFTER_GENERATION_FOR_DEBUG_PURPOSE
-						SourceFontPane::Instance()->OpenFont(vProjectFile, filePathName, false); // directly load the generated font file
+							SourceFontPane::Instance()->OpenFont(vProjectFile, filePathName, false); // directly load the generated font file
 #endif
+						}
 					}
 				}
 			}
@@ -156,14 +162,17 @@ void Generator::Generate(
 			{
 				for (auto& font : vProjectFile->m_Fonts)
 				{
-					auto ps = FileHelper::Instance()->ParsePathFileName(font.second.m_FontFileName);
-					if (ps.isOk)
+					if (font.second)
 					{
-						GenerateCard_One(
-							ps.GetFPNE_WithPathExt(vFilePath, ".png"),
-							&font.second,
-							vProjectFile->m_CardGlyphHeightInPixel,
-							vProjectFile->m_CardCountRowsMax);
+						auto ps = FileHelper::Instance()->ParsePathFileName(font.second->m_FontFileName);
+						if (ps.isOk)
+						{
+							GenerateCard_One(
+								ps.GetFPNE_WithPathExt(vFilePath, ".png"),
+								font.second,
+								vProjectFile->m_CardGlyphHeightInPixel,
+								vProjectFile->m_CardCountRowsMax);
+						}
 					}
 				}
 			}
@@ -237,8 +246,6 @@ static void WriteGlyphCardToPicture(
 	{
 		stbtt_fontinfo labelFontInfo;
 
-		bool labelFontLoaded = false;
-
 		// FontInfos ptr (size_t), stbtt_fontinfo // size_t is alwasy the size of the address (uint32_t for x32, uint64_t for x64)
 		std::unordered_map<size_t, stbtt_fontinfo> fonts;
 
@@ -298,10 +305,10 @@ static void WriteGlyphCardToPicture(
 						// not exist so we will load the stbtt_fontinfo
 						if (!fontPtr->m_ImFontAtlas.ConfigData.empty())
 						{
-							const int32_t font_offset = stbtt_GetFontOffsetForIndex(
+							const int32_t font_offset2 = stbtt_GetFontOffsetForIndex(
 								(unsigned char*)fontPtr->m_ImFontAtlas.ConfigData[0].FontData,
 								fontPtr->m_ImFontAtlas.ConfigData[0].FontNo);
-							if (stbtt_InitFont(&fontInfos, (unsigned char*)fontPtr->m_ImFontAtlas.ConfigData[0].FontData, font_offset))
+							if (stbtt_InitFont(&fontInfos, (unsigned char*)fontPtr->m_ImFontAtlas.ConfigData[0].FontData, font_offset2))
 							{
 								fonts[(size_t)fontPtr] = fontInfos;
 							}
@@ -420,13 +427,13 @@ static void WriteGlyphCardToPicture(
 					}
 					else
 					{
-						Messaging::Instance()->AddError(true, 0, 0,
+						Messaging::Instance()->AddError(true, nullptr, nullptr,
 							"Png Writing Fail for path : %s", vFilePathName.c_str());
 					}
 				}
 				else
 				{
-					Messaging::Instance()->AddError(true, 0, 0,
+					Messaging::Instance()->AddError(true, nullptr, nullptr,
 						"Png Writing Fail for path : %s, final computed size not ok %i, %i\n",
 						vFilePathName.c_str(), finalWidth, finalHeight);
 				}
@@ -461,7 +468,7 @@ two modes :
 */
 void Generator::GenerateCard_One(
 	const std::string& vFilePathName,
-	FontInfos* vFontInfos,
+	std::shared_ptr<FontInfos> vFontInfos,
 	const uint32_t& vGlyphHeight,	// max height of glyph
 	const uint32_t& vMaxRows)		// max row count
 {
@@ -489,14 +496,14 @@ void Generator::GenerateCard_One(
 			{
 				for (auto& glyph : vFontInfos->m_GlyphCodePointToName)
 				{
-					glyphs[GetNewHeaderName(prefix, glyph.second)] = std::pair<uint32_t, size_t>(glyph.first, (size_t)vFontInfos);
+					glyphs[GetNewHeaderName(prefix, glyph.second)] = std::pair<uint32_t, size_t>(glyph.first, (size_t)vFontInfos.get());
 				}
 			}
 			else
 			{
 				for (auto& glyph : vFontInfos->m_SelectedGlyphs)
 				{
-					glyphs[GetNewHeaderName(prefix, glyph.second.newHeaderName)] = std::pair<uint32_t, size_t>(glyph.first, (size_t)vFontInfos);
+					glyphs[GetNewHeaderName(prefix, glyph.second.newHeaderName)] = std::pair<uint32_t, size_t>(glyph.first, (size_t)vFontInfos.get());
 				}
 			}
 
@@ -504,7 +511,7 @@ void Generator::GenerateCard_One(
 		}
 		else
 		{
-			Messaging::Instance()->AddError(true, 0, 0, "Invalid path : %s", vFilePathName.c_str());
+			Messaging::Instance()->AddError(true, nullptr, nullptr, "Invalid path : %s", vFilePathName.c_str());
 		}
 	}
 }
@@ -544,9 +551,12 @@ void Generator::GenerateCard_Merged(
 			std::map<std::string, std::pair<uint32_t, size_t>> glyphs;
 			for (const auto& font : vProjectFile->m_Fonts)
 			{
-				for (const auto& glyph : font.second.m_SelectedGlyphs)
+				if (font.second)
 				{
-					glyphs[GetNewHeaderName(prefix, glyph.second.newHeaderName)] = std::pair<uint32_t, size_t>(glyph.first, (size_t)&font.second);
+					for (const auto& glyph : font.second->m_SelectedGlyphs)
+					{
+						glyphs[GetNewHeaderName(prefix, glyph.second.newHeaderName)] = std::pair<uint32_t, size_t>(glyph.first, (size_t)&font.second);
+					}
 				}
 			}
 
@@ -554,7 +564,7 @@ void Generator::GenerateCard_Merged(
 		}
 		else
 		{
-			Messaging::Instance()->AddError(true, 0, 0, "Invalid path : %s", vFilePathName.c_str());
+			Messaging::Instance()->AddError(true, nullptr, nullptr, "Invalid path : %s", vFilePathName.c_str());
 		}
 	}
 }
@@ -572,7 +582,7 @@ if vGenerateHeader is true, will Generate also a Header file with glyphs
 void Generator::GenerateFontFile_One(
 	const std::string& vFilePathName, 
 	ProjectFile* vProjectFile,
-	FontInfos *vFontInfos,
+	std::shared_ptr<FontInfos> vFontInfos,
 	const GenModeFlags& vFlags)
 {
 	if (vProjectFile && !vFilePathName.empty() && vFontInfos)
@@ -642,20 +652,20 @@ void Generator::GenerateFontFile_One(
 				}
 				else
 				{
-					Messaging::Instance()->AddError(true, 0, 0, "Cannot create font file %s", filePathName.c_str());
+					Messaging::Instance()->AddError(true, nullptr, nullptr, "Cannot create font file %s", filePathName.c_str());
 					return;
 				}
 			}
 			else
 			{
-				Messaging::Instance()->AddError(true, 0, 0, "File Path Name is wrong : %s", vFilePathName.c_str());
+				Messaging::Instance()->AddError(true, nullptr, nullptr, "File Path Name is wrong : %s", vFilePathName.c_str());
 				return;
 			}
 			
 		}
 		else
 		{
-			Messaging::Instance()->AddError(true, 0, 0,
+			Messaging::Instance()->AddError(true, nullptr, nullptr,
 				"Could not open font file %s.\n", 
 				vProjectFile->m_SelectedFont->m_FontFilePathName.c_str());
 			return;
@@ -685,64 +695,70 @@ void Generator::GenerateFontFile_Merged(
 		// abse infos for merge all toher fonts in this one
 		for (auto &it : vProjectFile->m_Fonts)
 		{
-			if (vProjectFile->m_FontToMergeIn == it.second.m_FontFileName &&
-				!vProjectFile->IsGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE))
+			if (it.second)
 			{
-				baseFontBoundingBox = it.second.m_BoundingBox;
-				baseFontAscent = it.second.m_Ascent;
-				baseFontDescent = it.second.m_Descent;
-				baseSize = it.second.m_BoundingBox.zw() - it.second.m_BoundingBox.xy();
+				if (vProjectFile->m_FontToMergeIn == it.second->m_FontFileName &&
+					!vProjectFile->IsGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE))
+				{
+					baseFontBoundingBox = it.second->m_BoundingBox;
+					baseFontAscent = it.second->m_Ascent;
+					baseFontDescent = it.second->m_Descent;
+					baseSize = it.second->m_BoundingBox.zw() - it.second->m_BoundingBox.xy();
+				}
 			}
 		}
 
 		for (auto &it : vProjectFile->m_Fonts)
 		{
-			bool scaleChanged = false;
-			ct::dvec2 scale = 1.0;
-			if (vProjectFile->m_FontToMergeIn != it.second.m_FontFileName &&
-				!vProjectFile->IsGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE))
+			if (it.second)
 			{
-				scaleChanged = true;
-				ct::ivec2 newSize = it.second.m_BoundingBox.zw() - it.second.m_BoundingBox.xy();
-				scale.x = (double)baseSize.x / (double)newSize.x;
-				scale.y = (double)baseSize.y / (double)newSize.y;
-				double v = ct::mini(scale.x, scale.y);
-				scale.x = v; // same value for keep glyph ratio
-				scale.y = v; // same value for keep glyph ratio
-			}
-
-			std::map<int32_t, std::string> newHeaderNames;
-			std::map<int32_t, int32_t> newCodePoints;
-			std::map<CodePoint, GlyphInfos> newGlyphInfos;
-			for (const auto &glyph : it.second.m_SelectedGlyphs)
-			{
-				GlyphInfos gInfos = glyph.second;
-
-				newHeaderNames[glyph.first] = gInfos.newHeaderName;
-				newCodePoints[glyph.first] = gInfos.newCodePoint;
-
-				if (scaleChanged &&
+				bool scaleChanged = false;
+				ct::dvec2 scale = 1.0;
+				if (vProjectFile->m_FontToMergeIn != it.second->m_FontFileName &&
 					!vProjectFile->IsGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE))
 				{
-					gInfos.simpleGlyph.isValid = true;
-					gInfos.simpleGlyph.m_Scale = scale;
-
-					gInfos.m_FontBoundingBox = baseFontBoundingBox;
-					gInfos.m_FontAscent = baseFontAscent;
-					gInfos.m_FontDescent = baseFontDescent;
+					scaleChanged = true;
+					ct::ivec2 newSize = it.second->m_BoundingBox.zw() - it.second->m_BoundingBox.xy();
+					scale.x = (double)baseSize.x / (double)newSize.x;
+					scale.y = (double)baseSize.y / (double)newSize.y;
+					double v = ct::mini(scale.x, scale.y);
+					scale.x = v; // same value for keep glyph ratio
+					scale.y = v; // same value for keep glyph ratio
 				}
-								
-				newGlyphInfos[glyph.first] = gInfos;
-			}
 
-			if (!newHeaderNames.empty())
-			{
-				std::string absPath = vProjectFile->GetAbsolutePath(it.second.m_FontFilePathName);
-				res &= fontHelper.OpenFontFile(absPath, newHeaderNames, newCodePoints, newGlyphInfos, !scaleChanged);
-			}
-			else
-			{
-				res = false;
+				std::map<int32_t, std::string> newHeaderNames;
+				std::map<int32_t, int32_t> newCodePoints;
+				std::map<CodePoint, GlyphInfos> newGlyphInfos;
+				for (const auto& glyph : it.second->m_SelectedGlyphs)
+				{
+					GlyphInfos gInfos = glyph.second;
+
+					newHeaderNames[glyph.first] = gInfos.newHeaderName;
+					newCodePoints[glyph.first] = gInfos.newCodePoint;
+
+					if (scaleChanged &&
+						!vProjectFile->IsGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE))
+					{
+						gInfos.simpleGlyph.isValid = true;
+						gInfos.simpleGlyph.m_Scale = scale;
+
+						gInfos.m_FontBoundingBox = baseFontBoundingBox;
+						gInfos.m_FontAscent = baseFontAscent;
+						gInfos.m_FontDescent = baseFontDescent;
+					}
+
+					newGlyphInfos[glyph.first] = gInfos;
+				}
+
+				if (!newHeaderNames.empty())
+				{
+					std::string absPath = vProjectFile->GetAbsolutePath(it.second->m_FontFilePathName);
+					res &= fontHelper.OpenFontFile(absPath, newHeaderNames, newCodePoints, newGlyphInfos, !scaleChanged);
+				}
+				else
+				{
+					res = false;
+				}
 			}
 		}
 		
@@ -791,19 +807,19 @@ void Generator::GenerateFontFile_Merged(
 				}
 				else
 				{
-					Messaging::Instance()->AddError(true, 0, 0, "Cannot create font file %s", filePathName.c_str());
+					Messaging::Instance()->AddError(true, nullptr, nullptr, "Cannot create font file %s", filePathName.c_str());
 					return;
 				}
 			}
 			else
 			{
-				Messaging::Instance()->AddError(true, 0, 0, "File Path Name is wrong : %s", vFilePathName.c_str());
+				Messaging::Instance()->AddError(true, nullptr, nullptr, "File Path Name is wrong : %s", vFilePathName.c_str());
 				return;
 			}
 		}
 		else
 		{
-			Messaging::Instance()->AddError(true, 0, 0,
+			Messaging::Instance()->AddError(true, nullptr, nullptr,
 				"Could not open font file %s.\n",
 				vProjectFile->m_SelectedFont->m_FontFilePathName.c_str());
 			return;
@@ -824,7 +840,7 @@ two modes :
 void Generator::GenerateSource_One(
 	const std::string& vFilePathName, 
 	ProjectFile* vProjectFile,
-	FontInfos *vFontInfos,
+	std::shared_ptr<FontInfos> vFontInfos,
 	const GenModeFlags& vFlags)
 {
 	if (vProjectFile && !vFilePathName.empty() && vFontInfos)
@@ -948,25 +964,25 @@ void Generator::GenerateSource_One(
 					}
 					else
 					{
-						Messaging::Instance()->AddError(true, 0, 0,
+						Messaging::Instance()->AddError(true, nullptr, nullptr,
 							"Error opening or reading file %s", filePathName.c_str());
 					}
 				}
 				else
 				{
-					Messaging::Instance()->AddError(true, 0, 0,
+					Messaging::Instance()->AddError(true, nullptr, nullptr,
 						"Language not set for : %s", vFilePathName.c_str());
 				}
 			}
 			else
 			{
-				Messaging::Instance()->AddError(true, 0, 0,
+				Messaging::Instance()->AddError(true, nullptr, nullptr,
 					"Cant open file %s", filePathName.c_str());
 			}
 		}
 		else
 		{
-			Messaging::Instance()->AddError(true, 0, 0,
+			Messaging::Instance()->AddError(true, nullptr, nullptr,
 				"Bad File path Name %s", filePathName.c_str());
 		}
 	}
@@ -1082,20 +1098,20 @@ void Generator::GenerateSource_Merged(
 					}
 					else
 					{
-						Messaging::Instance()->AddError(true, 0, 0,
+						Messaging::Instance()->AddError(true, nullptr, nullptr,
 							"Error opening or reading file %s", filePathName.c_str());
 					}
 				}
 				else
 				{
-					Messaging::Instance()->AddError(true, 0, 0,
+					Messaging::Instance()->AddError(true, nullptr, nullptr,
 						"Language not set for : %s", vFilePathName.c_str());
 				}
 			}
 		}
 		else
 		{
-			Messaging::Instance()->AddError(true, 0, 0,
+			Messaging::Instance()->AddError(true, nullptr, nullptr,
 				"Bad File path Name %s", filePathName.c_str());
 		}
 	}

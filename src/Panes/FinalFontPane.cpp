@@ -330,7 +330,7 @@ void FinalFontPane::PrepareSelection(ProjectFile *vProjectFile)
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile, 
-	FontInfos *vFontInfos, const ImVec2& vSize,
+	std::shared_ptr<FontInfos> vFontInfos, const ImVec2& vSize,
 	GlyphInfos *vGlyph, bool vShowRect, 
 	bool *vNameupdated, bool *vCodePointUpdated, 
 	bool vForceEditMode) const
@@ -519,7 +519,7 @@ void FinalFontPane::DrawSelectionsByFontNoOrder(ProjectFile *vProjectFile, bool 
 	{
 		for (auto & it : vProjectFile->m_Fonts)
 		{
-			DrawSelectionsByFontNoOrder_OneFontOnly(vProjectFile, &it.second, true, false, false, vShowTooltipInfos);
+			DrawSelectionsByFontNoOrder_OneFontOnly(vProjectFile, it.second, true, false, false, vShowTooltipInfos);
 
 			if (vProjectFile->m_Fonts.size() > 1)
 				ImGui::Separator();
@@ -530,7 +530,7 @@ void FinalFontPane::DrawSelectionsByFontNoOrder(ProjectFile *vProjectFile, bool 
 	}
 }
 
-static inline void DrawGlyphInfosToolTip(FontInfos *vFontInfos, GlyphInfos *vGlyphInfos)
+static inline void DrawGlyphInfosToolTip(std::shared_ptr<FontInfos> vFontInfos, GlyphInfos *vGlyphInfos)
 {
 	if (ImGui::IsItemHovered())
 	{
@@ -549,7 +549,7 @@ static inline void DrawGlyphInfosToolTip(FontInfos *vFontInfos, GlyphInfos *vGly
 // so we need to pass this flag in parameter
 void FinalFontPane::DrawSelectionsByFontNoOrder_OneFontOnly(
 	ProjectFile *vProjectFile,
-	FontInfos *vFontInfos,
+	std::shared_ptr<FontInfos> vFontInfos,
 	bool vWithFramedGroup,
 	bool vForceEditMode,
 	bool vForceEditModeOneColumn,
@@ -658,17 +658,17 @@ void FinalFontPane::PrepareSelectionByFontOrderedByCodePoint(ProjectFile *vProje
 	{
 		for (auto & itFont : vProjectFile->m_Fonts)
 		{
-			itFont.second.m_GlyphsOrderedByCodePoints.clear();
+			itFont.second->m_GlyphsOrderedByCodePoints.clear();
 
-			auto glyphs = &itFont.second;
+			auto glyphs = itFont.second;
 			for (auto &itGlyph : glyphs->m_SelectedGlyphs)
 			{
 				uint32_t codePoint = itGlyph.second.newCodePoint;
 				auto glyphInfo = &itGlyph.second;
 
-				glyphInfo->fontAtlas = &itFont.second;
+				glyphInfo->fontAtlas = itFont.second;
 
-				itFont.second.m_GlyphsOrderedByCodePoints[codePoint].push_back(glyphInfo);
+				itFont.second->m_GlyphsOrderedByCodePoints[codePoint].push_back(glyphInfo);
 			}
 		}
 	}
@@ -683,7 +683,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint(ProjectFile *vProject
 	{
 		for (auto & it : vProjectFile->m_Fonts)
 		{
-			DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(vProjectFile, &it.second, true, false, false, vShowTooltipInfos);
+			DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(vProjectFile, it.second, true, false, false, vShowTooltipInfos);
 
 			if (vProjectFile->m_Fonts.size() > 1)
 				ImGui::Separator();
@@ -699,7 +699,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint(ProjectFile *vProject
 // so we need to pass this flag in parameter
 void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
 	ProjectFile *vProjectFile, 
-	FontInfos *vFontInfos,
+	std::shared_ptr<FontInfos> vFontInfos,
 	bool vWithFramedGroup, 
 	bool vForceEditMode, 
 	bool vForceEditModeOneColumn,
@@ -827,16 +827,16 @@ void FinalFontPane::PrepareSelectionByFontOrderedByGlyphNames(ProjectFile *vProj
 	{
 		for (auto & itFont : vProjectFile->m_Fonts)
 		{
-			itFont.second.m_GlyphsOrderedByGlyphName.clear();
+			itFont.second->m_GlyphsOrderedByGlyphName.clear();
 
-			auto glyphs = &itFont.second;
+			auto glyphs = itFont.second;
 			for (auto &itGlyph : glyphs->m_SelectedGlyphs)
 			{
 				auto glyphInfo = &itGlyph.second;
 
-				glyphInfo->fontAtlas = &itFont.second;
+				glyphInfo->fontAtlas = itFont.second;
 
-				itFont.second.m_GlyphsOrderedByGlyphName[glyphInfo->newHeaderName].push_back(glyphInfo);
+				itFont.second->m_GlyphsOrderedByGlyphName[glyphInfo->newHeaderName].push_back(glyphInfo);
 			}
 		}
 	}
@@ -851,7 +851,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames(ProjectFile *vProjec
 	{
 		for (auto & it : vProjectFile->m_Fonts)
 		{
-			DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(vProjectFile, &it.second, true, false, false, vShowTooltipInfos);
+			DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(vProjectFile, it.second, true, false, false, vShowTooltipInfos);
 
 			if (vProjectFile->m_Fonts.size() > 1)
 				ImGui::Separator();
@@ -867,7 +867,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames(ProjectFile *vProjec
 // so we need to pass this flag in parameter
 void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(
 	ProjectFile *vProjectFile, 
-	FontInfos *vFontInfos,
+	std::shared_ptr<FontInfos> vFontInfos,
 	bool vWithFramedGroup, 
 	bool vForceEditMode, 
 	bool vForceEditModeOneColumn,
@@ -996,12 +996,12 @@ void FinalFontPane::PrepareSelectionMergedNoOrder(ProjectFile *vProjectFile)
 	{
 		for (auto & itFont : vProjectFile->m_Fonts)
 		{
-			auto glyphs = &itFont.second;
+			auto glyphs = itFont.second;
 			for (auto &itGlyph : glyphs->m_SelectedGlyphs)
 			{
 				auto glyphInfo = &itGlyph.second;
 
-				glyphInfo->fontAtlas = &itFont.second;
+				glyphInfo->fontAtlas = itFont.second;
 
 				m_GlyphsMergedNoOrder.push_back(glyphInfo);
 			}
@@ -1030,7 +1030,7 @@ void FinalFontPane::DrawSelectionMergedNoOrder(ProjectFile *vProjectFile)
 
 			for (auto& glyphInfo : m_GlyphsMergedNoOrder)
 			{
-				FontInfos* vFontInfos = glyphInfo->fontAtlas;
+				std::shared_ptr<FontInfos> vFontInfos = glyphInfo->fontAtlas;
 
 				if (vFontInfos && glyphCountX)
 				{
@@ -1112,13 +1112,13 @@ void FinalFontPane::PrepareSelectionMergedOrderedByCodePoint(ProjectFile *vProje
 	{
 		for (auto & itFont : vProjectFile->m_Fonts)
 		{
-			auto glyphs = &itFont.second;
+			auto glyphs = itFont.second;
 			for (auto &itGlyph : glyphs->m_SelectedGlyphs)
 			{
 				uint32_t codePoint = itGlyph.second.newCodePoint;
 				auto glyphInfo = &itGlyph.second;
 
-				glyphInfo->fontAtlas = &itFont.second;
+				glyphInfo->fontAtlas = itFont.second;
 
 				m_GlyphsMergedOrderedByCodePoints[codePoint].push_back(glyphInfo);
 			}
@@ -1155,7 +1155,7 @@ void FinalFontPane::DrawSelectionMergedOrderedByCodePoint(ProjectFile *vProjectF
 				// un rerange sera necesaire
 				for (auto& glyphInfo : glyphVector)
 				{
-					FontInfos* vFontInfos = glyphInfo->fontAtlas;
+					std::shared_ptr<FontInfos> vFontInfos = glyphInfo->fontAtlas;
 
 					if (vFontInfos && glyphCountX)
 					{
@@ -1236,13 +1236,12 @@ void FinalFontPane::PrepareSelectionMergedOrderedByGlyphNames(ProjectFile *vProj
 
 	if (vProjectFile)
 	{
-		for (auto & itFont : vProjectFile->m_Fonts)
+		for (auto itFont : vProjectFile->m_Fonts)
 		{
-			for (auto & itGlyph : itFont.second.m_SelectedGlyphs)
+			for (auto itGlyph : itFont.second->m_SelectedGlyphs)
 			{
 				auto glyphInfo = &itGlyph.second;
-
-				glyphInfo->fontAtlas = &itFont.second;
+				glyphInfo->fontAtlas = itFont.second;
 
 				m_GlyphsMergedOrderedByGlyphName[glyphInfo->newHeaderName].push_back(glyphInfo);
 			}
@@ -1278,7 +1277,7 @@ void FinalFontPane::DrawSelectionMergedOrderedByGlyphNames(ProjectFile *vProject
 				// un rerange sera necesaire
 				for (auto& glyphInfo : glyphVector)
 				{
-					FontInfos* vFontInfos = glyphInfo->fontAtlas;
+					std::shared_ptr<FontInfos> vFontInfos = glyphInfo->fontAtlas;
 
 					if (vFontInfos && glyphCountX)
 					{

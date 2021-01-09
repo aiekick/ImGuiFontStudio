@@ -31,9 +31,6 @@
 
 #include <array>
 
-FontInfos::FontInfos() = default;
-FontInfos::~FontInfos() = default;
-
 // Extract the UpperCase char's of a string and return as a Prefix
 // if the font name is like "FontAwesome" (UpperCase char), this func will give the prefix "FA"
 // if all the name is lowercase, retunr nothing..
@@ -53,6 +50,12 @@ static std::string GetPrefixFromFontFileName(const std::string& vFileName)
     }
 
     return res;
+}
+
+FontInfos::FontInfos() = default;
+FontInfos::~FontInfos()
+{
+	m_ImFontAtlas.Clear();
 }
 
 bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFilePathName)

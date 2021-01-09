@@ -32,14 +32,14 @@ Messaging::~Messaging() = default;
 
 static char Messaging_Message_Buffer[2048] = "\0";
 
-void Messaging::AddMessage(MessageTypeEnum vType, bool vSelect, void* vDatas, const MessageFunc& vFunction, const char* fmt, va_list args)
+void Messaging::AddMessage(MessageTypeEnum vType, bool vSelect, MessageData vDatas, const MessageFunc& vFunction, const char* fmt, va_list args)
 {
 	int size = vsnprintf(Messaging_Message_Buffer, 2047, fmt, args);
 	if (size > 0)
 		AddMessage(std::string(Messaging_Message_Buffer, size), vType, vSelect, vDatas, vFunction);
 }
 
-void Messaging::AddMessage(const std::string& vMsg, MessageTypeEnum vType, bool vSelect, void* vDatas, const MessageFunc& vFunction)
+void Messaging::AddMessage(const std::string& vMsg, MessageTypeEnum vType, bool vSelect, MessageData vDatas, const MessageFunc& vFunction)
 {
 	if (vSelect)
 	{
@@ -164,7 +164,7 @@ void Messaging::Draw(ProjectFile *vProjectFile)
 	}
 }
 
-void Messaging::AddInfos(bool vSelect, void* vDatas, const MessageFunc& vFunction, const char* fmt, ...)
+void Messaging::AddInfos(bool vSelect, MessageData vDatas, const MessageFunc& vFunction, const char* fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
@@ -173,7 +173,7 @@ void Messaging::AddInfos(bool vSelect, void* vDatas, const MessageFunc& vFunctio
 	m_MessageExistFlags = (MessageExistFlags)(m_MessageExistFlags | MESSAGE_EXIST_INFOS);
 }
 
-void Messaging::AddWarning(bool vSelect, void* vDatas, const MessageFunc& vFunction, const char* fmt, ...)
+void Messaging::AddWarning(bool vSelect, MessageData vDatas, const MessageFunc& vFunction, const char* fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);
@@ -182,7 +182,7 @@ void Messaging::AddWarning(bool vSelect, void* vDatas, const MessageFunc& vFunct
 	m_MessageExistFlags = (MessageExistFlags)(m_MessageExistFlags | MESSAGE_EXIST_WARNING);
 }
 
-void Messaging::AddError(bool vSelect, void* vDatas, const MessageFunc& vFunction, const char* fmt, ...)
+void Messaging::AddError(bool vSelect, MessageData vDatas, const MessageFunc& vFunction, const char* fmt, ...)
 {
 	va_list args;
 	va_start(args, fmt);

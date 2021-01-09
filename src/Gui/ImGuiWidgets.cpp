@@ -335,18 +335,95 @@ void ImGui::FramedGroupSeparator()
 	
 	ImRect bb;
 	bb.Min.x = window->WorkRect.Min.x;
-	bb.Min.y = window->DC.CursorPos.y - 5.0f;
+	bb.Min.y = window->DC.CursorPos.y;
 	bb.Max.x = window->WorkRect.Max.x;
-	bb.Max.y = window->DC.CursorPos.y;
+	bb.Max.y = window->DC.CursorPos.y + style.FramePadding.y;
 
 	ImGui::ItemSize(bb, style.FramePadding.y);
 	if (ImGui::ItemAdd(bb, 0))
 	{
 		const ImU32 lineCol = ImGui::GetColorU32(ImGuiCol_FrameBg);
-		window->DrawList->AddLine(ImVec2(bb.Min.x + style.ItemInnerSpacing.x, bb.Max.y), ImVec2(bb.Max.x - style.ItemInnerSpacing.x, bb.Max.y), lineCol);
+		window->DrawList->AddLine(
+			ImVec2(bb.Min.x + style.ItemInnerSpacing.x, bb.Max.y - style.FramePadding.y * 0.5f), 
+			ImVec2(bb.Max.x - style.ItemInnerSpacing.x, bb.Max.y - style.FramePadding.y * 0.5f), lineCol);
 		if (g.LogEnabled)
 			LogRenderedText(&bb.Min, "--------------------------------");
 	}
+}
+
+void ImGui::FramedGroupText(const char* vFmt, ...)
+{
+	ImGuiWindow* window = GetCurrentWindow();
+	if (window->SkipItems)
+		return;
+
+	va_list args;
+	va_start(args, vFmt);
+	static char TempBuffer[2048] = "\0";
+	int w = vsnprintf(TempBuffer, 2046, vFmt, args);
+	if (w)
+	{
+		TempBuffer[w + 1] = '\0'; // 2046 + 1 = 2047 => ok (under array size of 2048 in any case)
+		ImGuiContext& g = *GImGui;
+		const ImGuiID id = window->GetID(TempBuffer);
+		const ImGuiStyle& style = g.Style;
+		const ImVec2 label_size = ImGui::CalcTextSize(TempBuffer, nullptr, true);
+
+		const float frame_height =
+			ImMax(ImMin(window->DC.CurrLineSize.y, g.FontSize + style.FramePadding.y),
+				label_size.y + style.FramePadding.y);
+		ImRect bb;
+		bb.Min.x = window->WorkRect.Min.x;
+		bb.Min.y = window->DC.CursorPos.y;
+		bb.Max.x = window->WorkRect.Max.x;
+		bb.Max.y = window->DC.CursorPos.y + frame_height;
+
+		ImGui::ItemSize(bb, style.FramePadding.y);
+		if (ImGui::ItemAdd(bb, id))
+		{
+			ImGui::RenderTextClipped(bb.Min, bb.Max, TempBuffer, nullptr, &label_size, style.ButtonTextAlign, &bb);
+		}
+	}
+	va_end(args);
+}
+
+
+void ImGui::FramedGroupText(ImVec4 vTextColor, const char* vFmt, ...)
+{
+	ImGuiWindow* window = GetCurrentWindow();
+	if (window->SkipItems)
+		return;
+
+	va_list args;
+	va_start(args, vFmt);
+	static char TempBuffer[2048] = "\0";
+	int w = vsnprintf(TempBuffer, 2046, vFmt, args);
+	if (w)
+	{
+		TempBuffer[w + 1] = '\0'; // 2046 + 1 = 2047 => ok (under array size of 2048 in any case)
+		ImGuiContext& g = *GImGui;
+		const ImGuiID id = window->GetID(TempBuffer);
+		const ImGuiStyle& style = g.Style;
+		const ImVec2 label_size = ImGui::CalcTextSize(TempBuffer, nullptr, true);
+
+		const float frame_height =
+			ImMax(ImMin(window->DC.CurrLineSize.y, g.FontSize + style.FramePadding.y),
+				label_size.y + style.FramePadding.y);
+		ImRect bb;
+		bb.Min.x = window->WorkRect.Min.x;
+		bb.Min.y = window->DC.CursorPos.y;
+		bb.Max.x = window->WorkRect.Max.x;
+		bb.Max.y = window->DC.CursorPos.y + frame_height;
+
+		ImGui::ItemSize(bb, style.FramePadding.y);
+		if (ImGui::ItemAdd(bb, id))
+		{
+			ImGui::PushStyleColor(ImGuiCol_Text, vTextColor);
+			ImGui::RenderTextClipped(bb.Min, bb.Max, TempBuffer, nullptr, &label_size, style.ButtonTextAlign, &bb);
+			ImGui::PopStyleColor();
+		}
+	}
+	va_end(args);
 }
 
 bool ImGui::RadioButtonLabeled(const char* label, bool active, bool disabled)
@@ -955,7 +1032,7 @@ void ImGui::ShowCustomStyleEditor(bool *vOpen, ImGuiStyle* ref)
 // Read code of e.g. SliderFloat(), SliderInt() etc. or examples in 'Demo->Widgets->Data Types' to understand how to use this function directly.
 // text on the left in the box for keep space
 // value on the right in the box
-bool ImGui::SliderScalarDefaultCompact(float width, const char* label, ImGuiDataType data_type, void* p_data, const void* p_min, const void* p_max, const char* format)
+bool ImGui::SliderScalarCompact(float width, const char* label, ImGuiDataType data_type, void* p_data, const void* p_min, const void* p_max, const char* format)
 {
 	ImGuiWindow* window = GetCurrentWindow();
 	if (window->SkipItems)
@@ -1032,6 +1109,27 @@ bool ImGui::SliderScalarDefaultCompact(float width, const char* label, ImGuiData
 	return value_changed;
 }
 
+bool ImGui::SliderUIntCompact(float width,
+	const char* label, uint32_t* v, uint32_t v_min,
+	uint32_t v_max, const char* format)
+{
+	return SliderScalarCompact(width, label, ImGuiDataType_U32, v, &v_min, &v_max, format);
+}
+
+bool ImGui::SliderIntCompact(float width,
+	const char* label, int* v, int v_min,
+	int v_max, const char* format)
+{
+	return SliderScalarCompact(width, label, ImGuiDataType_S32, v, &v_min, &v_max, format);
+}
+
+bool ImGui::SliderFloatCompact(float width,
+	const char* label, float* v, float v_min,
+	float v_max, const char* format)
+{
+	return SliderScalarCompact(width, label, ImGuiDataType_Float, v, &v_min, &v_max, format);
+}
+
 bool ImGui::SliderUIntDefaultCompact(float width, const char* label, uint32_t* v, uint32_t v_min, uint32_t v_max, uint32_t v_default, const char* format)
 {
 	bool change = false;
@@ -1050,7 +1148,7 @@ bool ImGui::SliderUIntDefaultCompact(float width, const char* label, uint32_t* v
 
 	float w = width - ImGui::GetCursorPosX() + ax;
 
-	change |= SliderScalarDefaultCompact(w, label, ImGuiDataType_U32, v, &v_min, &v_max, format);
+	change |= SliderScalarCompact(w, label, ImGuiDataType_U32, v, &v_min, &v_max, format);
 
 	return change;
 }
@@ -1073,7 +1171,7 @@ bool ImGui::SliderIntDefaultCompact(float width, const char* label, int* v, int 
 
 	float w = width - ImGui::GetCursorPosX() + ax;
 
-	change |= SliderScalarDefaultCompact(w, label, ImGuiDataType_S32, v, &v_min, &v_max, format);
+	change |= SliderScalarCompact(w, label, ImGuiDataType_S32, v, &v_min, &v_max, format);
 
 	return change;
 }
@@ -1094,7 +1192,7 @@ bool ImGui::SliderFloatDefaultCompact(float width, const char* label, float* v, 
 
 	float w = width - ImGui::GetCursorPosX() + ax;
 
-	change |= SliderScalarDefaultCompact(w, label, ImGuiDataType_Float, v, &v_min, &v_max, format);
+	change |= SliderScalarCompact(w, label, ImGuiDataType_Float, v, &v_min, &v_max, format);
 
 	return change;
 }

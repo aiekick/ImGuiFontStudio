@@ -72,7 +72,7 @@ public:
 	std::string oldHeaderName;
 	std::string newHeaderName;
 	uint32_t newCodePoint = 0;
-	FontInfos *fontAtlas = 0;
+	std::shared_ptr<FontInfos> fontAtlas = 0;
 	SimpleGlyph_Solo simpleGlyph;
 	ct::ivec4 m_FontBoundingBox;
 	int m_FontAscent = 0;

@@ -89,7 +89,7 @@ void MainFrame::LoadProject(const std::string& vFilePathName)
 		SetAppTitle(vFilePathName);
 		for (auto &it : m_ProjectFile.m_Fonts)
 		{
-			std::string absPath = m_ProjectFile.GetAbsolutePath(it.second.m_FontFilePathName);
+			std::string absPath = m_ProjectFile.GetAbsolutePath(it.second->m_FontFilePathName);
 			SourceFontPane::Instance()->OpenFont(&m_ProjectFile, absPath, false);
 		}
 		m_ProjectFile.UpdateCountSelectedGlyphs();
@@ -788,12 +788,12 @@ void MainFrame::ReRouteFontToFile(const std::string& vFontNameToReRoute, const s
 	if (ps.isOk)
 	{
 		auto font = m_ProjectFile.m_Fonts[vFontNameToReRoute];
-		font.m_FontFilePathName = m_ProjectFile.GetRelativePath(vGoodFilePathName);
-		font.m_FontFileName = ps.name + "." + ps.ext;
-		m_ProjectFile.m_Fonts[font.m_FontFileName] = font;
-		if (font.m_FontFileName != vFontNameToReRoute)
+		font->m_FontFilePathName = m_ProjectFile.GetRelativePath(vGoodFilePathName);
+		font->m_FontFileName = ps.name + "." + ps.ext;
+		m_ProjectFile.m_Fonts[font->m_FontFileName] = font;
+		if (font->m_FontFileName != vFontNameToReRoute)
 			m_ProjectFile.m_Fonts.erase(vFontNameToReRoute);
-		SourceFontPane::Instance()->OpenFont(&m_ProjectFile, font.m_FontFilePathName, true);
+		SourceFontPane::Instance()->OpenFont(&m_ProjectFile, font->m_FontFilePathName, true);
 	}
 }
 
