@@ -595,15 +595,17 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 						int rowCount = (int)ct::ceil((double)countGlyphs / (double)glyphCountX);
 						ImGuiListClipper m_Clipper;
 
-						/*ImGui::SetTooltip(
-	"cell size : %.2f, %.2f\n\
-	glyph size : %.2f, %.2f\n\
-	count glyphs : x:%u,y:%i\n\
-	line height : %.0f",
+						/*
+						ImGui::SetTooltip(
+							"cell size : %.2f, %.2f\n\
+							glyph size : %.2f, %.2f\n\
+							count glyphs : x:%u,y:%i\n\
+							line height : %.0f",
 							cell_size.x, cell_size.y,
 							glyph_size.x, glyph_size.y,
 							glyphCountX, rowCount,
-							cell_size.y);*/
+							cell_size.y);
+						*/
 
 						m_Clipper.Begin(rowCount, cell_size.y);
 						while (m_Clipper.Step())

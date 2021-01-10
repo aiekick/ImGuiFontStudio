@@ -148,11 +148,11 @@ bool SelectionHelper::IsSelectionMode(GlyphSelectionModeFlags vGlyphSelectionMod
 	return (m_GlyphSelectionModeFlags & vGlyphSelectionModeFlags);
 }
 
-void SelectionHelper::DrawMenu(ProjectFile *vProjectFile)
+void SelectionHelper::DrawMenu(ProjectFile * vProjectFile)
 {
 	float maxWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 3.0f;
 	ImVec2 btnSize = ImVec2(maxWidth - ImGui::GetStyle().FramePadding.x, 0.0f);
-	
+
 	if (!m_SelectionForOperation.empty())
 	{
 		if (ImGui::BeginFramedGroup("Selection Operations"))
@@ -182,7 +182,7 @@ void SelectionHelper::DrawMenu(ProjectFile *vProjectFile)
 			if (!m_ReRangeStruct.endCodePoint.valid)
 				ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.8f, 0.2f, 0.2f, 0.8f));
 			edited = ImGui::SliderUIntCompact(maxWidth + ImGui::GetStyle().FramePadding.x,
-				"End CodePoint", &m_ReRangeStruct.endCodePoint.codePoint, 0U, 65535U); 
+				"End CodePoint", &m_ReRangeStruct.endCodePoint.codePoint, 0U, 65535U);
 			if (!m_ReRangeStruct.endCodePoint.valid)
 				ImGui::PopStyleColor();
 			if (edited)
@@ -259,7 +259,7 @@ void SelectionHelper::DrawMenu(ProjectFile *vProjectFile)
 	}
 }
 
-void SelectionHelper::DrawSelectionMenu(ProjectFile *vProjectFile, SelectionContainerEnum vSelectionContainerEnum)
+void SelectionHelper::DrawSelectionMenu(ProjectFile * vProjectFile, SelectionContainerEnum vSelectionContainerEnum)
 {
 	if (ImGui::BeginMenu("Selection"))
 	{
@@ -273,7 +273,7 @@ void SelectionHelper::DrawSelectionMenu(ProjectFile *vProjectFile, SelectionCont
 			}
 			else if (vSelectionContainerEnum == SelectionContainerEnum::SELECTION_CONTAINER_FINAL)
 			{
-				for (auto & font : vProjectFile->m_Fonts)
+				for (auto& font : vProjectFile->m_Fonts)
 				{
 					SelectAllGlyphs(
 						vProjectFile, font.second,
@@ -294,7 +294,7 @@ void SelectionHelper::DrawSelectionMenu(ProjectFile *vProjectFile, SelectionCont
 			}
 			else if (vSelectionContainerEnum == SelectionContainerEnum::SELECTION_CONTAINER_FINAL)
 			{
-				for (auto & font : vProjectFile->m_Fonts)
+				for (auto& font : vProjectFile->m_Fonts)
 				{
 					UnSelectAllGlyphs(
 						vProjectFile, font.second,
@@ -310,12 +310,9 @@ void SelectionHelper::DrawSelectionMenu(ProjectFile *vProjectFile, SelectionCont
 }
 
 void SelectionHelper::SelectWithToolOrApply(
-	ProjectFile *vProjectFile, 
+	ProjectFile * vProjectFile,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	if (!(ImGui::IsWindowHovered() || ImGui::IsWindowFocused()))
-		return;
-
 	if (IsSelectionType(GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_LINE))
 	{
 		SelectByLine(vProjectFile, vSelectionContainerEnum);
@@ -327,9 +324,9 @@ void SelectionHelper::SelectWithToolOrApply(
 }
 
 void SelectionHelper::SelectWithToolOrApplyOnGlyph(
-	ProjectFile *vProjectFile, 
-	std::shared_ptr<FontInfos> vFontInfos, 
-	ImFontGlyph vGlyph, 
+	ProjectFile * vProjectFile,
+	std::shared_ptr<FontInfos> vFontInfos,
+	ImFontGlyph vGlyph,
 	uint32_t vGlyphIdx,
 	bool vGlypSelected,
 	bool vUpdateMaps,
@@ -351,13 +348,14 @@ void SelectionHelper::SelectWithToolOrApplyOnGlyph(
 }
 
 bool SelectionHelper::IsGlyphIntersectedAndSelected(
-	std::shared_ptr<FontInfos> vFontInfos, ImVec2 vCellSize, uint32_t vCodePoint, bool *vSelected,
+	std::shared_ptr<FontInfos> vFontInfos, ImVec2 vCellSize, uint32_t vCodePoint, bool* vSelected,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
 	bool intersected = false;
 
 	if (vSelected)
 	{
+		if (ImGui::IsWindowFocused() || ImGui::IsWindowHovered()) // prevent selection / hovered if on another window
 		{
 			if (IsSelectionType(GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_LINE))
 			{
@@ -378,7 +376,7 @@ bool SelectionHelper::IsGlyphIntersectedAndSelected(
 				if (!intersected)
 					*vSelected = true;
 			}
-			else if(IsSelectionType(GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_ZONE))
+			else if (IsSelectionType(GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_ZONE))
 			{
 				if (!intersected)
 				{
@@ -405,16 +403,14 @@ bool SelectionHelper::IsGlyphIntersectedAndSelected(
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 void SelectionHelper::GlyphSelectionIfIntersected(
-	std::shared_ptr<FontInfos> vFontInfos, ImVec2 
+	std::shared_ptr<FontInfos> vFontInfos, ImVec2
 #ifdef _DEBUG 
 	vCaseSize
 #endif
 	, uint32_t vCodePoint,
-	bool *vSelected,
+	bool* vSelected,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	bool CanHandleSelection = (ImGui::IsWindowHovered() || ImGui::IsWindowFocused());
-
 	bool selected = IsGlyphSelected(vFontInfos, vSelectionContainerEnum, vCodePoint);
 
 	// attention this item is catched at frame start
@@ -423,14 +419,13 @@ void SelectionHelper::GlyphSelectionIfIntersected(
 	// ZONE is Ok because not use IsMouseClicked for start mode of ZONE
 	// __clickedFromLastFrame is here for use the click of the last frame only for line mode
 	// todo : need to found a better behavior
-	if (CanHandleSelection && ImGui::IsMouseClicked(0) ||
-		clickedFromLastFrame)
+	if (ImGui::IsMouseClicked(0) || clickedFromLastFrame)
 	{
 		m_GlyphSelectedStateFirstClick = (selected ? 1 : 0);
 		StartSelection(vSelectionContainerEnum);
 		clickedFromLastFrame = false;
 	}
-	
+
 	if (vSelected)
 	{
 		if (IsSelectionMode(GlyphSelectionModeFlags::GLYPH_SELECTION_MODE_INVERSE))
@@ -446,7 +441,7 @@ void SelectionHelper::GlyphSelectionIfIntersected(
 		}
 
 		// same issue for line mode as IsMouseClicked
-		if (CanHandleSelection && ImGui::IsMouseDown(0))
+		if (ImGui::IsMouseDown(0))
 		{
 			if (*vSelected)
 			{
@@ -474,7 +469,7 @@ void SelectionHelper::GlyphSelectionIfIntersected(
 //////// SELECTION BY LINE ////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-void SelectionHelper::SelectByLine(ProjectFile *vProjectFile, 
+void SelectionHelper::SelectByLine(ProjectFile * vProjectFile,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
 	if (IS_FLOAT_DIFFERENT(m_Line.sumAbs(), 0.0f))
@@ -508,9 +503,9 @@ void SelectionHelper::SelectByLine(ProjectFile *vProjectFile,
 // return true if intersected by line
 bool SelectionHelper::DrawGlyphSelectionByLine(
 	std::shared_ptr<FontInfos> vFontInfos,
-	ImVec2 vCaseSize, 
+	ImVec2 vCaseSize,
 	uint32_t vCodePoint,
-	bool *vSelected,
+	bool* vSelected,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
 	bool intersected = false;
@@ -539,7 +534,7 @@ bool SelectionHelper::DrawGlyphSelectionByLine(
 ///////////////////////////////////////////////////////////////////////////////////////////
 
 void SelectionHelper::SelectByZone(
-	ProjectFile *vProjectFile, 
+	ProjectFile * vProjectFile,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
 	m_Zone.x = ImGui::GetMousePos().x;
@@ -556,9 +551,9 @@ void SelectionHelper::SelectByZone(
 
 bool SelectionHelper::DrawGlyphSelectionByZone(
 	std::shared_ptr<FontInfos> vFontInfos,
-	ImVec2 vCaseSize, 
+	ImVec2 vCaseSize,
 	uint32_t vCodePoint,
-	bool *vSelected,
+	bool* vSelected,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
 	bool intersected = false;
@@ -568,11 +563,11 @@ bool SelectionHelper::DrawGlyphSelectionByZone(
 	ct::frect rc(startRect.x, startRect.y, vCaseSize.x + pad.x, vCaseSize.y + pad.y);
 	if (rc.IsIntersectedByCircle(m_Zone.xy(), m_Zone.z)) // intersected
 	{
-			GlyphSelectionIfIntersected(
-				vFontInfos, vCaseSize,
-				vCodePoint, vSelected, vSelectionContainerEnum);
+		GlyphSelectionIfIntersected(
+			vFontInfos, vCaseSize,
+			vCodePoint, vSelected, vSelectionContainerEnum);
 
-			intersected = true;
+		intersected = true;
 	}
 	else // trail
 	{
@@ -603,10 +598,10 @@ bool SelectionHelper::DrawGlyphSelectionByZone(
 	return intersected;
 }
 
-void SelectionHelper::ApplySelection(ProjectFile *vProjectFile, 
+void SelectionHelper::ApplySelection(ProjectFile * vProjectFile,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	if (vProjectFile &&  vProjectFile->IsLoaded())
+	if (vProjectFile && vProjectFile->IsLoaded())
 	{
 		if (CanWeApplySelection(vSelectionContainerEnum))
 		{
@@ -616,7 +611,7 @@ void SelectionHelper::ApplySelection(ProjectFile *vProjectFile,
 
 				// to Select
 				auto itSel = selStruct->tmpSel.begin();
-				while(itSel != selStruct->tmpSel.end())
+				while (itSel != selStruct->tmpSel.end())
 				{
 					const auto codePoint = *itSel; // attention, it is a copy
 
@@ -709,10 +704,10 @@ void SelectionHelper::ApplySelection(ProjectFile *vProjectFile,
 //// GLYPH SELECTION /////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-void SelectionHelper::SelectAllGlyphs(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
+void SelectionHelper::SelectAllGlyphs(ProjectFile * vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	if (vProjectFile &&  vProjectFile->IsLoaded())
+	if (vProjectFile && vProjectFile->IsLoaded())
 	{
 		if (vFontInfos)
 		{
@@ -748,10 +743,10 @@ void SelectionHelper::SelectAllGlyphs(ProjectFile *vProjectFile, std::shared_ptr
 	}
 }
 
-void SelectionHelper::UnSelectAllGlyphs(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
+void SelectionHelper::UnSelectAllGlyphs(ProjectFile * vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	if (vProjectFile &&  vProjectFile->IsLoaded())
+	if (vProjectFile && vProjectFile->IsLoaded())
 	{
 		if (vFontInfos)
 		{
@@ -763,7 +758,7 @@ void SelectionHelper::UnSelectAllGlyphs(ProjectFile *vProjectFile, std::shared_p
 
 					if (font)
 					{
-						for (const auto & glyph : font->Glyphs)
+						for (const auto& glyph : font->Glyphs)
 						{
 							UnSelectGlyph(vProjectFile, vFontInfos, glyph, false, vSelectionContainerEnum);
 						}
@@ -787,10 +782,10 @@ void SelectionHelper::UnSelectAllGlyphs(ProjectFile *vProjectFile, std::shared_p
 	}
 }
 
-void SelectionHelper::SelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, ImFontGlyph vGlyph, bool vUpdateMaps,
+void SelectionHelper::SelectGlyph(ProjectFile * vProjectFile, std::shared_ptr<FontInfos> vFontInfos, ImFontGlyph vGlyph, bool vUpdateMaps,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	if (vProjectFile &&  vProjectFile->IsLoaded())
+	if (vProjectFile && vProjectFile->IsLoaded())
 	{
 		if (vFontInfos)
 		{
@@ -803,7 +798,7 @@ void SelectionHelper::SelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<Fon
 						res = "Symbol Name";
 					vFontInfos->m_SelectedGlyphs[vGlyph.Codepoint] = GlyphInfos(vGlyph, res, res);
 					vProjectFile->SetProjectChange();
-					
+
 					if (vUpdateMaps)
 					{
 						vProjectFile->UpdateCountSelectedGlyphs();
@@ -822,17 +817,17 @@ void SelectionHelper::SelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<Fon
 	}
 }
 
-void SelectionHelper::SelectGlyph(ProjectFile *vProjectFile, FontInfosCodePoint vFontInfosCodePoint, bool vUpdateMaps,
+void SelectionHelper::SelectGlyph(ProjectFile * vProjectFile, FontInfosCodePoint vFontInfosCodePoint, bool vUpdateMaps,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	SelectGlyph(vProjectFile, vFontInfosCodePoint.second, 
-		vFontInfosCodePoint.first, vUpdateMaps,	vSelectionContainerEnum);
+	SelectGlyph(vProjectFile, vFontInfosCodePoint.second,
+		vFontInfosCodePoint.first, vUpdateMaps, vSelectionContainerEnum);
 }
 
-void SelectionHelper::SelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, uint32_t vCodePoint, bool /*vUpdateMaps*/,
+void SelectionHelper::SelectGlyph(ProjectFile * vProjectFile, std::shared_ptr<FontInfos> vFontInfos, uint32_t vCodePoint, bool /*vUpdateMaps*/,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	if (vProjectFile &&  vProjectFile->IsLoaded())
+	if (vProjectFile && vProjectFile->IsLoaded())
 	{
 		if (vFontInfos)
 		{
@@ -854,24 +849,24 @@ void SelectionHelper::SelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<Fon
 	}
 }
 
-void SelectionHelper::UnSelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, ImFontGlyph vGlyph, bool vUpdateMaps,
+void SelectionHelper::UnSelectGlyph(ProjectFile * vProjectFile, std::shared_ptr<FontInfos> vFontInfos, ImFontGlyph vGlyph, bool vUpdateMaps,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	UnSelectGlyph(vProjectFile, vFontInfos, 
+	UnSelectGlyph(vProjectFile, vFontInfos,
 		vGlyph.Codepoint, vUpdateMaps, vSelectionContainerEnum);
 }
 
-void SelectionHelper::UnSelectGlyph(ProjectFile *vProjectFile, FontInfosCodePoint vFontInfosCodePoint, bool vUpdateMaps,
+void SelectionHelper::UnSelectGlyph(ProjectFile * vProjectFile, FontInfosCodePoint vFontInfosCodePoint, bool vUpdateMaps,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	UnSelectGlyph(vProjectFile, vFontInfosCodePoint.second, 
-		vFontInfosCodePoint.first, vUpdateMaps,	vSelectionContainerEnum);
+	UnSelectGlyph(vProjectFile, vFontInfosCodePoint.second,
+		vFontInfosCodePoint.first, vUpdateMaps, vSelectionContainerEnum);
 }
 
-void SelectionHelper::UnSelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, uint32_t vCodePoint, bool vUpdateMaps,
+void SelectionHelper::UnSelectGlyph(ProjectFile * vProjectFile, std::shared_ptr<FontInfos> vFontInfos, uint32_t vCodePoint, bool vUpdateMaps,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	if (vProjectFile &&  vProjectFile->IsLoaded())
+	if (vProjectFile && vProjectFile->IsLoaded())
 	{
 		if (vFontInfos)
 		{
@@ -881,7 +876,7 @@ void SelectionHelper::UnSelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<F
 				{
 					vFontInfos->m_SelectedGlyphs.erase(vCodePoint);
 					vProjectFile->SetProjectChange();
-					
+
 					if (vUpdateMaps)
 					{
 						vProjectFile->UpdateCountSelectedGlyphs();
@@ -903,9 +898,9 @@ void SelectionHelper::UnSelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<F
 	}
 }
 
-void SelectionHelper::RemoveSelectionFromFinal(ProjectFile *vProjectFile)
+void SelectionHelper::RemoveSelectionFromFinal(ProjectFile * vProjectFile)
 {
-	for (auto & codePoint : m_SelectionForOperation)
+	for (auto& codePoint : m_SelectionForOperation)
 	{
 		UnSelectGlyph(vProjectFile, codePoint, false, SelectionContainerEnum::SELECTION_CONTAINER_SOURCE);
 	}
@@ -915,19 +910,19 @@ void SelectionHelper::RemoveSelectionFromFinal(ProjectFile *vProjectFile)
 	m_SelectionForOperation.clear();
 }
 
-void SelectionHelper::ReRange_Offset_After_Start(ProjectFile *vProjectFile, uint32_t vOffsetCodePoint)
+void SelectionHelper::ReRange_Offset_After_Start(ProjectFile * vProjectFile, uint32_t vOffsetCodePoint)
 {
 	std::set<uint32_t> codePoints;
-	for (auto &font : vProjectFile->m_Fonts)
+	for (auto& font : vProjectFile->m_Fonts)
 	{
-		for (auto &selection : font.second->m_SelectedGlyphs)
+		for (auto& selection : font.second->m_SelectedGlyphs)
 		{
 			codePoints.emplace(selection.first);
 		}
 	}
 
 	uint32_t pos = vOffsetCodePoint;
-	for (auto & codePoint : m_SelectionForOperation)
+	for (auto& codePoint : m_SelectionForOperation)
 	{
 		auto fontInfos = codePoint.second;
 		if (fontInfos)
@@ -957,19 +952,19 @@ void SelectionHelper::ReRange_Offset_After_Start(ProjectFile *vProjectFile, uint
 	PrepareSelection(vProjectFile, SelectionContainerEnum::SELECTION_CONTAINER_FINAL);
 }
 
-void SelectionHelper::ReRange_Offset_Before_End(ProjectFile *vProjectFile, uint32_t vOffsetCodePoint)
+void SelectionHelper::ReRange_Offset_Before_End(ProjectFile * vProjectFile, uint32_t vOffsetCodePoint)
 {
 	std::set<uint32_t> codePoints;
-	for (auto &font : vProjectFile->m_Fonts)
+	for (auto& font : vProjectFile->m_Fonts)
 	{
-		for (auto &selection : font.second->m_SelectedGlyphs)
+		for (auto& selection : font.second->m_SelectedGlyphs)
 		{
 			codePoints.emplace(selection.first);
 		}
 	}
 
 	uint32_t pos = vOffsetCodePoint;
-	for (auto & codePoint : m_SelectionForOperation)
+	for (auto& codePoint : m_SelectionForOperation)
 	{
 		auto fontInfos = codePoint.second;
 		if (fontInfos)
@@ -1000,14 +995,14 @@ void SelectionHelper::ReRange_Offset_Before_End(ProjectFile *vProjectFile, uint3
 }
 
 void SelectionHelper::SelectGlyphByRangeFromStartCodePoint(
-	ProjectFile *vProjectFile,
-	std::shared_ptr<FontInfos> vFontInfos, 
+	ProjectFile * vProjectFile,
+	std::shared_ptr<FontInfos> vFontInfos,
 	ImFontGlyph vGlyph,
-    uint32_t vFontGlyphIndex,
+	uint32_t vFontGlyphIndex,
 	bool vUpdateMaps,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	if (vProjectFile &&  vProjectFile->IsLoaded())
+	if (vProjectFile && vProjectFile->IsLoaded())
 	{
 		if (vFontInfos)
 		{
@@ -1083,7 +1078,7 @@ void SelectionHelper::SelectGlyphByRangeFromStartCodePoint(
 					auto glyphs = &vFontInfos->m_SelectedGlyphs;
 					auto leftIdx = glyphs->find(vGlyph.Codepoint);
 					auto rightIdx = glyphs->find(vGlyph.Codepoint);
-					
+
 					uint32_t leftCodePoint = vGlyph.Codepoint;
 					uint32_t rightCodePoint = vGlyph.Codepoint;
 					while (leftIdx != glyphs->end() || rightIdx != glyphs->end())
@@ -1137,13 +1132,13 @@ void SelectionHelper::SelectGlyphByRangeFromStartCodePoint(
 }
 
 void SelectionHelper::UnSelectGlyphByRangeFromStartCodePoint(
-	ProjectFile *vProjectFile,
-	std::shared_ptr<FontInfos> vFontInfos, 
-	ImFontGlyph vGlyph, 
+	ProjectFile * vProjectFile,
+	std::shared_ptr<FontInfos> vFontInfos,
+	ImFontGlyph vGlyph,
 	bool vUpdateMaps,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	if (vProjectFile &&  vProjectFile->IsLoaded())
+	if (vProjectFile && vProjectFile->IsLoaded())
 	{
 		if (vFontInfos)
 		{
@@ -1163,7 +1158,7 @@ void SelectionHelper::UnSelectGlyphByRangeFromStartCodePoint(
 						if (ptr)
 						{
 							glyphIndex = font->Glyphs.index_from_ptr(ptr);
-							UnSelectGlyphByRangeFromStartCodePoint(vProjectFile, vFontInfos, 
+							UnSelectGlyphByRangeFromStartCodePoint(vProjectFile, vFontInfos,
 								*ptr, glyphIndex, vUpdateMaps, vSelectionContainerEnum);
 						}
 					}
@@ -1188,14 +1183,14 @@ void SelectionHelper::UnSelectGlyphByRangeFromStartCodePoint(
 }
 
 void SelectionHelper::UnSelectGlyphByRangeFromStartCodePoint(
-	ProjectFile *vProjectFile, 
-	std::shared_ptr<FontInfos> vFontInfos, 
+	ProjectFile * vProjectFile,
+	std::shared_ptr<FontInfos> vFontInfos,
 	ImFontGlyph vGlyph,
-    uint32_t vFontGlyphIndex,
+	uint32_t vFontGlyphIndex,
 	bool vUpdateMaps,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
-	if (vProjectFile &&  vProjectFile->IsLoaded())
+	if (vProjectFile && vProjectFile->IsLoaded())
 	{
 		if (vFontInfos)
 		{
@@ -1325,7 +1320,7 @@ void SelectionHelper::UnSelectGlyphByRangeFromStartCodePoint(
 }
 
 void SelectionHelper::PrepareSelection(
-	ProjectFile *vProjectFile,
+	ProjectFile * vProjectFile,
 	SelectionContainerEnum /*vSelectionContainerEnum*/)
 {
 	FinalFontPane::Instance()->PrepareSelection(vProjectFile);
@@ -1333,25 +1328,25 @@ void SelectionHelper::PrepareSelection(
 	AnalyseSourceSelection(vProjectFile);
 }
 
-void SelectionHelper::AnalyseSourceSelection(ProjectFile *vProjectFile)
+void SelectionHelper::AnalyseSourceSelection(ProjectFile * vProjectFile)
 {
-	if (vProjectFile &&  vProjectFile->IsLoaded())
+	if (vProjectFile && vProjectFile->IsLoaded())
 	{
-        Messaging::Instance()->ClearErrors();
+		Messaging::Instance()->ClearErrors();
 
 		// search for codepoint and names in double => an generate an error
 		std::set<std::string> namesGlobal; vProjectFile->m_NameFoundInDouble = false;
 		std::set<uint32_t> codePointsGlobal; vProjectFile->m_CodePointFoundInDouble = false;
-		std::set<std::string> namesLocal; 
+		std::set<std::string> namesLocal;
 		std::set<uint32_t> codePointsLocal;
-		for (auto &font : vProjectFile->m_Fonts)
+		for (auto& font : vProjectFile->m_Fonts)
 		{
 			font.second->m_NameInDoubleFound = false;
 			font.second->m_CodePointInDoubleFound = false;
 			namesLocal.clear();
 			codePointsLocal.clear();
 
-			for (auto &selection : font.second->m_SelectedGlyphs)
+			for (auto& selection : font.second->m_SelectedGlyphs)
 			{
 				// local in current font
 				if (!font.second->m_CodePointInDoubleFound)
@@ -1391,7 +1386,7 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile *vProjectFile)
 					else
 					{
 						// double detected => cast an error
-                        vProjectFile->m_CodePointFoundInDouble = true;
+						vProjectFile->m_CodePointFoundInDouble = true;
 					}
 				}
 
@@ -1405,13 +1400,13 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile *vProjectFile)
 					else
 					{
 						// double detected => cast an error
-                        vProjectFile->m_NameFoundInDouble = true;
+						vProjectFile->m_NameFoundInDouble = true;
 					}
 				}
 
 				if (vProjectFile->m_CodePointFoundInDouble &&
-				    vProjectFile->m_NameFoundInDouble &&
-				    font.second->m_CodePointInDoubleFound &&
+					vProjectFile->m_NameFoundInDouble &&
+					font.second->m_CodePointInDoubleFound &&
 					font.second->m_NameInDoubleFound)
 					break;
 			}
@@ -1420,11 +1415,11 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile *vProjectFile)
 		if (vProjectFile->m_NameFoundInDouble)
 		{
 			Messaging::Instance()->AddError(true, nullptr, [this](MessageData)
-			{
-				ImGui::SetWindowFocus(FINAL_PANE);
-				FinalFontPane::Instance()->SetFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_ORDERED_BY_NAMES);
-				FinalFontPane::Instance()->PrepareSelection(MainFrame::Instance()->GetProject());
-			}, "Glyph names found in double ! Name export and header generation is prohibited until solved.");
+				{
+					ImGui::SetWindowFocus(FINAL_PANE);
+					FinalFontPane::Instance()->SetFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_ORDERED_BY_NAMES);
+					FinalFontPane::Instance()->PrepareSelection(MainFrame::Instance()->GetProject());
+				}, "Glyph names found in double ! Name export and header generation is prohibited until solved.");
 			GeneratorPane::Instance()->ProhibitStatus(GeneratorStatusFlags::GENERATOR_STATUS_FONT_HEADER_GENERATION_ALLOWED);
 		}
 		else
@@ -1435,11 +1430,11 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile *vProjectFile)
 		if (vProjectFile->m_CodePointFoundInDouble)
 		{
 			Messaging::Instance()->AddError(true, nullptr, [this](MessageData)
-			{
-				ImGui::SetWindowFocus(FINAL_PANE);
-				FinalFontPane::Instance()->SetFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_ORDERED_BY_CODEPOINT);
-				FinalFontPane::Instance()->PrepareSelection(MainFrame::Instance()->GetProject());
-			}, "Glyph codePoint found in double ! Font merge is prohibited until solved.");
+				{
+					ImGui::SetWindowFocus(FINAL_PANE);
+					FinalFontPane::Instance()->SetFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_ORDERED_BY_CODEPOINT);
+					FinalFontPane::Instance()->PrepareSelection(MainFrame::Instance()->GetProject());
+				}, "Glyph codePoint found in double ! Font merge is prohibited until solved.");
 			GeneratorPane::Instance()->ProhibitStatus(GeneratorStatusFlags::GENERATOR_STATUS_FONT_MERGE_ALLOWED);
 		}
 		else
@@ -1447,28 +1442,28 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile *vProjectFile)
 			GeneratorPane::Instance()->AllowStatus(GeneratorStatusFlags::GENERATOR_STATUS_FONT_MERGE_ALLOWED);
 		}
 
-		for (auto &font : vProjectFile->m_Fonts)
+		for (auto& font : vProjectFile->m_Fonts)
 		{
 			if (font.second->m_CodePointInDoubleFound)
 			{
 				Messaging::Instance()->AddError(true, font.second, [this](MessageData vDatas)
-				{
-					ImGui::SetWindowFocus(FINAL_PANE);
-					MainFrame::Instance()->GetProject()->m_SelectedFont = vDatas.GetUserDatas<FontInfos>();
-					FinalFontPane::Instance()->SetFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_CODEPOINT);
-					FinalFontPane::Instance()->PrepareSelection(MainFrame::Instance()->GetProject());
-				}, "Glyph codePoint found in double in font %s ! Font generation solo is prohibited until solved.", font.second->m_FontFileName.c_str());
+					{
+						ImGui::SetWindowFocus(FINAL_PANE);
+						MainFrame::Instance()->GetProject()->m_SelectedFont = vDatas.GetUserDatas<FontInfos>();
+						FinalFontPane::Instance()->SetFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_CODEPOINT);
+						FinalFontPane::Instance()->PrepareSelection(MainFrame::Instance()->GetProject());
+					}, "Glyph codePoint found in double in font %s ! Font generation solo is prohibited until solved.", font.second->m_FontFileName.c_str());
 			}
 
 			if (font.second->m_NameInDoubleFound)
 			{
 				Messaging::Instance()->AddError(true, font.second, [this](MessageData vDatas)
-				{
-					ImGui::SetWindowFocus(FINAL_PANE);
-					MainFrame::Instance()->GetProject()->m_SelectedFont = vDatas.GetUserDatas<FontInfos>();
-					FinalFontPane::Instance()->SetFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_NAMES);
-					FinalFontPane::Instance()->PrepareSelection(MainFrame::Instance()->GetProject());
-				}, "Glyph name found in double in font %s ! Font generation solo is prohibited until solved.", font.second->m_FontFileName.c_str());
+					{
+						ImGui::SetWindowFocus(FINAL_PANE);
+						MainFrame::Instance()->GetProject()->m_SelectedFont = vDatas.GetUserDatas<FontInfos>();
+						FinalFontPane::Instance()->SetFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_NAMES);
+						FinalFontPane::Instance()->PrepareSelection(MainFrame::Instance()->GetProject());
+					}, "Glyph name found in double in font %s ! Font generation solo is prohibited until solved.", font.second->m_FontFileName.c_str());
 			}
 		}
 	}
@@ -1478,7 +1473,7 @@ void SelectionHelper::FinalizeSelectionForOperations()
 {
 	// Prepare re range min/max
 	uint32_t inf = 65535, sup = 0;
-	for (auto & it : m_SelectionForOperation)
+	for (auto& it : m_SelectionForOperation)
 	{
 		inf = ct::mini<uint32_t>(inf, it.first);
 		sup = ct::maxi<uint32_t>(sup, it.first);

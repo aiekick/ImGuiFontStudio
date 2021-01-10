@@ -347,13 +347,14 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 			vFontInfos, vSize, vGlyph->glyph.Codepoint, &selected, 
 			SelectionContainerEnum::SELECTION_CONTAINER_FINAL);
 
-		res = ImGui::ImageCheckButton(
-			vFontInfos->m_ImFontAtlas.TexID, 
-			&selected, vSize,
-			ImVec2(vGlyph->glyph.U0, vGlyph->glyph.V0),
-			ImVec2(vGlyph->glyph.U1, vGlyph->glyph.V1),
-			ImVec2((float)vFontInfos->m_ImFontAtlas.TexWidth, 
-				(float)vFontInfos->m_ImFontAtlas.TexHeight), 
+		const ImVec2 hostTextureSize = ImVec2(
+			(float)vFontInfos->m_ImFontAtlas.TexWidth,
+			(float)vFontInfos->m_ImFontAtlas.TexHeight);
+		const ImVec2 UV0 = ImVec2(vGlyph->glyph.U0, vGlyph->glyph.V0);
+		const ImVec2 UV1 = ImVec2(vGlyph->glyph.U1, vGlyph->glyph.V1);
+
+		res = ImGui::ImageCheckButton(vFontInfos->m_ImFontAtlas.TexID, 
+			&selected, vSize, UV0, UV1, hostTextureSize,
 			-1, vShowRect ? 3.0f : 0.0f);
 		
 		if (res)
