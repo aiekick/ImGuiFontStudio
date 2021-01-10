@@ -284,6 +284,23 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 					"C#", "Embedded font as a Byte Array for C#",
 					&vProjectFile->m_GenMode, GENERATOR_MODE_LANG_CSHARP, mrw,
 					false, false, GENERATOR_MODE_RADIO_LANG);
+
+#ifdef _DEBUG
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
+					"Lua", "Embedded font as a Byte Array for LUA",
+					&vProjectFile->m_GenMode, GENERATOR_MODE_LANG_C, mrw,
+					false, false, GENERATOR_MODE_RADIO_LANG);
+				ImGui::SameLine();
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
+					"Python", "Embedded font as a Byte Array for Python",
+					&vProjectFile->m_GenMode, GENERATOR_MODE_LANG_CPP, mrw,
+					false, false, GENERATOR_MODE_RADIO_LANG);
+				ImGui::SameLine();
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
+					"Rust", "Embedded font as a Byte Array for Rust",
+					&vProjectFile->m_GenMode, GENERATOR_MODE_LANG_CSHARP, mrw,
+					false, false, GENERATOR_MODE_RADIO_LANG);
+#endif
 			}
 
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED))
