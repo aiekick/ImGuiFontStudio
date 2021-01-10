@@ -67,6 +67,14 @@ void FontPreviewPane::DrawDialogsAndPopups(ProjectFile* /*vProjectFile*/)
 
 }
 
+/*
+la font des glyoh n'aura pas la meme BBox que la font text avec laquelle elle devra etre affichée
+donc il faudrait voir le resultat et ajuster ci-besoin, donc on doit :
+- charger une font texte de test
+- composer un texte avec cette font
+- slectionner les glyph a voir, positionner dans le text
+*/
+
 ///////////////////////////////////////////////////////////////////////////////////
 //// PRIVATE //////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
@@ -92,10 +100,15 @@ void FontPreviewPane::DrawFontPreviewPane(ProjectFile *vProjectFile)
 				}
 
 				static char buffer[500] = "test\0";
-				ImGui::InputText("test", buffer, 499);
+				ImGui::Text("Text :");
+				ImGui::SameLine();
+				float aw = ImGui::GetContentRegionAvail().x;
+				ImGui::PushItemWidth(aw);
+				ImGui::InputText("#ImGuiFontStudio", buffer, 499);
+				ImGui::PopItemWidth();
 
 
-
+				ImGui::Text("%s", buffer);
 			}
 		}
 

@@ -43,11 +43,18 @@ static std::string GetHeader(std::string vLang, std::string vPrefix)
 	header += "//Header Generated with https://github.com/aiekick/ImGuiFontStudio\n";
 	header += "//Based on https://github.com/juliettef/IconFontCppHeaders\n";
 	
-	if (vLang == "cpp")
+	if (vLang == "c")
+	{
+		header += "//for Language c\n";
+		header += "\n";
+		header += ct::toStr("#ifndef %s_FONT_ICON_H\n", vPrefix.c_str());
+		header += ct::toStr("#define %s_FONT_ICON_H\n\n", vPrefix.c_str());
+	}
+	else if (vLang == "cpp")
 	{
 		header += "//for Language c++\n";
 		header += "\n";
-		header += "#pragma once\n\n";
+		header += ct::toStr("#pragma once\n\n");
 	}
 	else if (vLang == "c#")
 	{
@@ -61,7 +68,7 @@ static std::string GetHeader(std::string vLang, std::string vPrefix)
 	return header;
 }
 
-static std::string GetFooter(std::string vLang)
+static std::string GetFooter(std::string vLang, std::string vPrefix)
 {
 	std::string header;
 
@@ -70,7 +77,10 @@ static std::string GetFooter(std::string vLang)
 		header += "\t}\n";
 		header += "}\n";
 	}
-
+	else if (vLang == "c")
+	{
+		header += ct::toStr("\n#endif // %s_FONT_ICON_H\n", vPrefix.c_str());
+	}
 	return header;
 }
 
@@ -80,7 +90,8 @@ static std::string GetFontInfos(std::string vLang, std::string vPrefix, std::str
 
 	if (vFontBufferSize > 0)
 	{
-		if (vLang == "cpp")
+		if (vLang == "cpp" || 
+			vLang == "c")
 		{
 			header += ct::toStr("#define FONT_ICON_BUFFER_NAME_%s %s\n", vPrefix.c_str(), vFontBufferName.c_str());
 			header += ct::toStr("#define FONT_ICON_BUFFER_SIZE_%s 0x%s\n", vPrefix.c_str(), ct::toHexStr(vFontBufferSize).c_str());
@@ -92,7 +103,8 @@ static std::string GetFontInfos(std::string vLang, std::string vPrefix, std::str
 	}
 	else
 	{
-		if (vLang == "cpp")
+		if (vLang == "cpp" || 
+			vLang == "c")
 		{
 			header += ct::toStr("#define FONT_ICON_FILE_NAME_%s \"%s\"\n", vPrefix.c_str(), vFontFileName.c_str());
 		}
@@ -111,7 +123,8 @@ static std::string GetGlyphTableMinMax(std::string vLang, std::string vPrefix, c
 {
 	std::string header;
 
-	if (vLang == "cpp")
+	if (vLang == "cpp" || 
+		vLang == "c")
 	{
 		header += ct::toStr("#define ICON_MIN_%s 0x%s\n", vPrefix.c_str(), ct::toHexStr(vCodePointRange.x).c_str());
 		header += ct::toStr("#define ICON_MAX_%s 0x%s\n", vPrefix.c_str(), ct::toHexStr(vCodePointRange.y).c_str());
@@ -131,7 +144,8 @@ static std::string GetGlyphItem(std::string vLang, std::string vType, std::strin
 {
 	std::string header;
 	
-	if (vLang == "cpp")
+	if (vLang == "cpp" || 
+		vLang == "c")
 	{
 		header += ct::toStr("#define %s_%s u8\"\\u%s\"\n", vType.c_str(), vLabel.c_str(), ct::toHexStr(vCodePoint).c_str());
 	}
@@ -160,7 +174,7 @@ std::string HeaderGenerator::GenerateHeaderFile(std::string vLang, std::string v
 	{
 		headerFile += GetGlyphItem(vLang, "ICON", vPrefix, it.first, it.second);
 	}
-	headerFile += GetFooter(vLang);
+	headerFile += GetFooter(vLang, vPrefix);
 	return headerFile;
 }
 
@@ -225,7 +239,12 @@ void HeaderGenerator::GenerateHeader_One(
 			}
 
 			std::string lang, headerExt;
-			if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
+			if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C))
+			{
+				lang = "c";
+				headerExt = ".h";
+			}
+			else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
 			{
 				lang = "cpp";
 				headerExt = ".h";
@@ -297,7 +316,12 @@ void HeaderGenerator::GenerateHeader_Merged(
 			}
 
 			std::string lang, headerExt;
-			if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
+			if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C))
+			{
+				lang = "c";
+				headerExt = ".h";
+			}
+			else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
 			{
 				lang = "cpp";
 				headerExt = ".h";

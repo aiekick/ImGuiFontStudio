@@ -268,7 +268,13 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 			ImGui::FramedGroupText("Settings");
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER))
 			{
+				mrw = maxWidth / 3.0f - ImGui::GetStyle().FramePadding.x;
 				ImGui::Text("Header / Src Languages : ");
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
+					"C", "Embedded font as a Byte Array for C",
+					&vProjectFile->m_GenMode, GENERATOR_MODE_LANG_C, mrw,
+					false, false, GENERATOR_MODE_RADIO_LANG);
+				ImGui::SameLine();
 				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
 					"C++", "Embedded font as a Byte Array for C++",
 					&vProjectFile->m_GenMode, GENERATOR_MODE_LANG_CPP, mrw,
@@ -307,12 +313,14 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 					if (vProjectFile->IsGenMode(GENERATOR_MODE_FONT)) exts = ".ttf";
 					else if (vProjectFile->IsGenMode(GENERATOR_MODE_SRC))
 					{
-						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) exts = ".cpp";
+						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C)) exts = ".c";
+						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) exts = ".cpp";
 						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP)) exts = ".cs";
 					}
 					else if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER))
 					{
-						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) exts = ".h";
+						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C) ||
+							vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) exts = ".h";
 						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP)) exts = ".cs";
 					}
 					else if (vProjectFile->IsGenMode(GENERATOR_MODE_CARD)) exts = ".png";
@@ -326,6 +334,8 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 
 			if (btnClick)
 			{
+				assert(!exts.empty());
+
 				static char extTypes[512] = "\0";
 #ifdef MSVC
 				strncpy_s(extTypes, exts.c_str(), ct::mini((int)exts.size(), 511));
@@ -383,6 +393,11 @@ bool GeneratorPane::CheckGenerationConditions(ProjectFile *vProjectFile)
 		ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "Merged mode require the\ngeneration of font or cpp.\nPlease Select one of\nthese two at least");
 	}*/
 
+	bool needOneLangageSelectedAtLeast = 
+		(vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C) ||
+		vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP) ||
+		vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP));
+
 	if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER))
 	{
 		// header need SRC or Font at least
@@ -394,8 +409,7 @@ bool GeneratorPane::CheckGenerationConditions(ProjectFile *vProjectFile)
 		}
 
 		// need on language at mini
-		if (!(vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP) ||
-			vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP)))
+		if (!needOneLangageSelectedAtLeast)
 		{
 			res = false;
 			ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->badColor, "A language must be selected for the generation of the Header file");
@@ -405,8 +419,7 @@ bool GeneratorPane::CheckGenerationConditions(ProjectFile *vProjectFile)
 	if (vProjectFile->IsGenMode(GENERATOR_MODE_SRC))
 	{
 		// need on language at mini
-		if (!(vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP) ||
-			vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP)))
+		if (!needOneLangageSelectedAtLeast)
 		{
 			res = false;
 			ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->badColor, "A language must be selected for the generation of the Source file");

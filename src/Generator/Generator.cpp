@@ -874,7 +874,8 @@ void Generator::GenerateSource_One(
 			if (FileHelper::Instance()->IsFileExist(filePathName))
 			{
 				std::string lang;
-				if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) lang = "cpp";
+				if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C)) lang = "c";
+				else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) lang = "cpp";
 				else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP)) lang = "c#";
 				if (!lang.empty())
 				{
@@ -899,7 +900,8 @@ void Generator::GenerateSource_One(
 						PathStruct psSource = ps;
 
 						std::string sourceExt;
-						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) sourceExt = ".cpp";
+						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C)) sourceExt = ".c";
+						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) sourceExt = ".cpp";
 						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
 						{
 							psSource.name += "_Bytes";
@@ -913,19 +915,21 @@ void Generator::GenerateSource_One(
 							PathStruct psHeader = ps;
 
 							std::string headerExt;
-							if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) headerExt = ".h";
+							if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C) ||
+								vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) headerExt = ".h";
 							else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
 							{
 								psHeader.name += "_Labels";
 								headerExt = ".cs";
 							}
 
-							if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
+							if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C) ||
+								vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
 							{
 								sourceFile = "#include \"" + ps.name + headerExt + "\"\n\n";
 								std::string prefix = "";
-								prefix = "FONT_ICON_BUFFER_NAME_" + vProjectFile->m_MergedFontPrefix;
-								ct::replaceString(res, vProjectFile->m_MergedFontPrefix + "_compressed_data_base85", prefix);
+								prefix = "FONT_ICON_BUFFER_NAME_" + vFontInfos->m_FontPrefix;
+								ct::replaceString(res, vFontInfos->m_FontPrefix + "_compressed_data_base85", prefix);
 							}
 
 							m_HeaderGenerator.GenerateHeader_One(
@@ -953,7 +957,8 @@ void Generator::GenerateSource_One(
 							sourceFile += res;
 							sourceFile += "\t}\n}\n";
 						}
-						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
+						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C) ||
+								 vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
 						{
 							sourceFile += res;
 						}
@@ -1012,7 +1017,8 @@ void Generator::GenerateSource_Merged(
 			if (FileHelper::Instance()->IsFileExist(filePathName))
 			{
 				std::string lang;
-				if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) lang = "cpp";
+				if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) lang = "c";
+				else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) lang = "cpp";
 				else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP)) lang = "c#";
 				if (!lang.empty())
 				{
@@ -1034,7 +1040,8 @@ void Generator::GenerateSource_Merged(
 						PathStruct psSource = ps;
 						
 						std::string sourceExt;
-						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) sourceExt = ".cpp";
+						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) sourceExt = ".c";
+						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) sourceExt = ".cpp";
 						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
 						{
 							psSource.name += "_Bytes";
@@ -1048,14 +1055,16 @@ void Generator::GenerateSource_Merged(
 							PathStruct psHeader = ps;
 							
 							std::string headerExt;
-							if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) headerExt = ".h";
+							if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C) ||
+								vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) headerExt = ".h";
 							else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
 							{
 								psHeader.name += "_Labels";
 								headerExt = ".cs";
 							}
 
-							if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
+							if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C) ||
+								vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
 							{
 								sourceFile = "#include \"" + ps.name + headerExt + "\"\n\n";
 								std::string prefix = "";

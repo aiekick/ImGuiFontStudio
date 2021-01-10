@@ -94,7 +94,9 @@ std::string Compress::GetCompressedBase85BytesArray(
 		}
 		
 	}
-	else if (vLang == "cpp")
+	else if (
+		vLang == "cpp" || 
+		vLang == "c")
 	{
 		bufferName = vPrefix + "_compressed_data_base85";
 		res += "static const char " + bufferName + "[" + ct::toStr(bufferSize) + "+1] =";
@@ -152,7 +154,9 @@ std::string Compress::GetCompressedBase85BytesArray(
 				{
 					content += "\" +\n\t\t\t\"";
 				}
-				else if (vLang == "cpp")
+				else if (
+					vLang == "cpp" || 
+					vLang == "c")
 				{
 					content += "\"\n    \"";
 				}
@@ -163,7 +167,8 @@ std::string Compress::GetCompressedBase85BytesArray(
 	if (generateByteArray)
 	{
 		content = content.substr(0, content.size() - 2);
-		if (vLang == "cpp")
+		if (vLang == "cpp" || 
+			vLang == "c")
 		{
 			res += content + "};\n";
 		}
@@ -174,7 +179,8 @@ std::string Compress::GetCompressedBase85BytesArray(
 	}
 	else
 	{
-		if (vLang == "cpp")
+		if (vLang == "cpp" || 
+			vLang == "c")
 		{
 			res += content + "\";\n\n";
 		}
