@@ -86,7 +86,7 @@ bool SelectionHelper::CanWeApplySelection(SelectionContainerEnum vSelectionConta
 	size_t n = s->tmpSel.size() + s->tmpUnSel.size();
 	if (n > 0)
 	{
-		if (ImGui::IsWindowHovered(ImGuiHoveredFlags_AnyWindow) && s->startSelWindow)
+		if (ImGui::IsWindowHovered() && s->startSelWindow)
 		{
 			res = (s->startSelWindow == ImGui::GetHoveredWindow());
 		}
@@ -313,6 +313,9 @@ void SelectionHelper::SelectWithToolOrApply(
 	ProjectFile *vProjectFile, 
 	SelectionContainerEnum vSelectionContainerEnum)
 {
+	if (!(ImGui::IsWindowHovered() || ImGui::IsWindowFocused()))
+		return;
+
 	if (IsSelectionType(GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_LINE))
 	{
 		SelectByLine(vProjectFile, vSelectionContainerEnum);
@@ -355,15 +358,17 @@ bool SelectionHelper::IsGlyphIntersectedAndSelected(
 
 	if (vSelected)
 	{
-		if (IsSelectionType(GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_LINE))
 		{
-			intersected = DrawGlyphSelectionByLine(
-				vFontInfos, vCellSize, vCodePoint, vSelected, vSelectionContainerEnum);
-		}
-		else if (IsSelectionType(GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_ZONE))
-		{
-			intersected = DrawGlyphSelectionByZone(
-				vFontInfos, vCellSize, vCodePoint, vSelected, vSelectionContainerEnum);
+			if (IsSelectionType(GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_LINE))
+			{
+				intersected = DrawGlyphSelectionByLine(
+					vFontInfos, vCellSize, vCodePoint, vSelected, vSelectionContainerEnum);
+			}
+			else if (IsSelectionType(GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_ZONE))
+			{
+				intersected = DrawGlyphSelectionByZone(
+					vFontInfos, vCellSize, vCodePoint, vSelected, vSelectionContainerEnum);
+			}
 		}
 
 		if (IsGlyphSelected(vFontInfos, vSelectionContainerEnum, vCodePoint))
@@ -408,15 +413,17 @@ void SelectionHelper::GlyphSelectionIfIntersected(
 	bool *vSelected,
 	SelectionContainerEnum vSelectionContainerEnum)
 {
+	bool CanHandleSelection = (ImGui::IsWindowHovered() || ImGui::IsWindowFocused());
+
 	bool selected = IsGlyphSelected(vFontInfos, vSelectionContainerEnum, vCodePoint);
 
 	// attention this item is catched at frame start
 	// but the start of selection mode is at end frame so this is started for LINE at the last frame.
 	// so for LINE mode, IsMouseClicked is never catched
 	// ZONE is Ok because not use IsMouseClicked for start mode of ZONE
-	// __clickedFromLastFrame is here for use the click of the alst frame only for line mode
+	// __clickedFromLastFrame is here for use the click of the last frame only for line mode
 	// todo : need to found a better behavior
-	if (ImGui::IsMouseClicked(0) || 
+	if (CanHandleSelection && ImGui::IsMouseClicked(0) ||
 		clickedFromLastFrame)
 	{
 		m_GlyphSelectedStateFirstClick = (selected ? 1 : 0);
@@ -439,7 +446,7 @@ void SelectionHelper::GlyphSelectionIfIntersected(
 		}
 
 		// same issue for line mode as IsMouseClicked
-		if (ImGui::IsMouseDown(0))
+		if (CanHandleSelection && ImGui::IsMouseDown(0))
 		{
 			if (*vSelected)
 			{
@@ -561,11 +568,11 @@ bool SelectionHelper::DrawGlyphSelectionByZone(
 	ct::frect rc(startRect.x, startRect.y, vCaseSize.x + pad.x, vCaseSize.y + pad.y);
 	if (rc.IsIntersectedByCircle(m_Zone.xy(), m_Zone.z)) // intersected
 	{
-		GlyphSelectionIfIntersected(
-			vFontInfos, vCaseSize,
-			vCodePoint, vSelected, vSelectionContainerEnum);
+			GlyphSelectionIfIntersected(
+				vFontInfos, vCaseSize,
+				vCodePoint, vSelected, vSelectionContainerEnum);
 
-		intersected = true;
+			intersected = true;
 	}
 	else // trail
 	{
