@@ -36,7 +36,7 @@ Succesfully tested on my side :
 * can subset font file (one file same time or by batch)
 * can generate header with corresponding glyph names and codepoint
 * can generate a card picture file who show the content (icon + name of the header)
-* can generate cpp file with compressed data or for embedded use
+* can generate src (C/C++/C#) file with compressed data for embedded (incorparated in binary) use
 * can merge many font file in one (the glyphs will be resized)
 * can edit codepoint and glyph names
 * have a project file
@@ -92,8 +92,8 @@ ImGuiFontStudio will generate, 4 file types, depending of your needs.
  | File Type | Description |
  | --------- | ----------- |
  | Font file TTF | Vector Font File needed for external mode |
- | Source Code | .cpp/.cs for c++/c# with conpressed font data for embedded mode |
- | Header code | .h/.cs for c++/c# with infos like (glyph labels/codepoint min/max ranges)]
+ | Source Code | .c/.cpp/.cs for c/c++/c# with conpressed font data for embedded mode |
+ | Header code | .h/.cs for c/c++/c# with infos like (glyph labels/codepoint min/max ranges)]
  | Card | .png this card is a picture file who show each glyph and the corresponding labels|
  
  1) If you want to have no external dependencie, 
@@ -111,13 +111,26 @@ for instance here in this example for load embedded font, we have (with font Pre
 * ICON_MAX_IGFS => max range
 * FONT_ICON_FILE_NAME_IGFS => the font file name to load (ex: fontawesome.ttf)
 
+### For C (CImGui)
+
+```c
+ImGuiIO* ioptr = igGetIO();
+ImFontAtlas_AddFontDefault(ioptr->Fonts, NULL);
+const ImWchar icons_ranges[3] = { ICON_MIN_IGFS, ICON_MAX_IGFS, 0 };
+ImFontConfig* icons_config = ImFontConfig_ImFontConfig();
+icons_config->MergeMode = true; 
+icons_config->PixelSnapH = true;
+ImFontAtlas_AddFontFromFileTTF(ioptr->Fonts, FONT_ICON_FILE_NAME_IGFS, 15.0f, icons_config, icons_ranges);
+ImFontConfig_destroy(icons_config);
+```
+
 ### For C++
 
 ```cpp
- ImGui::GetIO().Fonts->AddFontDefault();
+ImGui::GetIO().Fonts->AddFontDefault();
 static const ImWchar icons_ranges[] = { ICON_MIN_IGFS, ICON_MAX_IGFS, 0 };
- ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
- ImGui::GetIO().Fonts->AddFontFromFileTTF(FONT_ICON_FILE_NAME_IGFS, 15.0f, &icons_config, icons_ranges);
+ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
+ImGui::GetIO().Fonts->AddFontFromFileTTF(FONT_ICON_FILE_NAME_IGFS, 15.0f, &icons_config, icons_ranges);
 ```
 
 ### For C# (ImGui.NET)
@@ -140,13 +153,26 @@ for instance here in this example for load embedded font, we have (with font Pre
 * FONT_ICON_BUFFER_NAME_IGFS => the compressed buffer name you have in your_embedded_font.cpp to load 
 (ex: IGFS_compressed_data_base85)
 
+### For C (CImGui)
+
+```c
+ImGuiIO* ioptr = igGetIO();
+ImFontAtlas_AddFontDefault(ioptr->Fonts, NULL);
+const ImWchar icons_ranges[3] = { ICON_MIN_IGFS, ICON_MAX_IGFS, 0 };
+ImFontConfig* icons_config = ImFontConfig_ImFontConfig();
+icons_config->MergeMode = true; 
+icons_config->PixelSnapH = true;
+ImFontAtlas_AddFontFromMemoryCompressedBase85TTF(ioptr->Fonts, FONT_ICON_FILE_NAME_IGFS, 15.0f, icons_config, icons_ranges);
+ImFontConfig_destroy(icons_config);
+```
+
 ### For C++
 
 ```cpp
- ImGui::GetIO().Fonts->AddFontDefault();
- static const ImWchar icons_ranges[] = { ICON_MIN_IGFS, ICON_MAX_IGFS, 0 };
- ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
- ImGui::GetIO().Fonts->AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_IGFS, 15.0f, &icons_config, icons_ranges);
+ImGui::GetIO().Fonts->AddFontDefault();
+static const ImWchar icons_ranges[] = { ICON_MIN_IGFS, ICON_MAX_IGFS, 0 };
+ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
+ImGui::GetIO().Fonts->AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_IGFS, 15.0f, &icons_config, icons_ranges);
 ```
 
 ### For C# (ImGui.NET)
@@ -168,16 +194,16 @@ In both cases, the use in code is the same :
 After that step, when you have a ImGui widget to test, you just need to put in the label field,
 the glyph you want, defined in the header file for labels :
 
-### For C++
+### For C/C++
 
 ```cpp
- ImGui::Button(ICON_IGFS_FOLDER_OPEN " Open Font");
+ImGui::Button(ICON_IGFS_FOLDER_OPEN " Open Font");
 ```
 
 ### For C# (ImGui.NET)
 
 ```cpp
- ImGui::Button(IconFonts.IGFS_Labels.FOLDER_OPEN + " Open Font");
+ImGui::Button(IconFonts.IGFS_Labels.FOLDER_OPEN + " Open Font");
 ```
 
 and you will have this result : 
