@@ -259,14 +259,15 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 			// donc on fait soit l'un soit l'autre
 			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Font", "Font File",
 				&vProjectFile->m_GenMode, GENERATOR_MODE_FONT, mrw,
-				false, false, GENERATOR_MODE_RADIO_FONT_CPP);
+				true, false, GENERATOR_MODE_RADIO_FONT_SRC);
 			ImGui::SameLine();
 			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Src", "Source File for C++/C#\n\twith font as a bytes array",
 				&vProjectFile->m_GenMode, GENERATOR_MODE_SRC, mrw,
-				false, false, GENERATOR_MODE_RADIO_FONT_CPP);
+				true, false, GENERATOR_MODE_RADIO_FONT_SRC);
 
 			ImGui::FramedGroupText("Settings");
-			if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER))
+			if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER) || 
+				vProjectFile->IsGenMode(GENERATOR_MODE_SRC))
 			{
 				mrw = maxWidth / 3.0f - ImGui::GetStyle().FramePadding.x;
 				ImGui::Text("Header / Src Languages : ");
@@ -286,19 +287,19 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 					false, false, GENERATOR_MODE_RADIO_LANG);
 
 #ifdef _DEBUG
-				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
+/*				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
 					"Lua", "Embedded font as a Byte Array for LUA",
-					&vProjectFile->m_GenMode, GENERATOR_MODE_LANG_C, mrw,
+					&vProjectFile->m_GenMode, GENERATOR_MODE_LANG_LUA, mrw,
 					false, false, GENERATOR_MODE_RADIO_LANG);
 				ImGui::SameLine();
 				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
 					"Python", "Embedded font as a Byte Array for Python",
-					&vProjectFile->m_GenMode, GENERATOR_MODE_LANG_CPP, mrw,
+					&vProjectFile->m_GenMode, GENERATOR_MODE_LANG_PYTHON, mrw,
 					false, false, GENERATOR_MODE_RADIO_LANG);
-				ImGui::SameLine();
+				ImGui::SameLine();*/
 				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
 					"Rust", "Embedded font as a Byte Array for Rust",
-					&vProjectFile->m_GenMode, GENERATOR_MODE_LANG_CSHARP, mrw,
+					&vProjectFile->m_GenMode, GENERATOR_MODE_LANG_RUST, mrw,
 					false, false, GENERATOR_MODE_RADIO_LANG);
 #endif
 			}
