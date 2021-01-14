@@ -273,7 +273,7 @@ void SelectionHelper::DrawSelectionMenu(ProjectFile * vProjectFile, SelectionCon
 			}
 			else if (vSelectionContainerEnum == SelectionContainerEnum::SELECTION_CONTAINER_FINAL)
 			{
-				for (auto& font : vProjectFile->m_Fonts)
+				for (auto font : vProjectFile->m_Fonts)
 				{
 					SelectAllGlyphs(
 						vProjectFile, font.second,
@@ -294,7 +294,7 @@ void SelectionHelper::DrawSelectionMenu(ProjectFile * vProjectFile, SelectionCon
 			}
 			else if (vSelectionContainerEnum == SelectionContainerEnum::SELECTION_CONTAINER_FINAL)
 			{
-				for (auto& font : vProjectFile->m_Fonts)
+				for (auto font : vProjectFile->m_Fonts)
 				{
 					UnSelectAllGlyphs(
 						vProjectFile, font.second,
@@ -913,7 +913,7 @@ void SelectionHelper::RemoveSelectionFromFinal(ProjectFile * vProjectFile)
 void SelectionHelper::ReRange_Offset_After_Start(ProjectFile * vProjectFile, uint32_t vOffsetCodePoint)
 {
 	std::set<uint32_t> codePoints;
-	for (auto& font : vProjectFile->m_Fonts)
+	for (auto font : vProjectFile->m_Fonts)
 	{
 		for (auto& selection : font.second->m_SelectedGlyphs)
 		{
@@ -955,7 +955,7 @@ void SelectionHelper::ReRange_Offset_After_Start(ProjectFile * vProjectFile, uin
 void SelectionHelper::ReRange_Offset_Before_End(ProjectFile * vProjectFile, uint32_t vOffsetCodePoint)
 {
 	std::set<uint32_t> codePoints;
-	for (auto& font : vProjectFile->m_Fonts)
+	for (auto font : vProjectFile->m_Fonts)
 	{
 		for (auto& selection : font.second->m_SelectedGlyphs)
 		{
@@ -1339,7 +1339,7 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile * vProjectFile)
 		std::set<uint32_t> codePointsGlobal; vProjectFile->m_CodePointFoundInDouble = false;
 		std::set<std::string> namesLocal;
 		std::set<uint32_t> codePointsLocal;
-		for (auto& font : vProjectFile->m_Fonts)
+		for (auto font : vProjectFile->m_Fonts)
 		{
 			font.second->m_NameInDoubleFound = false;
 			font.second->m_CodePointInDoubleFound = false;
@@ -1442,7 +1442,7 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile * vProjectFile)
 			GeneratorPane::Instance()->AllowStatus(GeneratorStatusFlags::GENERATOR_STATUS_FONT_MERGE_ALLOWED);
 		}
 
-		for (auto& font : vProjectFile->m_Fonts)
+		for (auto font : vProjectFile->m_Fonts)
 		{
 			if (font.second->m_CodePointInDoubleFound)
 			{

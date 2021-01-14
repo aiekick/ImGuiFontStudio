@@ -98,7 +98,7 @@ std::string Compress::GetCompressedBase85BytesArray(
 		vLang == "cpp" || 
 		vLang == "c")
 	{
-		bufferName = vPrefix + "_compressed_data_base85";
+		bufferName = "compressed_data_base85";
 		res += "static const char " + bufferName + "[" + ct::toStr(bufferSize) + "+1] =";
 		if (generateByteArray)
 		{

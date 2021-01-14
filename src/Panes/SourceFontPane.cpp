@@ -19,7 +19,7 @@
 #include "SourceFontPane.h"
 
 #include <ctools/FileHelper.h>
-#include <ImGuiFileDialog/ImGuiFileDialog/ImGuiFileDialog.h>
+#include <ImGuiFileDialog/ImGuiFileDialog.h>
 
 #include <MainFrame.h>
 #include <Helper/SelectionHelper.h>
@@ -70,28 +70,28 @@ void SourceFontPane::DrawDialogsAndPopups(ProjectFile * vProjectFile)
 		ImVec2 min = MainFrame::Instance()->m_DisplaySize * 0.5f;
 		ImVec2 max = MainFrame::Instance()->m_DisplaySize;
 
-		if (igfd::ImGuiFileDialog::Instance()->FileDialog("OpenFontDlg", ImGuiWindowFlags_NoDocking, min, max))
+		if (ImGuiFileDialog::Instance()->Display("OpenFontDlg", ImGuiWindowFlags_NoDocking, min, max))
 		{
-			if (igfd::ImGuiFileDialog::Instance()->IsOk)
+			if (ImGuiFileDialog::Instance()->IsOk())
 			{
-				OpenFonts(vProjectFile, igfd::ImGuiFileDialog::Instance()->GetSelection());
+				OpenFonts(vProjectFile, ImGuiFileDialog::Instance()->GetSelection());
 			}
 
-			igfd::ImGuiFileDialog::Instance()->CloseDialog();
+			ImGuiFileDialog::Instance()->Close();
 		}
 
-		if (igfd::ImGuiFileDialog::Instance()->FileDialog("SaveFontToPictureFile", ImGuiWindowFlags_NoDocking, min, max))
+		if (ImGuiFileDialog::Instance()->Display("SaveFontToPictureFile", ImGuiWindowFlags_NoDocking, min, max))
 		{
-			if (igfd::ImGuiFileDialog::Instance()->IsOk)
+			if (ImGuiFileDialog::Instance()->IsOk())
 			{
-				auto atlas = dynamic_cast<ImFontAtlas*>((ImFontAtlas*)igfd::ImGuiFileDialog::Instance()->GetUserDatas());
+				auto atlas = dynamic_cast<ImFontAtlas*>((ImFontAtlas*)ImGuiFileDialog::Instance()->GetUserDatas());
 				if (atlas)
 				{
 					GLuint textureToSave = (GLuint)(size_t)atlas->TexID;
 					if (textureToSave)
 					{
 						auto win = MainFrame::Instance()->GetGLFWwindow();
-						auto file = igfd::ImGuiFileDialog::Instance()->GetFilePathName();
+						auto file = ImGuiFileDialog::Instance()->GetFilePathName();
 						Generator::SaveTextureToPng(win, file, textureToSave,
 							ct::uvec2(atlas->TexWidth, atlas->TexHeight), 4U);
 						FileHelper::Instance()->OpenFile(file);
@@ -99,7 +99,7 @@ void SourceFontPane::DrawDialogsAndPopups(ProjectFile * vProjectFile)
 				}
 			}
 
-			igfd::ImGuiFileDialog::Instance()->CloseDialog();
+			ImGuiFileDialog::Instance()->Close();
 		}
 	}
 }
@@ -207,7 +207,7 @@ void SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile)
 
 						static int selection = 0;
 						static ImGuiTableFlags flags =
-							ImGuiTableFlags_SizingPolicyFixed |	ImGuiTableFlags_RowBg |
+							ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg |
 							ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
 							ImGuiTableFlags_NoHostExtendY | ImGuiTableFlags_Borders;
 						if (ImGui::BeginTable("##fileTable", 2, flags, ImVec2(maxWidth - ImGui::GetStyle().FramePadding.x, 100)))
@@ -217,7 +217,7 @@ void SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile)
 							ImGui::TableSetupColumn("Edit", ImGuiTableColumnFlags_WidthFixed, 32, 1);
 							ImGui::TableHeadersRow();
 							
-							for (auto & itFont : vProjectFile->m_Fonts)
+							for (auto itFont : vProjectFile->m_Fonts)
 							{
 								bool sel = false;
 
@@ -258,10 +258,10 @@ void SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile)
 										else
 											label = "Search an alternative font file " + itFont.first;
 
-										igfd::ImGuiFileDialog::Instance()->OpenModal(
+										ImGuiFileDialog::Instance()->OpenModal(
 											"SolveBadFilePathName",
 											label.c_str(), "Font File (*.ttf *.otf){.ttf,.otf}", ".",
-											itFont.first, 1, (igfd::UserDatas)itFont.first.c_str());
+											itFont.first.c_str(), 1, (IGFD::UserDatas)itFont.first.c_str());
 									}
 									if (itFont.second->m_NeedFilePathResolve)
 										ImGui::PopStyleColor();
@@ -343,7 +343,7 @@ void SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile)
 							ImGui::RadioButtonLabeled_BitWize<GlyphDisplayTuningModeFlags>(
 								ICON_IGFS_USED "##GlypCountIsMaster",
 								ICON_IGFS_NOT_USED "##GlypCountIsMaster",
-								"Apply Glyph Count Policy on Resize",
+								"Apply Glyph Count Policy when Resized",
 								&vProjectFile->m_GlyphDisplayTuningMode, GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT, radioButtonWidth, true);
 							radioButtonWidth = ImGui::GetItemRectSize().x;
 
@@ -359,7 +359,7 @@ void SourceFontPane::DrawParamsPane(ProjectFile *vProjectFile)
 							ImGui::RadioButtonLabeled_BitWize<GlyphDisplayTuningModeFlags>(
 								ICON_IGFS_USED "##GlypSizeIsMaster",
 								ICON_IGFS_NOT_USED "##GlypSizeIsMaster",
-								"Apply Glyph Width Policy on Resize",
+								"Policy to be applied When resized :\n1) Glyph Width Policy\n2) Glyph Count Policy",
 								&vProjectFile->m_GlyphDisplayTuningMode, GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_SIZE, radioButtonWidth, true);
 							
 							ImGui::FramedGroupSeparator();
@@ -400,8 +400,8 @@ open font :
 	MainFrame::Instance()->GetActionSystem()->Clear();
 	MainFrame::Instance()->GetActionSystem()->Add([this]()
 		{
-			igfd::ImGuiFileDialog::Instance()->OpenModal(
-				"OpenFontDlg", "Open Font File", "Font File (*.ttf *.otf){.ttf,.otf}", ".", 0);
+			ImGuiFileDialog::Instance()->OpenModal(
+				"OpenFontDlg", "Open Font File", "Font File (*.ttf *.otf){.ttf,.otf},All Files (*.*){.*}", ".", 0);
 			return true;
 		});
 }
@@ -648,8 +648,10 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 												SelectionContainerEnum::SELECTION_CONTAINER_SOURCE);
 
 											ImGui::PushID(NewWidgetId());
+											ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
 											bool check = ImGui::ImageCheckButton(vFontInfos->m_ImFontAtlas.TexID, &selected, glyph_size,
 												ImVec2(glyph.U0, glyph.V0), ImVec2(glyph.U1, glyph.V1), hostTextureSize);
+											ImGui::PopStyleVar();
 											ImGui::PopID();
 
 											if (check)
@@ -704,8 +706,8 @@ void SourceFontPane::DrawFontTexture(std::shared_ptr<FontInfos> vFontInfos)
 				{
 					if (ImGui::MenuItem("Save to File"))
 					{
-						igfd::ImGuiFileDialog::Instance()->OpenModal("SaveFontToPictureFile", "Svae Font Testure to File", ".png", 
-							".", 0, igfd::UserDatas(&vFontInfos->m_ImFontAtlas), ImGuiFileDialogFlags_ConfirmOverwrite);
+						ImGuiFileDialog::Instance()->OpenModal("SaveFontToPictureFile", "Svae Font Testure to File", ".png", 
+							".", 0, IGFD::UserDatas(&vFontInfos->m_ImFontAtlas), ImGuiFileDialogFlags_ConfirmOverwrite);
 					}
 
 					ImGui::EndMenuBar();
@@ -747,17 +749,27 @@ void SourceFontPane::OpenFont(ProjectFile *vProjectFile, const std::string& vFon
 		if (ps.isOk)
 		{
 			std::string fontName = ps.name + "." + ps.ext;
-			std::shared_ptr<FontInfos> font = vProjectFile->m_Fonts[fontName];
-			if (font->LoadFont(vProjectFile, vFontFilePathName))
-			{
-				if (vProjectFile->m_FontToMergeIn.empty() ||
-				    vProjectFile->m_FontToMergeIn == font->m_FontFileName)
-				{
-					SelectFont(vProjectFile, font);
-				}
 
-				if (vUpdateCount)
-					vProjectFile->UpdateCountSelectedGlyphs();
+			if (vProjectFile->m_Fonts.find(fontName) == vProjectFile->m_Fonts.end())
+			{
+				// create font 
+				vProjectFile->m_Fonts[fontName] = std::make_shared<FontInfos>();
+			}
+						
+			auto font = vProjectFile->m_Fonts[fontName];
+			if (font)
+			{
+				if (font->LoadFont(vProjectFile, vFontFilePathName))
+				{
+					if (vProjectFile->m_FontToMergeIn.empty() ||
+						vProjectFile->m_FontToMergeIn == font->m_FontFileName)
+					{
+						SelectFont(vProjectFile, font);
+					}
+
+					if (vUpdateCount)
+						vProjectFile->UpdateCountSelectedGlyphs();
+				}
 			}
 		}
 	}

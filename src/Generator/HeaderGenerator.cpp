@@ -126,8 +126,8 @@ static std::string GetGlyphTableMinMax(std::string vLang, std::string vPrefix, c
 	if (vLang == "cpp" || 
 		vLang == "c")
 	{
-		header += ct::toStr("#define ICON_MIN_%s 0x%s\n", vPrefix.c_str(), ct::toHexStr(vCodePointRange.x).c_str());
-		header += ct::toStr("#define ICON_MAX_%s 0x%s\n", vPrefix.c_str(), ct::toHexStr(vCodePointRange.y).c_str());
+		header += ct::toStr("#define ICON_%s_MIN 0x%s\n", vPrefix.c_str(), ct::toHexStr(vCodePointRange.x).c_str());
+		header += ct::toStr("#define ICON_%s_MAX 0x%s\n", vPrefix.c_str(), ct::toHexStr(vCodePointRange.y).c_str());
 	}
 	else if (vLang == "c#")
 	{
@@ -147,7 +147,7 @@ static std::string GetGlyphItem(std::string vLang, std::string vType, std::strin
 	if (vLang == "cpp" || 
 		vLang == "c")
 	{
-		header += ct::toStr("#define %s_%s u8\"\\u%s\"\n", vType.c_str(), vLabel.c_str(), ct::toHexStr(vCodePoint).c_str());
+		header += ct::toStr("#define %s_%s_%s u8\"\\u%s\"\n", vType.c_str(), vPrefix.c_str(), vLabel.c_str(), ct::toHexStr(vCodePoint).c_str());
 	}
 	else if (vLang == "c#")
 	{
@@ -303,7 +303,7 @@ void HeaderGenerator::GenerateHeader_Merged(
 			
 			// we take only selected glyphs of all fonts
 			std::map<std::string, uint32_t> glyphNames;
-			for (const auto& font : vProjectFile->m_Fonts)
+			for (const auto font : vProjectFile->m_Fonts)
 				for (const auto& glyph : font.second->m_SelectedGlyphs)
 					glyphNames[glyph.second.newHeaderName] = glyph.second.newCodePoint;
 			m_FinalGlyphNames.clear();

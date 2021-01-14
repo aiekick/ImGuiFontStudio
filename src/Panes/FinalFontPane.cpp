@@ -353,10 +353,12 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 		const ImVec2 UV0 = ImVec2(vGlyph->glyph.U0, vGlyph->glyph.V0);
 		const ImVec2 UV1 = ImVec2(vGlyph->glyph.U1, vGlyph->glyph.V1);
 
-		res = ImGui::ImageCheckButton(vFontInfos->m_ImFontAtlas.TexID, 
+		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
+		res = ImGui::ImageCheckButton(vFontInfos->m_ImFontAtlas.TexID,
 			&selected, vSize, UV0, UV1, hostTextureSize,
 			-1, vShowRect ? 3.0f : 0.0f);
-		
+		ImGui::PopStyleVar();
+
 		if (res)
 		{
 			if (vForceEditMode)
@@ -518,7 +520,7 @@ void FinalFontPane::DrawSelectionsByFontNoOrder(ProjectFile *vProjectFile, bool 
 {
 	if (vProjectFile)
 	{
-		for (auto & it : vProjectFile->m_Fonts)
+		for (auto it : vProjectFile->m_Fonts)
 		{
 			DrawSelectionsByFontNoOrder_OneFontOnly(vProjectFile, it.second, true, false, false, vShowTooltipInfos);
 
@@ -657,7 +659,7 @@ void FinalFontPane::PrepareSelectionByFontOrderedByCodePoint(ProjectFile *vProje
 {
 	if (vProjectFile)
 	{
-		for (auto& itFont : vProjectFile->m_Fonts)
+		for (auto itFont : vProjectFile->m_Fonts)
 		{
 			itFont.second->m_GlyphsOrderedByCodePoints.clear();
 
@@ -678,7 +680,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint(ProjectFile *vProject
 {
 	if (vProjectFile)
 	{
-		for (auto & it : vProjectFile->m_Fonts)
+		for (auto it : vProjectFile->m_Fonts)
 		{
 			DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(vProjectFile, it.second, true, false, false, vShowTooltipInfos);
 
@@ -822,7 +824,7 @@ void FinalFontPane::PrepareSelectionByFontOrderedByGlyphNames(ProjectFile *vProj
 {
 	if (vProjectFile)
 	{
-		for (auto& itFont : vProjectFile->m_Fonts)
+		for (auto itFont : vProjectFile->m_Fonts)
 		{
 			itFont.second->m_GlyphsOrderedByGlyphName.clear();
 
@@ -843,7 +845,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames(ProjectFile *vProjec
 {
 	if (vProjectFile)
 	{
-		for (auto & it : vProjectFile->m_Fonts)
+		for (auto it : vProjectFile->m_Fonts)
 		{
 			DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(vProjectFile, it.second, true, false, false, vShowTooltipInfos);
 
@@ -988,7 +990,7 @@ void FinalFontPane::PrepareSelectionMergedNoOrder(ProjectFile *vProjectFile)
 
 	if (vProjectFile)
 	{
-		for (auto& itFont : vProjectFile->m_Fonts)
+		for (auto itFont : vProjectFile->m_Fonts)
 		{
 			for (auto& itGlyph : itFont.second->m_SelectedGlyphs)
 			{
@@ -1100,7 +1102,7 @@ void FinalFontPane::PrepareSelectionMergedOrderedByCodePoint(ProjectFile *vProje
 
 	if (vProjectFile)
 	{
-		for (auto& itFont : vProjectFile->m_Fonts)
+		for (auto itFont : vProjectFile->m_Fonts)
 		{
 			for (auto& itGlyph : itFont.second->m_SelectedGlyphs)
 			{
@@ -1221,7 +1223,7 @@ void FinalFontPane::PrepareSelectionMergedOrderedByGlyphNames(ProjectFile *vProj
 
 	if (vProjectFile)
 	{
-		for (auto& itFont : vProjectFile->m_Fonts)
+		for (auto itFont : vProjectFile->m_Fonts)
 		{
 			for (auto& itGlyph : itFont.second->m_SelectedGlyphs)
 			{

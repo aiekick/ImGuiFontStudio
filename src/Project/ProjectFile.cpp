@@ -168,7 +168,7 @@ void ProjectFile::UpdateCountSelectedGlyphs()
 	m_CountSelectedGlyphs = 0;
 	m_CountFontWithSelectedGlyphs = 0;
 
-	for (auto &it : m_Fonts)
+	for (auto it : m_Fonts)
 	{
 		if (it.second)
 		{
@@ -224,7 +224,7 @@ std::string ProjectFile::getXml(const std::string& vOffset)
 
 	if (!m_Fonts.empty())
 	{
-		for (auto &it : m_Fonts)
+		for (auto it : m_Fonts)
 		{
 			if (it.second)
 			{

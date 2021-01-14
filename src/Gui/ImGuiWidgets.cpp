@@ -1024,6 +1024,108 @@ void ImGui::ShowCustomStyleEditor(bool *vOpen, ImGuiStyle* ref)
 	ImGui::End();
 }
 
+IMGUI_API bool ImGui::CustomButton(const char* label, const ImVec2& size_arg, ImGuiButtonFlags flags)
+{
+	ImGuiWindow* window = GetCurrentWindow();
+	if (window->SkipItems)
+		return false;
+
+	ImGuiContext& g = *GImGui;
+	const ImGuiStyle& style = g.Style;
+	const ImGuiID id = window->GetID(label);
+	const ImVec2 label_size = CalcTextSize(label, NULL, true);
+
+	ImVec2 pos = window->DC.CursorPos;
+	if ((flags & ImGuiButtonFlags_AlignTextBaseLine) && style.FramePadding.y < window->DC.CurrLineTextBaseOffset) // Try to vertically align buttons that are smaller/have no padding so that text baseline matches (bit hacky, since it shouldn't be a flag)
+		pos.y += window->DC.CurrLineTextBaseOffset - style.FramePadding.y;
+	ImVec2 size = CalcItemSize(size_arg, label_size.x + style.FramePadding.x * 2.0f, label_size.y + style.FramePadding.y * 2.0f);
+
+	const ImRect bb(pos, pos + size);
+	ItemSize(size, style.FramePadding.y);
+	if (!ItemAdd(bb, id))
+		return false;
+
+	if (window->DC.ItemFlags & ImGuiItemFlags_ButtonRepeat)
+		flags |= ImGuiButtonFlags_Repeat;
+	bool hovered, held;
+	bool pressed = ButtonBehavior(bb, id, &hovered, &held, flags);
+
+	// Render
+	const ImU32 col = GetColorU32((held && hovered) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+	RenderFrame(bb.Min, bb.Max, col, true, style.FrameRounding);
+	RenderNavHighlight(bb, id);
+	RenderTextClipped(bb.Min + style.FramePadding, bb.Max - style.FramePadding, label, NULL, &label_size, style.ButtonTextAlign, &bb);
+
+	// Automatically close popups
+	//if (pressed && !(flags & ImGuiButtonFlags_DontClosePopups) && (window->Flags & ImGuiWindowFlags_Popup))
+	//    CloseCurrentPopup();
+
+	IMGUI_TEST_ENGINE_ITEM_INFO(id, label, window->DC.LastItemStatusFlags);
+	return pressed;
+}
+
+#ifdef USE_GRADIENT
+
+void ImGui::RenderGradFrame(ImVec2 p_min, ImVec2 p_max, ImU32 fill_start_col, ImU32 fill_end_col, bool border, float rounding)
+{
+	ImGuiContext& g = *GImGui;
+	ImGuiWindow* window = g.CurrentWindow;
+	window->DrawList->AddRectFilledMultiColor(p_min, p_max, fill_end_col, fill_end_col, fill_start_col, fill_start_col);
+	const float border_size = g.Style.FrameBorderSize;
+	if (border && border_size > 0.0f)
+	{
+		window->DrawList->AddRect(p_min + ImVec2(1, 1), p_max + ImVec2(1, 1), GetColorU32(ImGuiCol_BorderShadow), rounding, ImDrawCornerFlags_All, border_size);
+		window->DrawList->AddRect(p_min, p_max, GetColorU32(ImGuiCol_Border), rounding, ImDrawCornerFlags_All, border_size);
+	}
+}
+
+bool ImGui::GradButton(const char* label, const ImVec2& size_arg, ImGuiButtonFlags flags)
+{
+	ImGuiWindow* window = GetCurrentWindow();
+	if (window->SkipItems)
+		return false;
+
+	ImGuiContext& g = *GImGui;
+	const ImGuiStyle& style = g.Style;
+	const ImGuiID id = window->GetID(label);
+	const ImVec2 label_size = CalcTextSize(label, NULL, true);
+
+	ImVec2 pos = window->DC.CursorPos;
+	if ((flags & ImGuiButtonFlags_AlignTextBaseLine) && style.FramePadding.y < window->DC.CurrLineTextBaseOffset) // Try to vertically align buttons that are smaller/have no padding so that text baseline matches (bit hacky, since it shouldn't be a flag)
+		pos.y += window->DC.CurrLineTextBaseOffset - style.FramePadding.y;
+	ImVec2 size = CalcItemSize(size_arg, label_size.x + style.FramePadding.x * 2.0f, label_size.y + style.FramePadding.y * 2.0f);
+
+	const ImRect bb(pos, pos + size);
+	ItemSize(size, style.FramePadding.y);
+	if (!ItemAdd(bb, id))
+		return false;
+
+	if (window->DC.ItemFlags & ImGuiItemFlags_ButtonRepeat)
+		flags |= ImGuiButtonFlags_Repeat;
+	bool hovered, held;
+	bool pressed = ButtonBehavior(bb, id, &hovered, &held, flags);
+
+	// Render
+	//const ImU32 col = GetColorU32((held && hovered) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+	//RenderFrame(bb.Min, bb.Max, col, true, style.FrameRounding);
+	
+	const ImVec4 col = GetStyleColorVec4((held && hovered) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+	ImVec4 col_darker = ImVec4(col.x * 0.5f, col.y * 0.5f, col.z * 0.5f, col.w);
+	RenderGradFrame(bb.Min, bb.Max, GetColorU32(col_darker), GetColorU32(col), true, g.Style.FrameRounding);
+
+	RenderNavHighlight(bb, id);
+	RenderTextClipped(bb.Min + style.FramePadding, bb.Max - style.FramePadding, label, NULL, &label_size, style.ButtonTextAlign, &bb);
+
+	// Automatically close popups
+	//if (pressed && !(flags & ImGuiButtonFlags_DontClosePopups) && (window->Flags & ImGuiWindowFlags_Popup))
+	//    CloseCurrentPopup();
+
+	IMGUI_TEST_ENGINE_ITEM_INFO(id, label, window->DC.LastItemStatusFlags);
+	return pressed;
+}
+
+#endif
+
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ///// SLIDERS //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
@@ -1082,9 +1184,16 @@ bool ImGui::SliderScalarCompact(float width, const char* label, ImGuiDataType da
 		return TempInputScalar(total_bb, id, label, data_type, p_data, format);// , p_min, p_max);
 
 	// Draw frame
+
+#ifndef USE_GRADIENT
 	const ImU32 frame_col = GetColorU32(g.ActiveId == id ? ImGuiCol_FrameBgActive : g.HoveredId == id ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
 	RenderNavHighlight(total_bb, id);
 	RenderFrame(total_bb.Min, total_bb.Max, frame_col, true, g.Style.FrameRounding);
+#else
+	const ImVec4 frame_col = GetStyleColorVec4(g.ActiveId == id ? ImGuiCol_FrameBgActive : g.HoveredId == id ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
+	ImVec4 frame_col_darker = ImVec4(frame_col.x * 0.5f, frame_col.y * 0.5f, frame_col.z * 0.5f, frame_col.w);
+	RenderGradFrame(total_bb.Min, total_bb.Max, GetColorU32(frame_col_darker), GetColorU32(frame_col), true, g.Style.FrameRounding);
+#endif
 
 	// Slider behavior
 	ImRect grab_bb;
@@ -1094,7 +1203,15 @@ bool ImGui::SliderScalarCompact(float width, const char* label, ImGuiDataType da
 
 	// Render grab
 	if (grab_bb.Max.x > grab_bb.Min.x)
+	{
+#ifdef USE_GRADIENT
+		const ImVec4 col = GetStyleColorVec4(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab);
+		ImVec4 col_darker = ImVec4(col.x * 0.5f, col.y * 0.5f, col.z * 0.5f, col.w);
+		window->DrawList->AddRectFilledMultiColor(grab_bb.Min, grab_bb.Max, GetColorU32(col), GetColorU32(col), GetColorU32(col_darker), GetColorU32(col_darker));
+#else
 		window->DrawList->AddRectFilled(grab_bb.Min, grab_bb.Max, GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
+#endif
+	}
 
 	// display label / but not if input mode 
 	if (label_size.x > 0.0f && !temp_input_is_active)
@@ -1137,7 +1254,7 @@ bool ImGui::SliderUIntDefaultCompact(float width, const char* label, uint32_t* v
 	float ax = ImGui::GetCursorPosX();
 
 	ImGui::PushID(label);
-	if (Button(ICON_IGFS_RESET))
+	if (CustomButton(ICON_IGFS_RESET))
 	{
 		*v = v_default;
 		change = true;
@@ -1160,7 +1277,7 @@ bool ImGui::SliderIntDefaultCompact(float width, const char* label, int* v, int 
 	float ax = ImGui::GetCursorPosX();
 
 	ImGui::PushID(label);
-	if (Button(ICON_IGFS_RESET))
+	if (CustomButton(ICON_IGFS_RESET))
 	{
 		*v = v_default;
 		change = true;
@@ -1182,7 +1299,7 @@ bool ImGui::SliderFloatDefaultCompact(float width, const char* label, float* v, 
 
 	float ax = ImGui::GetCursorPosX();
 
-	if (Button(ICON_IGFS_RESET))
+	if (CustomButton(ICON_IGFS_RESET))
 	{
 		*v = v_default;
 		change = true;

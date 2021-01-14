@@ -26,7 +26,7 @@
 #include <cctype>
 #include <GLFW/glfw3.h>
 
-#include <ImGuiFileDialog/ImGuiFileDialog/ImGuiFileDialog.h>
+#include <ImGuiFileDialog/ImGuiFileDialog.h>
 #include <Generator/Generator.h>
 #include <Gui/ImGuiWidgets.h>
 #include <Panes/Manager/LayoutManager.h>
@@ -87,7 +87,7 @@ void MainFrame::LoadProject(const std::string& vFilePathName)
 	if (m_ProjectFile.LoadAs(vFilePathName))
 	{
 		SetAppTitle(vFilePathName);
-		for (auto &it : m_ProjectFile.m_Fonts)
+		for (auto it : m_ProjectFile.m_Fonts)
 		{
 			std::string absPath = m_ProjectFile.GetAbsolutePath(it.second->m_FontFilePathName);
 			SourceFontPane::Instance()->OpenFont(&m_ProjectFile, absPath, false);
@@ -285,13 +285,13 @@ void MainFrame::DisplayDialogsAndPopups()
 		ImVec2 min = MainFrame::Instance()->m_DisplaySize * 0.5f;
 		ImVec2 max = MainFrame::Instance()->m_DisplaySize;
 		
-		if (igfd::ImGuiFileDialog::Instance()->FileDialog("SolveBadFilePathName",
+		if (ImGuiFileDialog::Instance()->Display("SolveBadFilePathName",
 			ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking, min, max))
 		{
-			if (igfd::ImGuiFileDialog::Instance()->IsOk)
+			if (ImGuiFileDialog::Instance()->IsOk())
 			{
-				auto GoodFilePathName = igfd::ImGuiFileDialog::Instance()->GetFilePathName();
-				auto UserDatas = std::string((const char*)igfd::ImGuiFileDialog::Instance()->GetUserDatas());
+				auto GoodFilePathName = ImGuiFileDialog::Instance()->GetFilePathName();
+				auto UserDatas = std::string((const char*)ImGuiFileDialog::Instance()->GetUserDatas());
 
 				if (FileHelper::Instance()->IsFileExist(GoodFilePathName))
 				{
@@ -302,7 +302,7 @@ void MainFrame::DisplayDialogsAndPopups()
 				}
 			}
 
-			igfd::ImGuiFileDialog::Instance()->CloseDialog();
+			ImGuiFileDialog::Instance()->Close();
 		}
 	}
 
@@ -431,7 +431,7 @@ void MainFrame::SetAppTitle(const std::string& vFilePathName)
 void MainFrame::OpenUnSavedDialog()
 {
 	// force close dialog if any dialog is opened
-	igfd::ImGuiFileDialog::Instance()->CloseDialog();
+	ImGuiFileDialog::Instance()->Close();
 
 	m_SaveDialogIfRequired = true;
 }
@@ -536,7 +536,7 @@ open project :
 	m_ActionSystem.Add([this]()
 		{
 			CloseUnSavedDialog();
-			igfd::ImGuiFileDialog::Instance()->OpenModal(
+			ImGuiFileDialog::Instance()->OpenModal(
 				"OpenProjectDlg", "Open Project File", "Project File{.ifs}", ".");
 			return true;
 		});
@@ -580,7 +580,7 @@ save project :
 			if (!SaveProject())
 			{
 				CloseUnSavedDialog();
-				igfd::ImGuiFileDialog::Instance()->OpenModal(
+				ImGuiFileDialog::Instance()->OpenModal(
 					"SaveProjectDlg", "Save Project File", "Project File{.ifs}", ".");
 			}
 			return true;
@@ -601,7 +601,7 @@ save as project :
 	m_ActionSystem.Add([this]()
 		{
 			CloseUnSavedDialog();
-			igfd::ImGuiFileDialog::Instance()->OpenModal(
+			ImGuiFileDialog::Instance()->OpenModal(
 				"SaveProjectDlg", "Save Project File", "Project File{.ifs}", ".",
 				1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
 			return true;
@@ -688,7 +688,7 @@ void MainFrame::Action_UnSavedDialog_SaveProject()
 		m_ActionSystem.Insert([this]()
 			{
 				CloseUnSavedDialog();
-				igfd::ImGuiFileDialog::Instance()->OpenModal(
+				ImGuiFileDialog::Instance()->OpenModal(
 					"SaveProjectDlg", "Save Project File", "Project File{.ifs}",
 					".", 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
 				return true;
@@ -705,7 +705,7 @@ void MainFrame::Action_UnSavedDialog_SaveAsProject()
 	m_ActionSystem.Insert([this]()
 		{
 			CloseUnSavedDialog();
-			igfd::ImGuiFileDialog::Instance()->OpenModal(
+			ImGuiFileDialog::Instance()->OpenModal(
 				"SaveProjectDlg", "Save Project File", "Project File{.ifs}",
 				".", 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
 			return true;
@@ -728,20 +728,20 @@ bool MainFrame::Display_OpenProjectDialog()
 	ImVec2 min = MainFrame::Instance()->m_DisplaySize * 0.5f;
 	ImVec2 max = MainFrame::Instance()->m_DisplaySize;
 	
-	if (igfd::ImGuiFileDialog::Instance()->FileDialog("OpenProjectDlg",
+	if (ImGuiFileDialog::Instance()->Display("OpenProjectDlg",
 		ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking, min, max))
 	{
-		if (igfd::ImGuiFileDialog::Instance()->IsOk)
+		if (ImGuiFileDialog::Instance()->IsOk())
 		{
 			CloseUnSavedDialog();
-			LoadProject(igfd::ImGuiFileDialog::Instance()->GetFilePathName());
+			LoadProject(ImGuiFileDialog::Instance()->GetFilePathName());
 		}
 		else // cancel
 		{
 			Action_Cancel(); // we interrupts all actions
 		}
 
-		igfd::ImGuiFileDialog::Instance()->CloseDialog();
+		ImGuiFileDialog::Instance()->Close();
 
 		return true;
 	}
@@ -756,21 +756,21 @@ bool MainFrame::Display_SaveProjectDialog()
 	ImVec2 min = MainFrame::Instance()->m_DisplaySize * 0.5f;
 	ImVec2 max = MainFrame::Instance()->m_DisplaySize;
 	
-	if (igfd::ImGuiFileDialog::Instance()->FileDialog("SaveProjectDlg",
+	if (ImGuiFileDialog::Instance()->Display("SaveProjectDlg",
 		ImGuiWindowFlags_NoCollapse | ImGuiWindowFlags_NoDocking, min, max))
 	{
-		if (igfd::ImGuiFileDialog::Instance()->IsOk)
+		if (ImGuiFileDialog::Instance()->IsOk())
 		{
 			CloseUnSavedDialog();
-			auto file = igfd::ImGuiFileDialog::Instance()->GetFilePathName();
-			SaveAsProject(igfd::ImGuiFileDialog::Instance()->GetFilePathName());
+			auto file = ImGuiFileDialog::Instance()->GetFilePathName();
+			SaveAsProject(ImGuiFileDialog::Instance()->GetFilePathName());
 		}
 		else // cancel
 		{
 			Action_Cancel(); // we interrupts all actions
 		}
 
-		igfd::ImGuiFileDialog::Instance()->CloseDialog();
+		ImGuiFileDialog::Instance()->Close();
 
 		return true;
 	}
@@ -788,12 +788,15 @@ void MainFrame::ReRouteFontToFile(const std::string& vFontNameToReRoute, const s
 	if (ps.isOk)
 	{
 		auto font = m_ProjectFile.m_Fonts[vFontNameToReRoute];
-		font->m_FontFilePathName = m_ProjectFile.GetRelativePath(vGoodFilePathName);
-		font->m_FontFileName = ps.name + "." + ps.ext;
-		m_ProjectFile.m_Fonts[font->m_FontFileName] = font;
-		if (font->m_FontFileName != vFontNameToReRoute)
-			m_ProjectFile.m_Fonts.erase(vFontNameToReRoute);
-		SourceFontPane::Instance()->OpenFont(&m_ProjectFile, font->m_FontFilePathName, true);
+		if (font)
+		{
+			font->m_FontFilePathName = m_ProjectFile.GetRelativePath(vGoodFilePathName);
+			font->m_FontFileName = ps.name + "." + ps.ext;
+			m_ProjectFile.m_Fonts[font->m_FontFileName] = font;
+			if (font->m_FontFileName != vFontNameToReRoute)
+				m_ProjectFile.m_Fonts.erase(vFontNameToReRoute);
+			SourceFontPane::Instance()->OpenFont(&m_ProjectFile, font->m_FontFilePathName, true);
+		}
 	}
 }
 
@@ -816,7 +819,7 @@ std::string MainFrame::getXml(const std::string& vOffset)
 
 	str += ImGuiThemeHelper::Instance()->getXml(vOffset);
 	str += LayoutManager::Instance()->getXml(vOffset);
-	str += vOffset + "<bookmarks>" + igfd::ImGuiFileDialog::Instance()->SerializeBookmarks() + "</bookmarks>\n";
+	str += vOffset + "<bookmarks>" + ImGuiFileDialog::Instance()->SerializeBookmarks() + "</bookmarks>\n";
 	str += vOffset + "<showaboutdialog>" + (m_ShowAboutDialog ? "true" : "false") + "</showaboutdialog>\n";
 	str += vOffset + "<showimgui>" + (m_ShowImGui ? "true" : "false") + "</showimgui>\n";
 	str += vOffset + "<showmetric>" + (m_ShowMetric ? "true" : "false") + "</showmetric>\n";
@@ -843,7 +846,7 @@ bool MainFrame::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 	LayoutManager::Instance()->setFromXml(vElem, vParent);
 
 	if (strName == "bookmarks")
-		igfd::ImGuiFileDialog::Instance()->DeserializeBookmarks(strValue);
+		ImGuiFileDialog::Instance()->DeserializeBookmarks(strValue);
 	else if (strName == "project")
 		LoadProject(strValue);
 	else if (strName == "showaboutdialog")

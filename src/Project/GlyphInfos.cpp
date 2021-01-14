@@ -43,20 +43,21 @@ int GlyphDisplayHelper::CalcGlyphsCountAndSize(
 	{
 		currentPaneAvailWidth = ImGui::GetContentRegionAvail().x;
 		
+		int glyphCount = vProjectFile->m_Preview_Glyph_CountX;
+		float glyphSize = (float)vProjectFile->m_Preview_Glyph_Width;
+		
+		// GlyphSize est Menant, puis glyphCount est appliqué
+		if (vProjectFile->m_GlyphDisplayTuningMode & GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_SIZE)
+		{
+			vProjectFile->m_Preview_Glyph_CountX = (int)(currentPaneAvailWidth / ct::maxi(vProjectFile->m_Preview_Glyph_Width, 1.0f));
+			glyphSize = currentPaneAvailWidth / (float)ct::maxi(vProjectFile->m_Preview_Glyph_CountX, 1);
+		}
 		// GlyphCount est Menant, dont m_Preview_Glyph_CountX n'est jamais réécrit en dehors du user
-		if (vProjectFile->m_GlyphDisplayTuningMode & GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT)
+		else if (vProjectFile->m_GlyphDisplayTuningMode & GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT)
 		{
 			vProjectFile->m_Preview_Glyph_Width = currentPaneAvailWidth / (float)ct::maxi(vProjectFile->m_Preview_Glyph_CountX, 1);
 		}
-		// GlyphSize est Menant, dont m_Preview_Glyph_Width n'est jamais réécrit en dehors du user
-		else if (vProjectFile->m_GlyphDisplayTuningMode & GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_SIZE)
-		{
-			vProjectFile->m_Preview_Glyph_CountX = (int)(currentPaneAvailWidth / ct::maxi(vProjectFile->m_Preview_Glyph_Width, 1.0f));
-		}
-
-		int glyphCount = vProjectFile->m_Preview_Glyph_CountX;
-		float glyphSize = (float)vProjectFile->m_Preview_Glyph_Width;
-
+			
 		if (glyphCount > 0)
 		{
 			*vCellSize = ImVec2(glyphSize, glyphSize);

@@ -265,7 +265,7 @@ void FontInfos::DrawInfos()
 			const float aw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 2.0f;
 
 			static ImGuiTableFlags flags = 
-				ImGuiTableFlags_SizingPolicyFixed |
+				ImGuiTableFlags_SizingFixedFit |
 				ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable |
 				ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
 				ImGuiTableFlags_NoHostExtendY | ImGuiTableFlags_Borders;

@@ -88,16 +88,16 @@ void GeneratorPane::DrawDialogsAndPopups(ProjectFile* vProjectFile)
 		ImVec2 min = MainFrame::Instance()->m_DisplaySize * 0.5f;
 		ImVec2 max = MainFrame::Instance()->m_DisplaySize;
 
-		if (igfd::ImGuiFileDialog::Instance()->FileDialog("GenerateFileDlg", ImGuiWindowFlags_NoDocking, min, max))
+		if (ImGuiFileDialog::Instance()->Display("GenerateFileDlg", ImGuiWindowFlags_NoDocking, min, max))
 		{
-			if (igfd::ImGuiFileDialog::Instance()->IsOk)
+			if (ImGuiFileDialog::Instance()->IsOk())
 			{
-				vProjectFile->m_LastGeneratedPath = igfd::ImGuiFileDialog::Instance()->GetCurrentPath();
-				vProjectFile->m_LastGeneratedFileName = igfd::ImGuiFileDialog::Instance()->GetCurrentFileName();
+				vProjectFile->m_LastGeneratedPath = ImGuiFileDialog::Instance()->GetCurrentPath();
+				vProjectFile->m_LastGeneratedFileName = ImGuiFileDialog::Instance()->GetCurrentFileName();
 				Generator::Instance()->Generate( vProjectFile);
 			}
 
-			igfd::ImGuiFileDialog::Instance()->CloseDialog();
+			ImGuiFileDialog::Instance()->Close();
 		}
 	}
 }
@@ -360,10 +360,10 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 #else
 				strncpy(extTypes, exts.c_str(), exts.size());
 #endif
-				igfd::ImGuiFileDialog::Instance()->OpenModal(
+				ImGuiFileDialog::Instance()->OpenModal(
 					"GenerateFileDlg",
-					"Location and name where create the file", extTypes, vProjectFile->m_LastGeneratedPath,
-					vProjectFile->m_LastGeneratedFileName,
+					"Location and name where create the file", extTypes, vProjectFile->m_LastGeneratedPath.c_str(),
+					vProjectFile->m_LastGeneratedFileName.c_str(),
 					std::bind(&GeneratorPane::GeneratorFileDialogPane, this,
 						std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
 					200, 1, vProjectFile, ImGuiFileDialogFlags_ConfirmOverwrite);
@@ -450,7 +450,7 @@ bool GeneratorPane::CheckGenerationConditions(ProjectFile *vProjectFile)
 		
 		ImGui::FramedGroupText("Font Status");
 		vProjectFile->m_CountFontWithSelectedGlyphs = 0;
-		for (auto& font : vProjectFile->m_Fonts)
+		for (auto font : vProjectFile->m_Fonts)
 		{
 			if (font.second->m_CodePointInDoubleFound || font.second->m_NameInDoubleFound)
 			{
@@ -512,7 +512,7 @@ bool GeneratorPane::CheckGenerationConditions(ProjectFile *vProjectFile)
 }
 
 // file dialog pane
-void GeneratorPane::GeneratorFileDialogPane(std::string /*vFilter*/, igfd::UserDatas vUserDatas,
+void GeneratorPane::GeneratorFileDialogPane(std::string /*vFilter*/, IGFD::UserDatas vUserDatas,
 	bool *vCantContinue) // if vCantContinue is false, the user cant validate the dialog
 {
 	LogAssert(vCantContinue != 0, "ImGuiFileDialog Pane param vCantContinue is NULL");
@@ -562,30 +562,33 @@ void GeneratorPane::GeneratorFileDialogPane(std::string /*vFilter*/, igfd::UserD
 					std::map<std::string, int> prefixs;
 					for (auto& font : prj->m_Fonts)
 					{
-						snprintf(prefixBuffer, PREFIX_MAX_SIZE, "%s", font.second->m_FontPrefix.c_str());
+						if (font.second)
+						{
+							snprintf(prefixBuffer, PREFIX_MAX_SIZE, "%s", font.second->m_FontPrefix.c_str());
 
-						bool cond = !font.second->m_FontPrefix.empty(); // not empty
-						if (prefixs.find(font.second->m_FontPrefix) == prefixs.end())
-						{
-							prefixs[font.second->m_FontPrefix] = 1;
-						}
-						else
-						{
-							cond &= (prefixs[font.second->m_FontPrefix] == 0); // must be unique
-						}
-						ImGui::TextWrapped("Header Prefix for\n\t%s :", font.second->m_FontFileName.c_str());
+							bool cond = !font.second->m_FontPrefix.empty(); // not empty
+							if (prefixs.find(font.second->m_FontPrefix) == prefixs.end())
+							{
+								prefixs[font.second->m_FontPrefix] = 1;
+							}
+							else
+							{
+								cond &= (prefixs[font.second->m_FontPrefix] == 0); // must be unique
+							}
+							ImGui::TextWrapped("Header Prefix for\n\t%s :", font.second->m_FontFileName.c_str());
 
-						ImGui::PushID(&font);
-						bool res = ImGui::InputText_Validation("##FontPrefix", prefixBuffer, PREFIX_MAX_SIZE,
-							&cond, "You must Define a\nfont prefix and unique for continue");
-						ImGui::PopID();
-						if (res)
-						{
-							font.second->m_FontPrefix = std::string(prefixBuffer);
-							prj->SetProjectChange();
+							ImGui::PushID(&font);
+							bool res = ImGui::InputText_Validation("##FontPrefix", prefixBuffer, PREFIX_MAX_SIZE,
+								&cond, "You must Define a\nfont prefix and unique for continue");
+							ImGui::PopID();
+							if (res)
+							{
+								font.second->m_FontPrefix = std::string(prefixBuffer);
+								prj->SetProjectChange();
+							}
+							prefixs[font.second->m_FontPrefix]++;
+							canContinue &= cond;
 						}
-						prefixs[font.second->m_FontPrefix]++;
-						canContinue &= cond;
 					}
 				}
 			}

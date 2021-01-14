@@ -17,7 +17,7 @@
 
 #include <Panes/Abstract/AbstractPane.h>
 
-#include <ImGuiFileDialog/ImGuiFileDialog/ImGuiFileDialog.h>
+#include <ImGuiFileDialog/ImGuiFileDialog.h>
 
 #include <stdint.h>
 #include <string>
@@ -55,7 +55,7 @@ public:
 private:
 	void DrawGeneratorPane(ProjectFile *vProjectFile);
 	void DrawFontsGenerator(ProjectFile *vProjectFile);
-	void GeneratorFileDialogPane(std::string vFilter, igfd::UserDatas vUserDatas, bool* vCantContinue);
+	void GeneratorFileDialogPane(std::string vFilter, IGFD::UserDatas vUserDatas, bool* vCantContinue);
 
 	bool CheckGenerationConditions(ProjectFile *vProjectFile);
 	

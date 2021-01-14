@@ -20,6 +20,8 @@
 #include <cstdarg> // variadic
 #include <cstdint> // types like uint32_t
 
+//#define USE_GRADIENT
+
 struct ImGuiWindow;
 
 namespace ImGui
@@ -233,6 +235,17 @@ namespace ImGui
 
 	////////////////////////////////////////////////////////////////////////////
 
+	IMGUI_API bool CustomButton(const char* label, const ImVec2& size_arg = ImVec2(0, 0), ImGuiButtonFlags flags = ImGuiButtonFlags_None);
+
+	////////////////////////////////////////////////////////////////////////////
+
+	#ifdef USE_GRADIENT
+	IMGUI_API void RenderGradFrame(ImVec2 p_min, ImVec2 p_max, ImU32 fill_start_col, ImU32 fill_end_col, bool border, float rounding);
+	IMGUI_API bool GradButton(const char* label, const ImVec2& size_arg = ImVec2(0, 0), ImGuiButtonFlags flags = ImGuiButtonFlags_None);
+	#endif
+
+	////////////////////////////////////////////////////////////////////////////
+	
 	IMGUI_API bool SliderScalarCompact(float width,
 		const char* label, ImGuiDataType data_type, 
 		void* p_data, const void* p_min, const void* p_max, 

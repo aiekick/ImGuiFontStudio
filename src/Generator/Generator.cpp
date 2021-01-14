@@ -79,7 +79,7 @@ void Generator::Generate(
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
 			{
-				for (auto &font : vProjectFile->m_Fonts)
+				for (auto font : vProjectFile->m_Fonts)
 				{
 					if (font.second)
 					{
@@ -118,7 +118,7 @@ void Generator::Generate(
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
 			{
-				for (auto &font : vProjectFile->m_Fonts)
+				for (auto font : vProjectFile->m_Fonts)
 				{
 					if (font.second)
 					{
@@ -160,7 +160,7 @@ void Generator::Generate(
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
 			{
-				for (auto& font : vProjectFile->m_Fonts)
+				for (auto font : vProjectFile->m_Fonts)
 				{
 					if (font.second)
 					{
@@ -549,7 +549,7 @@ void Generator::GenerateCard_Merged(
 			// old codepoint because, we will get the glyph from te already loaded texture,
 			// so can only be accessed with old codepoints
 			std::map<std::string, std::pair<uint32_t, size_t>> glyphs;
-			for (const auto& font : vProjectFile->m_Fonts)
+			for (const auto font : vProjectFile->m_Fonts)
 			{
 				if (font.second)
 				{
@@ -693,7 +693,7 @@ void Generator::GenerateFontFile_Merged(
 		int32_t baseFontDescent = 0;
 
 		// abse infos for merge all toher fonts in this one
-		for (auto &it : vProjectFile->m_Fonts)
+		for (auto it : vProjectFile->m_Fonts)
 		{
 			if (it.second)
 			{
@@ -708,7 +708,7 @@ void Generator::GenerateFontFile_Merged(
 			}
 		}
 
-		for (auto &it : vProjectFile->m_Fonts)
+		for (auto it : vProjectFile->m_Fonts)
 		{
 			if (it.second)
 			{
