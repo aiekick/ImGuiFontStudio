@@ -34,8 +34,8 @@ public:
 	void DrawMenu();
 
 public:
-	std::string getXml(const std::string& vOffset) override;
-	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent) override;
+	std::string getXml(const std::string& vOffset, const std::string& vUserDatas = "") override;
+	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas = "") override;
 
 public:
 	void ApplyStyleColorsDefault(ImGuiStyle* dst = nullptr);

@@ -74,6 +74,7 @@ public:
 	void DisplayMenu(ImVec2 vSize);
 	int DisplayPanes(ProjectFile *vProjectFile, int vWidgetId);
 	void DrawDialogsAndPopups(ProjectFile* vProjectFile);
+	int DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas);
 	void ShowSpecificPane(PaneFlags vPane);
 	void FocusSpecificPane(PaneFlags vPane);
 	void ShowAndFocusSpecificPane(PaneFlags vPane);
@@ -89,8 +90,8 @@ private: // configuration
 	void SetFocusedPanes(PaneFlags vActivePanes);
 
 public: // configuration
-	std::string getXml(const std::string& vOffset);
-	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent);
+	std::string getXml(const std::string& vOffset, const std::string& vUserDatas = "");
+	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas = "");
 
 public: // singleton
 	static LayoutManager *Instance()

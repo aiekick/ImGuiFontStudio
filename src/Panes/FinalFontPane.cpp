@@ -65,6 +65,14 @@ void FinalFontPane::DrawDialogsAndPopups(ProjectFile * /*vProjectFile*/)
 
 }
 
+int FinalFontPane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas)
+{
+	UNUSED(vProjectFile);
+	UNUSED(vUserDatas);
+
+	return vWidgetId;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////
 //// PRIVATE //////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
@@ -301,7 +309,7 @@ void FinalFontPane::PrepareSelection(ProjectFile *vProjectFile)
 
 	if (IsFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_NO_ORDER))
 	{
-		// nothing to prepare becasue this is the default view => pointed on FontInfos->m_SelectedGlyphs
+		// nothing to prepare because this is the default view => pointed on FontInfos->m_SelectedGlyphs
 	}
 	else if (IsFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_CODEPOINT))
 	{
@@ -1338,3 +1346,55 @@ void FinalFontPane::DrawSelectionMergedOrderedByGlyphNames(ProjectFile *vProject
 	}
 }
 
+std::string FinalFontPane::getXml(const std::string& vOffset, const std::string& vUserDatas = "")
+{
+	UNUSED(vUserDatas);
+
+	std::string str;
+
+	str += vOffset + "<finalfontpane>\n";
+	//str += vOffset + "\t<glyphsizepolicy_count>" + ct::toStr(m_Final_GlyphSize_Policy_Count) + "</glyphsizepolicy_count>\n";
+	//str += vOffset + "\t<glyphsizepolicy_width>" + ct::toStr(m_Final_GlyphSize_Policy_Width) + "</glyphsizepolicy_width>\n";
+	str += vOffset + "</finalfontpane>\n";
+
+	str += vOffset + "<selectedfontpane>\n";
+	//str += vOffset + "\t<glyphsizepolicy_count>" + ct::toStr(m_Selected_GlyphSize_Policy_Count) + "</glyphsizepolicy_count>\n";
+	//str += vOffset + "\t<glyphsizepolicy_width>" + ct::toStr(m_Selected_GlyphSize_Policy_Width) + "</glyphsizepolicy_width>\n";
+	str += vOffset + "</selectedfontpane>\n";
+
+	return str;
+}
+
+bool FinalFontPane::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas = "")
+{
+	UNUSED(vUserDatas);
+
+	// The value of this child identifies the name of this element
+	std::string strName;
+	std::string strValue;
+	std::string strParentName;
+
+	strName = vElem->Value();
+	if (vElem->GetText())
+		strValue = vElem->GetText();
+	if (vParent != nullptr)
+		strParentName = vParent->Value();
+
+	if (strParentName == "finalfontpane")
+	{
+		/*if (strName == "glyphsizepolicy_count")
+			m_Final_GlyphSize_Policy_Count = ct::ivariant(strValue).GetI();
+		else if (strName == "glyphsizepolicy_width")
+			m_Final_GlyphSize_Policy_Width = ct::fvariant(strValue).GetF();*/
+	}
+
+	if (strParentName == "selectedfontpane")
+	{
+		/*if (strName == "glyphsizepolicy_count")
+			m_Selected_GlyphSize_Policy_Count = ct::ivariant(strValue).GetI();
+		else if (strName == "glyphsizepolicy_width")
+			m_Selected_GlyphSize_Policy_Width = ct::fvariant(strValue).GetF();*/
+	}
+
+	return true;
+}

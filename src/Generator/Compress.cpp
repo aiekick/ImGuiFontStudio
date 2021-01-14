@@ -48,6 +48,8 @@ std::string Compress::GetCompressedBase85BytesArray(
 	std::string *vBufferName, 
 	size_t *vBufferSize)
 {
+	UNUSED(vPrefix);
+
 	std::string res;
 
 	// Read file

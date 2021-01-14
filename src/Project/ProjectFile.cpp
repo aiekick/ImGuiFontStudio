@@ -22,6 +22,8 @@
 #include <Helper/SelectionHelper.h>
 #include <ctools/FileHelper.h>
 
+#include <Panes/Manager/LayoutManager.h>
+
 ProjectFile::ProjectFile() = default;
 
 ProjectFile::ProjectFile(const std::string& vFilePathName)
@@ -216,7 +218,7 @@ std::string ProjectFile::GetRelativePath(const std::string& vFilePathName) const
 	return res;
 }
 
-std::string ProjectFile::getXml(const std::string& vOffset)
+std::string ProjectFile::getXml(const std::string& vOffset, const std::string& /*vUserDatas*/)
 {
 	std::string str;
 
@@ -233,40 +235,34 @@ std::string ProjectFile::getXml(const std::string& vOffset)
 		}
 	}
 
-	str += vOffset + "\t<rangecoloring show=\"" + 
-		(m_ShowRangeColoring ? "true" : "false") + "\" hash=\"" + 
-		ct::fvec4(m_RangeColoringHash).string() + "\"/>\n";
+	str += LayoutManager::Instance()->getXml(vOffset, "project");
 
+	str += vOffset + "\t<rangecoloring show=\"" + (m_ShowRangeColoring ? "true" : "false") + "\" hash=\"" + ct::fvec4(m_RangeColoringHash).string() + "\"/>\n";
 	str += vOffset + "\t<previewglyphcount>" + ct::toStr(m_Preview_Glyph_CountX) + "</previewglyphcount>\n";
 	str += vOffset + "\t<previewglyphwidth>" + ct::toStr(m_Preview_Glyph_Width) + "</previewglyphwidth>\n";
 	str += vOffset + "\t<mergedfontprefix>" + m_MergedFontPrefix + "</mergedfontprefix>\n";
-
 	str += vOffset + "\t<curglyphtooltip>" + (m_CurrentPane_ShowGlyphTooltip ? "true" : "false") + "</curglyphtooltip>\n";
 	str += vOffset + "\t<srcglyphtooltip>" + (m_SourcePane_ShowGlyphTooltip ? "true" : "false") +"</srcglyphtooltip>\n";
 	str += vOffset + "\t<dstglyphtooltip>" + (m_FinalPane_ShowGlyphTooltip ? "true" : "false") +"</dstglyphtooltip>\n";
-
 	str += vOffset + "\t<glyphpreviewscale>" + ct::toStr(m_GlyphPreview_Scale) + "</glyphpreviewscale>\n";
 	str += vOffset + "\t<glyphpreviewshowcontrollines>" + (m_GlyphPreview_ShowControlLines ? "true" : "false") + "</glyphpreviewshowcontrollines>\n";
 	str += vOffset + "\t<glyphpreviewquadbeziercounsegment>" + ct::toStr(m_GlyphPreview_QuadBezierCountSegments) + "</glyphpreviewquadbeziercounsegment>\n";
-
 	str += vOffset + "\t<genmode>" + ct::toStr(m_GenMode) + "</genmode>\n";
 	str += vOffset + "\t<fonttomergein>" + m_FontToMergeIn + "</fonttomergein>\n";
-	
 	str += vOffset + "\t<glyphdisplaytuningmode>" + ct::toStr(m_GlyphDisplayTuningMode) + "</glyphdisplaytuningmode>\n";
 	str += vOffset + "\t<sourcefontpaneflags>" + ct::toStr(m_SourceFontPaneFlags) + "</sourcefontpaneflags>\n";
-	
 	str += vOffset + "\t<cardglyhpheight>" + ct::toStr(m_CardGlyphHeightInPixel) + "</cardglyhpheight>\n";
 	str += vOffset + "\t<cardcountrowsmax>" + ct::toStr(m_CardCountRowsMax) + "</cardcountrowsmax>\n";
-
 	str += vOffset + "\t<lastgeneratedpath>" + m_LastGeneratedPath + "</lastgeneratedpath>\n";
 	str += vOffset + "\t<lastgeneratedfilename>" + m_LastGeneratedFileName + "</lastgeneratedfilename>\n";
-
+	str += vOffset + "\t<alignedwithfontbbox>" + (m_KeepGlyphAlignedWithFontGlyphBBox ? "true" : "false") +"</alignedwithfontbbox>\n";
+	
 	str += vOffset + "</project>\n";
 
 	return str;
 }
 
-bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent)
+bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& /*vUserDatas*/)
 {
 	// The value of this child identifies the name of this element
 	std::string strName;
@@ -279,13 +275,15 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 	if (vParent != nullptr)
 		strParentName = vParent->Value();
 
-	if (strName == "project")
+	/*if (strName == "project")
 	{
 
-	}
+	}*/
 
 	if (strParentName == "project")
 	{
+		LayoutManager::Instance()->setFromXml(vElem, vParent, "project");
+		
 		if (strName == "font")
 		{
 			FontInfos f;
@@ -342,6 +340,8 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 			m_LastGeneratedPath = strValue;
 		else if (strName == "lastgeneratedfilename")
 			m_LastGeneratedFileName = strValue;
+		else if (strName == "alignedwithfontbbox")
+			m_KeepGlyphAlignedWithFontGlyphBBox = ct::ivariant(strValue).GetB();
 	}
 
 	return true;

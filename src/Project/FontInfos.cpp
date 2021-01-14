@@ -84,7 +84,9 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 		m_FontConfig.OversampleH = m_Oversample;
 		m_FontConfig.OversampleV = m_Oversample;
 		m_ImFontAtlas.Clear();
-		m_ImFontAtlas.Flags = m_ImFontAtlas.Flags | ImFontAtlasFlags_NoMouseCursors;
+		m_ImFontAtlas.Flags |= 
+			ImFontAtlasFlags_NoMouseCursors | // hte mouse cursors
+			ImFontAtlasFlags_NoBakedLines; // the big triangle
 
 		auto ps = FileHelper::Instance()->ParsePathFileName(fontFilePathName);
 		if (ps.isOk)
@@ -425,8 +427,10 @@ void FontInfos::DestroyFontTexture()
 //// CONFIG FILE /////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-std::string FontInfos::getXml(const std::string& vOffset)
+std::string FontInfos::getXml(const std::string& vOffset, const std::string& vUserDatas)
 {
+	UNUSED(vUserDatas);
+
 	std::string res;
 
 	res += vOffset + "<font name=\"" + m_FontFileName + "\">\n";
@@ -464,8 +468,10 @@ std::string FontInfos::getXml(const std::string& vOffset)
 	return res;
 }
 
-bool FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent)
+bool FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas)
 {
+	UNUSED(vUserDatas);
+
 	// The value of this child identifies the name of this element
 	std::string strName;
 	std::string strValue;

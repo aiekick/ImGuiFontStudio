@@ -81,8 +81,8 @@ private: // Opengl Texture
 	void DestroyFontTexture();
 
 public: // Configuration
-	std::string getXml(const std::string& vOffset);
-	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent);
+	std::string getXml(const std::string& vOffset, const std::string& vUserDatas = "");
+	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas = "");
 
 public: // Cons/Des tructors
 	FontInfos();

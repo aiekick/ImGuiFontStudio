@@ -16,6 +16,7 @@
 #pragma once
 
 #include <memory> // smart ptr
+#include <string>
 
 class ProjectFile;
 class AbstractPane
@@ -29,4 +30,5 @@ public:
 	virtual void Unit() = 0;
 	virtual int DrawPanes(ProjectFile* vProjectFile, int vWidgetId) = 0;
 	virtual void DrawDialogsAndPopups(ProjectFile* vProjectFile) = 0;
+	virtual int DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas) = 0;
 };

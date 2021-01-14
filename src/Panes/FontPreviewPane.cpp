@@ -67,6 +67,14 @@ void FontPreviewPane::DrawDialogsAndPopups(ProjectFile* /*vProjectFile*/)
 
 }
 
+int FontPreviewPane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas)
+{
+	UNUSED(vProjectFile);
+	UNUSED(vUserDatas);
+
+	return vWidgetId;
+}
+
 /*
 la font des glyoh n'aura pas la meme BBox que la font text avec laquelle elle devra etre affichée
 donc il faudrait voir le resultat et ajuster ci-besoin, donc on doit :

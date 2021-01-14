@@ -501,8 +501,10 @@ void ImGuiThemeHelper::ApplyFileTypeColors()
 //// CONFIGURATION ////////////////////////////////////
 ///////////////////////////////////////////////////////
 
-std::string ImGuiThemeHelper::getXml(const std::string& vOffset)
+std::string ImGuiThemeHelper::getXml(const std::string& vOffset, const std::string& vUserDatas)
 {
+	UNUSED(vUserDatas);
+
 	std::string str;
 
 	ImGuiStyle* style = &ImGui::GetStyle();
@@ -548,8 +550,10 @@ std::string ImGuiThemeHelper::getXml(const std::string& vOffset)
 	return str;
 }
 
-bool ImGuiThemeHelper::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent)
+bool ImGuiThemeHelper::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas)
 {
+	UNUSED(vUserDatas);
+
 	// The value of this child identifies the name of this element
 	std::string strName;
 	std::string strValue;

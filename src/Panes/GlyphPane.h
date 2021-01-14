@@ -41,6 +41,7 @@ public:
 	void Unit() override;
 	int DrawPanes(ProjectFile* vProjectFile, int vWidgetId) override;
 	void DrawDialogsAndPopups(ProjectFile* vProjectFile) override;
+	int DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas) override;
 
 	void DrawGlyphPane(ProjectFile *vProjectFile);
 	bool LoadGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, GlyphInfos *vGlyphInfos);

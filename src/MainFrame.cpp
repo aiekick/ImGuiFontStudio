@@ -38,6 +38,7 @@
 #include <Panes/GeneratorPane.h>
 #include <Panes/GlyphPane.h>
 #include <Panes/SourceFontPane.h>
+#include <Panes/ParamsPane.h>
 #include <Project/FontInfos.h>
 #include <Project/ProjectFile.h>
 #include <Res/CustomFont.h>
@@ -90,7 +91,7 @@ void MainFrame::LoadProject(const std::string& vFilePathName)
 		for (auto it : m_ProjectFile.m_Fonts)
 		{
 			std::string absPath = m_ProjectFile.GetAbsolutePath(it.second->m_FontFilePathName);
-			SourceFontPane::Instance()->OpenFont(&m_ProjectFile, absPath, false);
+			ParamsPane::Instance()->OpenFont(&m_ProjectFile, absPath, false);
 		}
 		m_ProjectFile.UpdateCountSelectedGlyphs();
 		m_ProjectFile.SetProjectChange(false);
@@ -795,7 +796,7 @@ void MainFrame::ReRouteFontToFile(const std::string& vFontNameToReRoute, const s
 			m_ProjectFile.m_Fonts[font->m_FontFileName] = font;
 			if (font->m_FontFileName != vFontNameToReRoute)
 				m_ProjectFile.m_Fonts.erase(vFontNameToReRoute);
-			SourceFontPane::Instance()->OpenFont(&m_ProjectFile, font->m_FontFilePathName, true);
+			ParamsPane::Instance()->OpenFont(&m_ProjectFile, font->m_FontFilePathName, true);
 		}
 	}
 }
@@ -813,12 +814,14 @@ void MainFrame::IWantToCloseTheApp()
 //// CONFIGURATION ////////////////////////////////////
 ///////////////////////////////////////////////////////
 
-std::string MainFrame::getXml(const std::string& vOffset)
+std::string MainFrame::getXml(const std::string& vOffset, const std::string& vUserDatas)
 {
+	UNUSED(vUserDatas);
+
 	std::string str;
 
 	str += ImGuiThemeHelper::Instance()->getXml(vOffset);
-	str += LayoutManager::Instance()->getXml(vOffset);
+	str += LayoutManager::Instance()->getXml(vOffset, "app");
 	str += vOffset + "<bookmarks>" + ImGuiFileDialog::Instance()->SerializeBookmarks() + "</bookmarks>\n";
 	str += vOffset + "<showaboutdialog>" + (m_ShowAboutDialog ? "true" : "false") + "</showaboutdialog>\n";
 	str += vOffset + "<showimgui>" + (m_ShowImGui ? "true" : "false") + "</showimgui>\n";
@@ -829,8 +832,10 @@ std::string MainFrame::getXml(const std::string& vOffset)
 	return str;
 }
 
-bool MainFrame::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent)
+bool MainFrame::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas)
 {
+	UNUSED(vUserDatas);
+
 	// The value of this child identifies the name of this element
 	std::string strName;
 	std::string strValue;
@@ -843,7 +848,7 @@ bool MainFrame::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 		strParentName = vParent->Value();
 
 	ImGuiThemeHelper::Instance()->setFromXml(vElem, vParent);
-	LayoutManager::Instance()->setFromXml(vElem, vParent);
+	LayoutManager::Instance()->setFromXml(vElem, vParent, "app");
 
 	if (strName == "bookmarks")
 		ImGuiFileDialog::Instance()->DeserializeBookmarks(strValue);

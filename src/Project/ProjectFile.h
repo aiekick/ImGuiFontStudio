@@ -22,7 +22,13 @@
 
 #include <Project/FontInfos.h>
 #include <Generator/Generator.h>
-#include <Panes/SourceFontPane.h>
+
+enum SourceFontPaneFlags
+{
+	SOURCE_FONT_PANE_NONE = 0,
+	SOURCE_FONT_PANE_GLYPH = (1 << 0),
+	SOURCE_FONT_PANE_TEXTURE = (1 << 1)
+};
 
 enum GlyphDisplayTuningModeFlags
 {
@@ -38,7 +44,7 @@ public: // to save
 	bool m_ShowRangeColoring = false;
 	ImVec4 m_RangeColoringHash = ImVec4(10, 15, 35, 0.5f);
 	int m_Preview_Glyph_CountX = 20;
-	float m_Preview_Glyph_Width = 50;
+	float m_Preview_Glyph_Width = 40.0f;
 	std::string m_ProjectFilePathName;
 	std::string m_ProjectFilePath;
 	std::string m_LastGeneratedPath = ".";
@@ -59,8 +65,9 @@ public: // to save
 		GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT;
 	SourceFontPaneFlags m_SourceFontPaneFlags = 
 		SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH;
-	uint32_t m_CardGlyphHeightInPixel = 40U; // ine item height in card
+	uint32_t m_CardGlyphHeightInPixel = 40U; // glyph item height in card
 	uint32_t m_CardCountRowsMax = 20U; // after this max, new columns
+	bool m_KeepGlyphAlignedWithFontGlyphBBox = false; // keep the glyph aligned to font glyph bounding box
 
 public: // dont save
 	std::shared_ptr<FontInfos> m_SelectedFont = nullptr;
@@ -68,6 +75,7 @@ public: // dont save
 	size_t m_CountFontWithSelectedGlyphs = 0; // for all fonts
     bool m_NameFoundInDouble = false;
     bool m_CodePointFoundInDouble = false;
+	bool m_GlyphSizePolicyChangeFromWidgetUse = false; // say if the user is chnaging the size policy by the widget, for avoid change when via the resize on another pane
 
 private: // dont save
 	bool m_IsLoaded = false;
@@ -106,8 +114,8 @@ public: // Generation Mode
 	bool IsGenMode(GenModeFlags vFlags) const;
 
 public:
-	std::string getXml(const std::string& vOffset) override;
-	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent) override;
+	std::string getXml(const std::string& vOffset, const std::string& vUserDatas = "") override;
+	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas = "") override;
 
 public: // utils
 	ImVec4 GetColorFromInteger(uint32_t vInteger) const;

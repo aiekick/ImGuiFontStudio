@@ -16,7 +16,7 @@
 #pragma once
 
 #include <Panes/Abstract/AbstractPane.h>
-
+#include <ctools/ConfigAbstract.h>
 #include <Gui/ImGuiWidgets.h>
 
 #include <imgui/imgui.h>
@@ -47,6 +47,12 @@ class ProjectFile;
 class FontInfos;
 class FinalFontPane : public AbstractPane
 {
+private: // per pane settings to save
+	//int m_Final_GlyphSize_Policy_Count = 20;
+	//float m_Final_GlyphSize_Policy_Width = 40.0f;
+	//int m_Selected_GlyphSize_Policy_Count = 20;
+	//float m_Selected_GlyphSize_Policy_Width = 40.0f;
+
 private:
 	std::vector<GlyphInfos*> m_GlyphsMergedNoOrder;
 	std::map<uint32_t, std::vector<GlyphInfos*>> m_GlyphsMergedOrderedByCodePoints;
@@ -66,6 +72,7 @@ public:
 	void Unit() override;
 	int DrawPanes(ProjectFile* vProjectFile, int vWidgetId) override;
 	void DrawDialogsAndPopups(ProjectFile* vProjectFile) override;
+	int DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas) override;
 
 	// Preparation
 	void SetFinalFontPaneMode(FinalFontPaneModeFlags vFinalFontPaneModeFlags);
@@ -120,7 +127,11 @@ private:
 
 	void PrepareSelectionMergedOrderedByGlyphNames(ProjectFile *vProjectFile);
 	void DrawSelectionMergedOrderedByGlyphNames(ProjectFile *vProjectFile);
-	
+
+public: // configuration
+	std::string getXml(const std::string& vOffset, const std::string& vUserDatas);
+	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas);
+
 public: // singleton
 	static FinalFontPane *Instance()
 	{

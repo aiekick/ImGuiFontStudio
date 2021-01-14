@@ -29,9 +29,6 @@ class ProjectFile;
 class GlyphDisplayHelper
 {
 public:
-	static float currentPaneAvailWidth;
-
-public:
 	static int CalcGlyphsCountAndSize(			/* return new glyph count x				*/
 		ProjectFile* vProjectFile,				/* project file for save some vars		*/
 		ImVec2* vCellSize,						/* cell size							*/

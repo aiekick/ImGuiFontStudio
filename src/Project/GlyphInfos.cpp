@@ -29,8 +29,6 @@
  //// PUBLIC : STATIC //////////////////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////////////
 
-float GlyphDisplayHelper::currentPaneAvailWidth = 0.0f;
-
 int GlyphDisplayHelper::CalcGlyphsCountAndSize(
 	ProjectFile* vProjectFile,				/* project file for save some vars  */
 	ImVec2* vCellSize,						/* cell size						*/
@@ -41,26 +39,34 @@ int GlyphDisplayHelper::CalcGlyphsCountAndSize(
 {
 	if (vProjectFile && vCellSize && vGlyphSize)
 	{
-		currentPaneAvailWidth = ImGui::GetContentRegionAvail().x;
+		float aw = ImGui::GetContentRegionAvail().x;
 		
 		int glyphCount = vProjectFile->m_Preview_Glyph_CountX;
-		float glyphSize = (float)vProjectFile->m_Preview_Glyph_Width;
+		float glyphWidth = (float)vProjectFile->m_Preview_Glyph_Width;
 		
 		// GlyphSize est Menant, puis glyphCount est appliqué
 		if (vProjectFile->m_GlyphDisplayTuningMode & GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_SIZE)
 		{
-			vProjectFile->m_Preview_Glyph_CountX = (int)(currentPaneAvailWidth / ct::maxi(vProjectFile->m_Preview_Glyph_Width, 1.0f));
-			glyphSize = currentPaneAvailWidth / (float)ct::maxi(vProjectFile->m_Preview_Glyph_CountX, 1);
+			glyphCount = (int)(aw / ct::maxi(glyphWidth, 1.0f));
+			glyphWidth = aw / (float)ct::maxi(glyphCount, 1);
+			if (vProjectFile->m_GlyphSizePolicyChangeFromWidgetUse)
+			{
+				vProjectFile->m_Preview_Glyph_CountX = glyphCount;
+			}
 		}
 		// GlyphCount est Menant, dont m_Preview_Glyph_CountX n'est jamais réécrit en dehors du user
 		else if (vProjectFile->m_GlyphDisplayTuningMode & GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT)
 		{
-			vProjectFile->m_Preview_Glyph_Width = currentPaneAvailWidth / (float)ct::maxi(vProjectFile->m_Preview_Glyph_CountX, 1);
+			glyphWidth = aw / (float)ct::maxi(glyphCount, 1);
+			if (vProjectFile->m_GlyphSizePolicyChangeFromWidgetUse)
+			{
+				vProjectFile->m_Preview_Glyph_Width = glyphWidth;
+			}
 		}
 			
 		if (glyphCount > 0)
 		{
-			*vCellSize = ImVec2(glyphSize, glyphSize);
+			*vCellSize = ImVec2(glyphWidth, glyphWidth);
 			*vGlyphSize = *vCellSize - ImGui::GetStyle().ItemSpacing;
 
 			if (vGlyphEdited || vForceEditMode)
@@ -73,7 +79,7 @@ int GlyphDisplayHelper::CalcGlyphsCountAndSize(
 					label_size.y + ImGui::GetStyle().FramePadding.y * 2.0f);
 				float cell_size_y = frame_size.y * 2.0f + ImGui::GetStyle().FramePadding.y;
 				float cell_size_x = cell_size_y + ImGui::GetStyle().FramePadding.x + GLYPH_EDIT_CONTROl_WIDTH;
-				glyphCount = ct::maxi(1, (int)ct::floor(currentPaneAvailWidth / cell_size_x));
+				glyphCount = ct::maxi(1, (int)ct::floor(aw / cell_size_x));
 				*vGlyphSize = ImVec2(cell_size_y, cell_size_y);
 			}
 

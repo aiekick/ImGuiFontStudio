@@ -102,6 +102,14 @@ void GeneratorPane::DrawDialogsAndPopups(ProjectFile* vProjectFile)
 	}
 }
 
+int GeneratorPane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas)
+{
+	UNUSED(vProjectFile);
+	UNUSED(vUserDatas);
+	
+	return vWidgetId;
+}
+
 ///////////////////////////////////////////////////////////////////////////////////
 //// PRIVATE //////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
@@ -121,7 +129,7 @@ void GeneratorPane::DrawGeneratorPane(ProjectFile *vProjectFile)
 		{
 			if (vProjectFile && vProjectFile->IsLoaded())
 			{
-				if (SourceFontPane::Instance()->IsFlagSet(vProjectFile, SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH))
+				if (vProjectFile->m_SourceFontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH)
 				{
 					SelectionHelper::Instance()->DrawMenu(vProjectFile);
 
@@ -360,13 +368,24 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 #else
 				strncpy(extTypes, exts.c_str(), exts.size());
 #endif
-				ImGuiFileDialog::Instance()->OpenModal(
-					"GenerateFileDlg",
-					"Location and name where create the file", extTypes, vProjectFile->m_LastGeneratedPath.c_str(),
-					vProjectFile->m_LastGeneratedFileName.c_str(),
-					std::bind(&GeneratorPane::GeneratorFileDialogPane, this,
-						std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
-					200, 1, vProjectFile, ImGuiFileDialogFlags_ConfirmOverwrite);
+				if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER))
+				{
+					ImGuiFileDialog::Instance()->OpenModal(
+						"GenerateFileDlg",
+						"Location and name where create the file", extTypes, vProjectFile->m_LastGeneratedPath.c_str(),
+						vProjectFile->m_LastGeneratedFileName.c_str(),
+						std::bind(&GeneratorPane::GeneratorFileDialogPane, this,
+							std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
+						200, 1, vProjectFile, ImGuiFileDialogFlags_ConfirmOverwrite);
+				}
+				else
+				{
+					ImGuiFileDialog::Instance()->OpenModal(
+						"GenerateFileDlg",
+						"Location and name where create the file", extTypes, vProjectFile->m_LastGeneratedPath.c_str(),
+						vProjectFile->m_LastGeneratedFileName.c_str(),
+						1, vProjectFile, ImGuiFileDialogFlags_ConfirmOverwrite);
+				}
 			}
 		}
 		else

@@ -40,6 +40,7 @@ public:
 	void Unit() override;
 	int DrawPanes(ProjectFile* vProjectFile, int vWidgetId) override;
 	void DrawDialogsAndPopups(ProjectFile* vProjectFile) override;
+	int DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas) override;
 
 private:
 	void DrawDebugPane(ProjectFile *vProjectFile);

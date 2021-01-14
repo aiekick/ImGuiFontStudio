@@ -16,7 +16,7 @@
 #pragma once
 
 #include <Panes/Abstract/AbstractPane.h>
-
+#include <ctools/ConfigAbstract.h>
 #include <ctools/cTools.h>
 #include <Gui/ImGuiWidgets.h>
 
@@ -24,18 +24,15 @@
 #include <map>
 #include <set>
 
-enum SourceFontPaneFlags
-{
-	SOURCE_FONT_PANE_NONE = 0,
-	SOURCE_FONT_PANE_GLYPH = (1 << 0),
-	SOURCE_FONT_PANE_TEXTURE = (1 << 1)
-};
-
 class FontInfos;
 class ProjectFile;
 struct ImGuiWindow;
 class SourceFontPane : public AbstractPane
 {
+private: // per pane settings to save
+	//int m_GlyphSize_Policy_Count = 20;
+	//float m_GlyphSize_Policy_Width = 40.0f;
+
 private: // private vars
 	ImGuiListClipper m_FontsClipper;
 
@@ -47,12 +44,7 @@ public:
 	void Unit() override;
 	int DrawPanes(ProjectFile* vProjectFile, int vWidgetId) override;
 	void DrawDialogsAndPopups(ProjectFile* vProjectFile) override;
-
-	void OpenFonts(ProjectFile* vProjectFile, const std::map<std::string, std::string>& vFontFilePathNames);
-	void OpenFont(ProjectFile* vProjectFile, const std::string& vFontFilePathName, bool vUpdateCount);
-	void SelectFont(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos);
-
-	bool IsFlagSet(ProjectFile* vProjectFile, SourceFontPaneFlags vFlag);
+	int DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas) override;
 
 private: 
 	void DrawFilterBar(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos);
@@ -62,16 +54,10 @@ private:
 
 	// panes
 	void DrawSourceFontPane(ProjectFile *vProjectFile);
-	void DrawParamsPane(ProjectFile *vProjectFile);
 
-private: // actions
-	// via menu
-	void Action_Menu_OpenFont();
-	void Action_Menu_CloseFont();
-	void Action_Cancel();
-	void Open_ConfirmToCloseFont_Dialog(); // dialog
-	void Close_ConfirmToCloseFont_Dialog(); // dialog
-	bool Display_ConfirmToCloseFont_Dialog(); // dialog
+public: // configuration
+	std::string getXml(const std::string& vOffset, const std::string& vUserDatas);
+	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas);
 
 public: // singleton
 	static SourceFontPane* Instance()

@@ -28,6 +28,7 @@
 #ifdef _DEBUG
 #include <Panes/DebugPane.h>
 #endif
+#include <Panes/ParamsPane.h>
 #include <Panes/FinalFontPane.h>
 #include <Panes/FontStructurePane.h>
 #include <Panes/GeneratorPane.h>
@@ -56,6 +57,7 @@ void LayoutManager::Init()
 #ifdef _DEBUG
 	DebugPane::Instance()->Init();
 #endif
+	ParamsPane::Instance()->Init();
 	FinalFontPane::Instance()->Init();
 	FontStructurePane::Instance()->Init();
 	GeneratorPane::Instance()->Init();
@@ -69,6 +71,7 @@ void LayoutManager::Unit()
 #ifdef _DEBUG
 	DebugPane::Instance()->Unit();
 #endif
+	ParamsPane::Instance()->Unit();
 	FinalFontPane::Instance()->Unit();
 	FontStructurePane::Instance()->Unit();
 	GeneratorPane::Instance()->Unit();
@@ -164,6 +167,7 @@ void LayoutManager::DisplayMenu(ImVec2 vSize)
 
 int LayoutManager::DisplayPanes(ProjectFile *vProjectFile, int vWidgetId)
 {
+	vWidgetId = ParamsPane::Instance()->DrawPanes(vProjectFile, vWidgetId);
 	vWidgetId = SourceFontPane::Instance()->DrawPanes(vProjectFile, vWidgetId);
 	vWidgetId = FinalFontPane::Instance()->DrawPanes(vProjectFile, vWidgetId);
 	vWidgetId = GeneratorPane::Instance()->DrawPanes(vProjectFile, vWidgetId);
@@ -179,6 +183,7 @@ int LayoutManager::DisplayPanes(ProjectFile *vProjectFile, int vWidgetId)
 
 void LayoutManager::DrawDialogsAndPopups(ProjectFile* vProjectFile)
 {
+	ParamsPane::Instance()->DrawDialogsAndPopups(vProjectFile);
 	SourceFontPane::Instance()->DrawDialogsAndPopups(vProjectFile);
 	FinalFontPane::Instance()->DrawDialogsAndPopups(vProjectFile);
 	GeneratorPane::Instance()->DrawDialogsAndPopups(vProjectFile);
@@ -188,6 +193,22 @@ void LayoutManager::DrawDialogsAndPopups(ProjectFile* vProjectFile)
 #ifdef _DEBUG
 	DebugPane::Instance()->DrawDialogsAndPopups(vProjectFile);
 #endif
+}
+
+int LayoutManager::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas)
+{
+	vWidgetId = ParamsPane::Instance()->DrawWidgets(vProjectFile, vWidgetId, vUserDatas);
+	vWidgetId = SourceFontPane::Instance()->DrawWidgets(vProjectFile, vWidgetId, vUserDatas);
+	vWidgetId = FinalFontPane::Instance()->DrawWidgets(vProjectFile, vWidgetId, vUserDatas);
+	vWidgetId = GeneratorPane::Instance()->DrawWidgets(vProjectFile, vWidgetId, vUserDatas);
+	vWidgetId = GlyphPane::Instance()->DrawWidgets(vProjectFile, vWidgetId, vUserDatas);
+	vWidgetId = FontStructurePane::Instance()->DrawWidgets(vProjectFile, vWidgetId, vUserDatas);
+	vWidgetId = FontPreviewPane::Instance()->DrawWidgets(vProjectFile, vWidgetId, vUserDatas);
+#ifdef _DEBUG
+	vWidgetId = DebugPane::Instance()->DrawWidgets(vProjectFile, vWidgetId, vUserDatas);
+#endif
+
+	return vWidgetId;
 }
 
 void LayoutManager::ShowSpecificPane(PaneFlags vPane)
@@ -310,21 +331,29 @@ void LayoutManager::SetFocusedPanes(PaneFlags vActivePanes)
 //// CONFIGURATION PUBLIC /////////////////////////////
 ///////////////////////////////////////////////////////
 
-std::string LayoutManager::getXml(const std::string& vOffset)
+std::string LayoutManager::getXml(const std::string& vOffset, const std::string& vUserDatas)
 {
 	std::string str;
 
-	str += vOffset + "<layout>\n";
+	if (vUserDatas == "app")
+	{
+		str += vOffset + "<layout>\n";
+		m_Pane_Focused = GetFocusedPanes();
+		str += vOffset + "\t<panes opened=\"" + ct::ivariant((int32_t)m_Pane_Shown).GetS() + "\" active=\"" + ct::ivariant((int32_t)m_Pane_Focused).GetS() + "\"/>\n";
+		str += vOffset + "</layout>\n";
+	}
+	else if (vUserDatas == "project")
+	{
+		// per pane settings
 
-	m_Pane_Focused = GetFocusedPanes();
-	str += vOffset + "\t<panes opened=\"" + ct::ivariant((int32_t)m_Pane_Shown).GetS() + "\" active=\"" + ct::ivariant((int32_t)m_Pane_Focused).GetS() + "\"/>\n";
-
-	str += vOffset + "</layout>\n";
+		str += SourceFontPane::Instance()->getXml(vOffset + "\t", vUserDatas);
+		str += FinalFontPane::Instance()->getXml(vOffset + "\t", vUserDatas);
+	}
 
 	return str;
 }
 
-bool LayoutManager::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent)
+bool LayoutManager::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas)
 {
 	// The value of this child identifies the name of this element
 	std::string strName = "";
@@ -337,18 +366,26 @@ bool LayoutManager::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement
 	if (vParent != 0)
 		strParentName = vParent->Value();
 
-	if (strParentName == "layout")
+	if (vUserDatas == "app")
 	{
-		for (const tinyxml2::XMLAttribute* attr = vElem->FirstAttribute(); attr != nullptr; attr = attr->Next())
+		if (strParentName == "layout")
 		{
-			std::string attName = attr->Name();
-			std::string attValue = attr->Value();
+			for (const tinyxml2::XMLAttribute* attr = vElem->FirstAttribute(); attr != nullptr; attr = attr->Next())
+			{
+				std::string attName = attr->Name();
+				std::string attValue = attr->Value();
 
-			if (attName == "opened")
-				m_Pane_Shown = (PaneFlags)ct::ivariant(attValue).GetI();
-			if (attName == "active")
-				m_Pane_Focused = (PaneFlags)ct::ivariant(attValue).GetI();
+				if (attName == "opened")
+					m_Pane_Shown = (PaneFlags)ct::ivariant(attValue).GetI();
+				if (attName == "active")
+					m_Pane_Focused = (PaneFlags)ct::ivariant(attValue).GetI();
+			}
 		}
+	}
+	else if (vUserDatas == "project")
+	{
+		SourceFontPane::Instance()->setFromXml(vElem, vParent, vUserDatas);
+		FinalFontPane::Instance()->setFromXml(vElem, vParent, vUserDatas);
 	}
 
 	return true;
