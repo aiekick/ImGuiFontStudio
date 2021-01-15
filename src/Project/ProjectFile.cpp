@@ -255,7 +255,7 @@ std::string ProjectFile::getXml(const std::string& vOffset, const std::string& /
 	str += vOffset + "\t<cardcountrowsmax>" + ct::toStr(m_CardCountRowsMax) + "</cardcountrowsmax>\n";
 	str += vOffset + "\t<lastgeneratedpath>" + m_LastGeneratedPath + "</lastgeneratedpath>\n";
 	str += vOffset + "\t<lastgeneratedfilename>" + m_LastGeneratedFileName + "</lastgeneratedfilename>\n";
-	str += vOffset + "\t<alignedwithfontbbox>" + (m_KeepGlyphAlignedWithFontGlyphBBox ? "true" : "false") +"</alignedwithfontbbox>\n";
+	str += vOffset + "\t<alignedwithfontbbox>" + (m_ZoomGlyphs ? "true" : "false") +"</alignedwithfontbbox>\n";
 	
 	str += vOffset + "</project>\n";
 
@@ -341,7 +341,7 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 		else if (strName == "lastgeneratedfilename")
 			m_LastGeneratedFileName = strValue;
 		else if (strName == "alignedwithfontbbox")
-			m_KeepGlyphAlignedWithFontGlyphBBox = ct::ivariant(strValue).GetB();
+			m_ZoomGlyphs = ct::ivariant(strValue).GetB();
 	}
 
 	return true;

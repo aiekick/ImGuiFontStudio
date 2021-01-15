@@ -27,11 +27,11 @@
 class FontInfos;
 class ProjectFile;
 struct ImGuiWindow;
-class SourceFontPane : public AbstractPane
+class ParamsPane : public AbstractPane
 {
 private: // per pane settings to save
-	//int m_GlyphSize_Policy_Count = 20;
-	//float m_GlyphSize_Policy_Width = 40.0f;
+	int m_GlyphSize_Policy_Count = 20;
+	float m_GlyphSize_Policy_Width = 40.0f;
 
 private: // private vars
 	ImGuiListClipper m_FontsClipper;
@@ -46,31 +46,38 @@ public:
 	void DrawDialogsAndPopups(ProjectFile* vProjectFile) override;
 	int DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas) override;
 
+	void OpenFonts(ProjectFile* vProjectFile, const std::map<std::string, std::string>& vFontFilePathNames);
+	void OpenFont(ProjectFile* vProjectFile, const std::string& vFontFilePathName, bool vUpdateCount);
+	void SelectFont(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos);
+
 private: 
-	void DrawFilterBar(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos);
-	bool IfCatchedByFilters(std::shared_ptr<FontInfos> vFontInfos, const std::string& vSymbolName);
-	void DrawFontTexture(std::shared_ptr<FontInfos> vFontInfos);
-	bool DrawGlyph(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos, std::string vName, ImTextureID vTextureID, bool* vSelected, ImVec2 vGlyphSize, ImFontGlyph vGlyph, ImVec2 vHostTextureSize);
-	void DrawFontAtlas_Virtual(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos);
-	
-	// panes
-	void DrawSourceFontPane(ProjectFile *vProjectFile);
+
+	void DrawParamsPane(ProjectFile *vProjectFile);
+
+private: // actions
+	// via menu
+	void Action_Menu_OpenFont();
+	void Action_Menu_CloseFont();
+	void Action_Cancel();
+	void Open_ConfirmToCloseFont_Dialog(); // dialog
+	void Close_ConfirmToCloseFont_Dialog(); // dialog
+	bool Display_ConfirmToCloseFont_Dialog(); // dialog
 
 public: // configuration
 	std::string getXml(const std::string& vOffset, const std::string& vUserDatas);
 	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas);
 
 public: // singleton
-	static SourceFontPane* Instance()
+	static ParamsPane* Instance()
 	{
-		static SourceFontPane *_instance = new SourceFontPane();
+		static ParamsPane *_instance = new ParamsPane();
 		return _instance;
 	}
 
 protected:
-	SourceFontPane(); // Prevent construction
-	SourceFontPane(const SourceFontPane&) {}; // Prevent construction by copying
-	SourceFontPane& operator =(const SourceFontPane&) { return *this; }; // Prevent assignment
-	~SourceFontPane(); // Prevent unwanted destruction};
+	ParamsPane(); // Prevent construction
+	ParamsPane(const ParamsPane&) {}; // Prevent construction by copying
+	ParamsPane& operator =(const ParamsPane&) { return *this; }; // Prevent assignment
+	~ParamsPane(); // Prevent unwanted destruction};
 };
 

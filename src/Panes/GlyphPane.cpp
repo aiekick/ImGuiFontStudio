@@ -68,8 +68,37 @@ void GlyphPane::DrawDialogsAndPopups(ProjectFile* /*vProjectFile*/)
 
 int GlyphPane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas)
 {
-	UNUSED(vProjectFile);
 	UNUSED(vUserDatas);
+
+	if (vProjectFile && vProjectFile->IsLoaded())
+	{
+		if (LayoutManager::Instance()->IsSpecificPaneFocused(PaneFlags::PANE_GLYPH))
+		{
+			const float maxWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 4.0f;
+			const float mrw = maxWidth / 1.0f - ImGui::GetStyle().FramePadding.x;
+
+			if (ImGui::BeginFramedGroup("Glyph Pane"))
+			{
+				if (ImGui::SliderFloatDefaultCompact(mrw, "Scale", &vProjectFile->m_GlyphPreview_Scale, 0.01f, 2.0f, 1.0f))
+				{
+					vProjectFile->SetProjectChange();
+				}
+
+				if (ImGui::SliderIntDefaultCompact(mrw, "Segments", &vProjectFile->m_GlyphPreview_QuadBezierCountSegments, 0, 50, 0))
+				{
+					vProjectFile->SetProjectChange();
+				}
+
+				//ImGui::Checkbox("Stroke or Fill", &_stroke);
+				if (ImGui::Checkbox("Control Lines", &vProjectFile->m_GlyphPreview_ShowControlLines))
+				{
+					vProjectFile->SetProjectChange();
+				}
+			}
+
+			ImGui::EndFramedGroup(true);
+		}
+	}
 
 	return vWidgetId;
 }
@@ -85,7 +114,7 @@ void GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile)
 		if (ImGui::Begin<PaneFlags>(GLYPH_PANE,
 			&LayoutManager::m_Pane_Shown, PaneFlags::PANE_GLYPH,
 			//ImGuiWindowFlags_NoTitleBar |
-			ImGuiWindowFlags_MenuBar |
+			//ImGuiWindowFlags_MenuBar |
 			//ImGuiWindowFlags_NoMove |
 			ImGuiWindowFlags_NoCollapse |
 			//ImGuiWindowFlags_NoResize |
@@ -93,21 +122,17 @@ void GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile)
 		{
 			if (vProjectFile &&  vProjectFile->IsLoaded())
 			{
-				if (ImGui::BeginMenuBar())
+				/*if (ImGui::BeginMenuBar())
 				{
-					ImGui::PushItemWidth(100.0f);
-					if (ImGui::SliderFloat("Scale", &vProjectFile->m_GlyphPreview_Scale, 0.01f, 2.0f))
+					if (ImGui::SliderFloatDefaultCompact(100.0f, "Scale", &vProjectFile->m_GlyphPreview_Scale, 0.01f, 2.0f, 1.0f))
 					{
 						vProjectFile->SetProjectChange();
 					}
-					ImGui::PopItemWidth();
-
-					ImGui::PushItemWidth(100.0f);
-					if (ImGui::SliderInt("Segments", &vProjectFile->m_GlyphPreview_QuadBezierCountSegments, 0, 50))
+					
+					if (ImGui::SliderIntDefaultCompact(100.0f, "Segments", &vProjectFile->m_GlyphPreview_QuadBezierCountSegments, 0, 50, 0))
 					{
 						vProjectFile->SetProjectChange();
 					}
-					ImGui::PopItemWidth();
 					
 					//ImGui::Checkbox("Stroke or Fill", &_stroke);
 					if (ImGui::Checkbox("Control Lines", &vProjectFile->m_GlyphPreview_ShowControlLines))
@@ -116,7 +141,7 @@ void GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile)
 					}
 
 					ImGui::EndMenuBar();
-				}
+				}*/
 
 				DrawSimpleGlyph(
 					&m_GlyphToDisplay, 

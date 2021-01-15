@@ -335,8 +335,11 @@ void FontInfos::GetInfos()
 	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Ascent / Descent :", ct::toStr("%i / %i", m_Ascent, m_Descent)));
 	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Glyph BBox :", ct::toStr("min : %i x %i/max : %i x %i",
 		m_BoundingBox.x, m_BoundingBox.y, m_BoundingBox.z, m_BoundingBox.w)));
-	//m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Line gap :", ct::toStr("%i", m_LineGap))); // dont know what is it haha
-	//m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Scale pixel height :", ct::toStr("%.4f", m_Point))); // same.., its used internally by ImGui but dont know what is it
+#ifdef _DEBUG
+	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("SizeInPixels :", ct::toStr("%.2f", m_FontConfig.SizePixels)));
+	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Line gap :", ct::toStr("%i", m_LineGap))); // dont know what is it haha
+	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Scale pixel height :", ct::toStr("%.4f", m_Point))); // same.., its used internally by ImGui but dont know what is it
+#endif
 }
 
 void FontInfos::GenerateCodePointToGlypNamesDB()

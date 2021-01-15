@@ -67,7 +67,7 @@ public: // to save
 		SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH;
 	uint32_t m_CardGlyphHeightInPixel = 40U; // glyph item height in card
 	uint32_t m_CardCountRowsMax = 20U; // after this max, new columns
-	bool m_KeepGlyphAlignedWithFontGlyphBBox = false; // keep the glyph aligned to font glyph bounding box
+	bool m_ZoomGlyphs = false; // keep the glyph aligned to font glyph bounding box
 
 public: // dont save
 	std::shared_ptr<FontInfos> m_SelectedFont = nullptr;

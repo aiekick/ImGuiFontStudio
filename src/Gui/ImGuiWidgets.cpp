@@ -223,7 +223,8 @@ bool ImGui::ImageCheckButton(
     float hostRatioX = 1.0f;
     if (vHostTextureSize.y > 0)
         hostRatioX = ImRatioX(vHostTextureSize);
-    float ratioX = ImRatioX(ImVec2(uv1 - uv0)) * hostRatioX;
+	ImVec2 uvSize = uv1 - uv0;
+    float ratioX = ImRatioX(uvSize) * hostRatioX;
     ImVec2 imgSize = image_bb.GetSize();
     float newX = imgSize.y * ratioX;
     ImVec2 glyphSize = ImVec2(imgSize.x, imgSize.x / ratioX) * 0.5f;

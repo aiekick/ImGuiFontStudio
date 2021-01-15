@@ -200,7 +200,7 @@ GlyphInfos::GlyphInfos(
 	std::string vNewName, uint32_t vNewCodePoint)
 {
 	glyph = vGlyph;
-	oldHeaderName = std::move(vOldName);
+	oldHeaderName = vOldName;
 	newHeaderName = vNewName;
 	newCodePoint = vNewCodePoint;
 	if (newCodePoint == 0)
