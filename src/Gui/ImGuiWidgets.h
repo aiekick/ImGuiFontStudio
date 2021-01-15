@@ -26,6 +26,10 @@ struct ImGuiWindow;
 
 namespace ImGui
 {
+	IMGUI_API void RenderInnerShadowFrame(ImVec2 p_min, ImVec2 p_max, ImU32 fill_col, ImU32 fill_col_darker, ImU32 bg_Color, bool border, float rounding);
+
+	/// //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
 	IMGUI_API bool SelectableWithBtn(const char* label, bool selected = false, const char* btnLabel = 0, bool *btnClicked = 0, bool *btnHovered = 0, ImVec4 vBtnColor = ImVec4(0.8f, 0.5f, 0.2f, 1.0f), ImVec4 vBtnHoveredColor = ImVec4(1.0f, 0.8f, 0.2f, 1.0f), ImGuiSelectableFlags flags = 0, const ImVec2& size_args = ImVec2(0.0f, 0.0f));
 	IMGUI_API bool ImageCheckButton(ImTextureID user_texture_id, bool *v, const ImVec2& size, const ImVec2& uv0 = ImVec2(0.0f, 0.0f), const ImVec2& uv1 = ImVec2(1.0f, 1.0f), const ImVec2& vHostTextureSize = ImVec2(0.0f, 0.0f), int frame_padding = -1, float vRectThickNess = 0.0f, ImVec4 vRectColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
 	IMGUI_API bool BeginFramedGroup(const char *vLabel, bool vSpacing = false, ImVec4 vCol = ImVec4(0.0f, 0.0f, 0.0f, 0.5f), ImVec4 vHoveredCol = ImVec4(0.15f, 0.15f, 0.15f, 0.5f));

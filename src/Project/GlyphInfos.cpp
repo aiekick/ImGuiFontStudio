@@ -25,6 +25,8 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 
+#include <Gui/ImGuiWidgets.h>
+
  ///////////////////////////////////////////////////////////////////////////////////
  //// PUBLIC : STATIC //////////////////////////////////////////////////////////////
  ///////////////////////////////////////////////////////////////////////////////////
@@ -261,7 +263,11 @@ bool GlyphInfos::DrawGlyphButton(
 		// Render
 		const ImU32 col = ImGui::GetColorU32(((held && hovered) || (vSelected && *vSelected)) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
 		ImGui::RenderNavHighlight(bb, id);
-		ImGui::RenderFrame(bb.Min, bb.Max, col, true, ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding));
+		float rounding = ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding);
+		ImVec4 cb = ImColor(col).Value; // color base : cb
+		ImVec4 cbd = ImVec4(cb.x * 0.5f, cb.y * 0.5f, cb.z * 0.5f, cb.w * 1.5f); // color base darker : cbd
+		ImGui::RenderInnerShadowFrame(bb.Min, bb.Max, col, ImGui::GetColorU32(cbd), ImGui::GetColorU32(ImGuiCol_WindowBg), true, rounding);
+		//ImGui::RenderFrame(bb.Min, bb.Max, col, true, ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding));
 		if (vRectThickNess > 0.0f)
 		{
 			window->DrawList->AddRect(bb.Min, bb.Max, ImGui::GetColorU32(vRectColor), 0.0, 15, vRectThickNess);

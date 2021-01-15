@@ -20,8 +20,82 @@
 #include <ctools/FileHelper.h>
 #include <Res/CustomFont.h>
 
+#include <imgui/imgui.h>
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
+
+// https://github.com/ocornut/imgui/issues/3710
+
+inline void PathInvertedRect(ImDrawList *vDrawList, const ImVec2& a, const ImVec2& b, ImU32 col, float rounding, ImDrawCornerFlags rounding_corners)
+{
+	if (!vDrawList) return;
+
+	rounding = ImMin(rounding, ImFabs(b.x - a.x) * 
+		(((rounding_corners & ImDrawCornerFlags_Top) == ImDrawCornerFlags_Top) || 
+		((rounding_corners & ImDrawCornerFlags_Bot) == ImDrawCornerFlags_Bot) ? 0.5f : 1.0f) - 1.0f);
+	rounding = ImMin(rounding, ImFabs(b.y - a.y) * 
+		(((rounding_corners & ImDrawCornerFlags_Left) == ImDrawCornerFlags_Left) || 
+		((rounding_corners & ImDrawCornerFlags_Right) == ImDrawCornerFlags_Right) ? 0.5f : 1.0f) - 1.0f);
+
+	if (rounding <= 0.0f || rounding_corners == 0)
+	{
+		return;
+	}
+	else
+	{
+		const float rounding_tl = (rounding_corners & ImDrawCornerFlags_TopLeft) ? rounding : 0.0f;
+		vDrawList->PathLineTo(a);
+		vDrawList->PathArcToFast(ImVec2(a.x + rounding_tl, a.y + rounding_tl), rounding_tl, 6, 9);
+		vDrawList->PathFillConvex(col);
+
+		const float rounding_tr = (rounding_corners & ImDrawCornerFlags_TopRight) ? rounding : 0.0f;
+		vDrawList->PathLineTo(ImVec2(b.x, a.y));
+		vDrawList->PathArcToFast(ImVec2(b.x - rounding_tr, a.y + rounding_tr), rounding_tr, 9, 12);
+		vDrawList->PathFillConvex(col);
+
+		const float rounding_br = (rounding_corners & ImDrawCornerFlags_BotRight) ? rounding : 0.0f;
+		vDrawList->PathLineTo(ImVec2(b.x, b.y));
+		vDrawList->PathArcToFast(ImVec2(b.x - rounding_br, b.y - rounding_br), rounding_br, 0, 3);
+		vDrawList->PathFillConvex(col);
+
+		const float rounding_bl = (rounding_corners & ImDrawCornerFlags_BotLeft) ? rounding : 0.0f;
+		vDrawList->PathLineTo(ImVec2(a.x, b.y));
+		vDrawList->PathArcToFast(ImVec2(a.x + rounding_bl, b.y - rounding_bl), rounding_bl, 3, 6);
+		vDrawList->PathFillConvex(col);
+	}
+}
+
+inline void AddInvertedRectFilled(ImDrawList* vDrawList, const ImVec2& p_min, const ImVec2& p_max, ImU32 col, float rounding, ImDrawCornerFlags rounding_corners)
+{
+	if (!vDrawList) return;
+
+	if ((col & IM_COL32_A_MASK) == 0) return;
+	if (rounding > 0.0f)
+		PathInvertedRect(vDrawList, p_min, p_max, col, rounding, rounding_corners);
+}
+
+// Render a rectangle shaped with optional rounding and borders
+void ImGui::RenderInnerShadowFrame(ImVec2 p_min, ImVec2 p_max, ImU32 fill_col, ImU32 fill_col_darker, ImU32 bg_Color, bool border, float rounding)
+{
+	ImGuiContext& g = *GImGui;
+	ImGuiWindow* window = g.CurrentWindow;
+#if 0
+	window->DrawList->AddRectFilled(p_min, p_max, fill_col, rounding);
+#else
+	window->DrawList->AddRectFilledMultiColor(p_min, p_max, fill_col, fill_col, fill_col_darker, fill_col_darker);
+	AddInvertedRectFilled(window->DrawList, p_min, p_max, bg_Color, rounding, ImDrawCornerFlags_All);
+#endif
+	const float border_size = g.Style.FrameBorderSize;
+	if (border && border_size > 0.0f)
+	{
+		window->DrawList->AddRect(p_min + ImVec2(1, 1), p_max + ImVec2(1, 1), GetColorU32(ImGuiCol_BorderShadow), rounding, ImDrawCornerFlags_All, border_size);
+		window->DrawList->AddRect(p_min, p_max, GetColorU32(ImGuiCol_Border), rounding, ImDrawCornerFlags_All, border_size);
+	}
+}
+
+////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 bool ImGui::SelectableWithBtn(
         const char* label,
