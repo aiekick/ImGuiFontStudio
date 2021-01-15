@@ -195,31 +195,9 @@ void SourceFontPane::DrawFilterBar(ProjectFile *vProjectFile, std::shared_ptr<Fo
 				vFontInfos->m_Filters.insert(it);
 			}
 			vProjectFile->SetProjectChange();
+			vFontInfos->UpdateFiltering();
 		}
 	}
-}
-
-bool SourceFontPane::IfCatchedByFilters(std::shared_ptr<FontInfos> vFontInfos, const std::string& vSymbolName)
-{
-	if (vFontInfos)
-	{
-		if (vFontInfos->m_Filters.empty())
-		{
-			return true;
-		}
-		else
-		{
-			for (const auto &it : vFontInfos->m_Filters)
-			{
-				if (vSymbolName.find(it) != std::string::npos) // found
-				{
-					return true;
-				}
-			}
-		}
-	}
-
-	return false;
 }
 
 bool SourceFontPane::DrawGlyphButton(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
@@ -341,42 +319,27 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 
 			if (vFontInfos->m_ImFontAtlas.IsBuilt())
 			{
-				ImFont* font = vFontInfos->m_ImFontAtlas.Fonts[0];
-
 				if (vFontInfos->m_ImFontAtlas.TexID)
 				{
-					ImVec2 hostTextureSize = ImVec2(
-						(float)vFontInfos->m_ImFontAtlas.TexWidth,
-						(float)vFontInfos->m_ImFontAtlas.TexHeight);
-					ImVec2 cell_size, glyph_size;
-					uint32_t glyphCountX = GlyphDisplayHelper::CalcGlyphsCountAndSize(vProjectFile, &cell_size, &glyph_size);
-					if (glyphCountX)
+					if (!vFontInfos->m_FilteredGlyphs.empty())
 					{
-						uint32_t idx = 0, lastGlyphCodePoint = 0;
-						ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
-						bool showRangeColoring = vProjectFile->IsRangeColoringShown();
-						if (!font->Glyphs.empty())
+						ImVec2 hostTextureSize = ImVec2(
+							(float)vFontInfos->m_ImFontAtlas.TexWidth,
+							(float)vFontInfos->m_ImFontAtlas.TexHeight);
+						ImVec2 cell_size, glyph_size;
+						uint32_t glyphCountX = GlyphDisplayHelper::CalcGlyphsCountAndSize(vProjectFile, &cell_size, &glyph_size);
+						if (glyphCountX)
 						{
-							uint32_t countGlyphs = (uint32_t)font->Glyphs.size();
+							uint32_t idx = 0, lastGlyphCodePoint = 0;
+							bool showRangeColoring = vProjectFile->IsRangeColoringShown();
+							
+							uint32_t countGlyphs = (uint32_t)vFontInfos->m_FilteredGlyphs.size();
 							int rowCount = (int)ct::ceil((double)countGlyphs / (double)glyphCountX);
-							ImGuiListClipper m_Clipper;
-
-							/*
-							ImGui::SetTooltip(
-								"cell size : %.2f, %.2f\n\
-								glyph size : %.2f, %.2f\n\
-								count glyphs : x:%u,y:%i\n\
-								line height : %.0f",
-								cell_size.x, cell_size.y,
-								glyph_size.x, glyph_size.y,
-								glyphCountX, rowCount,
-								cell_size.y);
-							*/
-
-							m_Clipper.Begin(rowCount, cell_size.y);
-							while (m_Clipper.Step())
+							
+							m_VirtualClipper.Begin(rowCount, cell_size.y);
+							while (m_VirtualClipper.Step())
 							{
-								for (int j = m_Clipper.DisplayStart; j < m_Clipper.DisplayEnd; j++)
+								for (int j = m_VirtualClipper.DisplayStart; j < m_VirtualClipper.DisplayEnd; j++)
 								{
 									if (j < 0) continue;
 
@@ -385,71 +348,74 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 										uint32_t glyphIdx = i + j * glyphCountX;
 										if (glyphIdx < countGlyphs)
 										{
-											auto glyph = *(font->Glyphs.begin() + glyphIdx);
+											auto glyph = *(vFontInfos->m_FilteredGlyphs.begin() + glyphIdx);
 
 											std::string name = vFontInfos->m_GlyphCodePointToName[glyph.Codepoint];
-											if (IfCatchedByFilters(vFontInfos, name))
+
+											uint32_t x = idx % glyphCountX;
+
+											if (x) ImGui::SameLine();
+
+											if (showRangeColoring)
 											{
-												uint32_t x = idx % glyphCountX;
+												ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
 
-												if (x) ImGui::SameLine();
-
-												if (showRangeColoring)
+												if (glyph.Codepoint != lastGlyphCodePoint + 1)
 												{
-													if (glyph.Codepoint != lastGlyphCodePoint + 1)
-													{
-														glyphRangeColoring = vProjectFile->GetColorFromInteger(glyph.Codepoint);
-													}
-
-													ImGui::PushStyleColor(ImGuiCol_Button, glyphRangeColoring);
-													ImVec4 bh = glyphRangeColoring; bh.w = 0.8f;
-													ImGui::PushStyleColor(ImGuiCol_ButtonHovered, bh);
-													ImVec4 ba = glyphRangeColoring; ba.w = 1.0f;
-													ImGui::PushStyleColor(ImGuiCol_ButtonActive, ba);
+													glyphRangeColoring = vProjectFile->GetColorFromInteger(glyph.Codepoint);
 												}
 
-												win->DrawList->ChannelsSetCurrent(1);
-
-												bool selected = false;
-												SelectionHelper::Instance()->IsGlyphIntersectedAndSelected(
-													vFontInfos, glyph_size, glyph.Codepoint, &selected,
-													SelectionContainerEnum::SELECTION_CONTAINER_SOURCE);
-
-												win->DrawList->ChannelsSetCurrent(0);
-
-												ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
-												bool check = GlyphInfos::DrawGlyphButton(vProjectFile, vFontInfos, &selected, glyph_size, glyph, hostTextureSize);
-												ImGui::PopStyleVar();
-
-												if (check)
-												{
-													SelectionHelper::Instance()->SelectWithToolOrApplyOnGlyph(
-														vProjectFile, vFontInfos,
-														glyph, idx, selected, true,
-														SelectionContainerEnum::SELECTION_CONTAINER_SOURCE);
-												}
-
-												if (showRangeColoring)
-												{
-													ImGui::PopStyleColor(3);
-												}
-
-												if (vProjectFile->m_SourcePane_ShowGlyphTooltip)
-												{
-													if (ImGui::IsItemHovered())
-													{
-														ImGui::SetTooltip("name : %s\ncodepoint : %i", name.c_str(), (int)glyph.Codepoint);
-													}
-												}
-
-												lastGlyphCodePoint = glyph.Codepoint;
-												idx++;
+												ImGui::PushStyleColor(ImGuiCol_Button, glyphRangeColoring);
+												ImVec4 bh = glyphRangeColoring; bh.w = 0.8f;
+												ImGui::PushStyleColor(ImGuiCol_ButtonHovered, bh);
+												ImVec4 ba = glyphRangeColoring; ba.w = 1.0f;
+												ImGui::PushStyleColor(ImGuiCol_ButtonActive, ba);
 											}
+
+											win->DrawList->ChannelsSetCurrent(1);
+
+											bool selected = false;
+
+											// draw selection square in channel 1
+											SelectionHelper::Instance()->IsGlyphIntersectedAndSelected(
+												vFontInfos, glyph_size, glyph.Codepoint, &selected,
+												SelectionContainerEnum::SELECTION_CONTAINER_SOURCE);
+
+											win->DrawList->ChannelsSetCurrent(0);
+
+											// draw glyph in channel 0
+											ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
+											bool check = GlyphInfos::DrawGlyphButton(vProjectFile, vFontInfos, &selected, glyph_size, glyph, hostTextureSize);
+											ImGui::PopStyleVar();
+
+											if (check)
+											{
+												SelectionHelper::Instance()->SelectWithToolOrApplyOnGlyph(
+													vProjectFile, vFontInfos,
+													glyph, idx, selected, true,
+													SelectionContainerEnum::SELECTION_CONTAINER_SOURCE);
+											}
+
+											if (showRangeColoring)
+											{
+												ImGui::PopStyleColor(3);
+											}
+
+											if (vProjectFile->m_SourcePane_ShowGlyphTooltip)
+											{
+												if (ImGui::IsItemHovered())
+												{
+													ImGui::SetTooltip("name : %s\ncodepoint : %i", name.c_str(), (int)glyph.Codepoint);
+												}
+											}
+
+											lastGlyphCodePoint = glyph.Codepoint;
+											idx++;
 										}
 									}
 								}
 							}
-							m_Clipper.End();
+							m_VirtualClipper.End();
 						}
 
 						SelectionHelper::Instance()->SelectWithToolOrApply(

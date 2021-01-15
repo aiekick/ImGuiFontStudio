@@ -42,6 +42,7 @@
 #include <Project/FontInfos.h>
 #include <Project/ProjectFile.h>
 #include <Res/CustomFont.h>
+#include <Helper/AssetManager.h>
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
@@ -56,7 +57,7 @@ MainFrame::MainFrame(GLFWwindow *vWin)
 
 MainFrame::~MainFrame()
 {
-
+	AssetManager::Instance()->Clear();
 }
 
 void MainFrame::Init()
@@ -70,6 +71,8 @@ void MainFrame::Init()
 	LoadConfigFile("config.xml");
 
 	LayoutManager::Instance()->Init();
+
+	AssetManager::Instance()->LoadTexture2D("btn", "src/res/btn.png");
 }
 
 void MainFrame::Unit()
@@ -312,7 +315,7 @@ void MainFrame::DisplayDialogsAndPopups()
 	if (m_ShowImGui)
 		ImGui::ShowDemoWindow(&m_ShowImGui);
 	if (m_ShowImGuiStyle)
-		ImGui::ShowCustomStyleEditor(&m_ShowImGuiStyle);
+		ImGuiThemeHelper::Instance()->ShowCustomStyleEditor(&m_ShowImGuiStyle);
 	if (m_ShowMetric)
 		ImGui::ShowMetricsWindow(&m_ShowMetric);
 

@@ -26,6 +26,8 @@
 #include <imgui/imgui_internal.h>
 
 #include <Gui/ImGuiWidgets.h>
+#include <Helper/ImGuiThemeHelper.h>
+#include <Helper/AssetManager.h>
 
  ///////////////////////////////////////////////////////////////////////////////////
  //// PUBLIC : STATIC //////////////////////////////////////////////////////////////
@@ -264,10 +266,24 @@ bool GlyphInfos::DrawGlyphButton(
 		const ImU32 col = ImGui::GetColorU32(((held && hovered) || (vSelected && *vSelected)) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
 		ImGui::RenderNavHighlight(bb, id);
 		float rounding = ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding);
+#ifndef USE_GRADIENT
+		// normal
+		ImGui::RenderFrame(bb.Min, bb.Max, col, true, ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding));
+#else
+
+#if 1
+		// inner shadow
 		ImVec4 cb = ImColor(col).Value; // color base : cb
-		ImVec4 cbd = ImVec4(cb.x * 0.5f, cb.y * 0.5f, cb.z * 0.5f, cb.w * 1.5f); // color base darker : cbd
+		float sha = ImGuiThemeHelper::Instance()->m_ShadowStrength;
+		ImVec4 cbd = ImVec4(cb.x * sha, cb.y * sha, cb.z * sha, cb.w * 0.9f); // color base darker : cbd
 		ImGui::RenderInnerShadowFrame(bb.Min, bb.Max, col, ImGui::GetColorU32(cbd), ImGui::GetColorU32(ImGuiCol_WindowBg), true, rounding);
-		//ImGui::RenderFrame(bb.Min, bb.Max, col, true, ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding));
+#else
+		ImTextureID texId = (ImTextureID)AssetManager::Instance()->m_Textures["btn"].glTex;
+		window->DrawList->AddImage(texId, bb.Min, bb.Max, ImVec2(0, 0), ImVec2(1, 1), col);
+#endif
+
+#endif
+		ImGui::AddInvertedRectFilled(window->DrawList, bb.Min, bb.Max, ImGui::GetColorU32(ImGuiCol_WindowBg), rounding, ImDrawCornerFlags_All);
 		if (vRectThickNess > 0.0f)
 		{
 			window->DrawList->AddRect(bb.Min, bb.Max, ImGui::GetColorU32(vRectColor), 0.0, 15, vRectThickNess);
@@ -320,6 +336,11 @@ bool GlyphInfos::DrawGlyphButton(
 			{
 				float asc = vFontInfos->m_Ascent * vFontInfos->m_Point * pScale.y;
 				window->DrawList->AddLine(ImVec2(bb.Min.x, startPos.y + asc), ImVec2(bb.Max.x, startPos.y + asc), ImGui::GetColorU32(ImGuiCol_PlotHistogram), 2.0f); // base line
+			}
+
+			if (vProjectFile->m_ShowOriginX) // draw origin x
+			{
+				window->DrawList->AddLine(ImVec2(startPos.x + offsetX, bb.Min.y), ImVec2(startPos.x + offsetX, bb.Max.y), ImGui::GetColorU32(ImGuiCol_PlotLinesHovered), 2.0f); // base line
 			}
 
 			if (vProjectFile->m_ShowAdvanceX) // draw advance X

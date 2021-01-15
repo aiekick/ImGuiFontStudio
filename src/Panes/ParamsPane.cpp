@@ -27,6 +27,7 @@
 #include <Panes/Manager/LayoutManager.h>
 #include <Project/FontInfos.h>
 #include <Project/ProjectFile.h>
+#include <Helper/AssetManager.h>
 
 #include <cinttypes> // printf zu
 
@@ -247,16 +248,18 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 					if (ImGui::BeginFramedGroup("Glyphs"))
 					{
 						maxWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 2.0f;
-						mrw = maxWidth / 3.0f - ImGui::GetStyle().FramePadding.x;
+						mrw = maxWidth / 4.0f - ImGui::GetStyle().FramePadding.x;
 
 						ImGui::PushItemWidth(mrw);
 						ImGui::RadioButtonLabeled("Zoom", "Zoom Each Glyphs for best fit", &vProjectFile->m_ZoomGlyphs);
 						ImGui::SameLine();
 						ImGui::RadioButtonLabeled("Base", "Show the base line of the font", &vProjectFile->m_ShowBaseLine, vProjectFile->m_ZoomGlyphs);
 						ImGui::SameLine();
+						ImGui::RadioButtonLabeled("OrgX", "Show the Origin X of the glyph", &vProjectFile->m_ShowOriginX, vProjectFile->m_ZoomGlyphs);
+						ImGui::SameLine();
 						ImGui::RadioButtonLabeled("AdvX", "Show the Advance X of the glyph", &vProjectFile->m_ShowAdvanceX, vProjectFile->m_ZoomGlyphs);
 						ImGui::PopItemWidth();
-
+						
 						ImGui::EndFramedGroup(true);
 					}
 

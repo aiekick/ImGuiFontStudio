@@ -120,6 +120,7 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 						FillGlyphNames();
 						GenerateCodePointToGlypNamesDB();
 						UpdateInfos();
+						UpdateFiltering();
 
 						// update glyph ptrs
 						for (auto &it : m_SelectedGlyphs)
@@ -397,6 +398,41 @@ void FontInfos::GenerateCodePointToGlypNamesDB()
 						}
 					}
 				}
+			}
+		}
+	}
+}
+
+void FontInfos::UpdateFiltering()
+{
+	m_FilteredGlyphs.clear();
+
+	ImFont* font = m_ImFontAtlas.Fonts[0];
+	if (font)
+	{
+		uint32_t countGlyphs = (uint32_t)font->Glyphs.size();
+		for (uint32_t idx = 0; idx < countGlyphs; idx++)
+		{
+			auto glyph = *(font->Glyphs.begin() + idx);
+
+			if (!m_Filters.empty())
+			{
+				std::string name = m_GlyphCodePointToName[glyph.Codepoint];
+
+				if (!name.empty())
+				{
+					for (const auto& it : m_Filters)
+					{
+						if (name.find(it) != std::string::npos) // found
+						{
+							m_FilteredGlyphs.push_back(glyph);
+						}
+					}
+				}
+			}
+			else
+			{
+				m_FilteredGlyphs.push_back(glyph);
 			}
 		}
 	}

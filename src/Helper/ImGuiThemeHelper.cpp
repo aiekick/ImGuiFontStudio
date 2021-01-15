@@ -19,6 +19,7 @@
 #include "ImGuiThemeHelper.h"
 
 #include <Res/CustomFont.h>
+#include <Gui/ImGuiWidgets.h>
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
@@ -43,6 +44,10 @@ void ImGuiThemeHelper::DrawMenu()
 	if (ImGui::MenuItem("RedDark"))	ApplyStyleColorsRedDark();
 	if (ImGui::MenuItem("Light"))	ApplyStyleColorsLight();
 	
+	ImGui::Separator();
+
+	ImGui::SliderFloatDefaultCompact(300.0f, "Inner Shadow", &m_ShadowStrength, 2.0f, 0.0f, 0.5f);
+
 	ImGui::Separator();
 
 	ImGui::Text("File Type Colors :");
@@ -917,4 +922,155 @@ int ImGuiThemeHelper::GetImGuiColFromName(const std::string& vName)
 	else if (vName == "ImGuiCol_NavWindowingDimBg") return ImGuiCol_NavWindowingDimBg;
 	else if (vName == "ImGuiCol_ModalWindowDimBg") return ImGuiCol_ModalWindowDimBg;
 	return -1;
+}
+
+void ImGuiThemeHelper::ShowCustomStyleEditor(bool* vOpen, ImGuiStyle* ref)
+{
+	if (ImGui::Begin("Styles Editor", vOpen))
+	{
+		// You can pass in a reference ImGuiStyle structure to compare to, revert to and save to (else it compares to an internally stored reference)
+		ImGuiStyle& style = ImGui::GetStyle();
+		static ImGuiStyle ref_saved_style;
+
+		// Default to using internal storage as reference
+		static bool init = true;
+		if (init && ref == nullptr)
+			ref_saved_style = style;
+		init = false;
+		if (ref == nullptr)
+			ref = &ref_saved_style;
+
+		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.50f);
+
+		if (ImGui::ShowStyleSelector("Colors##Selector"))
+			ref_saved_style = style;
+		ImGui::ShowFontSelector("Fonts##Selector");
+
+		// Simplified Settings
+		if (ImGui::SliderFloat("FrameRounding", &style.FrameRounding, 0.0f, 12.0f, "%.0f"))
+			style.GrabRounding = style.FrameRounding; // Make GrabRounding always the same value as FrameRounding
+		{ bool window_border = (style.WindowBorderSize > 0.0f); if (ImGui::Checkbox("WindowBorder", &window_border)) style.WindowBorderSize = window_border ? 1.0f : 0.0f; }
+		ImGui::SameLine();
+		{ bool frame_border = (style.FrameBorderSize > 0.0f); if (ImGui::Checkbox("FrameBorder", &frame_border)) style.FrameBorderSize = frame_border ? 1.0f : 0.0f; }
+		ImGui::SameLine();
+		{ bool popup_border = (style.PopupBorderSize > 0.0f); if (ImGui::Checkbox("PopupBorder", &popup_border)) style.PopupBorderSize = popup_border ? 1.0f : 0.0f; }
+		
+		// Custom Shadow
+		ImGui::SliderFloatDefaultCompact(300.0f, "Inner Shadow", &m_ShadowStrength, 2.0f, 0.0f, 0.5f);
+
+		// Save/Revert button
+		if (ImGui::Button("Save Ref"))
+			*ref = ref_saved_style = style;
+		ImGui::SameLine();
+		if (ImGui::Button("Revert Ref"))
+			style = *ref;
+		ImGui::SameLine();
+		ImGui::HelpMarker("Save/Revert in local non-persistent storage. Default Colors definition are not affected. Use \"Export\" below to save them somewhere.");
+
+		ImGui::Separator();
+
+		if (ImGui::BeginTabBar("##tabs", ImGuiTabBarFlags_None))
+		{
+			if (ImGui::BeginTabItem("Sizes"))
+			{
+				ImGui::Text("Main");
+				ImGui::SliderFloat2("WindowPadding", (float*)&style.WindowPadding, 0.0f, 20.0f, "%.0f");
+				ImGui::SliderFloat2("FramePadding", (float*)&style.FramePadding, 0.0f, 20.0f, "%.0f");
+				ImGui::SliderFloat2("ItemSpacing", (float*)&style.ItemSpacing, 0.0f, 20.0f, "%.0f");
+				ImGui::SliderFloat2("ItemInnerSpacing", (float*)&style.ItemInnerSpacing, 0.0f, 20.0f, "%.0f");
+				ImGui::SliderFloat2("TouchExtraPadding", (float*)&style.TouchExtraPadding, 0.0f, 10.0f, "%.0f");
+				ImGui::SliderFloat("IndentSpacing", &style.IndentSpacing, 0.0f, 30.0f, "%.0f");
+				ImGui::SliderFloat("ScrollbarSize", &style.ScrollbarSize, 1.0f, 20.0f, "%.0f");
+				ImGui::SliderFloat("GrabMinSize", &style.GrabMinSize, 1.0f, 20.0f, "%.0f");
+				ImGui::Text("Borders");
+				ImGui::SliderFloat("WindowBorderSize", &style.WindowBorderSize, 0.0f, 1.0f, "%.0f");
+				ImGui::SliderFloat("ChildBorderSize", &style.ChildBorderSize, 0.0f, 1.0f, "%.0f");
+				ImGui::SliderFloat("PopupBorderSize", &style.PopupBorderSize, 0.0f, 1.0f, "%.0f");
+				ImGui::SliderFloat("FrameBorderSize", &style.FrameBorderSize, 0.0f, 1.0f, "%.0f");
+				ImGui::SliderFloat("TabBorderSize", &style.TabBorderSize, 0.0f, 1.0f, "%.0f");
+				ImGui::Text("Rounding");
+				ImGui::SliderFloat("WindowRounding", &style.WindowRounding, 0.0f, 12.0f, "%.0f");
+				ImGui::SliderFloat("ChildRounding", &style.ChildRounding, 0.0f, 12.0f, "%.0f");
+				ImGui::SliderFloat("FrameRounding", &style.FrameRounding, 0.0f, 12.0f, "%.0f");
+				ImGui::SliderFloat("PopupRounding", &style.PopupRounding, 0.0f, 12.0f, "%.0f");
+				ImGui::SliderFloat("ScrollbarRounding", &style.ScrollbarRounding, 0.0f, 12.0f, "%.0f");
+				ImGui::SliderFloat("GrabRounding", &style.GrabRounding, 0.0f, 12.0f, "%.0f");
+				ImGui::SliderFloat("TabRounding", &style.TabRounding, 0.0f, 12.0f, "%.0f");
+				ImGui::Text("Alignment");
+				ImGui::SliderFloat2("WindowTitleAlign", (float*)&style.WindowTitleAlign, 0.0f, 1.0f, "%.2f");
+				int window_menu_button_position = style.WindowMenuButtonPosition + 1;
+				if (ImGui::Combo("WindowMenuButtonPosition", (int*)&window_menu_button_position, "None\0Left\0Right\0"))
+					style.WindowMenuButtonPosition = window_menu_button_position - 1;
+				ImGui::Combo("ColorButtonPosition", (int*)&style.ColorButtonPosition, "Left\0Right\0");
+				ImGui::SliderFloat2("ButtonTextAlign", (float*)&style.ButtonTextAlign, 0.0f, 1.0f, "%.2f"); ImGui::SameLine(); ImGui::HelpMarker("Alignment applies when a button is larger than its text content.");
+				ImGui::SliderFloat2("SelectableTextAlign", (float*)&style.SelectableTextAlign, 0.0f, 1.0f, "%.2f"); ImGui::SameLine(); ImGui::HelpMarker("Alignment applies when a selectable is larger than its text content.");
+				ImGui::Text("Safe Area Padding"); ImGui::SameLine(); ImGui::HelpMarker("Adjust if you cannot see the edges of your screen (e.g. on a TV where scaling has not been configured).");
+				ImGui::SliderFloat2("DisplaySafeAreaPadding", (float*)&style.DisplaySafeAreaPadding, 0.0f, 30.0f, "%.0f");
+				ImGui::EndTabItem();
+			}
+
+			if (ImGui::BeginTabItem("Colors"))
+			{
+				static int output_dest = 0;
+				static bool output_only_modified = true;
+				if (ImGui::Button("Export"))
+				{
+					if (output_dest == 0)
+						ImGui::LogToClipboard();
+					else
+						ImGui::LogToTTY();
+					ImGui::LogText("ImVec4* colors = ImGui::GetStyle().Colors;" IM_NEWLINE);
+					for (int i = 0; i < ImGuiCol_COUNT; i++)
+					{
+						const ImVec4& col = style.Colors[i];
+						const char* name = ImGui::GetStyleColorName(i);
+						if (!output_only_modified || memcmp(&col, &ref->Colors[i], sizeof(ImVec4)) != 0)
+							ImGui::LogText("colors[ImGuiCol_%s]%*s= ImVec4(%.2ff, %.2ff, %.2ff, %.2ff);" IM_NEWLINE, name, 23 - (int)strlen(name), "", col.x, col.y, col.z, col.w);
+					}
+					ImGui::LogFinish();
+				}
+				ImGui::SameLine(); ImGui::SetNextItemWidth(120); ImGui::Combo("##output_type", &output_dest, "To Clipboard\0To TTY\0");
+				ImGui::SameLine(); ImGui::Checkbox("Only Modified Colors", &output_only_modified);
+
+				static ImGuiTextFilter filter;
+				filter.Draw("Filter colors", ImGui::GetFontSize() * 16);
+
+				static ImGuiColorEditFlags alpha_flags = 0;
+				if (ImGui::RadioButton("Opaque", alpha_flags == 0)) { alpha_flags = 0; } ImGui::SameLine();
+				if (ImGui::RadioButton("Alpha", alpha_flags == ImGuiColorEditFlags_AlphaPreview)) { alpha_flags = ImGuiColorEditFlags_AlphaPreview; } ImGui::SameLine();
+				if (ImGui::RadioButton("Both", alpha_flags == ImGuiColorEditFlags_AlphaPreviewHalf)) { alpha_flags = ImGuiColorEditFlags_AlphaPreviewHalf; } ImGui::SameLine();
+				ImGui::HelpMarker("In the color list:\nLeft-click on colored square to open color picker,\nRight-click to open edit options menu.");
+
+				ImGui::BeginChild("##colors", ImVec2(0, 0), true, ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar | ImGuiWindowFlags_NavFlattened);
+				ImGui::PushItemWidth(-160);
+				for (int i = 0; i < ImGuiCol_COUNT; i++)
+				{
+					const char* name = ImGui::GetStyleColorName(i);
+					if (!filter.PassFilter(name))
+						continue;
+					ImGui::PushID(i);
+					ImGui::ColorEdit4("##color", (float*)&style.Colors[i], ImGuiColorEditFlags_AlphaBar | alpha_flags);
+					if (memcmp(&style.Colors[i], &ref->Colors[i], sizeof(ImVec4)) != 0)
+					{
+						// Tips: in a real user application, you may want to merge and use an icon font into the main font, so instead of "Save"/"Revert" you'd use icons.
+						// Read the FAQ and docs/FONTS.txt about using icon fonts. It's really easy and super convenient!
+						ImGui::SameLine(0.0f, style.ItemInnerSpacing.x); if (ImGui::Button("Save")) ref->Colors[i] = style.Colors[i];
+						ImGui::SameLine(0.0f, style.ItemInnerSpacing.x); if (ImGui::Button("Revert")) style.Colors[i] = ref->Colors[i];
+					}
+					ImGui::SameLine(0.0f, style.ItemInnerSpacing.x);
+					ImGui::TextUnformatted(name);
+					ImGui::PopID();
+				}
+				ImGui::PopItemWidth();
+				ImGui::EndChild();
+
+				ImGui::EndTabItem();
+			}
+
+			ImGui::EndTabBar();
+		}
+
+		ImGui::PopItemWidth();
+	}
+	ImGui::End();
 }

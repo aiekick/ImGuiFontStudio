@@ -26,12 +26,14 @@ class ImGuiThemeHelper : public conf::ConfigAbstract
 public:
 	ImVec4 goodColor = ImVec4(0.2f, 0.8f, 0.2f, 1.0f);
 	ImVec4 badColor = ImVec4(0.8f, 0.2f, 0.2f, 1.0f);
+	float m_ShadowStrength = 0.5f; // low value is darker than higt (0.0f - 2.0f)
 
 private:
 	std::map<std::string, IGFD::FileExtentionInfosStruct> m_FileTypeInfos;
 
 public:
 	void DrawMenu();
+	void ShowCustomStyleEditor(bool* vOpen, ImGuiStyle* ref = 0);
 
 public:
 	std::string getXml(const std::string& vOffset, const std::string& vUserDatas = "") override;
@@ -44,7 +46,7 @@ public:
 	void ApplyStyleColorsLight(ImGuiStyle* dst = nullptr);
 	void ApplyStyleColorsDarcula(ImGuiStyle* dst = nullptr);
 	void ApplyStyleColorsRedDark(ImGuiStyle* dst = nullptr);
-
+	
 private:
 	void ApplyFileTypeColors();
 

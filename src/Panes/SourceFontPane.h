@@ -34,7 +34,7 @@ private: // per pane settings to save
 	//float m_GlyphSize_Policy_Width = 40.0f;
 
 private: // private vars
-	ImGuiListClipper m_FontsClipper;
+	ImGuiListClipper m_VirtualClipper;
 
 private: // private enum
 	bool m_Show_ConfirmToCloseFont_Dialog = false;  // show confirm to close font dialog
@@ -48,7 +48,6 @@ public:
 
 private: 
 	void DrawFilterBar(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos);
-	bool IfCatchedByFilters(std::shared_ptr<FontInfos> vFontInfos, const std::string& vSymbolName);
 	void DrawFontTexture(std::shared_ptr<FontInfos> vFontInfos);
 	bool DrawGlyphButton(
 		ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos, 

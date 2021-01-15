@@ -17,6 +17,8 @@
 
 #include <imgui/imgui.h>
 
+#include <ctools/cTools.h>
+
 #include <cstdarg> // variadic
 #include <cstdint> // types like uint32_t
 
@@ -26,9 +28,11 @@ struct ImGuiWindow;
 
 namespace ImGui
 {
+	IMGUI_API void AddInvertedRectFilled(ImDrawList* vDrawList, const ImVec2& p_min, const ImVec2& p_max, ImU32 col, float rounding, ImDrawCornerFlags rounding_corners);
 	IMGUI_API void RenderInnerShadowFrame(ImVec2 p_min, ImVec2 p_max, ImU32 fill_col, ImU32 fill_col_darker, ImU32 bg_Color, bool border, float rounding);
+	IMGUI_API void DrawShadowImage(ImTextureID vShadowImage, const ImVec2& vSize, ImU32 col);
 
-	/// //////////////////////////////////////////////////////////////////////////////////////////////////////////////
+	//////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
 	IMGUI_API bool SelectableWithBtn(const char* label, bool selected = false, const char* btnLabel = 0, bool *btnClicked = 0, bool *btnHovered = 0, ImVec4 vBtnColor = ImVec4(0.8f, 0.5f, 0.2f, 1.0f), ImVec4 vBtnHoveredColor = ImVec4(1.0f, 0.8f, 0.2f, 1.0f), ImGuiSelectableFlags flags = 0, const ImVec2& size_args = ImVec2(0.0f, 0.0f));
 	IMGUI_API bool ImageCheckButton(ImTextureID user_texture_id, bool *v, const ImVec2& size, const ImVec2& uv0 = ImVec2(0.0f, 0.0f), const ImVec2& uv1 = ImVec2(1.0f, 1.0f), const ImVec2& vHostTextureSize = ImVec2(0.0f, 0.0f), int frame_padding = -1, float vRectThickNess = 0.0f, ImVec4 vRectColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
@@ -235,7 +239,6 @@ namespace ImGui
 		const bool *vValidation = 0, const char* vValidationHelp = 0,
 		ImGuiInputTextFlags flags = 0, ImGuiInputTextCallback callback = nullptr, void* user_data = nullptr);
 	IMGUI_API void HelpMarker(const char* desc);
-	IMGUI_API void ShowCustomStyleEditor(bool *vOpen, ImGuiStyle* ref = nullptr);
 
 	////////////////////////////////////////////////////////////////////////////
 

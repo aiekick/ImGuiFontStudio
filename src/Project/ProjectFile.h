@@ -70,6 +70,7 @@ public: // to save
 	bool m_ZoomGlyphs = false; // keep the glyph aligned to font glyph bounding box
 	bool m_ShowBaseLine = false; // show the base line of the glyph only when m_ZoomGlyphs is false
 	bool m_ShowAdvanceX = false; // show the advance x of the glyph only when m_ZoomGlyphs is false
+	bool m_ShowOriginX = false; // show the origin x of the glyph only when m_ZoomGlyphs is false
 
 public: // dont save
 	std::shared_ptr<FontInfos> m_SelectedFont = nullptr;

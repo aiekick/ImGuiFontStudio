@@ -56,6 +56,7 @@ public: // not to save
 	std::string m_FontFileName;
 	std::vector<std::pair<std::string, std::string>> m_InfosToDisplay;
 	ImGuiListClipper m_InfosToDisplayClipper;
+	std::vector<ImFontGlyph> m_FilteredGlyphs;
 
 public: // to save
 	std::map<uint32_t, GlyphInfos> m_SelectedGlyphs;
@@ -71,6 +72,7 @@ public: // callable
 	std::string GetGlyphName(uint32_t vCodePoint);
 	void DrawInfos(ProjectFile* vProjectFile);
 	void UpdateInfos();
+	void UpdateFiltering();
 
 private: // Glyph Names Extraction / DB
 	void FillGlyphNames();
