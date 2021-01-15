@@ -2,7 +2,7 @@
 	<project>
 		<font name="arialbd.ttf">
 			<prefix></prefix>
-			<pathfilename>C:\windows\fonts\arialbd.ttf</pathfilename>
+			<pathfilename>..\..\..\..\windows\fonts\arialbd.ttf</pathfilename>
 			<oversample>1</oversample>
 			<fontsize>40</fontsize>
 		</font>
@@ -13,8 +13,8 @@
 		<selectedfontpane>
 		</selectedfontpane>
 		<rangecoloring show="false" hash="10;15;35;0.5"/>
-		<previewglyphcount>15</previewglyphcount>
-		<previewglyphwidth>40</previewglyphwidth>
+		<previewglyphcount>18</previewglyphcount>
+		<previewglyphwidth>96.383</previewglyphwidth>
 		<mergedfontprefix></mergedfontprefix>
 		<curglyphtooltip>true</curglyphtooltip>
 		<srcglyphtooltip>true</srcglyphtooltip>
@@ -22,7 +22,7 @@
 		<glyphpreviewscale>0.193</glyphpreviewscale>
 		<glyphpreviewshowcontrollines>false</glyphpreviewshowcontrollines>
 		<glyphpreviewquadbeziercounsegment>0</glyphpreviewquadbeziercounsegment>
-		<genmode>275</genmode>
+		<genmode>1307</genmode>
 		<fonttomergein>arialbd.ttf</fonttomergein>
 		<glyphdisplaytuningmode>2</glyphdisplaytuningmode>
 		<sourcefontpaneflags>1</sourcefontpaneflags>
@@ -30,6 +30,8 @@
 		<cardcountrowsmax>20</cardcountrowsmax>
 		<lastgeneratedpath>.</lastgeneratedpath>
 		<lastgeneratedfilename>Generated_Font</lastgeneratedfilename>
-		<alignedwithfontbbox>true</alignedwithfontbbox>
+		<zoomglyphs>false</zoomglyphs>
+		<showbaseline>true</showbaseline>
+		<showadvancex>true</showadvancex>
 	</project>
 </config>

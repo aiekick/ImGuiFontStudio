@@ -44,7 +44,7 @@ public: // to save
 	bool m_ShowRangeColoring = false;
 	ImVec4 m_RangeColoringHash = ImVec4(10, 15, 35, 0.5f);
 	int m_Preview_Glyph_CountX = 20;
-	float m_Preview_Glyph_Width = 40.0f;
+	float m_Preview_Glyph_Width = 50.0f;
 	std::string m_ProjectFilePathName;
 	std::string m_ProjectFilePath;
 	std::string m_LastGeneratedPath = ".";
@@ -68,6 +68,8 @@ public: // to save
 	uint32_t m_CardGlyphHeightInPixel = 40U; // glyph item height in card
 	uint32_t m_CardCountRowsMax = 20U; // after this max, new columns
 	bool m_ZoomGlyphs = false; // keep the glyph aligned to font glyph bounding box
+	bool m_ShowBaseLine = false; // show the base line of the glyph only when m_ZoomGlyphs is false
+	bool m_ShowAdvanceX = false; // show the advance x of the glyph only when m_ZoomGlyphs is false
 
 public: // dont save
 	std::shared_ptr<FontInfos> m_SelectedFont = nullptr;

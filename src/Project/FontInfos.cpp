@@ -23,6 +23,7 @@
 #include <Gui/ImGuiWidgets.h>
 #include <Helper/Messaging.h>
 #include <ctools/Logger.h>
+#include <Panes/ParamsPane.h>
 
 #define STB_TRUETYPE_IMPLEMENTATION  
 #include <imgui/imstb_truetype.h>
@@ -30,6 +31,11 @@
 #include <glad/glad.h>
 
 #include <array>
+
+///////////////////////////////////////////////////////////////////////////////////
+static ProjectFile defaultProjectValues;
+static FontInfos defaultFontInfosValues;
+///////////////////////////////////////////////////////////////////////////////////
 
 // Extract the UpperCase char's of a string and return as a Prefix
 // if the font name is like "FontAwesome" (UpperCase char), this func will give the prefix "FA"
@@ -113,7 +119,7 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 
 						FillGlyphNames();
 						GenerateCodePointToGlypNamesDB();
-						GetInfos();
+						UpdateInfos();
 
 						// update glyph ptrs
 						for (auto &it : m_SelectedGlyphs)
@@ -258,13 +264,13 @@ std::string FontInfos::GetGlyphName(uint32_t vCodePoint)
 	return "Symbol Name";
 }
 
-void FontInfos::DrawInfos()
+void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 {
 	if (!m_ImFontAtlas.Fonts.empty() && !m_InfosToDisplay.empty())
 	{
 		if (ImGui::BeginFramedGroup("Selected Font Infos"))
 		{
-			const float aw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 2.0f;
+			float aw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 2.0f;
 
 			static ImGuiTableFlags flags = 
 				ImGuiTableFlags_SizingFixedFit |
@@ -308,12 +314,29 @@ void FontInfos::DrawInfos()
 				ImGui::EndTable();
 			}
 			
+			ImGui::FramedGroupSeparator();
+
+			ImGui::Text("Selecteds : %u", (uint32_t)m_SelectedGlyphs.size());
+
+			ImGui::FramedGroupSeparator();
+
+			bool needFontReGen = false;
+			needFontReGen |= ImGui::SliderIntDefaultCompact(ImGui::GetContentRegionAvail().x, "Font Size", &vProjectFile->m_SelectedFont->m_FontSize, 7, 50, defaultFontInfosValues.m_FontSize);
+			needFontReGen |= ImGui::SliderIntDefaultCompact(ImGui::GetContentRegionAvail().x, "Font Anti-aliasing", &vProjectFile->m_SelectedFont->m_Oversample, 1, 5, defaultFontInfosValues.m_Oversample);
+			if (needFontReGen)
+			{
+				vProjectFile->m_SelectedFont->m_FontSize = ct::clamp(vProjectFile->m_SelectedFont->m_FontSize, 7, 50);
+				vProjectFile->m_SelectedFont->m_Oversample = ct::clamp(vProjectFile->m_SelectedFont->m_Oversample, 1, 5);
+				ParamsPane::Instance()->OpenFont(vProjectFile, vProjectFile->m_SelectedFont->m_FontFilePathName, false);
+				vProjectFile->SetProjectChange();
+			}
+
 			ImGui::EndFramedGroup(true);
 		}
 	}
 }
 
-void FontInfos::GetInfos()
+void FontInfos::UpdateInfos()
 {
 	stbtt_fontinfo fontInfo;
 	const int font_offset = stbtt_GetFontOffsetForIndex(
@@ -330,14 +353,14 @@ void FontInfos::GetInfos()
 	m_InfosToDisplay.clear();
 	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Font", m_FontFilePathName));
 	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("N Glyphs :", ct::toStr(m_ImFontAtlas.Fonts[0]->Glyphs.size())));
-	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("N Sel Glyphs :", ct::toStr(m_SelectedGlyphs.size())));
+	//m_InfosToDisplay.push_back(std::pair<std::string, std::string>("N Sel Glyphs :", ct::toStr(m_SelectedGlyphs.size())));
 	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Texture Size :", ct::toStr("%i x %i", m_ImFontAtlas.TexWidth, m_ImFontAtlas.TexHeight)));
 	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Ascent / Descent :", ct::toStr("%i / %i", m_Ascent, m_Descent)));
 	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Glyph BBox :", ct::toStr("min : %i x %i/max : %i x %i",
 		m_BoundingBox.x, m_BoundingBox.y, m_BoundingBox.z, m_BoundingBox.w)));
 #ifdef _DEBUG
-	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("SizeInPixels :", ct::toStr("%.2f", m_FontConfig.SizePixels)));
-	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Line gap :", ct::toStr("%i", m_LineGap))); // dont know what is it haha
+	//m_InfosToDisplay.push_back(std::pair<std::string, std::string>("SizeInPixels :", ct::toStr("%.2f", m_FontConfig.SizePixels)));
+	//m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Line gap :", ct::toStr("%i", m_LineGap))); // dont know what is it haha
 	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Scale pixel height :", ct::toStr("%.4f", m_Point))); // same.., its used internally by ImGui but dont know what is it
 #endif
 }

@@ -104,11 +104,13 @@ void SelectionHelper::DrawRect(ImVec2 vPos, ImVec2 vSize)
 	ImGuiWindow* window = ImGui::GetCurrentWindow();
 	if (window)
 	{
-		ImVec2 spa = ImGui::GetStyle().ItemSpacing;
-		ImVec2 pad = ImGui::GetStyle().FramePadding * 2.0f;
+		auto style = &ImGui::GetStyle();
+		ImVec2 spa = style->ItemSpacing;
+		ImVec2 pad = style->FramePadding * 2.0f;
+		float round = ImClamp((float)ImMin(style->FramePadding.x, style->FramePadding.y), 0.0f, 12.0f);
 		window->DrawList->AddRect(vPos - spa * 0.5f,
 			vPos + vSize + pad + spa * 0.5f,
-			ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 0, 15, 3.0f);
+			ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), round, 15, 3.0f);
 	}
 }
 

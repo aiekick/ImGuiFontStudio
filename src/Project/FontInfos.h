@@ -69,12 +69,12 @@ public: // callable
 	bool LoadFont(ProjectFile *vProjectFile, const std::string& vFontFilePathName);
 	void Clear();
 	std::string GetGlyphName(uint32_t vCodePoint);
-	void DrawInfos();
+	void DrawInfos(ProjectFile* vProjectFile);
+	void UpdateInfos();
 
 private: // Glyph Names Extraction / DB
 	void FillGlyphNames();
 	void GenerateCodePointToGlypNamesDB();
-	void GetInfos();
 
 private: // Opengl Texture
 	void CreateFontTexture();

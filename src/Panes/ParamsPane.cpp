@@ -130,8 +130,8 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 		{
 			if (vProjectFile && vProjectFile->IsLoaded())
 			{
-				const float maxWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 4.0f;
-				const float mrw = maxWidth / 2.0f - ImGui::GetStyle().FramePadding.x;
+				float maxWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 4.0f;
+				float mrw = maxWidth / 2.0f - ImGui::GetStyle().FramePadding.x;
 				
 				if (ImGui::BeginFramedGroup("Font File"))
 				{
@@ -240,34 +240,33 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 
 				if (vProjectFile->m_SelectedFont)
 				{
-					vProjectFile->m_SelectedFont->DrawInfos();
+					vProjectFile->m_SelectedFont->DrawInfos(vProjectFile);
 
 					LayoutManager::Instance()->DrawWidgets(vProjectFile, 0, "");
 
-					if (ImGui::BeginFramedGroup("Font Preview"))
+					if (ImGui::BeginFramedGroup("Glyphs"))
 					{
-						bool needFontReGen = false;
+						maxWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 2.0f;
+						mrw = maxWidth / 3.0f - ImGui::GetStyle().FramePadding.x;
 
-						float aw = ImGui::GetContentRegionAvail().x;
+						ImGui::PushItemWidth(mrw);
+						ImGui::RadioButtonLabeled("Zoom", "Zoom Each Glyphs for best fit", &vProjectFile->m_ZoomGlyphs);
+						ImGui::SameLine();
+						ImGui::RadioButtonLabeled("Base", "Show the base line of the font", &vProjectFile->m_ShowBaseLine, vProjectFile->m_ZoomGlyphs);
+						ImGui::SameLine();
+						ImGui::RadioButtonLabeled("AdvX", "Show the Advance X of the glyph", &vProjectFile->m_ShowAdvanceX, vProjectFile->m_ZoomGlyphs);
+						ImGui::PopItemWidth();
 
-						ImGui::Checkbox("Zoom Glyphs", &vProjectFile->m_ZoomGlyphs);
+						ImGui::EndFramedGroup(true);
+					}
 
-						needFontReGen |= ImGui::SliderIntDefaultCompact(aw, "Font Size", &vProjectFile->m_SelectedFont->m_FontSize, 7, 50, defaultFontInfosValues.m_FontSize);
-						needFontReGen |= ImGui::SliderIntDefaultCompact(aw, "Font Anti-aliasing", &vProjectFile->m_SelectedFont->m_Oversample, 1, 5, defaultFontInfosValues.m_Oversample);
-
-						if (needFontReGen)
-						{
-							vProjectFile->m_SelectedFont->m_FontSize = ct::clamp(vProjectFile->m_SelectedFont->m_FontSize, 7, 50);
-							vProjectFile->m_SelectedFont->m_Oversample = ct::clamp(vProjectFile->m_SelectedFont->m_Oversample, 1, 5);
-							OpenFont(vProjectFile, vProjectFile->m_SelectedFont->m_FontFilePathName, false);
-							vProjectFile->SetProjectChange();
-						}
-
+					if (ImGui::BeginFramedGroup("Font Layout"))
+					{
 						if (vProjectFile->m_SourceFontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH)
 						{
 							const auto style = &ImGui::GetStyle();
 							static float radioButtonWidth = ImGui::GetFrameHeight();
-							aw = ImGui::GetContentRegionAvail().x - style->ItemSpacing.x - radioButtonWidth;
+							float aw = ImGui::GetContentRegionAvail().x - style->ItemSpacing.x - radioButtonWidth;
 
 							bool change = false;
 							if (ImGui::SliderIntDefaultCompact(aw, "Glyph Count X", &vProjectFile->m_Preview_Glyph_CountX, 
@@ -304,7 +303,7 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 							
 							ImGui::FramedGroupSeparator();
 
-							ImGui::Checkbox("Show Range Colors", &vProjectFile->m_ShowRangeColoring);
+							ImGui::Checkbox("Differential Colorations", &vProjectFile->m_ShowRangeColoring);
 							if (vProjectFile->IsRangeColoringShown())
 							{
 								change |= ImGui::SliderFloatDefaultCompact(aw, "H x", &vProjectFile->m_RangeColoringHash.x, 0, 50, defaultProjectValues.m_RangeColoringHash.x);

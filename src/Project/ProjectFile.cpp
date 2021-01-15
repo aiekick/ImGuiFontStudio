@@ -255,8 +255,10 @@ std::string ProjectFile::getXml(const std::string& vOffset, const std::string& /
 	str += vOffset + "\t<cardcountrowsmax>" + ct::toStr(m_CardCountRowsMax) + "</cardcountrowsmax>\n";
 	str += vOffset + "\t<lastgeneratedpath>" + m_LastGeneratedPath + "</lastgeneratedpath>\n";
 	str += vOffset + "\t<lastgeneratedfilename>" + m_LastGeneratedFileName + "</lastgeneratedfilename>\n";
-	str += vOffset + "\t<alignedwithfontbbox>" + (m_ZoomGlyphs ? "true" : "false") +"</alignedwithfontbbox>\n";
-	
+	str += vOffset + "\t<zoomglyphs>" + (m_ZoomGlyphs ? "true" : "false") +"</zoomglyphs>\n";
+	str += vOffset + "\t<showbaseline>" + (m_ShowBaseLine ? "true" : "false") + "</showbaseline>\n";
+	str += vOffset + "\t<showadvancex>" + (m_ShowAdvanceX ? "true" : "false") + "</showadvancex>\n";
+
 	str += vOffset + "</project>\n";
 
 	return str;
@@ -340,8 +342,13 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 			m_LastGeneratedPath = strValue;
 		else if (strName == "lastgeneratedfilename")
 			m_LastGeneratedFileName = strValue;
-		else if (strName == "alignedwithfontbbox")
+		else if (strName == "zoomglyphs")
 			m_ZoomGlyphs = ct::ivariant(strValue).GetB();
+		else if (strName == "showbaseline")
+			m_ShowBaseLine = ct::ivariant(strValue).GetB();
+		else if (strName == "showadvancex")
+			m_ShowAdvanceX = ct::ivariant(strValue).GetB();
+		
 	}
 
 	return true;

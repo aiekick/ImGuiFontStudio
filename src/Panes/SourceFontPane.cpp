@@ -222,46 +222,30 @@ bool SourceFontPane::IfCatchedByFilters(std::shared_ptr<FontInfos> vFontInfos, c
 }
 
 bool SourceFontPane::DrawGlyph(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos, 
-	std::string vName, ImTextureID vTextureID, bool* vSelected, ImVec2 vGlyphSize, ImFontGlyph vGlyph, ImVec2 vHostTextureSize)
+	std::string vName, bool* vSelected, ImVec2 vGlyphSize, ImFontGlyph vGlyph, ImVec2 vHostTextureSize)
 {
 	bool res = false;
 
-	if (!vProjectFile->m_ZoomGlyphs && vFontInfos)
+	if (vFontInfos)
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return false;
+
 		ImGuiContext& g = *GImGui;
 		const ImGuiStyle& style = g.Style;
-		
-		ImVec2 startPos = window->DC.CursorPos + style.FramePadding;
-		ImVec2 endPos = startPos + vGlyphSize;
-		
-		ImRect cellRect = ImRect(startPos, endPos);
-		ImVec2 cellSize = cellRect.GetSize();
-		
-		float scale = vFontInfos->m_Point / (float)vFontInfos->m_FontSize * vGlyphSize.y;
-		float ma = vFontInfos->m_Ascent * scale;
-		float sy = (vFontInfos->m_Ascent - vFontInfos->m_Descent) * scale;
 
-		ImVec2 pScale = vGlyphSize / (float)vFontInfos->m_FontSize;
-		ImVec2 xy0 = ImVec2(vGlyph.X0, vGlyph.Y0) * pScale;
-		ImVec2 xy1 = ImVec2(vGlyph.X1, vGlyph.Y1) * pScale;
-
-		xy0.y = xy0.y + sy * 0.5f - cellSize.y * 0.5f;// *0.5f + bboxSize.y * 0.5f;
-		xy1.y = xy1.y + sy * 0.5f - cellSize.y * 0.5f;// *0.5f + bboxSize.y * 0.5f;
-		
-		// Render
 		ImGui::PushID(NewWidgetId());
-		ImGui::PushID((void*)(intptr_t)vTextureID);
+		ImGui::PushID((void*)(intptr_t)vFontInfos->m_ImFontAtlas.TexID);
 		const ImGuiID id = window->GetID("#image");
 		ImGui::PopID();
 		ImGui::PopID();
-		
-		// add widget
+
 		const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + vGlyphSize + style.FramePadding * 2);
 		ImGui::ItemSize(bb);
 		if (!ImGui::ItemAdd(bb, id))
 			return false;
-		
+
 		bool hovered, held;
 		bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held);
 
@@ -272,80 +256,86 @@ bool SourceFontPane::DrawGlyph(ProjectFile* vProjectFile, std::shared_ptr<FontIn
 		const ImU32 col = ImGui::GetColorU32(((held && hovered) || (vSelected && *vSelected)) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
 		ImGui::RenderNavHighlight(bb, id);
 		ImGui::RenderFrame(bb.Min, bb.Max, col, true, ImClamp((float)ImMin(style.FramePadding.x, style.FramePadding.y), 0.0f, 12.0f));
+
+		ImVec2 startPos = bb.Min + style.FramePadding;
+		ImVec2 endPos = startPos + vGlyphSize;
 		
-		// resize with respect to glyph ratio
-		ImRect image_bb(startPos + xy0, startPos + xy1);
+		ImVec2 uv0 = ImVec2(vGlyph.U0, vGlyph.V0);
+		ImVec2 uv1 = ImVec2(vGlyph.U1, vGlyph.V1);
+		ImVec2 center = ImVec2(0, 0);
+		ImVec2 glyphSize = ImVec2(0, 0);
+
 		float hostRatioX = 1.0f;
-#define ImRatioX(a) a.x / a.y
 		if (vHostTextureSize.y > 0)
-			hostRatioX = ImRatioX(vHostTextureSize);
-		ImVec2 uvSize = ImVec2(vGlyph.U1 - vGlyph.U0, vGlyph.V1 - vGlyph.V0);
-		float ratioX = ImRatioX(uvSize) * hostRatioX;
-#undef ImRatioX
-		ImVec2 imgSize = image_bb.GetSize();
-		float newX = imgSize.y * ratioX;
-		ImVec2 glyphSize = ImVec2(imgSize.x, imgSize.x / ratioX) * 0.5f;
-		if (newX < imgSize.x) glyphSize = ImVec2(newX, imgSize.y) * 0.5f;
-		ImVec2 center = image_bb.GetCenter();
-		// centering glyph
-		float offsetX = cellRect.GetSize().x * 0.5f - imgSize.x * 0.5f;
-		center.x += offsetX;
-		xy0.x += offsetX;
-		xy1.x += offsetX;
-		// draw glyph
+			hostRatioX = vHostTextureSize.x / vHostTextureSize.y;
+		ImVec2 uvSize = uv1 - uv0;
+		float ratioX = uvSize.x * hostRatioX / uvSize.y;
+
 		ImGui::PushClipRect(bb.Min, bb.Max, true);
-		window->DrawList->AddLine(ImVec2(bb.Min.x, startPos.y + ma), ImVec2(bb.Max.x, startPos.y + ma), ImGui::GetColorU32(ImGuiCol_PlotHistogram), 2.0f); // base line
-		window->DrawList->AddImage(vTextureID, center - glyphSize, center + glyphSize, ImVec2(vGlyph.U0, vGlyph.V0), ImVec2(vGlyph.U1, vGlyph.V1), ImGui::GetColorU32(ImGuiCol_Text)); // glyph
+
+		if (vProjectFile->m_ZoomGlyphs)
+		{
+			float newX = vGlyphSize.y * ratioX;
+			glyphSize = ImVec2(vGlyphSize.x, vGlyphSize.x / ratioX) * 0.5f;
+			if (newX < vGlyphSize.x) 
+				glyphSize = ImVec2(newX, vGlyphSize.y) * 0.5f;
+			center = bb.GetCenter();
+		}
+		else
+		{
+			ImVec2 pScale = vGlyphSize / (float)vFontInfos->m_FontSize;
+			
+			ImVec2 xy0 = ImVec2(vGlyph.X0, vGlyph.Y0) * pScale;
+			ImVec2 xy1 = ImVec2(vGlyph.X1, vGlyph.Y1) * pScale;
+			ImRect realGlyphRect = ImRect(startPos + xy0, startPos + xy1);
+			ImVec2 realGlyphSize = realGlyphRect.GetSize();
+
+			// redim with ratio
+			float newX = realGlyphSize.y * ratioX;
+			glyphSize = ImVec2(realGlyphSize.x, realGlyphSize.x / ratioX) * 0.5f;
+			if (newX < realGlyphSize.x)
+				glyphSize = ImVec2(newX, realGlyphSize.y) * 0.5f;
+			center = realGlyphRect.GetCenter();
+
+			float offsetX = vGlyphSize.x * 0.5f - realGlyphSize.x * 0.5;
+			center.x += offsetX; // center the glyph
+
+			if (vProjectFile->m_ShowBaseLine)// draw base line
+			{
+				float asc = vFontInfos->m_Ascent * vFontInfos->m_Point * pScale.y;
+				window->DrawList->AddLine(ImVec2(bb.Min.x, startPos.y + asc), ImVec2(bb.Max.x, startPos.y + asc), ImGui::GetColorU32(ImGuiCol_PlotHistogram), 2.0f); // base line
+			}
+
+			if (vProjectFile->m_ShowAdvanceX) // draw advance X
+			{
+				float adv = vGlyph.AdvanceX * pScale.y + offsetX;
+				window->DrawList->AddLine(ImVec2(startPos.x + adv, bb.Min.y), ImVec2(startPos.x + adv, bb.Max.y), ImGui::GetColorU32(ImGuiCol_PlotLines), 2.0f); // base line
+			}
+		}
+
+		window->DrawList->AddImage(vFontInfos->m_ImFontAtlas.TexID, center - glyphSize, center + glyphSize, uv0, uv1, ImGui::GetColorU32(ImGuiCol_Text)); // glyph
+
 		ImGui::PopClipRect();
-		////////////////////////////////////////////////////////////////////////////////////
-
-		/*ImGui::PushID(NewWidgetId());
-		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
-		res = ImGui::ImageCheckButton(vTextureID, vSelected, vGlyphSize,
-			ImVec2(vGlyph.U0, vGlyph.V0), ImVec2(vGlyph.U1, vGlyph.V1), vHostTextureSize);
-		ImGui::PopStyleVar();
-		ImGui::PopID();*/
 
 		if (vProjectFile->m_SourcePane_ShowGlyphTooltip)
 		{
 			if (ImGui::IsItemHovered())
 			{
-				ImGui::SetTooltip("name : %s\ncodepoint : %i\nadv x : %.2f\nuv0 : (%.3f,%.3f)\nuv1 : (%.3f,%.3f)\nxy0 : (%.3f,%.3f)\nxy1 : (%.3f,%.3f)",
-					vName.c_str(), (int)vGlyph.Codepoint, vGlyph.AdvanceX,
-					vGlyph.U0, vGlyph.V0, vGlyph.U1, vGlyph.V1,
-					xy0.x, xy0.y, xy1.x, xy1.y);
+				ImGui::SetTooltip("name : %s\ncodepoint : %i", vName.c_str(), (int)vGlyph.Codepoint);
 			}
 		}
 	}
-	else
-	{
-		ImGui::PushID(NewWidgetId());
-		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
-		res = ImGui::ImageCheckButton(vTextureID, vSelected, vGlyphSize,
-			ImVec2(vGlyph.U0, vGlyph.V0), ImVec2(vGlyph.U1, vGlyph.V1), vHostTextureSize);
-		ImGui::PopStyleVar();
-		ImGui::PopID();
-
-		if (vProjectFile->m_SourcePane_ShowGlyphTooltip)
-		{
-			if (ImGui::IsItemHovered())
-			{
-				ImGui::SetTooltip("name : %s\ncodepoint : %i\nadv x : %.2f\nuv0 : (%.3f,%.3f)\nuv1 : (%.3f,%.3f)\nxy0 : (%.3f,%.3f)\nxy1 : (%.3f,%.3f)",
-					vName.c_str(), (int)vGlyph.Codepoint, vGlyph.AdvanceX,
-					vGlyph.U0, vGlyph.V0, vGlyph.U1, vGlyph.V1,
-					vGlyph.X0, vGlyph.Y0, vGlyph.X1, vGlyph.Y1);
-			}
-		}
-	}
-
+	
 	return res;
 }
 
 void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos)
 {
     if (vProjectFile && vProjectFile->IsLoaded() &&
-        vFontInfos && vProjectFile->m_Preview_Glyph_CountX)
+        vFontInfos)
     {
+		vProjectFile->m_Preview_Glyph_CountX = ct::maxi(vProjectFile->m_Preview_Glyph_CountX, 1);
+
         if (vFontInfos->m_ImFontAtlas.IsBuilt())
         {
             ImFont* font = vFontInfos->m_ImFontAtlas.Fonts[0];
@@ -420,11 +410,7 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 												vFontInfos, glyph_size, glyph.Codepoint, &selected,
 												SelectionContainerEnum::SELECTION_CONTAINER_SOURCE);
 
-
-											bool check = DrawGlyph(vProjectFile, vFontInfos, name, vFontInfos->m_ImFontAtlas.TexID,
-												&selected, glyph_size, glyph, hostTextureSize);
-
-											if (check)
+											if (DrawGlyph(vProjectFile, vFontInfos, name, &selected, glyph_size, glyph, hostTextureSize))
 											{
 												SelectionHelper::Instance()->SelectWithToolOrApplyOnGlyph(
 													vProjectFile, vFontInfos,

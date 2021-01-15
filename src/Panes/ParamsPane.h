@@ -51,7 +51,6 @@ public:
 	void SelectFont(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos);
 
 private: 
-
 	void DrawParamsPane(ProjectFile *vProjectFile);
 
 private: // actions

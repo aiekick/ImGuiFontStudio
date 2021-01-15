@@ -50,7 +50,7 @@ private:
 	void DrawFilterBar(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos);
 	bool IfCatchedByFilters(std::shared_ptr<FontInfos> vFontInfos, const std::string& vSymbolName);
 	void DrawFontTexture(std::shared_ptr<FontInfos> vFontInfos);
-	bool DrawGlyph(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos, std::string vName, ImTextureID vTextureID, bool* vSelected, ImVec2 vGlyphSize, ImFontGlyph vGlyph, ImVec2 vHostTextureSize);
+	bool DrawGlyph(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos, std::string vName, bool* vSelected, ImVec2 vGlyphSize, ImFontGlyph vGlyph, ImVec2 vHostTextureSize);
 	void DrawFontAtlas_Virtual(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos);
 	
 	// panes

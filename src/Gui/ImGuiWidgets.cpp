@@ -1300,11 +1300,13 @@ bool ImGui::SliderFloatDefaultCompact(float width, const char* label, float* v, 
 
 	float ax = ImGui::GetCursorPosX();
 
+	ImGui::PushID(label);
 	if (CustomButton(ICON_IGFS_RESET))
 	{
 		*v = v_default;
 		change = true;
 	}
+	ImGui::PopID();
 
 	ImGui::SameLine();
 
