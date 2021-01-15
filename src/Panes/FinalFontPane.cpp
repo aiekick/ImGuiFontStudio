@@ -25,6 +25,7 @@
 #include <Res/CustomFont.h>
 #include <Helper/SelectionHelper.h>
 #include <Panes/GlyphPane.h>
+#include <Project/GlyphInfos.h>
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
@@ -362,9 +363,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 		const ImVec2 UV1 = ImVec2(vGlyph->glyph.U1, vGlyph->glyph.V1);
 
 		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
-		res = ImGui::ImageCheckButton(vFontInfos->m_ImFontAtlas.TexID,
-			&selected, vSize, UV0, UV1, hostTextureSize,
-			-1, vShowRect ? 3.0f : 0.0f);
+		res = GlyphInfos::DrawGlyphButton(vProjectFile, vFontInfos, &selected, vSize, vGlyph->glyph, hostTextureSize, -1, vShowRect ? 3.0f : 0.0f);
 		ImGui::PopStyleVar();
 
 		if (res)
@@ -490,6 +489,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 					);
 				}
 			}
+
 			bool codePointChanged = ImGui::InputInt("##glyphnewcodepoint", &vGlyph->editCodePoint, 1, 10);
 			ImGui::PopItemWidth();
 			if (codePointChanged)

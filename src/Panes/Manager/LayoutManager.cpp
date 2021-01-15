@@ -274,7 +274,9 @@ bool LayoutManager::IsSpecificPaneFocused(const char *vlabel)
 	ImGuiWindow* window = ImGui::FindWindowByName(vlabel);
 	if (window)
 	{
-		return window->DockTabIsVisible;
+		return 
+			window->DockTabIsVisible || 
+			window->ViewportOwned;
 	}
 	return false;
 }

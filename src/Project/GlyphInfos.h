@@ -63,6 +63,12 @@ public:
 class FontInfos;
 class GlyphInfos
 {
+public:
+	static bool DrawGlyphButton(
+		ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
+		bool* vSelected, ImVec2 vGlyphSize, ImFontGlyph vGlyph, ImVec2 vHostTextureSize,
+		int frame_padding = -1, float vRectThickNess = 0.0f, ImVec4 vRectColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+
 private:
 	std::weak_ptr<FontInfos> fontInfos;
 

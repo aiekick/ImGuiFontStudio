@@ -27,6 +27,7 @@
 #include <Panes/Manager/LayoutManager.h>
 #include <Project/FontInfos.h>
 #include <Project/ProjectFile.h>
+#include <Project/GlyphInfos.h>
 
 #include <cinttypes> // printf zu
 
@@ -221,8 +222,9 @@ bool SourceFontPane::IfCatchedByFilters(std::shared_ptr<FontInfos> vFontInfos, c
 	return false;
 }
 
-bool SourceFontPane::DrawGlyph(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos, 
-	std::string vName, bool* vSelected, ImVec2 vGlyphSize, ImFontGlyph vGlyph, ImVec2 vHostTextureSize)
+bool SourceFontPane::DrawGlyphButton(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
+	std::string vName, bool* vSelected, ImVec2 vGlyphSize, ImFontGlyph vGlyph, ImVec2 vHostTextureSize, 
+	int frame_padding, float vRectThickNess, ImVec4 vRectColor)
 {
 	bool res = false;
 
@@ -256,6 +258,10 @@ bool SourceFontPane::DrawGlyph(ProjectFile* vProjectFile, std::shared_ptr<FontIn
 		const ImU32 col = ImGui::GetColorU32(((held && hovered) || (vSelected && *vSelected)) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
 		ImGui::RenderNavHighlight(bb, id);
 		ImGui::RenderFrame(bb.Min, bb.Max, col, true, ImClamp((float)ImMin(style.FramePadding.x, style.FramePadding.y), 0.0f, 12.0f));
+		if (vRectThickNess > 0.0f)
+		{
+			window->DrawList->AddRect(bb.Min, bb.Max, ImGui::GetColorU32(vRectColor), 0.0, 15, vRectThickNess);
+		}
 
 		ImVec2 startPos = bb.Min + style.FramePadding;
 		ImVec2 endPos = startPos + vGlyphSize;
@@ -316,14 +322,6 @@ bool SourceFontPane::DrawGlyph(ProjectFile* vProjectFile, std::shared_ptr<FontIn
 		window->DrawList->AddImage(vFontInfos->m_ImFontAtlas.TexID, center - glyphSize, center + glyphSize, uv0, uv1, ImGui::GetColorU32(ImGuiCol_Text)); // glyph
 
 		ImGui::PopClipRect();
-
-		if (vProjectFile->m_SourcePane_ShowGlyphTooltip)
-		{
-			if (ImGui::IsItemHovered())
-			{
-				ImGui::SetTooltip("name : %s\ncodepoint : %i", vName.c_str(), (int)vGlyph.Codepoint);
-			}
-		}
 	}
 	
 	return res;
@@ -410,7 +408,11 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 												vFontInfos, glyph_size, glyph.Codepoint, &selected,
 												SelectionContainerEnum::SELECTION_CONTAINER_SOURCE);
 
-											if (DrawGlyph(vProjectFile, vFontInfos, name, &selected, glyph_size, glyph, hostTextureSize))
+											ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
+											bool check = GlyphInfos::DrawGlyphButton(vProjectFile, vFontInfos, &selected, glyph_size, glyph, hostTextureSize);
+											ImGui::PopStyleVar();
+
+											if (check)
 											{
 												SelectionHelper::Instance()->SelectWithToolOrApplyOnGlyph(
 													vProjectFile, vFontInfos,
@@ -421,6 +423,14 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 											if (showRangeColoring)
 											{
 												ImGui::PopStyleColor(3);
+											}
+
+											if (vProjectFile->m_SourcePane_ShowGlyphTooltip)
+											{
+												if (ImGui::IsItemHovered())
+												{
+													ImGui::SetTooltip("name : %s\ncodepoint : %i", name.c_str(), (int)glyph.Codepoint);
+												}
 											}
 
 											lastGlyphCodePoint = glyph.Codepoint;
