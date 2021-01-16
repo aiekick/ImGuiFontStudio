@@ -311,6 +311,11 @@ void SelectionHelper::DrawSelectionMenu(ProjectFile * vProjectFile, SelectionCon
 	}
 }
 
+std::set<FontInfosCodePoint>* SelectionHelper::GetSelection()
+{
+	return &m_SelectionForOperation;
+}
+
 void SelectionHelper::SelectWithToolOrApply(
 	ProjectFile * vProjectFile,
 	SelectionContainerEnum vSelectionContainerEnum)

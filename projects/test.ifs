@@ -6,6 +6,25 @@
 			<oversample>1</oversample>
 			<fontsize>40</fontsize>
 		</font>
+		<font name="fontawesome-webfont.ttf">
+			<glyphs>
+				<glyph orgId="61449" newId="61449" orgName="th_large" newName="th_large"/>
+				<glyph orgId="61450" newId="61450" orgName="th" newName="th"/>
+				<glyph orgId="61451" newId="61451" orgName="th_list" newName="th_list"/>
+				<glyph orgId="61512" newId="61512" orgName="step_backward" newName="step_backward"/>
+				<glyph orgId="61513" newId="61513" orgName="fast_backward" newName="fast_backward"/>
+				<glyph orgId="61514" newId="61514" orgName="backward" newName="backward"/>
+				<glyph orgId="61515" newId="61515" orgName="play" newName="play"/>
+				<glyph orgId="61516" newId="61516" orgName="pause" newName="pause"/>
+				<glyph orgId="61517" newId="61517" orgName="stop" newName="stop"/>
+				<glyph orgId="61518" newId="61518" orgName="forward" newName="forward"/>
+				<glyph orgId="61520" newId="61520" orgName="fast_forward" newName="fast_forward"/>
+			</glyphs>
+			<prefix></prefix>
+			<pathfilename>..\samples_Fonts\fontawesome-webfont.ttf</pathfilename>
+			<oversample>1</oversample>
+			<fontsize>39</fontsize>
+		</font>
 		<sourcefontpane>
 		</sourcefontpane>
 		<finalfontpane>
@@ -13,8 +32,8 @@
 		<selectedfontpane>
 		</selectedfontpane>
 		<rangecoloring show="false" hash="10;15;35;0.5"/>
-		<previewglyphcount>18</previewglyphcount>
-		<previewglyphwidth>96.383</previewglyphwidth>
+		<previewglyphcount>25</previewglyphcount>
+		<previewglyphwidth>17.84</previewglyphwidth>
 		<mergedfontprefix></mergedfontprefix>
 		<curglyphtooltip>true</curglyphtooltip>
 		<srcglyphtooltip>true</srcglyphtooltip>
@@ -23,15 +42,15 @@
 		<glyphpreviewshowcontrollines>false</glyphpreviewshowcontrollines>
 		<glyphpreviewquadbeziercounsegment>0</glyphpreviewquadbeziercounsegment>
 		<genmode>1307</genmode>
-		<fonttomergein>arialbd.ttf</fonttomergein>
-		<glyphdisplaytuningmode>2</glyphdisplaytuningmode>
+		<fonttomergein>fontawesome-webfont.ttf</fonttomergein>
+		<glyphdisplaytuningmode>1</glyphdisplaytuningmode>
 		<sourcefontpaneflags>1</sourcefontpaneflags>
 		<cardglyhpheight>40</cardglyhpheight>
 		<cardcountrowsmax>20</cardcountrowsmax>
 		<lastgeneratedpath>.</lastgeneratedpath>
 		<lastgeneratedfilename>Generated_Font</lastgeneratedfilename>
 		<zoomglyphs>false</zoomglyphs>
-		<showbaseline>true</showbaseline>
-		<showadvancex>true</showadvancex>
+		<showbaseline>false</showbaseline>
+		<showadvancex>false</showadvancex>
 	</project>
 </config>

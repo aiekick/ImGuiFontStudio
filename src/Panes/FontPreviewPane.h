@@ -17,6 +17,12 @@
 
 #include <Panes/Abstract/AbstractPane.h>
 
+#include <imgui/imgui.h>
+#include <Helper/SelectionHelper.h>
+
+#include <functional>
+#include <map>
+
 class FontInstance;
 class ProjectFile;
 class FontInfos;
@@ -26,7 +32,12 @@ class FontPreviewPane : public AbstractPane
 private:
 	FontInstance* m_fontInstance = 0;
 	GlyphInfos* m_GlyphToDisplay = 0;
-	
+	std::function<int(ImGuiInputTextCallbackData*)> m_InputTextCallBack;
+
+private:
+	std::map<uint32_t, FontInfosCodePoint> m_GlyphToInsert; // pos in word, glyph
+	std::string m_TestSentense;
+
 public:
 	void Init() override;
 	void Unit() override;
@@ -36,7 +47,7 @@ public:
 	
 private:
 	void DrawFontPreviewPane(ProjectFile *vProjectFile);
-	void GenerateLabelsList();
+	void DrawMixedFontResult(ProjectFile* vProjectFile);
 
 public: // singleton
 	static FontPreviewPane *Instance()

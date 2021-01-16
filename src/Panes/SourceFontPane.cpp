@@ -204,6 +204,8 @@ bool SourceFontPane::DrawGlyphButton(ProjectFile* vProjectFile, std::shared_ptr<
 	std::string vName, bool* vSelected, ImVec2 vGlyphSize, ImFontGlyph vGlyph, ImVec2 vHostTextureSize, 
 	int frame_padding, float vRectThickNess, ImVec4 vRectColor)
 {
+	UNUSED(frame_padding);
+
 	bool res = false;
 
 	if (vFontInfos)
@@ -281,7 +283,7 @@ bool SourceFontPane::DrawGlyphButton(ProjectFile* vProjectFile, std::shared_ptr<
 				glyphSize = ImVec2(newX, realGlyphSize.y) * 0.5f;
 			center = realGlyphRect.GetCenter();
 
-			float offsetX = vGlyphSize.x * 0.5f - realGlyphSize.x * 0.5;
+			float offsetX = vGlyphSize.x * 0.5f - realGlyphSize.x * 0.5f;
 			center.x += offsetX; // center the glyph
 
 			if (vProjectFile->m_ShowBaseLine)// draw base line

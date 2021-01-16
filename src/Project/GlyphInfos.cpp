@@ -262,6 +262,8 @@ bool GlyphInfos::DrawGlyphButton(
 		if (pressed && vSelected)
 			*vSelected = !*vSelected;
 
+		res = pressed;
+
 		// Render
 		const ImU32 col = ImGui::GetColorU32(((held && hovered) || (vSelected && *vSelected)) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
 		ImGui::RenderNavHighlight(bb, id);

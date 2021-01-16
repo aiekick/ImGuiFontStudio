@@ -35,6 +35,8 @@
 #include <ctools/cTools.h>
 #include <ctools/FileHelper.h>
 #include <sfntly/font_factory.h>
+#include <Gui/ImGuiWidgets.h>
+#include <Helper/SelectionHelper.h>
 
 FontPreviewPane::FontPreviewPane() = default;
 FontPreviewPane::~FontPreviewPane() = default;
@@ -83,9 +85,27 @@ donc il faudrait voir le resultat et ajuster ci-besoin, donc on doit :
 - slectionner les glyph a voir, positionner dans le text
 */
 
+/*
+on va taper un texte.
+can va nous afficher les box qui vont contenir les characteres
+et on va pouvoir choisir un glyph dans ces boites, ce qui nous affichera en dessous le resultat
+et il faudra pouvoir scale/translate le glyph
+*/
+
 ///////////////////////////////////////////////////////////////////////////////////
 //// PRIVATE //////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
+
+static uint32_t _TextCursorPos = 0;
+static int InputTextCallback(ImGuiInputTextCallbackData* vData)
+{
+	if (vData)
+	{
+		_TextCursorPos = vData->CursorPos;
+	}
+	
+	return 0;
+}
 
 void FontPreviewPane::DrawFontPreviewPane(ProjectFile *vProjectFile)
 {
@@ -107,16 +127,68 @@ void FontPreviewPane::DrawFontPreviewPane(ProjectFile *vProjectFile)
 					ImGui::EndMenuBar();
 				}
 
+				ImGui::Text("Current Selection");
+
+				bool change = false;
+				ImVec2 cell_size, glyph_size;
+				uint32_t glyphCountX = GlyphDisplayHelper::CalcGlyphsCountAndSize(vProjectFile, &cell_size, &glyph_size);
+				if (glyphCountX)
+				{
+					auto sel = SelectionHelper::Instance()->GetSelection();
+					size_t idx = 0;
+					for (auto glyph : *sel)
+					{
+						if (glyph.second)
+						{
+							uint32_t x = idx % glyphCountX;
+
+							if (x) ImGui::SameLine();
+
+							if (glyph.second->m_SelectedGlyphs.find(glyph.first) != glyph.second->m_SelectedGlyphs.end())
+							{
+								auto glyphInfos = glyph.second->m_SelectedGlyphs[glyph.first];
+
+								ImVec2 hostTextureSize = ImVec2(
+									(float)glyph.second->m_ImFontAtlas.TexWidth,
+									(float)glyph.second->m_ImFontAtlas.TexHeight);
+
+								ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
+								bool check = GlyphInfos::DrawGlyphButton(vProjectFile, glyph.second,
+									0, glyph_size, glyphInfos.glyph, hostTextureSize);
+								ImGui::PopStyleVar();
+
+								if (check)
+								{
+									m_GlyphToInsert[_TextCursorPos] = glyph;
+									change = true;
+								}
+							}
+
+							idx++;
+						}
+					}
+				}
+
+				ImGui::Separator();
+				
 				static char buffer[500] = "test\0";
+
 				ImGui::Text("Text :");
-				ImGui::SameLine();
 				float aw = ImGui::GetContentRegionAvail().x;
 				ImGui::PushItemWidth(aw);
-				ImGui::InputText("#ImGuiFontStudio", buffer, 499);
+				ImGui::PushID(paneWidgetId++);
+				change |= ImGui::InputText("##ImGuiFontStudio", buffer, 499,
+					ImGuiInputTextFlags_CallbackAlways | ImGuiInputTextFlags_CallbackCharFilter,
+					&InputTextCallback);
+				ImGui::PopID();
 				ImGui::PopItemWidth();
 
+				if (change)
+				{
+					m_TestSentense = buffer;
+				}
 
-				ImGui::Text("%s", buffer);
+				DrawMixedFontResult(vProjectFile);
 			}
 		}
 
@@ -124,7 +196,50 @@ void FontPreviewPane::DrawFontPreviewPane(ProjectFile *vProjectFile)
 	}
 }
 
-void FontPreviewPane::GenerateLabelsList()
+void FontPreviewPane::DrawMixedFontResult(ProjectFile* vProjectFile)
 {
+	ImGui::Text("%s", m_TestSentense.c_str());
 
+	// ici il va falloir afficher les glyphs au bon endroit dans la string m_TestSentense
+
+	uint32_t idx = 0;
+	for (auto c : m_TestSentense)
+	{
+		if (idx)
+		{
+			ImGui::SameLine();
+		}
+
+		if (m_GlyphToInsert.find(idx) != m_GlyphToInsert.end())
+		{
+			// on dessin le glyph
+			auto glyph = &m_GlyphToInsert[idx];
+			if (glyph->second)
+			{
+				if (glyph->second->m_SelectedGlyphs.find(glyph->first) != glyph->second->m_SelectedGlyphs.end())
+				{
+					ImVec2 cell_size, glyph_size;
+					GlyphDisplayHelper::CalcGlyphsCountAndSize(vProjectFile, &cell_size, &glyph_size);
+
+					auto glyphInfos = glyph->second->m_SelectedGlyphs[glyph->first];
+
+					ImVec2 hostTextureSize = ImVec2(
+						(float)glyph->second->m_ImFontAtlas.TexWidth,
+						(float)glyph->second->m_ImFontAtlas.TexHeight);
+
+					ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
+					GlyphInfos::DrawGlyphButton(vProjectFile, glyph->second,
+						0, glyph_size, glyphInfos.glyph, hostTextureSize);
+					ImGui::PopStyleVar();
+				}
+			}
+		}
+		else
+		{
+			// on dessine la lettre
+			ImGui::Text("%c", c);
+		}
+
+		idx++;
+	}
 }

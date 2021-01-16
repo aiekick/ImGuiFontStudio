@@ -145,6 +145,8 @@ public:
 	void DrawSelectionMenu(ProjectFile *vProjectFile, SelectionContainerEnum vSelectionContainerEnum);
 	
 public:
+	std::set<FontInfosCodePoint>* GetSelection();
+public:
 	void SelectWithToolOrApply(
 		ProjectFile *vProjectFile, 
 		SelectionContainerEnum vSelectionContainerEnum);
