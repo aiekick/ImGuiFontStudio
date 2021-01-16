@@ -1,10 +1,10 @@
 <config>
 	<project>
-		<font name="arialbd.ttf">
-			<prefix></prefix>
-			<pathfilename>..\..\..\..\windows\fonts\arialbd.ttf</pathfilename>
+		<font name="Roboto-Medium.ttf">
+			<prefix>RM</prefix>
+			<pathfilename>..\3rdparty\imgui\misc\fonts\Roboto-Medium.ttf</pathfilename>
 			<oversample>1</oversample>
-			<fontsize>40</fontsize>
+			<fontsize>50</fontsize>
 		</font>
 		<font name="fontawesome-webfont.ttf">
 			<glyphs>
@@ -23,7 +23,7 @@
 			<prefix></prefix>
 			<pathfilename>..\samples_Fonts\fontawesome-webfont.ttf</pathfilename>
 			<oversample>1</oversample>
-			<fontsize>39</fontsize>
+			<fontsize>50</fontsize>
 		</font>
 		<sourcefontpane>
 		</sourcefontpane>

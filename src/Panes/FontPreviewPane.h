@@ -33,6 +33,7 @@ private:
 	FontInstance* m_fontInstance = 0;
 	GlyphInfos* m_GlyphToDisplay = 0;
 	std::function<int(ImGuiInputTextCallbackData*)> m_InputTextCallBack;
+	float m_FontSizePreview = 100.0f;
 
 private:
 	std::map<uint32_t, FontInfosCodePoint> m_GlyphToInsert; // pos in word, glyph
@@ -48,6 +49,7 @@ public:
 private:
 	void DrawFontPreviewPane(ProjectFile *vProjectFile);
 	void DrawMixedFontResult(ProjectFile* vProjectFile);
+	bool DrawGlyphButton(ProjectFile* vProjectFile, ImFont* vFont, float vFontSize, bool* vSelected, ImVec2 vGlyphSize, ImFontGlyph vGlyph);
 
 public: // singleton
 	static FontPreviewPane *Instance()
