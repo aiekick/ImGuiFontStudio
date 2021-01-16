@@ -48,6 +48,7 @@ public:
 	
 private:
 	void DrawFontPreviewPane(ProjectFile *vProjectFile);
+	void DrawMixerWidget(ProjectFile* vProjectFile);
 	void DrawMixedFontResult(ProjectFile* vProjectFile);
 	bool DrawGlyphButton(ProjectFile* vProjectFile, ImFont* vFont, float vFontSize, bool* vSelected, ImVec2 vGlyphSize, ImFontGlyph vGlyph);
 

@@ -198,11 +198,62 @@ void FontPreviewPane::DrawFontPreviewPane(ProjectFile *vProjectFile)
 					m_TestSentense = buffer;
 				}
 
+				DrawMixerWidget(vProjectFile);
+
 				DrawMixedFontResult(vProjectFile);
 			}
 		}
 
 		ImGui::End();
+	}
+}
+
+void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
+{
+	ImVec2 cell_size, glyph_size;
+	uint32_t glyphCountX = GlyphDisplayHelper::CalcGlyphsCountAndSize(vProjectFile, &cell_size, &glyph_size);
+	
+	ImFont* font = ImGui::GetFont();
+	if (font)
+	{
+		uint32_t idx = 0;
+		for (auto c : m_TestSentense)
+		{
+			if (m_GlyphToInsert.find(idx) != m_GlyphToInsert.end())
+			{
+				// on dessin le glyph
+				auto glyphInfos = &m_GlyphToInsert[idx];
+				if (glyphInfos->second)
+				{
+					if (glyphInfos->second->m_SelectedGlyphs.find(glyphInfos->first) != glyphInfos->second->m_SelectedGlyphs.end())
+					{
+						auto glyph = glyphInfos->second->m_SelectedGlyphs[glyphInfos->first].glyph;
+
+						if (idx)
+						{
+							ImGui::SameLine();
+						}
+
+						bool selected = false;
+						DrawGlyphButton(vProjectFile, glyphInfos->second->m_ImFontAtlas.Fonts[0], m_FontSizePreview, &selected, glyph_size, glyph);
+					}
+				}
+			}
+
+			auto glyph = font->FindGlyph(c);
+			if (glyph)
+			{
+				if (idx)
+				{
+					ImGui::SameLine();
+				}
+
+				bool selected = false;
+				DrawGlyphButton(vProjectFile, font->ContainerAtlas->Fonts[0], font->FontSize, &selected, glyph_size, *glyph);
+			}
+
+			idx++;
+		}
 	}
 }
 
@@ -230,7 +281,7 @@ void FontPreviewPane::DrawMixedFontResult(ProjectFile* vProjectFile)
 			baseFontRatioX = font->ContainerAtlas->TexWidth / font->ContainerAtlas->TexHeight;
 
 		ImVec2 pos = window->DC.CursorPos;
-		ImVec2 size = ImVec2(aw, font->FontSize);
+		ImVec2 size = ImVec2(aw, m_FontSizePreview);
 		const ImRect bb(pos, pos + size);
 		ImGui::ItemSize(bb); 
 		if (!ImGui::ItemAdd(bb, id))
