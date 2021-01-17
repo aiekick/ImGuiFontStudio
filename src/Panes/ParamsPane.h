@@ -32,7 +32,7 @@ class ParamsPane : public AbstractPane
 private: // per pane settings to save
 	int m_GlyphSize_Policy_Count = 20;
 	float m_GlyphSize_Policy_Width = 40.0f;
-
+	
 private: // private vars
 	ImGuiListClipper m_FontsClipper;
 

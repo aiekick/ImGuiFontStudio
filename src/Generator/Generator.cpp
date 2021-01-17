@@ -1017,7 +1017,7 @@ void Generator::GenerateSource_Merged(
 			if (FileHelper::Instance()->IsFileExist(filePathName))
 			{
 				std::string lang;
-				if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) lang = "c";
+				if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C)) lang = "c";
 				else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) lang = "cpp";
 				else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP)) lang = "c#";
 				if (!lang.empty())
@@ -1040,7 +1040,7 @@ void Generator::GenerateSource_Merged(
 						PathStruct psSource = ps;
 						
 						std::string sourceExt;
-						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) sourceExt = ".c";
+						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C)) sourceExt = ".c";
 						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) sourceExt = ".cpp";
 						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
 						{

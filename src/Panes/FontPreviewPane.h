@@ -22,7 +22,7 @@
 
 #include <functional>
 #include <map>
-
+#include <memory>
 class FontInstance;
 class ProjectFile;
 class FontInfos;
@@ -34,6 +34,7 @@ private:
 	GlyphInfos* m_GlyphToDisplay = 0;
 	std::function<int(ImGuiInputTextCallbackData*)> m_InputTextCallBack;
 	float m_FontSizePreview = 100.0f;
+	std::weak_ptr<FontInfos> m_TestFont;
 
 private:
 	std::map<uint32_t, FontInfosCodePoint> m_GlyphToInsert; // pos in word, glyph
