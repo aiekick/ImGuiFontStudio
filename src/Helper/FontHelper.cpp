@@ -74,7 +74,7 @@ bool FontHelper::OpenFontFile(
 	const std::string& vFontFilePathName, 
 	std::map<CodePoint, std::string> vNewNames,
 	std::map<CodePoint, CodePoint> vNewCodePoints,
-	std::map<CodePoint, GlyphInfos> vNewGlyphInfos,
+	std::map<CodePoint, std::shared_ptr<GlyphInfos>> vNewGlyphInfos,
 	bool vBaseFontFileToMergeIn)
 {
 	bool res = false;
@@ -969,9 +969,9 @@ bool FontHelper::SerializeFont(const char* font_path, sfntly::FontFactory* facto
 	return res;
 }
 
-GlyphInfos* FontHelper::GetGlyphInfosFromGlyphId(int32_t vFontId, int32_t vGlyphId)
+std::shared_ptr<GlyphInfos> FontHelper::GetGlyphInfosFromGlyphId(int32_t vFontId, int32_t vGlyphId)
 {
-	GlyphInfos *res = nullptr;
+	std::shared_ptr<GlyphInfos> res = nullptr;
 
 	if (vFontId >= 0 && (int32_t)m_Fonts.size() > vFontId)
 	{
@@ -983,7 +983,7 @@ GlyphInfos* FontHelper::GetGlyphInfosFromGlyphId(int32_t vFontId, int32_t vGlyph
 
 			if (inst->m_NewGlyphInfos.find(glyphCodePoint) != inst->m_NewGlyphInfos.end()) // found
 			{
-				res = &inst->m_NewGlyphInfos[glyphCodePoint];
+				res = inst->m_NewGlyphInfos[glyphCodePoint];
 			}
 		}
 	}

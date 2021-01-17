@@ -1,5 +1,11 @@
 <config>
 	<project>
+		<font name="Roboto-Medium.ttf">
+			<prefix>RM</prefix>
+			<pathfilename>..\3rdparty\imgui\misc\fonts\Roboto-Medium.ttf</pathfilename>
+			<oversample>1</oversample>
+			<fontsize>50</fontsize>
+		</font>
 		<font name="fontawesome-webfont.ttf">
 			<glyphs>
 				<glyph orgId="61442" newId="61442" orgName="search" newName="search"/>
@@ -58,7 +64,7 @@
 			<prefix>IGFS</prefix>
 			<pathfilename>..\samples_Fonts\fontawesome-webfont.ttf</pathfilename>
 			<oversample>2</oversample>
-			<fontsize>21</fontsize>
+			<fontsize>50</fontsize>
 		</font>
 		<font name="materialdesignicons-webfont.ttf">
 			<glyphs>
@@ -72,21 +78,40 @@
 		</font>
 		<rangecoloring show="false" hash="42.606;14.789;27.817;0.5"/>
 		<previewglyphcount>15</previewglyphcount>
-		<previewglyphwidth>50</previewglyphwidth>
+		<previewglyphwidth>29.8667</previewglyphwidth>
 		<mergedfontprefix>IGFS</mergedfontprefix>
 		<curglyphtooltip>true</curglyphtooltip>
 		<srcglyphtooltip>true</srcglyphtooltip>
 		<dstglyphtooltip>true</dstglyphtooltip>
-		<glyphpreviewscale>0.193</glyphpreviewscale>
+		<glyphpreviewscale>0.208</glyphpreviewscale>
 		<glyphpreviewshowcontrollines>false</glyphpreviewshowcontrollines>
 		<glyphpreviewquadbeziercounsegment>5</glyphpreviewquadbeziercounsegment>
 		<genmode>4377</genmode>
 		<fonttomergein>fontawesome-webfont.ttf</fonttomergein>
-		<glyphdisplaytuningmode>2</glyphdisplaytuningmode>
+		<glyphdisplaytuningmode>1</glyphdisplaytuningmode>
 		<sourcefontpaneflags>1</sourcefontpaneflags>
 		<cardglyhpheight>40</cardglyhpheight>
 		<cardcountrowsmax>20</cardcountrowsmax>
 		<lastgeneratedpath>.</lastgeneratedpath>
 		<lastgeneratedfilename>Generated_Font</lastgeneratedfilename>
+		<zoomglyphs>false</zoomglyphs>
+		<showbaseline>true</showbaseline>
+		<showadvancex>false</showadvancex>
+		<finalselection>
+			<selection orgId="61553" font="fontawesome-webfont.ttf"/>
+			<selection orgId="61717" font="fontawesome-webfont.ttf"/>
+		</finalselection>
+		<fonttest>
+			<fontsize>109.557</fontsize>
+			<showbaseline>true</showbaseline>
+			<fontname>Roboto-Medium.ttf</fontname>
+			<teststring> Dear  ImGui </teststring>
+			<insertedglyphs>
+				<insert pos="0" orgId="61717" font="fontawesome-webfont.ttf"/>
+				<insert pos="6" orgId="61553" font="fontawesome-webfont.ttf"/>
+				<insert pos="13" orgId="61717" font="fontawesome-webfont.ttf"/>
+				<insert pos="14" orgId="61717" font="fontawesome-webfont.ttf"/>
+			</insertedglyphs>
+		</fonttest>
 	</project>
 </config>

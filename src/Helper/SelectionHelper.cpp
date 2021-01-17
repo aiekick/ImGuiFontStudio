@@ -311,6 +311,35 @@ void SelectionHelper::DrawSelectionMenu(ProjectFile * vProjectFile, SelectionCon
 	}
 }
 
+void SelectionHelper::Clear()
+{
+	m_Line = 0.0f;
+	m_Zone = ct::fvec4(0.0f, 0.0f, 0.5f, 0.5f);
+	m_SelectionForOperation.clear();
+	m_GlyphSelectedStateFirstClick = -1;
+}
+
+void SelectionHelper::Load(ProjectFile* vProjectFile)
+{
+	if (vProjectFile && vProjectFile->IsLoaded())
+	{
+		m_SelectionForOperation.clear();
+		if (!m_SelectionForOperation_ToLoad.empty())
+		{
+			for (auto ficdp_toload : m_SelectionForOperation_ToLoad)
+			{
+				auto font = vProjectFile->GetFontWithFontName(ficdp_toload.second);
+				if (font)
+				{
+					m_SelectionForOperation.emplace(ficdp_toload.first, font);
+				}
+			}
+
+			m_SelectionForOperation_ToLoad.clear();
+		}
+	}
+}
+
 std::set<FontInfosCodePoint>* SelectionHelper::GetSelection()
 {
 	return &m_SelectionForOperation;
@@ -741,7 +770,10 @@ void SelectionHelper::SelectAllGlyphs(ProjectFile * vProjectFile, std::shared_pt
 			{
 				for (const auto& glyph : vFontInfos->m_SelectedGlyphs)
 				{
-					SelectGlyph(vProjectFile, vFontInfos, glyph.second.glyph.Codepoint, false, vSelectionContainerEnum);
+					if (glyph.second)
+					{
+						SelectGlyph(vProjectFile, vFontInfos, glyph.second->glyph.Codepoint, false, vSelectionContainerEnum);
+					}
 				}
 
 				FinalizeSelectionForOperations();
@@ -780,7 +812,10 @@ void SelectionHelper::UnSelectAllGlyphs(ProjectFile * vProjectFile, std::shared_
 			{
 				for (const auto& glyph : vFontInfos->m_SelectedGlyphs)
 				{
-					UnSelectGlyph(vProjectFile, vFontInfos, glyph.second.glyph.Codepoint, false, vSelectionContainerEnum);
+					if (glyph.second)
+					{
+						UnSelectGlyph(vProjectFile, vFontInfos, glyph.second->glyph.Codepoint, false, vSelectionContainerEnum);
+					}
 				}
 
 				FinalizeSelectionForOperations();
@@ -803,7 +838,7 @@ void SelectionHelper::SelectGlyph(ProjectFile * vProjectFile, std::shared_ptr<Fo
 					std::string res = vFontInfos->GetGlyphName(vGlyph.Codepoint);
 					if (res.empty())
 						res = "Symbol Name";
-					vFontInfos->m_SelectedGlyphs[vGlyph.Codepoint] = GlyphInfos(vGlyph, res, res);
+					vFontInfos->m_SelectedGlyphs[vGlyph.Codepoint] = std::make_shared<GlyphInfos>(vGlyph, res, res);
 					vProjectFile->SetProjectChange();
 
 					if (vUpdateMaps)
@@ -943,9 +978,12 @@ void SelectionHelper::ReRange_Offset_After_Start(ProjectFile * vProjectFile, uin
 				{
 					if (pos >= m_ReRangeStruct.MinCodePoint && pos <= m_ReRangeStruct.MaxCodePoint)
 					{
-						fontInfos->m_SelectedGlyphs[codePoint.first].newCodePoint = pos;
-						pos++;
-						vProjectFile->SetProjectChange();
+						if (fontInfos->m_SelectedGlyphs[codePoint.first])
+						{
+							fontInfos->m_SelectedGlyphs[codePoint.first]->newCodePoint = pos;
+							pos++;
+							vProjectFile->SetProjectChange();
+						}
 					}
 				}
 				else
@@ -985,9 +1023,12 @@ void SelectionHelper::ReRange_Offset_Before_End(ProjectFile * vProjectFile, uint
 				{
 					if (pos >= m_ReRangeStruct.MinCodePoint && pos <= m_ReRangeStruct.MaxCodePoint)
 					{
-						fontInfos->m_SelectedGlyphs[codePoint.first].newCodePoint = pos;
-						pos--;
-						vProjectFile->SetProjectChange();
+						if (fontInfos->m_SelectedGlyphs[codePoint.first])
+						{
+							fontInfos->m_SelectedGlyphs[codePoint.first]->newCodePoint = pos;
+							pos--;
+							vProjectFile->SetProjectChange();
+						}
 					}
 				}
 				else
@@ -1097,15 +1138,18 @@ void SelectionHelper::SelectGlyphByRangeFromStartCodePoint(
 
 							if (leftIdx != glyphs->end())
 							{
-								if (leftIdx->second.newCodePoint != leftCodePoint - 1)
+								if (leftIdx->second)
 								{
-									// limite de range => on stop
-									leftIdx = glyphs->end();
-								}
-								else
-								{
-									SelectGlyph(vProjectFile, vFontInfos, leftIdx->second.newCodePoint, false, vSelectionContainerEnum);
-									leftCodePoint = leftIdx->second.newCodePoint;
+									if (leftIdx->second->newCodePoint != leftCodePoint - 1)
+									{
+										// limite de range => on stop
+										leftIdx = glyphs->end();
+									}
+									else
+									{
+										SelectGlyph(vProjectFile, vFontInfos, leftIdx->second->newCodePoint, false, vSelectionContainerEnum);
+										leftCodePoint = leftIdx->second->newCodePoint;
+									}
 								}
 							}
 						}
@@ -1117,15 +1161,18 @@ void SelectionHelper::SelectGlyphByRangeFromStartCodePoint(
 
 							if (rightIdx != glyphs->end())
 							{
-								if (rightIdx->second.newCodePoint != rightCodePoint + 1)
+								if (leftIdx->second)
 								{
-									// limite de range => on stop
-									rightIdx = glyphs->end();
-								}
-								else
-								{
-									SelectGlyph(vProjectFile, vFontInfos, rightIdx->second.newCodePoint, false, vSelectionContainerEnum);
-									rightCodePoint = rightIdx->second.newCodePoint;
+									if (rightIdx->second->newCodePoint != rightCodePoint + 1)
+									{
+										// limite de range => on stop
+										rightIdx = glyphs->end();
+									}
+									else
+									{
+										SelectGlyph(vProjectFile, vFontInfos, rightIdx->second->newCodePoint, false, vSelectionContainerEnum);
+										rightCodePoint = rightIdx->second->newCodePoint;
+									}
 								}
 							}
 						}
@@ -1285,15 +1332,18 @@ void SelectionHelper::UnSelectGlyphByRangeFromStartCodePoint(
 
 							if (leftIdx != glyphs->end())
 							{
-								if (leftIdx->second.newCodePoint != leftCodePoint - 1)
+								if (leftIdx->second)
 								{
-									// limite de range => on stop
-									leftIdx = glyphs->end();
-								}
-								else
-								{
-									UnSelectGlyph(vProjectFile, vFontInfos, leftIdx->second.newCodePoint, false, vSelectionContainerEnum);
-									leftCodePoint = leftIdx->second.newCodePoint;
+									if (leftIdx->second->newCodePoint != leftCodePoint - 1)
+									{
+										// limite de range => on stop
+										leftIdx = glyphs->end();
+									}
+									else
+									{
+										UnSelectGlyph(vProjectFile, vFontInfos, leftIdx->second->newCodePoint, false, vSelectionContainerEnum);
+										leftCodePoint = leftIdx->second->newCodePoint;
+									}
 								}
 							}
 						}
@@ -1305,15 +1355,18 @@ void SelectionHelper::UnSelectGlyphByRangeFromStartCodePoint(
 
 							if (rightIdx != glyphs->end())
 							{
-								if (rightIdx->second.newCodePoint != rightCodePoint + 1)
+								if (rightIdx->second)
 								{
-									// limite de range => on stop
-									rightIdx = glyphs->end();
-								}
-								else
-								{
-									UnSelectGlyph(vProjectFile, vFontInfos, rightIdx->second.newCodePoint, false, vSelectionContainerEnum);
-									rightCodePoint = rightIdx->second.newCodePoint;
+									if (rightIdx->second->newCodePoint != rightCodePoint + 1)
+									{
+										// limite de range => on stop
+										rightIdx = glyphs->end();
+									}
+									else
+									{
+										UnSelectGlyph(vProjectFile, vFontInfos, rightIdx->second->newCodePoint, false, vSelectionContainerEnum);
+										rightCodePoint = rightIdx->second->newCodePoint;
+									}
 								}
 							}
 						}
@@ -1358,56 +1411,68 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile * vProjectFile)
 				// local in current font
 				if (!font.second->m_CodePointInDoubleFound)
 				{
-					if (codePointsLocal.find(selection.second.newCodePoint) == codePointsLocal.end()) // not found 
+					if (selection.second)
 					{
-						codePointsLocal.emplace(selection.second.newCodePoint);
-					}
-					else
-					{
-						// double detected => cast an error
-						font.second->m_CodePointInDoubleFound = true;
+						if (codePointsLocal.find(selection.second->newCodePoint) == codePointsLocal.end()) // not found 
+						{
+							codePointsLocal.emplace(selection.second->newCodePoint);
+						}
+						else
+						{
+							// double detected => cast an error
+							font.second->m_CodePointInDoubleFound = true;
+						}
 					}
 				}
 
 				// local in current font
 				if (!font.second->m_NameInDoubleFound)
 				{
-					if (namesLocal.find(selection.second.newHeaderName) == namesLocal.end()) // not found 
+					if (selection.second)
 					{
-						namesLocal.emplace(selection.second.newHeaderName);
-					}
-					else
-					{
-						// double detected => cast an error
-						font.second->m_NameInDoubleFound = true;
+						if (namesLocal.find(selection.second->newHeaderName) == namesLocal.end()) // not found 
+						{
+							namesLocal.emplace(selection.second->newHeaderName);
+						}
+						else
+						{
+							// double detected => cast an error
+							font.second->m_NameInDoubleFound = true;
+						}
 					}
 				}
 
 				// global for all fonts
 				if (!vProjectFile->m_CodePointFoundInDouble)
 				{
-					if (codePointsGlobal.find(selection.second.newCodePoint) == codePointsGlobal.end()) // not found 
+					if (selection.second)
 					{
-						codePointsGlobal.emplace(selection.second.newCodePoint);
-					}
-					else
-					{
-						// double detected => cast an error
-						vProjectFile->m_CodePointFoundInDouble = true;
+						if (codePointsGlobal.find(selection.second->newCodePoint) == codePointsGlobal.end()) // not found 
+						{
+							codePointsGlobal.emplace(selection.second->newCodePoint);
+						}
+						else
+						{
+							// double detected => cast an error
+							vProjectFile->m_CodePointFoundInDouble = true;
+						}
 					}
 				}
 
 				// global for all fonts
 				if (!vProjectFile->m_NameFoundInDouble)
 				{
-					if (namesGlobal.find(selection.second.newHeaderName) == namesGlobal.end()) // not found 
+					if (selection.second)
 					{
-						namesGlobal.emplace(selection.second.newHeaderName);
-					}
-					else
-					{
-						// double detected => cast an error
-						vProjectFile->m_NameFoundInDouble = true;
+						if (namesGlobal.find(selection.second->newHeaderName) == namesGlobal.end()) // not found 
+						{
+							namesGlobal.emplace(selection.second->newHeaderName);
+						}
+						else
+						{
+							// double detected => cast an error
+							vProjectFile->m_NameFoundInDouble = true;
+						}
 					}
 				}
 
@@ -1487,4 +1552,75 @@ void SelectionHelper::FinalizeSelectionForOperations()
 	}
 	m_ReRangeStruct.startCodePoint.codePoint = inf;
 	m_ReRangeStruct.endCodePoint.codePoint = sup;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//// CONFIG FILE /////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+std::string SelectionHelper::getXml(const std::string& vOffset, const std::string& vUserDatas)
+{
+	UNUSED(vUserDatas);
+
+	std::string res;
+
+	res += vOffset + "<finalselection>\n";
+	for (auto fi : m_SelectionForOperation)
+	{
+		if (fi.second)
+		{
+			res += vOffset + "\t<selection orgId=\"" +
+				ct::toStr(fi.first) + "\" font=\"" + fi.second->m_FontFileName + "\"/>\n";
+		}
+	}
+	res += vOffset + "</finalselection>\n";
+
+	return res;
+}
+
+bool SelectionHelper::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas)
+{
+	UNUSED(vUserDatas);
+
+	// The value of this child identifies the name of this element
+	std::string strName;
+	std::string strValue;
+	std::string strParentName;
+
+	strName = vElem->Value();
+	if (vElem->GetText())
+		strValue = vElem->GetText();
+	if (vParent != nullptr)
+		strParentName = vParent->Value();
+
+	if (strName == "finalselection")
+	{
+		for (tinyxml2::XMLElement* child = vElem->FirstChildElement(); child != nullptr; child = child->NextSiblingElement())
+		{
+			RecursParsingConfig(child->ToElement(), vElem);
+		}
+	}
+
+	if (strParentName == "finalselection")
+	{
+		if (strName == "selection")
+		{
+			FontInfosCodePoint_ToLoad fi;
+
+			for (const tinyxml2::XMLAttribute* attr = vElem->FirstAttribute(); attr != nullptr; attr = attr->Next())
+			{
+				std::string attName = attr->Name();
+				std::string attValue = attr->Value();
+
+				if (attName == "orgId")
+					fi.first = ct::fvariant(attValue).GetI();
+				else if (attName == "font")
+					fi.second = attValue;
+			}
+
+			m_SelectionForOperation_ToLoad.emplace(fi);
+		}
+	}
+
+	return true;
 }

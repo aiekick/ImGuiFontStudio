@@ -25,6 +25,7 @@
 #include <set>
 #include <vector>
 #include <utility>
+#include <memory>
 
 struct GlyphsRange
 {
@@ -46,8 +47,8 @@ public: // not to save
 	bool m_NeedFilePathResolve = false; // the path is not found, need resolve for not lost glyphs datas
 	bool m_NameInDoubleFound = false;
 	bool m_CodePointInDoubleFound = false;
-	std::map<uint32_t, std::vector<GlyphInfos*>> m_GlyphsOrderedByCodePoints;
-	std::map<std::string, std::vector<GlyphInfos*>> m_GlyphsOrderedByGlyphName;
+	std::map<uint32_t, std::vector<std::shared_ptr<GlyphInfos>>> m_GlyphsOrderedByCodePoints;
+	std::map<std::string, std::vector<std::shared_ptr<GlyphInfos>>> m_GlyphsOrderedByGlyphName;
 	int m_Ascent = 0;
 	int m_Descent = 0;
 	int m_LineGap = 0;
@@ -59,7 +60,7 @@ public: // not to save
 	std::vector<ImFontGlyph> m_FilteredGlyphs;
 
 public: // to save
-	std::map<uint32_t, GlyphInfos> m_SelectedGlyphs;
+	std::map<uint32_t, std::shared_ptr<GlyphInfos>> m_SelectedGlyphs;
 	std::string m_FontPrefix; // peut servir pour la generation par lot
 	std::string m_FontFilePathName;
 	int m_Oversample = 1;

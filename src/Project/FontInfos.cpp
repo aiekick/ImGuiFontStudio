@@ -130,9 +130,13 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 							auto glyph = font->FindGlyphNoFallback((ImWchar)codePoint);
 							if (glyph)
 							{
-								it.second.glyph = *glyph;
-								it.second.oldHeaderName = GetGlyphName(codePoint);
-								it.second.glyphIndex = m_GlyphCodePointToGlyphIndex[codePoint];
+								if (it.second)
+								{
+									it.second->glyph = *glyph;
+									it.second->oldHeaderName = GetGlyphName(codePoint);
+									it.second->glyphIndex = m_GlyphCodePointToGlyphIndex[codePoint];
+								}
+								
 							}
 						}
 
@@ -502,10 +506,14 @@ std::string FontInfos::getXml(const std::string& vOffset, const std::string& vUs
 		res += vOffset + "\t<glyphs>\n";
 		for (auto &it : m_SelectedGlyphs)
 		{
-			res += vOffset + "\t\t<glyph orgId=\"" + ct::toStr(it.second.glyph.Codepoint) +
-				"\" newId=\"" + ct::toStr(it.second.newCodePoint) + 
-				"\" orgName=\"" + it.second.oldHeaderName + 
-				"\" newName=\"" + it.second.newHeaderName + "\"/>\n";
+			if (it.second)
+			{
+				res += vOffset + "\t\t<glyph orgId=\"" + ct::toStr(it.second->glyph.Codepoint) +
+					"\" newId=\"" + ct::toStr(it.second->newCodePoint) +
+					"\" orgName=\"" + it.second->oldHeaderName +
+					"\" newName=\"" + it.second->newHeaderName +
+					"\" trans=\"" + ct::fvec2(it.second->m_Translation).string() + "\"/>\n";
+			}
 		}
 		res += vOffset + "\t</glyphs>\n";
 	}
@@ -582,27 +590,30 @@ bool FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
         uint32_t newcodepoint = 0;
 		std::string oldName;
 		std::string newName;
+		ImVec2 translation;
 
 		for (const tinyxml2::XMLAttribute* attr = vElem->FirstAttribute(); attr != nullptr; attr = attr->Next())
 		{
 			std::string attName = attr->Name();
 			std::string attValue = attr->Value();
 
-			if (attName == "orgId" || 
+			if (attName == "orgId" ||
 				attName == "id") // for compatibility with first format, will be removed in few versions
 				oldcodepoint = (uint32_t)ct::ivariant(attValue).GetI();
-			else if (attName == "newId" || 
+			else if (attName == "newId" ||
 				attName == "nid")  // for compatibility with first format, will be removed in few versions
 				newcodepoint = (uint32_t)ct::ivariant(attValue).GetI();
 			else if (attName == "orgName") oldName = attValue;
-			else if (attName == "newName" || 
+			else if (attName == "newName" ||
 				attName == "name")  // for compatibility with first format, will be removed in few versions
 				newName = attValue;
+			else if (attName == "trans")
+				translation = ct::toImVec2(ct::fvariant(attValue).GetV2());
 		}
 
 		ImFontGlyph g{};
 		g.Codepoint = oldcodepoint;
-		m_SelectedGlyphs[oldcodepoint] = GlyphInfos(g, oldName, newName, newcodepoint);
+		m_SelectedGlyphs[oldcodepoint] = std::make_shared<GlyphInfos>(g, oldName, newName, newcodepoint, translation);
 	}
 	else if (strParentName == "filters" &&  strName == "filter")
 	{

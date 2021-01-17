@@ -281,11 +281,14 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 								vProjectFile->m_Preview_Glyph_CountX = ct::maxi(vProjectFile->m_Preview_Glyph_CountX, 1); // can prevent bugs (like div by zero) everywhere when user input value
 							}
 							ImGui::SameLine();
-							ImGui::RadioButtonLabeled_BitWize<GlyphDisplayTuningModeFlags>(
+							if (ImGui::RadioButtonLabeled_BitWize<GlyphDisplayTuningModeFlags>(
 								ICON_IGFS_USED "##GlypCountIsMaster",
 								ICON_IGFS_NOT_USED "##GlypCountIsMaster",
 								"Apply Glyph Count Policy when Resized",
-								&vProjectFile->m_GlyphDisplayTuningMode, GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT, radioButtonWidth, true);
+								&vProjectFile->m_GlyphDisplayTuningMode, GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT, radioButtonWidth, true))
+							{
+								vProjectFile->SetProjectChange();
+							}
 							radioButtonWidth = ImGui::GetItemRectSize().x;
 
 							if (ImGui::SliderFloatDefaultCompact(aw, "Glyph Width", &vProjectFile->m_Preview_Glyph_Width, 10.0f,
@@ -298,11 +301,14 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 							}
 
 							ImGui::SameLine();
-							ImGui::RadioButtonLabeled_BitWize<GlyphDisplayTuningModeFlags>(
+							if (ImGui::RadioButtonLabeled_BitWize<GlyphDisplayTuningModeFlags>(
 								ICON_IGFS_USED "##GlypSizeIsMaster",
 								ICON_IGFS_NOT_USED "##GlypSizeIsMaster",
 								"Policy to be applied When resized :\n1) Glyph Width Policy\n2) Glyph Count Policy",
-								&vProjectFile->m_GlyphDisplayTuningMode, GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_SIZE, radioButtonWidth, true);
+								&vProjectFile->m_GlyphDisplayTuningMode, GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_SIZE, radioButtonWidth, true))
+							{
+								vProjectFile->SetProjectChange();
+							}
 							
 							ImGui::FramedGroupSeparator();
 

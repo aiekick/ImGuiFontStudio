@@ -54,9 +54,9 @@ private: // per pane settings to save
 	//float m_Selected_GlyphSize_Policy_Width = 40.0f;
 
 private:
-	std::vector<GlyphInfos*> m_GlyphsMergedNoOrder;
-	std::map<uint32_t, std::vector<GlyphInfos*>> m_GlyphsMergedOrderedByCodePoints;
-	std::map<std::string, std::vector<GlyphInfos*>> m_GlyphsMergedOrderedByGlyphName;
+	std::vector<std::shared_ptr<GlyphInfos>> m_GlyphsMergedNoOrder;
+	std::map<uint32_t, std::vector<std::shared_ptr<GlyphInfos>>> m_GlyphsMergedOrderedByCodePoints;
+	std::map<std::string, std::vector<std::shared_ptr<GlyphInfos>>> m_GlyphsMergedOrderedByGlyphName;
 
 private:
 	FinalFontPaneModeFlags m_FinalFontPaneModeFlags = 
@@ -86,7 +86,7 @@ private:
 
 	bool DrawGlyph(ProjectFile *vProjectFile, 
 		std::shared_ptr<FontInfos> vFontInfos, const ImVec2& vSize,
-		GlyphInfos *vGlyph, bool vShowRect,
+		std::shared_ptr<GlyphInfos> vGlyph, bool vShowRect,
 		bool *vNameupdated, bool *vCodePointUpdated,
 		bool vForceEditMode = false) const;
 	

@@ -22,6 +22,7 @@
 #include <set>
 #include <map>
 #include <unordered_map>
+#include <memory>
 
 #include <sfntly/tag.h>
 #include <sfntly/font.h>
@@ -65,7 +66,7 @@ public:
 	std::set<int32_t> m_ResolvedSet;
 	std::map<int32_t, std::string> m_NewGlyphNames;
 	std::map<CodePoint, CodePoint> m_NewGlyphCodePoints;
-	std::map<CodePoint, GlyphInfos> m_NewGlyphInfos;
+	std::map<CodePoint, std::shared_ptr<GlyphInfos>> m_NewGlyphInfos;
 };
 
 class FontHelper
@@ -79,7 +80,7 @@ public:
 		const std::string& vFontFilePathName,
 		std::map<CodePoint, std::string> vNewNames,
 		std::map<CodePoint, CodePoint> vNewCodePoints,
-		std::map<CodePoint, GlyphInfos> vNewGlyphInfos,
+		std::map<CodePoint, std::shared_ptr<GlyphInfos>> vNewGlyphInfos,
 		bool vBaseFontFileToMergeIn);
 	bool GenerateFontFile(const std::string& vFontFilePathName, bool vUsePostTable);
 
@@ -137,6 +138,6 @@ private:
 	bool Assemble_Head_Table();
 
 private:
-	GlyphInfos* GetGlyphInfosFromGlyphId(int32_t vFontId, int32_t vGlyphId);
+	std::shared_ptr<GlyphInfos> GetGlyphInfosFromGlyphId(int32_t vFontId, int32_t vGlyphId);
 };
 

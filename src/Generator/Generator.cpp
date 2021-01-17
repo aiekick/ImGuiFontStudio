@@ -503,7 +503,10 @@ void Generator::GenerateCard_One(
 			{
 				for (auto& glyph : vFontInfos->m_SelectedGlyphs)
 				{
-					glyphs[GetNewHeaderName(prefix, glyph.second.newHeaderName)] = std::pair<uint32_t, size_t>(glyph.first, (size_t)vFontInfos.get());
+					if (glyph.second)
+					{
+						glyphs[GetNewHeaderName(prefix, glyph.second->newHeaderName)] = std::pair<uint32_t, size_t>(glyph.first, (size_t)vFontInfos.get());
+					}
 				}
 			}
 
@@ -555,7 +558,10 @@ void Generator::GenerateCard_Merged(
 				{
 					for (const auto& glyph : font.second->m_SelectedGlyphs)
 					{
-						glyphs[GetNewHeaderName(prefix, glyph.second.newHeaderName)] = std::pair<uint32_t, size_t>(glyph.first, (size_t)&font.second);
+						if (glyph.second)
+						{
+							glyphs[GetNewHeaderName(prefix, glyph.second->newHeaderName)] = std::pair<uint32_t, size_t>(glyph.first, (size_t)&font.second);
+						}
 					}
 				}
 			}
@@ -593,12 +599,15 @@ void Generator::GenerateFontFile_One(
 
 		std::map<int32_t, std::string> newHeaderNames;
 		std::map<int32_t, int32_t> newCodePoints;
-		std::map<CodePoint, GlyphInfos> newGlyphInfos;
+		std::map<CodePoint, std::shared_ptr<GlyphInfos>> newGlyphInfos;
 		for (const auto &glyph : vFontInfos->m_SelectedGlyphs)
 		{
-			newHeaderNames[glyph.first] = glyph.second.newHeaderName;
-			newCodePoints[glyph.first] = glyph.second.newCodePoint;
-			newGlyphInfos[glyph.first] = glyph.second;
+			if (glyph.second)
+			{
+				newHeaderNames[glyph.first] = glyph.second->newHeaderName;
+				newCodePoints[glyph.first] = glyph.second->newCodePoint;
+				newGlyphInfos[glyph.first] = glyph.second;
+			}
 		}
 
 		if (!newHeaderNames.empty() && !newCodePoints.empty())
@@ -728,26 +737,27 @@ void Generator::GenerateFontFile_Merged(
 
 				std::map<int32_t, std::string> newHeaderNames;
 				std::map<int32_t, int32_t> newCodePoints;
-				std::map<CodePoint, GlyphInfos> newGlyphInfos;
+				std::map<CodePoint, std::shared_ptr<GlyphInfos>> newGlyphInfos;
 				for (const auto& glyph : it.second->m_SelectedGlyphs)
 				{
-					GlyphInfos gInfos = glyph.second;
-
-					newHeaderNames[glyph.first] = gInfos.newHeaderName;
-					newCodePoints[glyph.first] = gInfos.newCodePoint;
-
-					if (scaleChanged &&
-						!vProjectFile->IsGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE))
+					if (glyph.second)
 					{
-						gInfos.simpleGlyph.isValid = true;
-						gInfos.simpleGlyph.m_Scale = scale;
+						newHeaderNames[glyph.first] = glyph.second->newHeaderName;
+						newCodePoints[glyph.first] = glyph.second->newCodePoint;
 
-						gInfos.m_FontBoundingBox = baseFontBoundingBox;
-						gInfos.m_FontAscent = baseFontAscent;
-						gInfos.m_FontDescent = baseFontDescent;
+						if (scaleChanged &&
+							!vProjectFile->IsGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE))
+						{
+							glyph.second->simpleGlyph.isValid = true;
+							glyph.second->simpleGlyph.m_Scale = ImVec2(scale.x, scale.y);
+
+							glyph.second->m_FontBoundingBox = baseFontBoundingBox;
+							glyph.second->m_FontAscent = baseFontAscent;
+							glyph.second->m_FontDescent = baseFontDescent;
+						}
+
+						newGlyphInfos[glyph.first] = glyph.second;
 					}
-
-					newGlyphInfos[glyph.first] = gInfos;
 				}
 
 				if (!newHeaderNames.empty())

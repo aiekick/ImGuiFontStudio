@@ -16,7 +16,7 @@
 #pragma once
 
 #include <ctools/cTools.h>
-
+#include <ctools/ConfigAbstract.h>
 #include <string>
 #include <set>
 #include <memory>
@@ -105,7 +105,7 @@ struct TemporarySelectionStruct
 };
 
 class ProjectFile;
-class SelectionHelper
+class SelectionHelper : public conf::ConfigAbstract
 {
 private: // Vars
 	GlyphSelectionTypeFlags m_GlyphSelectionTypeFlags =	GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_ZONE;
@@ -126,6 +126,10 @@ private: // structs / classes
 	TemporarySelectionStruct m_TmpSelectionSrc; // for selection of glyphs from sources
 	TemporarySelectionStruct m_TmpSelectionDst; // for operations on final seletected glyphs // like re range by glyph group
 
+public:
+	typedef std::pair<uint32_t, std::string> FontInfosCodePoint_ToLoad;
+	std::set<FontInfosCodePoint_ToLoad> m_SelectionForOperation_ToLoad;
+
 private:
 	TemporarySelectionStruct* getSelStruct(SelectionContainerEnum vSelectionContainerEnum);
 	bool IsGlyphSelected(
@@ -143,7 +147,9 @@ private:
 public:
 	void DrawMenu(ProjectFile *vProjectFile);
 	void DrawSelectionMenu(ProjectFile *vProjectFile, SelectionContainerEnum vSelectionContainerEnum);
-	
+	void Clear();
+	void Load(ProjectFile* vProjectFile);
+
 public:
 	std::set<FontInfosCodePoint>* GetSelection();
 public:
@@ -247,6 +253,10 @@ private: // selection by range
 		ImFontGlyph vGlyph, 
 		bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
+
+public:
+	std::string getXml(const std::string& vOffset, const std::string& vUserDatas = "");
+	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas = "");
 
 public: // singleton
 	static SelectionHelper *Instance()

@@ -106,7 +106,7 @@ int GlyphDisplayHelper::CalcGlyphsCountAndSize(
  //////////////////////////////////////////////////////////
  //////////////////////////////////////////////////////////
 
-void SimpleGlyph_Solo::clear()
+void SimpleGlyph_Solo::Clear()
 {
 	coords.clear();
 	onCurve.clear();
@@ -119,7 +119,7 @@ void SimpleGlyph_Solo::LoadSimpleGlyph(sfntly::GlyphTable::SimpleGlyph *vGlyph)
 	if (vGlyph)
 	{
 		vGlyph->Initialize();
-		clear();
+		Clear();
 		int cmax = vGlyph->NumberOfContours();
 		for (int c = 0; c < cmax; c++)
 		{
@@ -201,7 +201,8 @@ GlyphInfos::GlyphInfos()
 
 GlyphInfos::GlyphInfos(
 	ImFontGlyph vGlyph, std::string vOldName, 
-	std::string vNewName, uint32_t vNewCodePoint)
+	std::string vNewName, uint32_t vNewCodePoint,
+	ImVec2 vTranslation)
 {
 	glyph = vGlyph;
 	oldHeaderName = vOldName;
@@ -209,6 +210,7 @@ GlyphInfos::GlyphInfos(
 	newCodePoint = vNewCodePoint;
 	if (newCodePoint == 0)
 		newCodePoint = glyph.Codepoint;
+	m_Translation = vTranslation;
 }
 
 GlyphInfos::~GlyphInfos() = default;

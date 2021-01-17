@@ -60,6 +60,7 @@ void ProjectFile::Clear()
 	m_FinalPane_ShowGlyphTooltip = true;
 	m_CurrentPane_ShowGlyphTooltip = true;
 	m_FontTestInfos.Clear();
+	SelectionHelper::Instance()->Clear();
 	Messaging::Instance()->Clear();
 }
 
@@ -107,8 +108,11 @@ bool ProjectFile::LoadAs(const std::string vFilePathName)
 			m_LastGeneratedFileName = m_SelectedFont->m_FontFileName;
 		}
 		m_IsLoaded = true;
-		m_FontTestInfos.Load(this); // we do that after m_IsLoaded
 		SetProjectChange(false);
+
+		// we do that after m_IsLoaded
+		SelectionHelper::Instance()->Load(this); // first
+		m_FontTestInfos.Load(this); // then because use final selection from SelectionHelper
 	}
 	else
 	{
@@ -234,7 +238,6 @@ std::string ProjectFile::getXml(const std::string& vOffset, const std::string& /
 	std::string str;
 
 	str += vOffset + "<project>\n";
-
 	if (!m_Fonts.empty())
 	{
 		for (auto it : m_Fonts)
@@ -245,9 +248,7 @@ std::string ProjectFile::getXml(const std::string& vOffset, const std::string& /
 			}
 		}
 	}
-
 	str += LayoutManager::Instance()->getXml(vOffset, "project");
-
 	str += vOffset + "\t<rangecoloring show=\"" + (m_ShowRangeColoring ? "true" : "false") + 
 		"\" hash=\"" + ct::fvec4(m_RangeColoringHash).string() + "\"/>\n";
 	str += vOffset + "\t<previewglyphcount>" + ct::toStr(m_Preview_Glyph_CountX) + "</previewglyphcount>\n";
@@ -270,9 +271,8 @@ std::string ProjectFile::getXml(const std::string& vOffset, const std::string& /
 	str += vOffset + "\t<zoomglyphs>" + (m_ZoomGlyphs ? "true" : "false") +"</zoomglyphs>\n";
 	str += vOffset + "\t<showbaseline>" + (m_ShowBaseLine ? "true" : "false") + "</showbaseline>\n";
 	str += vOffset + "\t<showadvancex>" + (m_ShowAdvanceX ? "true" : "false") + "</showadvancex>\n";
-
+	str += SelectionHelper::Instance()->getXml(vOffset + "\t");
 	str += m_FontTestInfos.getXml(vOffset + "\t");
-
 	str += vOffset + "</project>\n";
 
 	return str;
@@ -362,8 +362,10 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 			m_ShowBaseLine = ct::ivariant(strValue).GetB();
 		else if (strName == "showadvancex")
 			m_ShowAdvanceX = ct::ivariant(strValue).GetB();
-
-		m_FontTestInfos.setFromXml(vElem, vParent);
+		else if (strName == "fonttest")
+			m_FontTestInfos.setFromXml(vElem, vParent);
+		else if (strName == "finalselection")
+			SelectionHelper::Instance()->setFromXml(vElem, vParent);
 	}
 
 	return true;

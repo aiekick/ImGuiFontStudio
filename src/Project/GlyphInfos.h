@@ -47,11 +47,11 @@ public:
 	std::vector<std::vector<ct::ivec2>> coords;
 	std::vector<std::vector<bool>> onCurve;
 	ct::ivec4 rc;
-	ct::ivec2 m_Translation = 0; // translation in first
-	ct::dvec2 m_Scale = 1.0; // scale in second
+	ImVec2 m_Translation = ImVec2(0.0f, 0.0f); // translation in first
+	ImVec2 m_Scale = ImVec2(1.0f, 1.0f); // scale in second
 
 public:
-	void clear();
+	void Clear();
 	void LoadSimpleGlyph(sfntly::GlyphTable::SimpleGlyph *vGlyph);
 	int GetCountContours() const;
 	ct::ivec2 GetCoords(int32_t vContour, int32_t vPoint);
@@ -82,6 +82,8 @@ public:
 	ct::ivec4 m_FontBoundingBox;
 	int m_FontAscent = 0;
 	int m_FontDescent = 0;
+	ImVec2 m_Translation = ImVec2(0, 0);
+	ImVec2 m_Scale = ImVec2(1, 1);
 
 public: // for interaction only
 	bool m_editingName = false;
@@ -92,8 +94,9 @@ public: // for interaction only
 public:
 	GlyphInfos();
 	GlyphInfos(
-		ImFontGlyph vGlyph, std::string vOldName, 
-		std::string vNewName, uint32_t vNewCodePoint = 0);
+		ImFontGlyph vGlyph, std::string vOldName,
+		std::string vNewName, uint32_t vNewCodePoint = 0, 
+		ImVec2 vTranslation = ImVec2(0, 0));
 	~GlyphInfos();
 
 	std::shared_ptr<FontInfos> GetFontInfos();

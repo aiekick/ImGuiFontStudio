@@ -32,7 +32,7 @@ class FontInfos;
 class DebugPane : public AbstractPane
 {
 private:
-	GlyphInfos m_GlyphToDisplay;
+	std::weak_ptr<GlyphInfos> m_GlyphToDisplay;
 	ct::ivec2 m_GlyphCurrentPoint = -1;
 
 public:
@@ -47,7 +47,9 @@ private:
 	void DrawDebugGlyphPane(ProjectFile* vProjectFile);
 
 public:
-	void SetGlyphToDebug(const GlyphInfos& vGlyphInfos);
+	void SetGlyphToDebug(std::weak_ptr<GlyphInfos> vGlyphInfos);
+	void Clear();
+
 	ct::ivec2 GetGlyphCurrentPoint();
 	void DrawGlyphCurrentPoint(float vPreviewScale, ImVec2 vScreenPos, ImDrawList *vImDrawList);
 

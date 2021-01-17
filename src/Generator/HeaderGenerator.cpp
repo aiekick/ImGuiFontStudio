@@ -228,7 +228,9 @@ void HeaderGenerator::GenerateHeader_One(
 					glyphNames[it.second] = it.first;
 			else
 				for (auto& it : vFontInfos->m_SelectedGlyphs)
-					glyphNames[it.second.newHeaderName] = it.second.newCodePoint;
+					if (it.second)
+						glyphNames[it.second->newHeaderName] = it.second->newCodePoint;
+
 			m_FinalGlyphNames.clear();
 			m_FinalCodePointRange = ct::uvec2(65535, 0);
 			for (const auto& it : glyphNames)
@@ -305,7 +307,9 @@ void HeaderGenerator::GenerateHeader_Merged(
 			std::map<std::string, uint32_t> glyphNames;
 			for (const auto font : vProjectFile->m_Fonts)
 				for (const auto& glyph : font.second->m_SelectedGlyphs)
-					glyphNames[glyph.second.newHeaderName] = glyph.second.newCodePoint;
+					if (glyph.second)
+						glyphNames[glyph.second->newHeaderName] = glyph.second->newCodePoint;
+					
 			m_FinalGlyphNames.clear();
 			m_FinalCodePointRange = ct::uvec2(65535, 0);
 			for (const auto& it : glyphNames)

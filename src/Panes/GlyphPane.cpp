@@ -122,33 +122,24 @@ void GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile)
 		{
 			if (vProjectFile &&  vProjectFile->IsLoaded())
 			{
-				/*if (ImGui::BeginMenuBar())
+				static float _ZoomPrecision = 200.0f;
+				static float _ZoomPrecisionRatio = 1.0f / _ZoomPrecision;
+				if (ImGui::SliderFloatDefaultCompact(ImGui::GetContentRegionAvail().x, "Zoom Precision", &_ZoomPrecision, 1.0f, 2000.0f, 200.0f))
 				{
-					if (ImGui::SliderFloatDefaultCompact(100.0f, "Scale", &vProjectFile->m_GlyphPreview_Scale, 0.01f, 2.0f, 1.0f))
-					{
-						vProjectFile->SetProjectChange();
-					}
-					
-					if (ImGui::SliderIntDefaultCompact(100.0f, "Segments", &vProjectFile->m_GlyphPreview_QuadBezierCountSegments, 0, 50, 0))
-					{
-						vProjectFile->SetProjectChange();
-					}
-					
-					//ImGui::Checkbox("Stroke or Fill", &_stroke);
-					if (ImGui::Checkbox("Control Lines", &vProjectFile->m_GlyphPreview_ShowControlLines))
-					{
-						vProjectFile->SetProjectChange();
-					}
+					_ZoomPrecision = ImMax(_ZoomPrecision, 1.0f);
+					_ZoomPrecisionRatio = 1.0f / _ZoomPrecision;
+				}
 
-					ImGui::EndMenuBar();
-				}*/
+				if (ImGui::IsWindowHovered())
+				{
+					if (IS_FLOAT_DIFFERENT(ImGui::GetIO().MouseWheel, 0.0f))
+					{
+						vProjectFile->m_GlyphPreview_Scale += ImGui::GetIO().MouseWheel * _ZoomPrecisionRatio;
+						vProjectFile->m_GlyphPreview_Scale = ImMax(vProjectFile->m_GlyphPreview_Scale, 0.00001f);
+					}
+				}
 
-				DrawSimpleGlyph(
-					&m_GlyphToDisplay, 
-					vProjectFile->m_SelectedFont, 
-					vProjectFile->m_GlyphPreview_Scale, 
-					vProjectFile->m_GlyphPreview_QuadBezierCountSegments,
-					vProjectFile->m_GlyphPreview_ShowControlLines);
+				DrawSimpleGlyph(vProjectFile);
 			}
 		}
 
@@ -164,53 +155,59 @@ void GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile)
 
 static int limitContour = 0;
 
-bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, GlyphInfos *vGlyphInfos)
+bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, std::weak_ptr<GlyphInfos> vGlyphInfos)
 {
 	bool res = false;
 
-	if (vFontInfos && vGlyphInfos)
+	if (vFontInfos && !vGlyphInfos.expired())
 	{
-		std::string fontPathName = vProjectFile->GetAbsolutePath(vFontInfos->m_FontFilePathName);
-
-		if (FileHelper::Instance()->IsFileExist(fontPathName))
+		auto glyphInfosPtr = vGlyphInfos.lock();
+		if (glyphInfosPtr)
 		{
-			FontHelper m_FontHelper;
+			std::string fontPathName = vProjectFile->GetAbsolutePath(vFontInfos->m_FontFilePathName);
 
-			m_fontInstance.m_Font.Attach(m_FontHelper.LoadFontFile(fontPathName.c_str()));
-			if (m_fontInstance.m_Font)
+			if (FileHelper::Instance()->IsFileExist(fontPathName))
 			{
-				sfntly::Ptr<sfntly::CMapTable> cmap_table = down_cast<sfntly::CMapTable*>(m_fontInstance.m_Font->GetTable(sfntly::Tag::cmap));
-				m_fontInstance.m_CMapTable.Attach(cmap_table->GetCMap(sfntly::CMapTable::WINDOWS_BMP));
-				if (m_fontInstance.m_CMapTable)
+				FontHelper m_FontHelper;
+
+				m_fontInstance.m_Font.Attach(m_FontHelper.LoadFontFile(fontPathName.c_str()));
+				if (m_fontInstance.m_Font)
 				{
-					m_fontInstance.m_GlyfTable = down_cast<sfntly::GlyphTable*>(m_fontInstance.m_Font->GetTable(sfntly::Tag::glyf));
-					m_fontInstance.m_LocaTable = down_cast<sfntly::LocaTable*>(m_fontInstance.m_Font->GetTable(sfntly::Tag::loca));
-
-					if (m_fontInstance.m_GlyfTable && m_fontInstance.m_LocaTable)
+					sfntly::Ptr<sfntly::CMapTable> cmap_table = down_cast<sfntly::CMapTable*>(m_fontInstance.m_Font->GetTable(sfntly::Tag::cmap));
+					m_fontInstance.m_CMapTable.Attach(cmap_table->GetCMap(sfntly::CMapTable::WINDOWS_BMP));
+					if (m_fontInstance.m_CMapTable)
 					{
-						uint32_t codePoint = vGlyphInfos->glyph.Codepoint;
-                        uint32_t glyphId = m_fontInstance.m_CMapTable->GlyphId(codePoint);
-                        uint32_t length = m_fontInstance.m_LocaTable->GlyphLength(glyphId);
-                        uint32_t offset = m_fontInstance.m_LocaTable->GlyphOffset(glyphId);
+						m_fontInstance.m_GlyfTable = down_cast<sfntly::GlyphTable*>(m_fontInstance.m_Font->GetTable(sfntly::Tag::glyf));
+						m_fontInstance.m_LocaTable = down_cast<sfntly::LocaTable*>(m_fontInstance.m_Font->GetTable(sfntly::Tag::loca));
 
-						// Get the GLYF table for the current glyph id.
-						auto g = m_fontInstance.m_GlyfTable->GetGlyph(offset, length);
-						
-						if (g->GlyphType() == sfntly::GlyphType::kSimple)
+						if (m_fontInstance.m_GlyfTable && m_fontInstance.m_LocaTable)
 						{
-							auto glyph = down_cast<sfntly::GlyphTable::SimpleGlyph*>(g);
-							if (glyph)
+							uint32_t codePoint = glyphInfosPtr->glyph.Codepoint;
+							uint32_t glyphId = m_fontInstance.m_CMapTable->GlyphId(codePoint);
+							uint32_t length = m_fontInstance.m_LocaTable->GlyphLength(glyphId);
+							uint32_t offset = m_fontInstance.m_LocaTable->GlyphOffset(glyphId);
+
+							// Get the GLYF table for the current glyph id.
+							auto g = m_fontInstance.m_GlyfTable->GetGlyph(offset, length);
+
+							if (g->GlyphType() == sfntly::GlyphType::kSimple)
 							{
-								m_GlyphToDisplay = *vGlyphInfos;
-								m_GlyphToDisplay.simpleGlyph.LoadSimpleGlyph(glyph);
-								limitContour = m_GlyphToDisplay.simpleGlyph.GetCountContours();
+								auto glyph = down_cast<sfntly::GlyphTable::SimpleGlyph*>(g);
+								if (glyph)
+								{
+									m_GlyphToDisplay = vGlyphInfos;
+									glyphInfosPtr->simpleGlyph.LoadSimpleGlyph(glyph);
+									limitContour = glyphInfosPtr->simpleGlyph.GetCountContours();
+									glyphInfosPtr->simpleGlyph.m_Translation = glyphInfosPtr->m_Translation;
+									glyphInfosPtr->simpleGlyph.m_Scale = glyphInfosPtr->m_Scale;
 #ifdef _DEBUG
-								DebugPane::Instance()->SetGlyphToDebug(m_GlyphToDisplay);
+									DebugPane::Instance()->SetGlyphToDebug(m_GlyphToDisplay);
 #endif
-								// show and active the glyph pane
-								LayoutManager::Instance()->ShowAndFocusSpecificPane(PaneFlags::PANE_GLYPH);
-								
-								res = true;
+									// show and active the glyph pane
+									LayoutManager::Instance()->ShowAndFocusSpecificPane(PaneFlags::PANE_GLYPH);
+
+									res = true;
+								}
 							}
 						}
 					}
@@ -222,12 +219,29 @@ bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> 
 	return res;
 }
 
-// https://github.com/rillig/sfntly/tree/master/java/src/com/google/typography/font/tools/fontviewer
-bool GlyphPane::DrawSimpleGlyph(
-        GlyphInfos *vGlyph, std::shared_ptr<FontInfos> vFontInfos,
-        float vScale, int vCountSegments, bool vControlLines)
+void GlyphPane::Clear()
 {
-	if (vGlyph && vFontInfos)
+	if (!m_GlyphToDisplay.expired())
+	{
+		auto glyphInfosPtr = m_GlyphToDisplay.lock();
+		if (glyphInfosPtr)
+		{
+			glyphInfosPtr->simpleGlyph.Clear();
+
+		}
+	}
+	m_GlyphToDisplay.reset();
+	limitContour = 0;
+
+#ifdef _DEBUG
+	DebugPane::Instance()->Clear();
+#endif
+}
+
+// https://github.com/rillig/sfntly/tree/master/java/src/com/google/typography/font/tools/fontviewer
+bool GlyphPane::DrawSimpleGlyph(ProjectFile* vProjectFile)
+{
+	if (!m_GlyphToDisplay.expired() && vProjectFile->m_SelectedFont)
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (window->SkipItems)
@@ -236,147 +250,155 @@ bool GlyphPane::DrawSimpleGlyph(
 
 		/////////////////////////////////////////////////
 
-		auto g = &vGlyph->simpleGlyph;
-		if (g->isValid)
+		auto glyphInfosPtr = m_GlyphToDisplay.lock();
+		if (glyphInfosPtr)
 		{
-			int cmax = (int)g->coords.size();
-			ct::ivec4 rc = g->rc;
-
-			ImVec2 contentSize = ImGui::GetContentRegionMax();
-			ImRect glypRect = ImRect(((float)rc.x) * vScale, ((float)rc.y) * vScale, ((float)(rc.z - rc.x)) * vScale, ((float)(rc.w - rc.y)) * vScale);
-
-			bool change = false;
-			ImGui::PushItemWidth(200.0f);
-			//change |= ImGui::SliderInt("tx", &_tx, -rc.z, rc.z); ImGui::SameLine();
-			//change |= ImGui::SliderFloat("sx", &_sx, 0.01f, 10.0f);
-			//change |= ImGui::SliderInt("ty", &_ty, -rc.w, rc.w); ImGui::SameLine();
-			//change |= ImGui::SliderFloat("sy", &_sy, 0.01f, 10.0f);
-			ImGui::PopItemWidth();
-
-			if (change)
+			auto g = &glyphInfosPtr->simpleGlyph;
+			if (g->isValid)
 			{
-				// will come back with svg or/and glyph edition
-				//g->m_Translation = ct::ivec2(_tx, _ty); not functionnal for the moment
-				//g->m_Scale = ct::dvec2((double)_sx, (double)_sy); for the moment scale is overwrite by merged system
-			}
+				int cmax = (int)g->coords.size();
+				ct::ivec4 rc = g->rc;
 
-			ImVec2 glyphCenter = glypRect.GetCenter();
-			ImVec2 pos = ImGui::GetCursorScreenPos() + contentSize * 0.5f - glyphCenter;
+				ImVec2 contentSize = ImGui::GetContentRegionAvail();
+				ImRect glypRect = ImRect(
+					((float)rc.x) * vProjectFile->m_GlyphPreview_Scale, 
+					((float)rc.y) * vProjectFile->m_GlyphPreview_Scale, 
+					((float)(rc.z - rc.x)) * vProjectFile->m_GlyphPreview_Scale, 
+					((float)(rc.w - rc.y)) * vProjectFile->m_GlyphPreview_Scale);
 
-			if (ImGui::BeginMenuBar())
-			{
-				ImGui::PushItemWidth(100.0f);
-				ImGui::SliderInt("Contours", &limitContour, 0, cmax);
-				ImGui::PopItemWidth();
+				bool change = false;
+				float aw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 4.0f) * 0.5f;
+				change |= ImGui::SliderFloatDefaultCompact(aw, "tx", &glyphInfosPtr->m_Translation.x, -rc.z, rc.z, 0.0f);// ImGui::SameLine();
+				//change |= ImGui::SliderFloatDefaultCompact(aw, "sx", &vGlyph->m_Scale.x, 0.01f, 10.0f, 1.0f);
+				change |= ImGui::SliderFloatDefaultCompact(aw, "ty", &glyphInfosPtr->m_Translation.y, -rc.w, rc.w, 0.0f);// ImGui::SameLine();
+				//change |= ImGui::SliderFloatDefaultCompact(aw, "sy", &vGlyph->m_Scale.y, 0.01f, 10.0f, 1.0f);
 
-				ImGui::EndMenuBar();
-			}
-
-			ImGui::Text("You can select glyph in Current Font Pane");
-			ImGui::Text("rc %i %i %i %i", rc.x, rc.y, rc.z, rc.w);
-			
-			// x 0 + blue
-			drawList->AddLine(
-				ct::toImVec2(g->Scale(ct::ivec2(0, (int32_t)ct::floor(rc.y * g->m_Scale.x)), vScale)) + pos,
-				ct::toImVec2(g->Scale(ct::ivec2(0, (int32_t)ct::floor(rc.w * g->m_Scale.y)), vScale)) + pos,
-				ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), 2.0f);
-
-			// Ascent
-			drawList->AddLine(
-				ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.x * g->m_Scale.x), vFontInfos->m_Ascent), vScale)) + pos,
-				ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.z * g->m_Scale.x), vFontInfos->m_Ascent), vScale)) + pos,
-				ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
-
-			// y 0
-			drawList->AddLine(
-				ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.x * g->m_Scale.x), 0), vScale)) + pos,
-				ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.z * g->m_Scale.x), 0), vScale)) + pos,
-				ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 1.0f);
-
-			// Descent
-			drawList->AddLine(
-				ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.x * g->m_Scale.x), vFontInfos->m_Descent), vScale)) + pos,
-				ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.z * g->m_Scale.x), vFontInfos->m_Descent), vScale)) + pos,
-				ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
-
-			for (int c = 0; c < cmax; c++)
-			{
-				if (c >= limitContour) break;
-
-				int pmax = (int)g->coords[c].size();
-
-				int firstOn = 0;
-				for (int p = 0; p < pmax; p++)
+				if (change)
 				{
-					if (g->IsOnCurve(c, p))
-					{
-						firstOn = p;
-						break;
-					}
+					// will come back with svg or/and glyph edition
+					g->m_Translation = glyphInfosPtr->m_Translation; // wip
+					g->m_Scale = glyphInfosPtr->m_Scale;// for the moment scale is overwrite by merged system
+					vProjectFile->SetProjectChange();
 				}
 
-				// curve
+				ImVec2 glyphCenter = glypRect.GetCenter();
+				ImVec2 pos = ImGui::GetCursorScreenPos() + contentSize * 0.5f - glyphCenter;
 
-				drawList->PathLineTo(ct::toImVec2(g->GetCoords(c, firstOn, vScale)) + pos);
-
-				for (int i = 0; i < pmax; i++)
+				if (ImGui::BeginMenuBar())
 				{
-					int icurr = firstOn + i + 1;
-					int inext = firstOn + i + 2;
-					ct::ivec2 cur = g->GetCoords(c, icurr, vScale);
+					ImGui::PushItemWidth(100.0f);
+					ImGui::SliderInt("Contours", &limitContour, 0, cmax);
+					ImGui::PopItemWidth();
 
-					if (g->IsOnCurve(c, icurr))
+					ImGui::EndMenuBar();
+				}
+
+				ImGui::Text("You can select glyph in Current Font Pane");
+				ImGui::Text("rc %i %i %i %i", rc.x, rc.y, rc.z, rc.w);
+
+				// x 0 + blue
+				drawList->AddLine(
+					ct::toImVec2(g->Scale(ct::ivec2(0, (int32_t)ct::floor(rc.y * g->m_Scale.x)), vProjectFile->m_GlyphPreview_Scale)) + pos,
+					ct::toImVec2(g->Scale(ct::ivec2(0, (int32_t)ct::floor(rc.w * g->m_Scale.y)), vProjectFile->m_GlyphPreview_Scale)) + pos,
+					ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), 2.0f);
+
+				// Ascent
+				drawList->AddLine(
+					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.x * g->m_Scale.x), vProjectFile->m_SelectedFont->m_Ascent), vProjectFile->m_GlyphPreview_Scale)) + pos,
+					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.z * g->m_Scale.x), vProjectFile->m_SelectedFont->m_Ascent), vProjectFile->m_GlyphPreview_Scale)) + pos,
+					ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
+
+				// y 0
+				drawList->AddLine(
+					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.x * g->m_Scale.x), 0), vProjectFile->m_GlyphPreview_Scale)) + pos,
+					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.z * g->m_Scale.x), 0), vProjectFile->m_GlyphPreview_Scale)) + pos,
+					ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 1.0f);
+
+				// Descent
+				drawList->AddLine(
+					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.x * g->m_Scale.x), vProjectFile->m_SelectedFont->m_Descent), vProjectFile->m_GlyphPreview_Scale)) + pos,
+					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.z * g->m_Scale.x), vProjectFile->m_SelectedFont->m_Descent), vProjectFile->m_GlyphPreview_Scale)) + pos,
+					ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
+
+				for (int c = 0; c < cmax; c++)
+				{
+					if (c >= limitContour) break;
+
+					int pmax = (int)g->coords[c].size();
+
+					int firstOn = 0;
+					for (int p = 0; p < pmax; p++)
 					{
-						drawList->PathLineTo(ct::toImVec2(cur) + pos);
-					}
-					else
-					{
-						ct::ivec2 nex = g->GetCoords(c, inext, vScale);
-						if (!g->IsOnCurve(c, inext))
+						if (g->IsOnCurve(c, p))
 						{
-							nex.x = (int)(((double)nex.x + (double)cur.x) * 0.5);
-							nex.y = (int)(((double)nex.y + (double)cur.y) * 0.5);
+							firstOn = p;
+							break;
 						}
-						drawList->PathBezierQuadraticCurveTo(
-							ct::toImVec2(cur) + pos,
-							ct::toImVec2(nex) + pos, 
-							vCountSegments);
 					}
-				}
 
-				drawList->PathStroke(ImGui::GetColorU32(ImGuiCol_Text), true);
+					// curve
 
-#ifdef _DEBUG
-				DebugPane::Instance()->DrawGlyphCurrentPoint(vScale, pos, drawList);
-#endif
-
-				if (vControlLines) // control lines
-				{
-					drawList->PathLineTo(ct::toImVec2(g->GetCoords(c, firstOn, vScale)) + pos);
+					drawList->PathLineTo(ct::toImVec2(g->GetCoords(c, firstOn, vProjectFile->m_GlyphPreview_Scale)) + pos);
 
 					for (int i = 0; i < pmax; i++)
 					{
 						int icurr = firstOn + i + 1;
 						int inext = firstOn + i + 2;
-						ct::ivec2 cur = g->GetCoords(c, icurr, vScale);
+						ct::ivec2 cur = g->GetCoords(c, icurr, vProjectFile->m_GlyphPreview_Scale);
+
 						if (g->IsOnCurve(c, icurr))
 						{
 							drawList->PathLineTo(ct::toImVec2(cur) + pos);
 						}
 						else
 						{
-							ct::ivec2 nex = g->GetCoords(c, inext, vScale);
+							ct::ivec2 nex = g->GetCoords(c, inext, vProjectFile->m_GlyphPreview_Scale);
 							if (!g->IsOnCurve(c, inext))
 							{
 								nex.x = (int)(((double)nex.x + (double)cur.x) * 0.5);
-								nex.y = (int)(((double)nex.y + (double)cur.y) * 0.5); 
+								nex.y = (int)(((double)nex.y + (double)cur.y) * 0.5);
 							}
-							drawList->PathLineTo(ct::toImVec2(cur) + pos);
-							drawList->PathLineTo(ct::toImVec2(nex) + pos);
+							drawList->PathBezierQuadraticCurveTo(
+								ct::toImVec2(cur) + pos,
+								ct::toImVec2(nex) + pos,
+								vProjectFile->m_GlyphPreview_QuadBezierCountSegments);
 						}
 					}
 
-					drawList->PathStroke(ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), true);
+					drawList->PathStroke(ImGui::GetColorU32(ImGuiCol_Text), true);
+
+#ifdef _DEBUG
+					DebugPane::Instance()->DrawGlyphCurrentPoint(vProjectFile->m_GlyphPreview_Scale, pos, drawList);
+#endif
+
+					if (vProjectFile->m_GlyphPreview_ShowControlLines) // control lines
+					{
+						drawList->PathLineTo(ct::toImVec2(g->GetCoords(c, firstOn, vProjectFile->m_GlyphPreview_Scale)) + pos);
+
+						for (int i = 0; i < pmax; i++)
+						{
+							int icurr = firstOn + i + 1;
+							int inext = firstOn + i + 2;
+							ct::ivec2 cur = g->GetCoords(c, icurr, vProjectFile->m_GlyphPreview_Scale);
+							if (g->IsOnCurve(c, icurr))
+							{
+								drawList->PathLineTo(ct::toImVec2(cur) + pos);
+							}
+							else
+							{
+								ct::ivec2 nex = g->GetCoords(c, inext, vProjectFile->m_GlyphPreview_Scale);
+								if (!g->IsOnCurve(c, inext))
+								{
+									nex.x = (int)(((double)nex.x + (double)cur.x) * 0.5);
+									nex.y = (int)(((double)nex.y + (double)cur.y) * 0.5);
+								}
+								drawList->PathLineTo(ct::toImVec2(cur) + pos);
+								drawList->PathLineTo(ct::toImVec2(nex) + pos);
+							}
+						}
+
+						drawList->PathStroke(ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), true);
+					}
 				}
 			}
 		}

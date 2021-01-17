@@ -4,32 +4,29 @@
 			<prefix>RM</prefix>
 			<pathfilename>..\3rdparty\imgui\misc\fonts\Roboto-Medium.ttf</pathfilename>
 			<oversample>1</oversample>
-			<fontsize>50</fontsize>
+			<fontsize>17</fontsize>
 		</font>
 		<font name="fontawesome-webfont.ttf">
 			<glyphs>
-				<glyph orgId="61449" newId="61449" orgName="th_large" newName="th_large"/>
-				<glyph orgId="61450" newId="61450" orgName="th" newName="th"/>
-				<glyph orgId="61451" newId="61451" orgName="th_list" newName="th_list"/>
-				<glyph orgId="61460" newId="61460" orgName="trash" newName="trash"/>
-				<glyph orgId="61717" newId="61717" orgName="folder_open_alt" newName="folder_open_alt"/>
+				<glyph orgId="61449" newId="61449" orgName="th_large" newName="th_large" trans="0;-180.375"/>
+				<glyph orgId="61450" newId="61450" orgName="th" newName="th" trans="0;-180.375"/>
+				<glyph orgId="61451" newId="61451" orgName="th_list" newName="th_list" trans="0;-191.143"/>
+				<glyph orgId="61460" newId="61460" orgName="trash" newName="trash" trans="0;-51.151"/>
+				<glyph orgId="61717" newId="61717" orgName="folder_open_alt" newName="folder_open_alt" trans="0;-137.3"/>
 			</glyphs>
 			<prefix></prefix>
 			<pathfilename>..\samples_Fonts\fontawesome-webfont.ttf</pathfilename>
 			<oversample>1</oversample>
-			<fontsize>50</fontsize>
-			<filters>
-				<filter name="op"/>
-			</filters>
+			<fontsize>17</fontsize>
 		</font>
 		<rangecoloring show="false" hash="10;15;35;0.5"/>
-		<previewglyphcount>24</previewglyphcount>
-		<previewglyphwidth>40</previewglyphwidth>
+		<previewglyphcount>13</previewglyphcount>
+		<previewglyphwidth>69.415</previewglyphwidth>
 		<mergedfontprefix></mergedfontprefix>
 		<curglyphtooltip>true</curglyphtooltip>
 		<srcglyphtooltip>true</srcglyphtooltip>
 		<dstglyphtooltip>true</dstglyphtooltip>
-		<glyphpreviewscale>0.193</glyphpreviewscale>
+		<glyphpreviewscale>0.206</glyphpreviewscale>
 		<glyphpreviewshowcontrollines>false</glyphpreviewshowcontrollines>
 		<glyphpreviewquadbeziercounsegment>0</glyphpreviewquadbeziercounsegment>
 		<genmode>1307</genmode>
@@ -41,17 +38,23 @@
 		<lastgeneratedpath>.</lastgeneratedpath>
 		<lastgeneratedfilename>Generated_Font</lastgeneratedfilename>
 		<zoomglyphs>false</zoomglyphs>
-		<showbaseline>false</showbaseline>
+		<showbaseline>true</showbaseline>
 		<showadvancex>false</showadvancex>
+		<finalselection>
+			<selection orgId="61449" font="fontawesome-webfont.ttf"/>
+			<selection orgId="61450" font="fontawesome-webfont.ttf"/>
+			<selection orgId="61451" font="fontawesome-webfont.ttf"/>
+			<selection orgId="61460" font="fontawesome-webfont.ttf"/>
+			<selection orgId="61717" font="fontawesome-webfont.ttf"/>
+		</finalselection>
 		<fonttest>
-			<fontsize>52.405</fontsize>
-			<showbaseline>true</showbaseline>
+			<fontsize>98.184</fontsize>
+			<showbaseline>false</showbaseline>
 			<fontname>Roboto-Medium.ttf</fontname>
-			<teststring>ImGuiFontStudio</teststring>
+			<teststring> Open Font</teststring>
 			<insertedglyphs>
-				<insert pos="0" orgId="61717" font="fontawesome-webfont.ttf"/>
-				<insert pos="15" orgId="61717" font="fontawesome-webfont.ttf"/>
-				<insert pos="16" orgId="61717" font="fontawesome-webfont.ttf"/>
+				<insert pos="0" orgId="61451" font="fontawesome-webfont.ttf"/>
+				<insert pos="24" orgId="61717" font="fontawesome-webfont.ttf"/>
 			</insertedglyphs>
 		</fonttest>
 	</project>

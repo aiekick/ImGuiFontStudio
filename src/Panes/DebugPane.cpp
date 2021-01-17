@@ -107,9 +107,14 @@ void DebugPane::DrawDebugPane(ProjectFile *vProjectFile)
 ///////////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void DebugPane::SetGlyphToDebug(const GlyphInfos& vGlyphInfos)
+void DebugPane::SetGlyphToDebug(std::weak_ptr<GlyphInfos> vGlyphInfos)
 {
 	m_GlyphToDisplay = vGlyphInfos;
+}
+
+void DebugPane::Clear()
+{
+	m_GlyphToDisplay.reset();
 }
 
 ct::ivec2 DebugPane::GetGlyphCurrentPoint()
@@ -119,55 +124,69 @@ ct::ivec2 DebugPane::GetGlyphCurrentPoint()
 
 void DebugPane::DrawGlyphCurrentPoint(float vPreviewScale, ImVec2 vScreenPos, ImDrawList *vImDrawList)
 {
-	auto g = &(m_GlyphToDisplay.simpleGlyph);
-	if (g->isValid)
+	if (!m_GlyphToDisplay.expired())
 	{
-		int cmax = (int)g->coords.size();
-		ct::ivec2 cp = DebugPane::Instance()->GetGlyphCurrentPoint();
-		if (cp.x >= 0 && cp.x < cmax)
+		auto m_GlyphPtr = m_GlyphToDisplay.lock();
+		if (m_GlyphPtr)
 		{
-			int pmax = (int)g->coords[cp.x].size();
-			int firstOn = 0;
-			for (int p = 0; p < pmax; p++)
+			auto g = &(m_GlyphPtr->simpleGlyph);
+			if (g->isValid)
 			{
-				if (g->IsOnCurve(cp.x, p))
+				int cmax = (int)g->coords.size();
+				ct::ivec2 cp = DebugPane::Instance()->GetGlyphCurrentPoint();
+				if (cp.x >= 0 && cp.x < cmax)
 				{
-					firstOn = p;
-					break;
+					int pmax = (int)g->coords[cp.x].size();
+					int firstOn = 0;
+					for (int p = 0; p < pmax; p++)
+					{
+						if (g->IsOnCurve(cp.x, p))
+						{
+							firstOn = p;
+							break;
+						}
+					}
+
+					int icurr = firstOn + cp.y + 1;
+					ct::ivec2 cur = g->GetCoords(cp.x, icurr, vPreviewScale);
+					ImVec2 posCircle = ct::toImVec2(cur) + vScreenPos;
+					vImDrawList->AddCircleFilled(posCircle, 5.0f, ImGui::GetColorU32(ImVec4(1, 1, 0, 1)));
 				}
 			}
-
-			int icurr = firstOn + cp.y + 1;
-			ct::ivec2 cur = g->GetCoords(cp.x, icurr, vPreviewScale);
-			ImVec2 posCircle = ct::toImVec2(cur) + vScreenPos;
-			vImDrawList->AddCircleFilled(posCircle, 5.0f, ImGui::GetColorU32(ImVec4(1, 1, 0, 1)));
 		}
 	}
 }
 
 void DebugPane::DrawDebugGlyphPane(ProjectFile* /*vProjectFile*/)
 {
-	auto g = &(m_GlyphToDisplay.simpleGlyph);
-	if (g->isValid)
+	if (!m_GlyphToDisplay.expired())
 	{
-		int _c = 0;
-		for (auto &co : g->coords)
+		auto m_GlyphPtr = m_GlyphToDisplay.lock();
+		if (m_GlyphPtr)
 		{
-			ImGui::PushID(++paneWidgetId);
-			bool res = ImGui::CollapsingHeader_SmallHeight("Contour", 0.7f, -1, true);
-			ImGui::PopID();
-			if (res)
+			auto g = &(m_GlyphPtr->simpleGlyph);
+			if (g->isValid)
 			{
-				int _i = 0;
-				for (auto &pt : co)
+				int _c = 0;
+				for (auto& co : g->coords)
 				{
-					ImGui::Selectable_FramedText("[%i] x:%i y:%i", _i, pt.x, pt.y);
-					if (ImGui::IsItemHovered())
-						m_GlyphCurrentPoint = ct::ivec2(_c, _i);
-					_i++;
+					ImGui::PushID(++paneWidgetId);
+					bool res = ImGui::CollapsingHeader_SmallHeight("Contour", 0.7f, -1, true);
+					ImGui::PopID();
+					if (res)
+					{
+						int _i = 0;
+						for (auto& pt : co)
+						{
+							ImGui::Selectable_FramedText("[%i] x:%i y:%i", _i, pt.x, pt.y);
+							if (ImGui::IsItemHovered())
+								m_GlyphCurrentPoint = ct::ivec2(_c, _i);
+							_i++;
+						}
+					}
+					_c++;
 				}
 			}
-			_c++;
 		}
 	}
 }

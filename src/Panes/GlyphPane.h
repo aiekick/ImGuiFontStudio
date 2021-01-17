@@ -24,7 +24,7 @@
 #include <stdint.h>
 #include <string>
 #include <map>
-
+#include <memory>
 #include <sfntly/table/truetype/glyph_table.h>
 
 class ProjectFile;
@@ -34,7 +34,7 @@ class GlyphPane : public AbstractPane
 {
 private:
 	FontInstance m_fontInstance;
-	GlyphInfos m_GlyphToDisplay;
+	std::weak_ptr<GlyphInfos> m_GlyphToDisplay;
 	
 public:
 	void Init() override;
@@ -44,11 +44,11 @@ public:
 	int DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas) override;
 
 	void DrawGlyphPane(ProjectFile *vProjectFile);
-	bool LoadGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, GlyphInfos *vGlyphInfos);
+	bool LoadGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, std::weak_ptr<GlyphInfos> vGlyphInfos);
+	void Clear();
 
 private:
-	static bool DrawSimpleGlyph(GlyphInfos *vGlyph, std::shared_ptr<FontInfos> vFontInfos,
-		float vScale, int vCountSegments, bool vControlLines);
+	bool DrawSimpleGlyph(ProjectFile* vProjectFile);
 
 public: // singleton
 	static GlyphPane *Instance()
