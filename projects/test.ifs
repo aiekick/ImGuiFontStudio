@@ -11,19 +11,16 @@
 				<glyph orgId="61449" newId="61449" orgName="th_large" newName="th_large"/>
 				<glyph orgId="61450" newId="61450" orgName="th" newName="th"/>
 				<glyph orgId="61451" newId="61451" orgName="th_list" newName="th_list"/>
-				<glyph orgId="61512" newId="61512" orgName="step_backward" newName="step_backward"/>
-				<glyph orgId="61513" newId="61513" orgName="fast_backward" newName="fast_backward"/>
-				<glyph orgId="61514" newId="61514" orgName="backward" newName="backward"/>
-				<glyph orgId="61515" newId="61515" orgName="play" newName="play"/>
-				<glyph orgId="61516" newId="61516" orgName="pause" newName="pause"/>
-				<glyph orgId="61517" newId="61517" orgName="stop" newName="stop"/>
-				<glyph orgId="61518" newId="61518" orgName="forward" newName="forward"/>
-				<glyph orgId="61520" newId="61520" orgName="fast_forward" newName="fast_forward"/>
+				<glyph orgId="61460" newId="61460" orgName="trash" newName="trash"/>
+				<glyph orgId="61717" newId="61717" orgName="folder_open_alt" newName="folder_open_alt"/>
 			</glyphs>
 			<prefix></prefix>
 			<pathfilename>..\samples_Fonts\fontawesome-webfont.ttf</pathfilename>
 			<oversample>1</oversample>
 			<fontsize>50</fontsize>
+			<filters>
+				<filter name="op"/>
+			</filters>
 		</font>
 		<sourcefontpane>
 		</sourcefontpane>
@@ -32,8 +29,8 @@
 		<selectedfontpane>
 		</selectedfontpane>
 		<rangecoloring show="false" hash="10;15;35;0.5"/>
-		<previewglyphcount>25</previewglyphcount>
-		<previewglyphwidth>17.84</previewglyphwidth>
+		<previewglyphcount>18</previewglyphcount>
+		<previewglyphwidth>68.811</previewglyphwidth>
 		<mergedfontprefix></mergedfontprefix>
 		<curglyphtooltip>true</curglyphtooltip>
 		<srcglyphtooltip>true</srcglyphtooltip>
@@ -43,7 +40,7 @@
 		<glyphpreviewquadbeziercounsegment>0</glyphpreviewquadbeziercounsegment>
 		<genmode>1307</genmode>
 		<fonttomergein>Roboto-Medium.ttf</fonttomergein>
-		<glyphdisplaytuningmode>1</glyphdisplaytuningmode>
+		<glyphdisplaytuningmode>2</glyphdisplaytuningmode>
 		<sourcefontpaneflags>1</sourcefontpaneflags>
 		<cardglyhpheight>40</cardglyhpheight>
 		<cardcountrowsmax>20</cardcountrowsmax>

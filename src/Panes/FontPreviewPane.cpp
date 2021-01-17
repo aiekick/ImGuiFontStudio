@@ -181,9 +181,7 @@ void FontPreviewPane::DrawFontPreviewPane(ProjectFile *vProjectFile)
 				{
 					m_GlyphToInsert.clear();
 				}
-				ImGui::SameLine();
-				ImGui::SliderFloatDefaultCompact(ImGui::GetContentRegionAvail().x, "Font Size", &m_FontSizePreview, 1, 300, 15.0f);
-
+				
 				ImGui::Text("Test :");
 				if (ImGui::Button("Clear##testfont"))
 				{
@@ -255,8 +253,9 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 						}
 
 						bool selected = false;
+						auto glyphFont = glyphInfos->second->m_ImFontAtlas.Fonts[0];
 						ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
-						DrawGlyphButton(vProjectFile, glyphInfos->second->m_ImFontAtlas.Fonts[0], m_FontSizePreview, &selected, glyph_size, glyph);
+						DrawGlyphButton(vProjectFile, glyphFont, glyphFont->FontSize, &selected, glyph_size, glyph);
 						ImGui::PopStyleVar();
 
 						used = true;
@@ -285,10 +284,8 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 
 void FontPreviewPane::DrawMixedFontResult(ProjectFile* vProjectFile)
 {
-	static int _method = 0;
-	ImGui::SliderIntDefaultCompact(300, "Method", &_method, 0, 3, 0);
-
 	ImFont* font = ImGui::GetFont();
+	
 	if (!m_TestFont.expired())
 	{
 		auto fontPtr = m_TestFont.lock();
@@ -300,6 +297,11 @@ void FontPreviewPane::DrawMixedFontResult(ProjectFile* vProjectFile)
 
 	if (font)
 	{
+		static bool _showBaseLine = true;
+		ImGui::RadioButtonLabeled("Base Line", "Show/Hide base line", &_showBaseLine);
+		ImGui::SameLine();
+		ImGui::SliderFloatDefaultCompact(ImGui::GetContentRegionAvail().x, "Preview Size", &m_FontSizePreview, 1, 300, font->FontSize);
+
 		float testFontScale = m_FontSizePreview / font->FontSize;
 		float testFontAscent = font->Ascent * testFontScale;
 
@@ -369,10 +371,13 @@ void FontPreviewPane::DrawMixedFontResult(ProjectFile* vProjectFile)
 				offsetX += glyph->AdvanceX * testFontScale;
 			}
 			
-			// Base Line
-			float asc = font->Ascent * testFontScale;
-			window->DrawList->AddLine(ImVec2(bb.Min.x, bb.Min.y + asc), ImVec2(bb.Max.x, bb.Min.y + asc), ImGui::GetColorU32(ImGuiCol_PlotHistogram), 2.0f); // base line
-			
+			if (_showBaseLine)
+			{
+				// Base Line
+				float asc = font->Ascent * testFontScale;
+				window->DrawList->AddLine(ImVec2(bb.Min.x, bb.Min.y + asc), ImVec2(bb.Max.x, bb.Min.y + asc), ImGui::GetColorU32(ImGuiCol_PlotHistogram), 1.0f); // base line
+			}
+
 			idx++;
 		}
 	}
@@ -397,7 +402,7 @@ bool FontPreviewPane::DrawGlyphButton(
 		const ImGuiID id = window->GetID("#image");
 		ImGui::PopID();
 
-		const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + vGlyphSize + style.FramePadding * 2);
+		ImRect bb(window->DC.CursorPos, window->DC.CursorPos + vGlyphSize + style.FramePadding * 2);
 		ImGui::ItemSize(bb);
 		if (!ImGui::ItemAdd(bb, id))
 			return false;
@@ -416,57 +421,42 @@ bool FontPreviewPane::DrawGlyphButton(
 		float rounding = ImClamp((float)ImMin(style.FramePadding.x, style.FramePadding.y), 0.0f, style.FrameRounding);
 		ImGui::RenderFrame(bb.Min, bb.Max, col, true, rounding);
 
-		ImVec2 startPos = bb.Min + style.FramePadding;
-		ImVec2 endPos = startPos + vGlyphSize;
-
-		ImVec2 uv0 = ImVec2(vGlyph.U0, vGlyph.V0);
-		ImVec2 uv1 = ImVec2(vGlyph.U1, vGlyph.V1);
-		ImVec2 center = ImVec2(0, 0);
-		ImVec2 glyphSize = ImVec2(0, 0);
-
-		float hostRatioX = 1.0f;
-		if (vFont->ContainerAtlas->TexHeight > 0)
-			hostRatioX = vFont->ContainerAtlas->TexWidth / vFont->ContainerAtlas->TexHeight;
-		ImVec2 uvSize = uv1 - uv0;
-		float ratioX = uvSize.x * hostRatioX / uvSize.y;
-
 		ImGui::PushClipRect(bb.Min, bb.Max, true);
 
+		bb.Min += style.FramePadding;
+		bb.Max -= style.FramePadding;
+		
 		ImVec2 pScale = vGlyphSize / vFontSize;
-
-		ImVec2 xy0 = ImVec2(vGlyph.X0, vGlyph.Y0) * pScale;
-		ImVec2 xy1 = ImVec2(vGlyph.X1, vGlyph.Y1) * pScale;
-		ImRect realGlyphRect = ImRect(startPos + xy0, startPos + xy1);
-		ImVec2 realGlyphSize = realGlyphRect.GetSize();
-
-		// redim with ratio
-		float newX = realGlyphSize.y * ratioX;
-		glyphSize = ImVec2(realGlyphSize.x, realGlyphSize.x / ratioX) * 0.5f;
-		if (newX < realGlyphSize.x)
-			glyphSize = ImVec2(newX, realGlyphSize.y) * 0.5f;
-		center = realGlyphRect.GetCenter();
-
-		float offsetX = vGlyphSize.x * 0.5f - realGlyphSize.x * 0.5;
-		center.x += offsetX; // center the glyph
-
+		float adv = vGlyph.AdvanceX * pScale.y;
+		float offsetX = bb.GetSize().x * 0.5f - adv * 0.5;
+		/*auto cf = ImGui::GetFont();
+		if (cf)
+		{
+			float fAsc = vFont->Ascent * pScale.y;
+			float cfAsc = cf->Ascent * vGlyphSize.y / cf->FontSize;
+			//startPos.y += cfAsc - fAsc;
+		}*/
+		
 		if (vProjectFile->m_ShowBaseLine)// draw base line
 		{
 			float asc = vFont->Ascent * pScale.y;
-			window->DrawList->AddLine(ImVec2(bb.Min.x, startPos.y + asc), ImVec2(bb.Max.x, startPos.y + asc), ImGui::GetColorU32(ImGuiCol_PlotHistogram), 2.0f); // base line
+			window->DrawList->AddLine(ImVec2(bb.Min.x, bb.Min.y + asc), ImVec2(bb.Max.x, bb.Min.y + asc), ImGui::GetColorU32(ImGuiCol_PlotHistogram), 2.0f); // base line
 		}
 
 		if (vProjectFile->m_ShowOriginX) // draw origin x
 		{
-			window->DrawList->AddLine(ImVec2(startPos.x + offsetX, bb.Min.y), ImVec2(startPos.x + offsetX, bb.Max.y), ImGui::GetColorU32(ImGuiCol_PlotLinesHovered), 2.0f); // base line
+			window->DrawList->AddLine(ImVec2(bb.Min.x + offsetX, bb.Min.y), ImVec2(bb.Min.x + offsetX, bb.Max.y), ImGui::GetColorU32(ImGuiCol_PlotLinesHovered), 2.0f); // base line
 		}
 
 		if (vProjectFile->m_ShowAdvanceX) // draw advance X
 		{
 			float adv = vGlyph.AdvanceX * pScale.y + offsetX;
-			window->DrawList->AddLine(ImVec2(startPos.x + adv, bb.Min.y), ImVec2(startPos.x + adv, bb.Max.y), ImGui::GetColorU32(ImGuiCol_PlotLines), 2.0f); // base line
+			window->DrawList->AddLine(ImVec2(bb.Min.x + adv, bb.Min.y), ImVec2(bb.Min.x + adv, bb.Max.y), ImGui::GetColorU32(ImGuiCol_PlotLines), 2.0f); // base line
 		}
 
-		window->DrawList->AddImage(vFont->ContainerAtlas->TexID, center - glyphSize, center + glyphSize, uv0, uv1, ImGui::GetColorU32(ImGuiCol_Text)); // glyph
+		window->DrawList->PushTextureID(vFont->ContainerAtlas->TexID);
+		vFont->RenderChar(window->DrawList, vGlyphSize.y, ImVec2(bb.Min.x + offsetX, bb.Min.y), ImGui::GetColorU32(ImGuiCol_Text), (ImWchar)vGlyph.Codepoint);
+		window->DrawList->PopTextureID();
 
 		ImGui::PopClipRect();
 	}
