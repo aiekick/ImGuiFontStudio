@@ -59,7 +59,7 @@ void ProjectFile::Clear()
 	m_SourcePane_ShowGlyphTooltip = true;
 	m_FinalPane_ShowGlyphTooltip = true;
 	m_CurrentPane_ShowGlyphTooltip = true;
-
+	m_FontTestInfos.Clear();
 	Messaging::Instance()->Clear();
 }
 
@@ -96,7 +96,6 @@ bool ProjectFile::LoadAs(const std::string vFilePathName)
 	std::string filePathName = FileHelper::Instance()->SimplifyFilePath(vFilePathName);
 	if (LoadConfigFile(filePathName))
 	{
-		m_FontTestInfos.Load(this);
 		m_ProjectFilePathName = filePathName;
 		auto ps = FileHelper::Instance()->ParsePathFileName(m_ProjectFilePathName);
 		if (ps.isOk)
@@ -108,6 +107,7 @@ bool ProjectFile::LoadAs(const std::string vFilePathName)
 			m_LastGeneratedFileName = m_SelectedFont->m_FontFileName;
 		}
 		m_IsLoaded = true;
+		m_FontTestInfos.Load(this); // we do that after m_IsLoaded
 		SetProjectChange(false);
 	}
 	else
@@ -362,11 +362,8 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 			m_ShowBaseLine = ct::ivariant(strValue).GetB();
 		else if (strName == "showadvancex")
 			m_ShowAdvanceX = ct::ivariant(strValue).GetB();
-		else if (strName == "fonttest")
-		{
-			m_FontTestInfos.Clear();
-			m_FontTestInfos.setFromXml(vElem, vParent);
-		}
+
+		m_FontTestInfos.setFromXml(vElem, vParent);
 	}
 
 	return true;

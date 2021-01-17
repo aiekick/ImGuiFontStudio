@@ -42,7 +42,9 @@ private:
 	void DrawFontPreviewPane(ProjectFile *vProjectFile);
 	void DrawMixerWidget(ProjectFile* vProjectFile);
 	void DrawMixedFontResult(ProjectFile* vProjectFile);
-	bool DrawGlyphButton(ProjectFile* vProjectFile, ImFont* vFont, float vFontSize, bool* vSelected, ImVec2 vGlyphSize, ImFontGlyph vGlyph);
+
+	// 0 => none, 1 => left pressed, 2 => right pressed
+	int DrawGlyphButton(ProjectFile* vProjectFile, ImFont* vFont, float vFontSize, bool* vSelected, ImVec2 vGlyphSize, const ImFontGlyph *vGlyph);
 
 public: // singleton
 	static FontPreviewPane *Instance()

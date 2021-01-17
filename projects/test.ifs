@@ -22,18 +22,9 @@
 				<filter name="op"/>
 			</filters>
 		</font>
-		<fontpreview>
-			<previewfontsize>50</previewfontsize>
-			<previewfontshowbaseline>true</previewfontshowbaseline>
-			<testfontname>Roboto-Medium.ttf</testfontname>
-			<teststring>ImGuiFontStudio</teststring>
-			<insertedglyphs>
-				<insert pos="0" orgId="61717" font="fontawesome-webfont.ttf"/>
-			</insertedglyphs>
-		</fontpreview>
 		<rangecoloring show="false" hash="10;15;35;0.5"/>
-		<previewglyphcount>18</previewglyphcount>
-		<previewglyphwidth>48.1667</previewglyphwidth>
+		<previewglyphcount>24</previewglyphcount>
+		<previewglyphwidth>40</previewglyphwidth>
 		<mergedfontprefix></mergedfontprefix>
 		<curglyphtooltip>true</curglyphtooltip>
 		<srcglyphtooltip>true</srcglyphtooltip>
@@ -43,7 +34,7 @@
 		<glyphpreviewquadbeziercounsegment>0</glyphpreviewquadbeziercounsegment>
 		<genmode>1307</genmode>
 		<fonttomergein>Roboto-Medium.ttf</fonttomergein>
-		<glyphdisplaytuningmode>1</glyphdisplaytuningmode>
+		<glyphdisplaytuningmode>2</glyphdisplaytuningmode>
 		<sourcefontpaneflags>1</sourcefontpaneflags>
 		<cardglyhpheight>40</cardglyhpheight>
 		<cardcountrowsmax>20</cardcountrowsmax>
@@ -52,5 +43,16 @@
 		<zoomglyphs>false</zoomglyphs>
 		<showbaseline>false</showbaseline>
 		<showadvancex>false</showadvancex>
+		<fonttest>
+			<fontsize>52.405</fontsize>
+			<showbaseline>true</showbaseline>
+			<fontname>Roboto-Medium.ttf</fontname>
+			<teststring>ImGuiFontStudio</teststring>
+			<insertedglyphs>
+				<insert pos="0" orgId="61717" font="fontawesome-webfont.ttf"/>
+				<insert pos="15" orgId="61717" font="fontawesome-webfont.ttf"/>
+				<insert pos="16" orgId="61717" font="fontawesome-webfont.ttf"/>
+			</insertedglyphs>
+		</fonttest>
 	</project>
 </config>
