@@ -21,6 +21,7 @@
 #include <memory>
 
 #include <Project/FontInfos.h>
+#include <Project/FontTestInfos.h>
 #include <Generator/Generator.h>
 
 enum SourceFontPaneFlags
@@ -71,6 +72,7 @@ public: // to save
 	bool m_ShowBaseLine = false; // show the base line of the glyph only when m_ZoomGlyphs is false
 	bool m_ShowAdvanceX = false; // show the advance x of the glyph only when m_ZoomGlyphs is false
 	bool m_ShowOriginX = false; // show the origin x of the glyph only when m_ZoomGlyphs is false
+	FontTestInfos m_FontTestInfos;
 
 public: // dont save
 	std::shared_ptr<FontInfos> m_SelectedFont = nullptr;
@@ -109,6 +111,8 @@ public:
 
 	std::string GetAbsolutePath(const std::string& vFilePathName) const;
 	std::string GetRelativePath(const std::string& vFilePathName) const;
+
+	std::shared_ptr<FontInfos> GetFontWithFontName(const std::string& vFontName);
 
 public: // Generation Mode
 	void AddGenMode(GenModeFlags vFlags);

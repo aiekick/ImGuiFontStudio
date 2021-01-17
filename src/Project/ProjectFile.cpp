@@ -96,6 +96,7 @@ bool ProjectFile::LoadAs(const std::string vFilePathName)
 	std::string filePathName = FileHelper::Instance()->SimplifyFilePath(vFilePathName);
 	if (LoadConfigFile(filePathName))
 	{
+		m_FontTestInfos.Load(this);
 		m_ProjectFilePathName = filePathName;
 		auto ps = FileHelper::Instance()->ParsePathFileName(m_ProjectFilePathName);
 		if (ps.isOk)
@@ -218,6 +219,16 @@ std::string ProjectFile::GetRelativePath(const std::string& vFilePathName) const
 	return res;
 }
 
+std::shared_ptr<FontInfos> ProjectFile::GetFontWithFontName(const std::string& vFontName)
+{
+	if (m_Fonts.find(vFontName) != m_Fonts.end())
+	{
+		return m_Fonts[vFontName];
+	}
+
+	return 0;
+}
+
 std::string ProjectFile::getXml(const std::string& vOffset, const std::string& /*vUserDatas*/)
 {
 	std::string str;
@@ -237,7 +248,8 @@ std::string ProjectFile::getXml(const std::string& vOffset, const std::string& /
 
 	str += LayoutManager::Instance()->getXml(vOffset, "project");
 
-	str += vOffset + "\t<rangecoloring show=\"" + (m_ShowRangeColoring ? "true" : "false") + "\" hash=\"" + ct::fvec4(m_RangeColoringHash).string() + "\"/>\n";
+	str += vOffset + "\t<rangecoloring show=\"" + (m_ShowRangeColoring ? "true" : "false") + 
+		"\" hash=\"" + ct::fvec4(m_RangeColoringHash).string() + "\"/>\n";
 	str += vOffset + "\t<previewglyphcount>" + ct::toStr(m_Preview_Glyph_CountX) + "</previewglyphcount>\n";
 	str += vOffset + "\t<previewglyphwidth>" + ct::toStr(m_Preview_Glyph_Width) + "</previewglyphwidth>\n";
 	str += vOffset + "\t<mergedfontprefix>" + m_MergedFontPrefix + "</mergedfontprefix>\n";
@@ -258,6 +270,8 @@ std::string ProjectFile::getXml(const std::string& vOffset, const std::string& /
 	str += vOffset + "\t<zoomglyphs>" + (m_ZoomGlyphs ? "true" : "false") +"</zoomglyphs>\n";
 	str += vOffset + "\t<showbaseline>" + (m_ShowBaseLine ? "true" : "false") + "</showbaseline>\n";
 	str += vOffset + "\t<showadvancex>" + (m_ShowAdvanceX ? "true" : "false") + "</showadvancex>\n";
+
+	str += m_FontTestInfos.getXml(vOffset + "\t");
 
 	str += vOffset + "</project>\n";
 
@@ -348,7 +362,11 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 			m_ShowBaseLine = ct::ivariant(strValue).GetB();
 		else if (strName == "showadvancex")
 			m_ShowAdvanceX = ct::ivariant(strValue).GetB();
-		
+		else if (strName == "fonttest")
+		{
+			m_FontTestInfos.Clear();
+			m_FontTestInfos.setFromXml(vElem, vParent);
+		}
 	}
 
 	return true;

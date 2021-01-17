@@ -1352,15 +1352,15 @@ std::string FinalFontPane::getXml(const std::string& vOffset, const std::string&
 
 	std::string str;
 
-	str += vOffset + "<finalfontpane>\n";
+	//str += vOffset + "<finalfontpane>\n";
 	//str += vOffset + "\t<glyphsizepolicy_count>" + ct::toStr(m_Final_GlyphSize_Policy_Count) + "</glyphsizepolicy_count>\n";
 	//str += vOffset + "\t<glyphsizepolicy_width>" + ct::toStr(m_Final_GlyphSize_Policy_Width) + "</glyphsizepolicy_width>\n";
-	str += vOffset + "</finalfontpane>\n";
+	//str += vOffset + "</finalfontpane>\n";
 
-	str += vOffset + "<selectedfontpane>\n";
+	//str += vOffset + "<selectedfontpane>\n";
 	//str += vOffset + "\t<glyphsizepolicy_count>" + ct::toStr(m_Selected_GlyphSize_Policy_Count) + "</glyphsizepolicy_count>\n";
 	//str += vOffset + "\t<glyphsizepolicy_width>" + ct::toStr(m_Selected_GlyphSize_Policy_Width) + "</glyphsizepolicy_width>\n";
-	str += vOffset + "</selectedfontpane>\n";
+	//str += vOffset + "</selectedfontpane>\n";
 
 	return str;
 }

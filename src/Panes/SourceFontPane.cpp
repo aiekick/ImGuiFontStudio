@@ -180,6 +180,7 @@ void SourceFontPane::DrawFilterBar(ProjectFile *vProjectFile, std::shared_ptr<Fo
 			ct::ResetBuffer(vFontInfos->m_SearchBuffer);
 			vFontInfos->m_Filters.clear();
 			vProjectFile->SetProjectChange();
+			vFontInfos->UpdateFiltering();
 		}
 		ImGui::PushItemWidth(400);
 		bool filterChanged = ImGui::InputText("##Filter", vFontInfos->m_SearchBuffer, 1023);
@@ -468,12 +469,12 @@ std::string SourceFontPane::getXml(const std::string& vOffset, const std::string
 
 	std::string str;
 
-	str += vOffset + "<sourcefontpane>\n";
+	//str += vOffset + "<sourcefontpane>\n";
 
 	//str += vOffset + "\t<glyphsizepolicy_count>" + ct::toStr(m_GlyphSize_Policy_Count) + "</glyphsizepolicy_count>\n";
 	//str += vOffset + "\t<glyphsizepolicy_width>" + ct::toStr(m_GlyphSize_Policy_Width) + "</glyphsizepolicy_width>\n";
 
-	str += vOffset + "</sourcefontpane>\n";
+	//str += vOffset + "</sourcefontpane>\n";
 
 	return str;
 }

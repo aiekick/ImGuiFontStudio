@@ -15,6 +15,7 @@
  */
 #pragma once
 
+#include <ctools/ConfigAbstract.h>
 #include <Panes/Abstract/AbstractPane.h>
 
 #include <imgui/imgui.h>
@@ -23,23 +24,13 @@
 #include <functional>
 #include <map>
 #include <memory>
-class FontInstance;
 class ProjectFile;
 class FontInfos;
-class GlyphInfos;
 class FontPreviewPane : public AbstractPane
 {
 private:
-	FontInstance* m_fontInstance = 0;
-	GlyphInfos* m_GlyphToDisplay = 0;
 	std::function<int(ImGuiInputTextCallbackData*)> m_InputTextCallBack;
-	float m_FontSizePreview = 100.0f;
-	std::weak_ptr<FontInfos> m_TestFont;
-
-private:
-	std::map<uint32_t, FontInfosCodePoint> m_GlyphToInsert; // pos in word, glyph
-	std::string m_TestSentense;
-
+	
 public:
 	void Init() override;
 	void Unit() override;
