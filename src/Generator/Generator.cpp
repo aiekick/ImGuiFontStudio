@@ -43,6 +43,7 @@
 #include <Helper/Messaging.h>
 #include <MainFrame.h>
 #include <Panes/SourceFontPane.h>
+#include <Panes/ParamsPane.h>
 #include <Project/FontInfos.h>
 #include <Project/ProjectFile.h>
 
@@ -50,7 +51,7 @@
 #include <stb/stb_image_write.h>
 #include <imgui/imstb_truetype.h>
 
-//#define AUTO_OPEN_FONT_IN_APP_AFTER_GENERATION_FOR_DEBUG_PURPOSE
+#define AUTO_OPEN_FONT_IN_APP_AFTER_GENERATION_FOR_DEBUG_PURPOSE
 
 Generator::Generator() = default;
 Generator::~Generator() = default;
@@ -113,7 +114,7 @@ void Generator::Generate(
 					vProjectFile->m_SelectedFont, 
 					vProjectFile->m_GenMode);
 #ifdef AUTO_OPEN_FONT_IN_APP_AFTER_GENERATION_FOR_DEBUG_PURPOSE
-				SourceFontPane::Instance()->OpenFont(vProjectFile, filePathName, false); // directly load the generated font file
+				ParamsPane::Instance()->OpenFont(vProjectFile, mainPS.GetFPNE(), false); // directly load the generated font file
 #endif
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
@@ -131,7 +132,7 @@ void Generator::Generate(
 								font.second,
 								vProjectFile->m_GenMode);
 #ifdef AUTO_OPEN_FONT_IN_APP_AFTER_GENERATION_FOR_DEBUG_PURPOSE
-							SourceFontPane::Instance()->OpenFont(vProjectFile, filePathName, false); // directly load the generated font file
+							ParamsPane::Instance()->OpenFont(vProjectFile, mainPS.GetFPNE(), false); // directly load the generated font file
 #endif
 						}
 					}
@@ -144,7 +145,7 @@ void Generator::Generate(
 					vProjectFile,
 					vProjectFile->m_GenMode);
 #ifdef AUTO_OPEN_FONT_IN_APP_AFTER_GENERATION_FOR_DEBUG_PURPOSE
-				SourceFontPane::Instance()->OpenFont(vProjectFile, filePathName, false); // directly load the generated font file
+				ParamsPane::Instance()->OpenFont(vProjectFile, mainPS.GetFPNE(), false); // directly load the generated font file
 #endif
 			}
 		}
@@ -749,7 +750,7 @@ void Generator::GenerateFontFile_Merged(
 							!vProjectFile->IsGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE))
 						{
 							glyph.second->simpleGlyph.isValid = true;
-							glyph.second->simpleGlyph.m_Scale = ImVec2(scale.x, scale.y);
+							glyph.second->simpleGlyph.m_Scale = ImVec2((float)scale.x, (float)scale.y);
 
 							glyph.second->m_FontBoundingBox = baseFontBoundingBox;
 							glyph.second->m_FontAscent = baseFontAscent;

@@ -155,10 +155,10 @@ ct::ivec2 SimpleGlyph_Solo::GetCoords(int32_t vContour, int32_t vPoint)
 	ct::ivec2 p = coords[vContour][vPoint % count];
 
 	// apply transformation
-	p += m_Translation;
 	p.x = (int)(p.x * m_Scale.x);
 	p.y = (int)(p.y * m_Scale.y);
-	
+	p += m_Translation;
+
 	return p;
 }
 
@@ -232,12 +232,12 @@ void GlyphInfos::SetFontInfos(std::shared_ptr<FontInfos> vFontInfos)
 		fontInfos.reset();
 }
 
-bool GlyphInfos::DrawGlyphButton(
+int GlyphInfos::DrawGlyphButton(
 	ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos, 
 	bool* vSelected, ImVec2 vGlyphSize, ImFontGlyph vGlyph, ImVec2 vHostTextureSize,
 	int frame_padding, float vRectThickNess, ImVec4 vRectColor)
 {
-	bool res = false;
+	int res = 0;
 
 	if (vFontInfos)
 	{
@@ -259,12 +259,21 @@ bool GlyphInfos::DrawGlyphButton(
 			return false;
 
 		bool hovered, held;
-		bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held);
+		bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, 
+			ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
 
-		if (pressed && vSelected)
-			*vSelected = !*vSelected;
+		if (pressed)
+		{
+			if (vSelected)
+			{
+				*vSelected = !*vSelected;
+			}
 
-		res = pressed;
+			if (g.ActiveIdMouseButton == 0)
+				res = 1;
+			if (g.ActiveIdMouseButton == 1)
+				res = 2;
+		}
 
 		// Render
 		const ImU32 col = ImGui::GetColorU32(((held && hovered) || (vSelected && *vSelected)) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
@@ -333,7 +342,7 @@ bool GlyphInfos::DrawGlyphButton(
 				glyphSize = ImVec2(newX, realGlyphSize.y) * 0.5f;
 			center = realGlyphRect.GetCenter();
 
-			float offsetX = vGlyphSize.x * 0.5f - realGlyphSize.x * 0.5;
+			float offsetX = vGlyphSize.x * 0.5f - realGlyphSize.x * 0.5f;
 			center.x += offsetX; // center the glyph
 
 			if (vProjectFile->m_ShowBaseLine)// draw base line

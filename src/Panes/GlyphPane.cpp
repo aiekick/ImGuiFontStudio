@@ -267,11 +267,11 @@ bool GlyphPane::DrawSimpleGlyph(ProjectFile* vProjectFile)
 					((float)(rc.w - rc.y)) * vProjectFile->m_GlyphPreview_Scale);
 
 				bool change = false;
-				float aw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 4.0f) * 0.5f;
-				change |= ImGui::SliderFloatDefaultCompact(aw, "tx", &glyphInfosPtr->m_Translation.x, -rc.z, rc.z, 0.0f);// ImGui::SameLine();
-				//change |= ImGui::SliderFloatDefaultCompact(aw, "sx", &vGlyph->m_Scale.x, 0.01f, 10.0f, 1.0f);
-				change |= ImGui::SliderFloatDefaultCompact(aw, "ty", &glyphInfosPtr->m_Translation.y, -rc.w, rc.w, 0.0f);// ImGui::SameLine();
-				//change |= ImGui::SliderFloatDefaultCompact(aw, "sy", &vGlyph->m_Scale.y, 0.01f, 10.0f, 1.0f);
+				float aw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 2.0f) * 0.5f;
+				change |= ImGui::SliderFloatDefaultCompact(aw, "Trans X", &glyphInfosPtr->m_Translation.x, (float)-rc.z, (float)rc.z, 0.0f); ImGui::SameLine();
+				change |= ImGui::SliderFloatDefaultCompact(aw, "Trans Y", &glyphInfosPtr->m_Translation.y, (float)-rc.w, (float)rc.w, 0.0f);
+				//change |= ImGui::SliderFloatDefaultCompact(aw, "Scale X", &glyphInfosPtr->m_Scale.x, 0.01f, 3.0f, 1.0f); ImGui::SameLine();
+				//change |= ImGui::SliderFloatDefaultCompact(aw, "Scale Y", &glyphInfosPtr->m_Scale.y, 0.01f, 3.0f, 1.0f);
 
 				if (change)
 				{
@@ -294,30 +294,30 @@ bool GlyphPane::DrawSimpleGlyph(ProjectFile* vProjectFile)
 				}
 
 				ImGui::Text("You can select glyph in Current Font Pane");
-				ImGui::Text("rc %i %i %i %i", rc.x, rc.y, rc.z, rc.w);
+				ImGui::Text("the transformed glyph must keep in this rect : %i %i %i %i", rc.x, rc.y, rc.z, rc.w);
 
 				// x 0 + blue
 				drawList->AddLine(
-					ct::toImVec2(g->Scale(ct::ivec2(0, (int32_t)ct::floor(rc.y * g->m_Scale.x)), vProjectFile->m_GlyphPreview_Scale)) + pos,
-					ct::toImVec2(g->Scale(ct::ivec2(0, (int32_t)ct::floor(rc.w * g->m_Scale.y)), vProjectFile->m_GlyphPreview_Scale)) + pos,
+					ct::toImVec2(g->Scale(ct::ivec2(0, (int32_t)ct::floor(rc.y)), vProjectFile->m_GlyphPreview_Scale)) + pos,
+					ct::toImVec2(g->Scale(ct::ivec2(0, (int32_t)ct::floor(rc.w)), vProjectFile->m_GlyphPreview_Scale)) + pos,
 					ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), 2.0f);
 
 				// Ascent
 				drawList->AddLine(
-					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.x * g->m_Scale.x), vProjectFile->m_SelectedFont->m_Ascent), vProjectFile->m_GlyphPreview_Scale)) + pos,
-					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.z * g->m_Scale.x), vProjectFile->m_SelectedFont->m_Ascent), vProjectFile->m_GlyphPreview_Scale)) + pos,
+					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.x), vProjectFile->m_SelectedFont->m_Ascent), vProjectFile->m_GlyphPreview_Scale)) + pos,
+					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.z), vProjectFile->m_SelectedFont->m_Ascent), vProjectFile->m_GlyphPreview_Scale)) + pos,
 					ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
 
 				// y 0
 				drawList->AddLine(
-					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.x * g->m_Scale.x), 0), vProjectFile->m_GlyphPreview_Scale)) + pos,
-					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.z * g->m_Scale.x), 0), vProjectFile->m_GlyphPreview_Scale)) + pos,
+					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.x), 0), vProjectFile->m_GlyphPreview_Scale)) + pos,
+					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.z), 0), vProjectFile->m_GlyphPreview_Scale)) + pos,
 					ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 1.0f);
 
 				// Descent
 				drawList->AddLine(
-					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.x * g->m_Scale.x), vProjectFile->m_SelectedFont->m_Descent), vProjectFile->m_GlyphPreview_Scale)) + pos,
-					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.z * g->m_Scale.x), vProjectFile->m_SelectedFont->m_Descent), vProjectFile->m_GlyphPreview_Scale)) + pos,
+					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.x), vProjectFile->m_SelectedFont->m_Descent), vProjectFile->m_GlyphPreview_Scale)) + pos,
+					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.z), vProjectFile->m_SelectedFont->m_Descent), vProjectFile->m_GlyphPreview_Scale)) + pos,
 					ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
 
 				for (int c = 0; c < cmax; c++)

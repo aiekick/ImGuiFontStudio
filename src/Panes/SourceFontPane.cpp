@@ -28,6 +28,7 @@
 #include <Project/FontInfos.h>
 #include <Project/ProjectFile.h>
 #include <Project/GlyphInfos.h>
+#include <Panes/GlyphPane.h>
 
 #include <cinttypes> // printf zu
 
@@ -388,11 +389,14 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 
 											// draw glyph in channel 0
 											ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
-											bool check = GlyphInfos::DrawGlyphButton(vProjectFile, vFontInfos, &selected, glyph_size, glyph, hostTextureSize);
+											int check = GlyphInfos::DrawGlyphButton(vProjectFile, vFontInfos, &selected, glyph_size, glyph, hostTextureSize);
 											ImGui::PopStyleVar();
 
 											if (check)
 											{
+												// left button : check == 1
+												// right button  : check == 2
+
 												SelectionHelper::Instance()->SelectWithToolOrApplyOnGlyph(
 													vProjectFile, vFontInfos,
 													glyph, idx, selected, true,
@@ -465,6 +469,7 @@ void SourceFontPane::DrawFontTexture(std::shared_ptr<FontInfos> vFontInfos)
 
 std::string SourceFontPane::getXml(const std::string& vOffset, const std::string& vUserDatas)
 {
+	UNUSED(vOffset);
 	UNUSED(vUserDatas);
 
 	std::string str;

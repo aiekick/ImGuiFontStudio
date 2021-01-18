@@ -8,77 +8,131 @@
 		</font>
 		<font name="fontawesome-webfont.ttf">
 			<glyphs>
-				<glyph orgId="61442" newId="61442" orgName="search" newName="search"/>
-				<glyph orgId="61450" newId="61443" orgName="th" newName="glyphs"/>
-				<glyph orgId="61452" newId="61452" orgName="ok" newName="ok"/>
-				<glyph orgId="61453" newId="61453" orgName="remove" newName="cancel"/>
-				<glyph orgId="61460" newId="61460" orgName="trash" newName="destroy"/>
-				<glyph orgId="61462" newId="61462" orgName="file_alt" newName="file"/>
-				<glyph orgId="61469" newId="61469" orgName="play_circle" newName="play_circle"/>
-				<glyph orgId="61470" newId="61470" orgName="repeat" newName="redo"/>
-				<glyph orgId="61473" newId="61473" orgName="refresh" newName="refresh"/>
-				<glyph orgId="61482" newId="61482" orgName="barcode" newName="barcode"/>
-				<glyph orgId="61485" newId="61485" orgName="book" newName="project"/>
-				<glyph orgId="61486" newId="61486" orgName="bookmark" newName="bookmark"/>
-				<glyph orgId="61489" newId="61489" orgName="font" newName="by_font"/>
-				<glyph orgId="61498" newId="61498" orgName="list" newName="list"/>
-				<glyph orgId="61502" newId="61502" orgName="picture" newName="texture"/>
-				<glyph orgId="61504" newId="61504" orgName="pencil" newName="edit"/>
-				<glyph orgId="61527" newId="61527" orgName="remove_sign" newName="error"/>
-				<glyph orgId="61530" newId="61530" orgName="info_sign" newName="infos"/>
-				<glyph orgId="61531" newId="61531" orgName="screenshot" newName="target"/>
-				<glyph orgId="61540" newId="61540" orgName="share_alt" newName="reset"/>
-				<glyph orgId="61543" newId="61543" orgName="plus" newName="add"/>
-				<glyph orgId="61544" newId="61544" orgName="minus" newName="remove"/>
-				<glyph orgId="61553" newId="61553" orgName="warning_sign" newName="warning"/>
-				<glyph orgId="61559" newId="61559" orgName="chevron_up" newName="sort_asc"/>
-				<glyph orgId="61560" newId="61560" orgName="chevron_down" newName="sort_desc"/>
-				<glyph orgId="61573" newId="61573" orgName="cogs" newName="generate"/>
-				<glyph orgId="61616" newId="61616" orgName="filter" newName="filter"/>
-				<glyph orgId="61618" newId="61618" orgName="fullscreen" newName="fullscreen"/>
-				<glyph orgId="61636" newId="61636" orgName="cut" newName="cut"/>
-				<glyph orgId="61637" newId="61637" orgName="copy" newName="copy"/>
-				<glyph orgId="61639" newId="61639" orgName="save" newName="save"/>
-				<glyph orgId="61640" newId="61640" orgName="sign_blank" newName="icon_view"/>
-				<glyph orgId="61648" newId="61648" orgName="magic" newName="select_path"/>
-				<glyph orgId="61656" newId="61656" orgName="caret_up" newName="menu_up"/>
-				<glyph orgId="61657" newId="61657" orgName="caret_left" newName="menu_left"/>
-				<glyph orgId="61658" newId="61658" orgName="caret_right" newName="menu_right"/>
-				<glyph orgId="61659" newId="61659" orgName="columns" newName="columns"/>
-				<glyph orgId="61666" newId="61666" orgName="undo" newName="undo"/>
-				<glyph orgId="61674" newId="61674" orgName="paste" newName="paste"/>
-				<glyph orgId="61686" newId="61686" orgName="file_text_alt" newName="file_type_text"/>
-				<glyph orgId="61716" newId="61716" orgName="folder_close_alt" newName="folder"/>
-				<glyph orgId="61717" newId="61717" orgName="folder_open_alt" newName="folder_open"/>
-				<glyph orgId="61736" newId="61736" orgName="question" newName="help"/>
-				<glyph orgId="61737" newId="61737" orgName="_279" newName="about"/>
-				<glyph orgId="61738" newId="61738" orgName="exclamation" newName="exclamation"/>
-				<glyph orgId="61771" newId="61771" orgName="edit_sign" newName="icon_edit"/>
-				<glyph orgId="61892" newId="61892" orgName="_424" newName="file_type_project"/>
-				<glyph orgId="61897" newId="61897" orgName="_429" newName="link"/>
-				<glyph orgId="61918" newId="61918" orgName="_449" newName="settings"/>
-				<glyph orgId="62003" newId="62003" orgName="_528" newName="drives"/>
-				<glyph orgId="62021" newId="62021" orgName="_545" newName="select"/>
-				<glyph orgId="62060" newId="62060" orgName="_582" newName="layout"/>
+				<glyph orgId="61442" newId="61442" orgName="search" newName="search" trans="0;-125.066"/>
+				<glyph orgId="61450" newId="61443" orgName="th" newName="glyphs" trans="0;-205.754"/>
+				<glyph orgId="61452" newId="61452" orgName="ok" newName="ok" trans="0;-148.097"/>
+				<glyph orgId="61453" newId="61453" orgName="remove" newName="cancel" trans="0;-90.516"/>
+				<glyph orgId="61460" newId="61460" orgName="trash" newName="destroy" trans="0;-76.653"/>
+				<glyph orgId="61462" newId="61462" orgName="file_alt" newName="file" trans="0;-30.808"/>
+				<glyph orgId="61469" newId="61469" orgName="play_circle" newName="play_circle" trans="0;-92.791"/>
+				<glyph orgId="61470" newId="61470" orgName="repeat" newName="redo" trans="0;-60.516"/>
+				<glyph orgId="61473" newId="61473" orgName="refresh" newName="refresh" trans="0;-92.791"/>
+				<glyph orgId="61482" newId="61482" orgName="barcode" newName="barcode" trans="0;-173.479"/>
+				<glyph orgId="61485" newId="61485" orgName="book" newName="project" trans="0;-125.066"/>
+				<glyph orgId="61486" newId="61486" orgName="bookmark" newName="bookmark" trans="0;-125.066"/>
+				<glyph orgId="61489" newId="61489" orgName="font" newName="by_font" trans="0;-92.791"/>
+				<glyph orgId="61498" newId="61498" orgName="list" newName="list" trans="0;-141.203"/>
+				<glyph orgId="61502" newId="61502" orgName="picture" newName="texture" trans="0;0"/>
+				<glyph orgId="61504" newId="61504" orgName="pencil" newName="edit" trans="0;-59.613"/>
+				<glyph orgId="61527" newId="61527" orgName="remove_sign" newName="error" trans="0;-92.791"/>
+				<glyph orgId="61530" newId="61530" orgName="info_sign" newName="infos" trans="0;-60.516"/>
+				<glyph orgId="61531" newId="61531" orgName="screenshot" newName="target" trans="0;-92.791"/>
+				<glyph orgId="61540" newId="61540" orgName="share_alt" newName="reset" trans="0;-80.138"/>
+				<glyph orgId="61543" newId="61543" orgName="plus" newName="add" trans="0;-157.341"/>
+				<glyph orgId="61544" newId="61544" orgName="minus" newName="remove" trans="0;-120.665"/>
+				<glyph orgId="61553" newId="61553" orgName="warning_sign" newName="warning" trans="0;-171.645"/>
+				<glyph orgId="61559" newId="61559" orgName="chevron_up" newName="sort_asc" trans="0;0"/>
+				<glyph orgId="61560" newId="61560" orgName="chevron_down" newName="sort_desc" trans="0;0"/>
+				<glyph orgId="61573" newId="61573" orgName="cogs" newName="generate" trans="0;-152.436"/>
+				<glyph orgId="61616" newId="61616" orgName="filter" newName="filter" trans="0;-84.355"/>
+				<glyph orgId="61618" newId="61618" orgName="fullscreen" newName="fullscreen" trans="0;-157.341"/>
+				<glyph orgId="61636" newId="61636" orgName="cut" newName="cut" trans="0;-69.685"/>
+				<glyph orgId="61637" newId="61637" orgName="copy" newName="copy" trans="0;-154.04"/>
+				<glyph orgId="61639" newId="61639" orgName="save" newName="save" trans="0;-108.928"/>
+				<glyph orgId="61640" newId="61640" orgName="sign_blank" newName="icon_view" trans="0;-141.203"/>
+				<glyph orgId="61648" newId="61648" orgName="magic" newName="select_path" trans="0;-154.04"/>
+				<glyph orgId="61656" newId="61656" orgName="caret_up" newName="menu_up" trans="0;0"/>
+				<glyph orgId="61657" newId="61657" orgName="caret_left" newName="menu_left" trans="0;-102.327"/>
+				<glyph orgId="61658" newId="61658" orgName="caret_right" newName="menu_right" trans="0;-89.123"/>
+				<glyph orgId="61659" newId="61659" orgName="columns" newName="columns" trans="0;-141.203"/>
+				<glyph orgId="61666" newId="61666" orgName="undo" newName="undo" trans="0;-108.928"/>
+				<glyph orgId="61674" newId="61674" orgName="paste" newName="paste" trans="0;-48.413"/>
+				<glyph orgId="61686" newId="61686" orgName="file_text_alt" newName="file_type_text" trans="0;-101.226"/>
+				<glyph orgId="61716" newId="61716" orgName="folder_close_alt" newName="folder" trans="0;-173.479"/>
+				<glyph orgId="61717" newId="61717" orgName="folder_open_alt" newName="folder_open" trans="0;-141.203"/>
+				<glyph orgId="61720" newId="61720" orgName="smile" newName="used" trans="0;-119.708"/>
+				<glyph orgId="61721" newId="61721" orgName="frown" newName="not used" trans="0;-119.708"/>
+				<glyph orgId="61736" newId="61736" orgName="question" newName="help" trans="0;-128.367"/>
+				<glyph orgId="61737" newId="61737" orgName="_279" newName="about" trans="0;-205.754"/>
+				<glyph orgId="61738" newId="61738" orgName="exclamation" newName="exclamation" trans="0;-205.754"/>
+				<glyph orgId="61771" newId="61771" orgName="edit_sign" newName="icon_edit" trans="0;-92.791"/>
+				<glyph orgId="61892" newId="61892" orgName="_424" newName="file_type_project" trans="0;-13.203"/>
+				<glyph orgId="61897" newId="61897" orgName="_429" newName="link" trans="0;0"/>
+				<glyph orgId="61918" newId="61918" orgName="_449" newName="settings" trans="0;-69.685"/>
+				<glyph orgId="62003" newId="62003" orgName="_528" newName="drives" trans="0;-254.166"/>
+				<glyph orgId="62021" newId="62021" orgName="_545" newName="select" trans="0;-242.063"/>
+				<glyph orgId="62060" newId="62060" orgName="_582" newName="layout" trans="0;-270.304"/>
 			</glyphs>
 			<prefix>IGFS</prefix>
 			<pathfilename>..\samples_Fonts\fontawesome-webfont.ttf</pathfilename>
 			<oversample>2</oversample>
 			<fontsize>50</fontsize>
 		</font>
-		<font name="materialdesignicons-webfont.ttf">
+		<font name="test.ttf">
 			<glyphs>
-				<glyph orgId="61484" newId="61484" orgName="alphabetical" newName="by_name"/>
-				<glyph orgId="62368" newId="62368" orgName="numeric" newName="by_codepoint"/>
+				<glyph orgId="61442" newId="61442" orgName="search" newName="search" trans="0;0"/>
+				<glyph orgId="61443" newId="61443" orgName="glyphs" newName="glyphs" trans="0;0"/>
+				<glyph orgId="61452" newId="61452" orgName="ok" newName="ok" trans="0;0"/>
+				<glyph orgId="61453" newId="61453" orgName="cancel" newName="cancel" trans="0;0"/>
+				<glyph orgId="61460" newId="61460" orgName="destroy" newName="destroy" trans="0;0"/>
+				<glyph orgId="61462" newId="61462" orgName="file" newName="file" trans="0;0"/>
+				<glyph orgId="61469" newId="61469" orgName="play_circle" newName="play_circle" trans="0;0"/>
+				<glyph orgId="61470" newId="61470" orgName="redo" newName="redo" trans="0;0"/>
+				<glyph orgId="61473" newId="61473" orgName="refresh" newName="refresh" trans="0;0"/>
+				<glyph orgId="61482" newId="61482" orgName="barcode" newName="barcode" trans="0;0"/>
+				<glyph orgId="61485" newId="61485" orgName="project" newName="project" trans="0;0"/>
+				<glyph orgId="61486" newId="61486" orgName="bookmark" newName="bookmark" trans="0;0"/>
+				<glyph orgId="61489" newId="61489" orgName="by_font" newName="by_font" trans="0;0"/>
+				<glyph orgId="61498" newId="61498" orgName="list" newName="list" trans="0;0"/>
+				<glyph orgId="61502" newId="61502" orgName="texture" newName="texture" trans="0;0"/>
+				<glyph orgId="61504" newId="61504" orgName="edit" newName="edit" trans="0;0"/>
+				<glyph orgId="61527" newId="61527" orgName="error" newName="error" trans="0;0"/>
+				<glyph orgId="61530" newId="61530" orgName="infos" newName="infos" trans="0;0"/>
+				<glyph orgId="61531" newId="61531" orgName="target" newName="target" trans="0;0"/>
+				<glyph orgId="61540" newId="61540" orgName="reset" newName="reset" trans="0;0"/>
+				<glyph orgId="61543" newId="61543" orgName="add" newName="add" trans="0;0"/>
+				<glyph orgId="61544" newId="61544" orgName="remove" newName="remove" trans="0;0"/>
+				<glyph orgId="61553" newId="61553" orgName="warning" newName="warning" trans="0;0"/>
+				<glyph orgId="61559" newId="61559" orgName="sort_asc" newName="sort_asc" trans="0;0"/>
+				<glyph orgId="61560" newId="61560" orgName="sort_desc" newName="sort_desc" trans="0;0"/>
+				<glyph orgId="61573" newId="61573" orgName="generate" newName="generate" trans="0;0"/>
+				<glyph orgId="61616" newId="61616" orgName="filter" newName="filter" trans="0;0"/>
+				<glyph orgId="61618" newId="61618" orgName="fullscreen" newName="fullscreen" trans="0;0"/>
+				<glyph orgId="61636" newId="61636" orgName="cut" newName="cut" trans="0;0"/>
+				<glyph orgId="61637" newId="61637" orgName="copy" newName="copy" trans="0;0"/>
+				<glyph orgId="61639" newId="61639" orgName="save" newName="save" trans="0;0"/>
+				<glyph orgId="61640" newId="61640" orgName="icon_view" newName="icon_view" trans="0;0"/>
+				<glyph orgId="61648" newId="61648" orgName="select_path" newName="select_path" trans="0;0"/>
+				<glyph orgId="61656" newId="61656" orgName="menu_up" newName="menu_up" trans="0;0"/>
+				<glyph orgId="61657" newId="61657" orgName="menu_left" newName="menu_left" trans="0;0"/>
+				<glyph orgId="61658" newId="61658" orgName="menu_right" newName="menu_right" trans="0;0"/>
+				<glyph orgId="61659" newId="61659" orgName="columns" newName="columns" trans="0;0"/>
+				<glyph orgId="61666" newId="61666" orgName="undo" newName="undo" trans="0;0"/>
+				<glyph orgId="61674" newId="61674" orgName="paste" newName="paste" trans="0;0"/>
+				<glyph orgId="61686" newId="61686" orgName="file_type_text" newName="file_type_text" trans="0;0"/>
+				<glyph orgId="61716" newId="61716" orgName="folder" newName="folder" trans="0;0"/>
+				<glyph orgId="61717" newId="61717" orgName="folder_open" newName="folder_open" trans="0;0"/>
+				<glyph orgId="61720" newId="61720" orgName="used" newName="used" trans="0;0"/>
+				<glyph orgId="61721" newId="61721" orgName="not used" newName="not used" trans="0;0"/>
+				<glyph orgId="61736" newId="61736" orgName="help" newName="help" trans="0;0"/>
+				<glyph orgId="61737" newId="61737" orgName="about" newName="about" trans="0;0"/>
+				<glyph orgId="61738" newId="61738" orgName="exclamation" newName="exclamation" trans="0;0"/>
+				<glyph orgId="61771" newId="61771" orgName="icon_edit" newName="icon_edit" trans="0;0"/>
+				<glyph orgId="61892" newId="61892" orgName="file_type_project" newName="file_type_project" trans="0;0"/>
+				<glyph orgId="61897" newId="61897" orgName="link" newName="link" trans="0;0"/>
+				<glyph orgId="61918" newId="61918" orgName="settings" newName="settings" trans="0;0"/>
+				<glyph orgId="62003" newId="62003" orgName="drives" newName="drives" trans="0;0"/>
+				<glyph orgId="62021" newId="62021" orgName="select" newName="select" trans="0;0"/>
+				<glyph orgId="62060" newId="62060" orgName="layout" newName="layout" trans="0;0"/>
 			</glyphs>
 			<prefix></prefix>
-			<pathfilename>..\samples_Fonts\materialdesignicons-webfont.ttf</pathfilename>
+			<pathfilename>..\build\Debug\exports\test.ttf</pathfilename>
 			<oversample>1</oversample>
-			<fontsize>32</fontsize>
+			<fontsize>42</fontsize>
 		</font>
 		<rangecoloring show="false" hash="42.606;14.789;27.817;0.5"/>
-		<previewglyphcount>15</previewglyphcount>
-		<previewglyphwidth>29.8667</previewglyphwidth>
+		<previewglyphcount>6</previewglyphcount>
+		<previewglyphwidth>76.488</previewglyphwidth>
 		<mergedfontprefix>IGFS</mergedfontprefix>
 		<curglyphtooltip>true</curglyphtooltip>
 		<srcglyphtooltip>true</srcglyphtooltip>
@@ -86,9 +140,9 @@
 		<glyphpreviewscale>0.208</glyphpreviewscale>
 		<glyphpreviewshowcontrollines>false</glyphpreviewshowcontrollines>
 		<glyphpreviewquadbeziercounsegment>5</glyphpreviewquadbeziercounsegment>
-		<genmode>4377</genmode>
+		<genmode>276</genmode>
 		<fonttomergein>fontawesome-webfont.ttf</fonttomergein>
-		<glyphdisplaytuningmode>1</glyphdisplaytuningmode>
+		<glyphdisplaytuningmode>2</glyphdisplaytuningmode>
 		<sourcefontpaneflags>1</sourcefontpaneflags>
 		<cardglyhpheight>40</cardglyhpheight>
 		<cardcountrowsmax>20</cardcountrowsmax>
@@ -98,19 +152,17 @@
 		<showbaseline>true</showbaseline>
 		<showadvancex>false</showadvancex>
 		<finalselection>
-			<selection orgId="61553" font="fontawesome-webfont.ttf"/>
-			<selection orgId="61717" font="fontawesome-webfont.ttf"/>
 		</finalselection>
 		<fonttest>
-			<fontsize>109.557</fontsize>
+			<fontsize>76.592</fontsize>
 			<showbaseline>true</showbaseline>
 			<fontname>Roboto-Medium.ttf</fontname>
-			<teststring> Dear  ImGui </teststring>
+			<teststring> Open Font</teststring>
 			<insertedglyphs>
-				<insert pos="0" orgId="61717" font="fontawesome-webfont.ttf"/>
-				<insert pos="6" orgId="61553" font="fontawesome-webfont.ttf"/>
-				<insert pos="13" orgId="61717" font="fontawesome-webfont.ttf"/>
-				<insert pos="14" orgId="61717" font="fontawesome-webfont.ttf"/>
+				<insert pos="0" orgId="61450" font="fontawesome-webfont.ttf"/>
+				<insert pos="23" orgId="61717" font="fontawesome-webfont.ttf"/>
+				<insert pos="24" orgId="61717" font="fontawesome-webfont.ttf"/>
+				<insert pos="2147483647" orgId="61658" font="fontawesome-webfont.ttf"/>
 			</insertedglyphs>
 		</fonttest>
 	</project>

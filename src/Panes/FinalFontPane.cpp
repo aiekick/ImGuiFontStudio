@@ -344,7 +344,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 	bool *vNameupdated, bool *vCodePointUpdated, 
 	bool vForceEditMode) const
 {
-	bool res = false;
+	int res = false;
 	
 	if (vGlyph)
 	{
@@ -368,6 +368,13 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 
 		if (res)
 		{
+			// left button : check == 1
+			// right button  : check == 2
+			if (res == 2) // put glyph on glyph pane
+			{
+				GlyphPane::Instance()->LoadGlyph(vProjectFile, vFontInfos, vGlyph);
+			}
+
 			if (vForceEditMode)
 			{
 				GlyphPane::Instance()->LoadGlyph(vProjectFile, vFontInfos, vGlyph);
@@ -518,7 +525,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 		ImGui::PopID();
 	}
 	
-	return res;
+	return (res > 0);
 }
 
 // this func can be called by FinalFontPane et SelectedFontPane
@@ -1360,6 +1367,7 @@ void FinalFontPane::DrawSelectionMergedOrderedByGlyphNames(ProjectFile *vProject
 
 std::string FinalFontPane::getXml(const std::string& vOffset, const std::string& vUserDatas = "")
 {
+	UNUSED(vOffset);
 	UNUSED(vUserDatas);
 
 	std::string str;

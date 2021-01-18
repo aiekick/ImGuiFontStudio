@@ -1,20 +1,20 @@
 //Header Generated with https://github.com/aiekick/ImGuiFontStudio
 //Based on https://github.com/juliettef/IconFontCppHeaders
+//for Language c++
 
 #pragma once
 
-#define FONT_ICON_BUFFER_NAME_IGFS IGFS_compressed_data_base85
-#define FONT_ICON_BUFFER_SIZE_IGFS 0x271f
+#define FONT_ICON_BUFFER_NAME_IGFS compressed_data_base85
+#define FONT_ICON_BUFFER_SIZE_IGFS 0x296d
 
 #define ICON_MIN_IGFS 0xf002
-#define ICON_MAX_IGFS 0xf3a0
+#define ICON_MAX_IGFS 0xf26c
 
 #define ICON_IGFS_ABOUT u8"\uf129"
 #define ICON_IGFS_ADD u8"\uf067"
+#define ICON_IGFS_BARCODE u8"\uf02a"
 #define ICON_IGFS_BOOKMARK u8"\uf02e"
-#define ICON_IGFS_BY_CODEPOINT u8"\uf3a0"
 #define ICON_IGFS_BY_FONT u8"\uf031"
-#define ICON_IGFS_BY_NAME u8"\uf02c"
 #define ICON_IGFS_CANCEL u8"\uf00d"
 #define ICON_IGFS_COLUMNS u8"\uf0db"
 #define ICON_IGFS_COPY u8"\uf0c5"
@@ -39,12 +39,14 @@
 #define ICON_IGFS_INFOS u8"\uf05a"
 #define ICON_IGFS_LAYOUT u8"\uf26c"
 #define ICON_IGFS_LINK u8"\uf1c9"
+#define ICON_IGFS_LIST u8"\uf03a"
 #define ICON_IGFS_MENU_LEFT u8"\uf0d9"
 #define ICON_IGFS_MENU_RIGHT u8"\uf0da"
 #define ICON_IGFS_MENU_UP u8"\uf0d8"
-#define ICON_IGFS_NOT_USED u8"\uf11a"
+#define ICON_IGFS_NOT_USED u8"\uf119"
 #define ICON_IGFS_OK u8"\uf00c"
 #define ICON_IGFS_PASTE u8"\uf0ea"
+#define ICON_IGFS_PLAY_CIRCLE u8"\uf01d"
 #define ICON_IGFS_PROJECT u8"\uf02d"
 #define ICON_IGFS_REDO u8"\uf01e"
 #define ICON_IGFS_REFRESH u8"\uf021"
@@ -55,7 +57,6 @@
 #define ICON_IGFS_SELECT u8"\uf245"
 #define ICON_IGFS_SELECT_PATH u8"\uf0d0"
 #define ICON_IGFS_SETTINGS u8"\uf1de"
-#define ICON_IGFS_SET_MODE u8"\uf100"
 #define ICON_IGFS_SORT_ASC u8"\uf077"
 #define ICON_IGFS_SORT_DESC u8"\uf078"
 #define ICON_IGFS_TARGET u8"\uf05b"

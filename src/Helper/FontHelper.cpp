@@ -423,7 +423,7 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 	const sfntly::Ptr<sfntly::ReadableFontData>& vReadableFontData)
 {
 	// we will not add or remove points
-	// just apply trasnofrmation soe the size will not change
+	// just apply transformation se the size will not change
 	// so we will use vWritableFontData for overwrite datas if needed
 	// easier way instead of regenerate glyph
 
@@ -459,8 +459,8 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 
 					//auto instructionSize = sglyph->InstructionSize();
 
-					//ct::ivec2 trans = glyphInfos->simpleGlyph.m_Translation; // first apply
-					ct::dvec2 scale = glyphInfos->simpleGlyph.m_Scale; // second apply
+					ct::ivec2 trans = glyphInfos->simpleGlyph.m_Translation; // first apply
+					ct::dvec2 scale = 1.0;// glyphInfos->simpleGlyph.m_Scale; // second apply
 
 					/////////////////////////////////////////////////////////////////////////////////////////////
 					// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
@@ -471,7 +471,9 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 					MemoryStream xCoordStream;
 					MemoryStream yCoordStream;
 
-					ct::iAABB boundingBox((int32_t)1e6, (int32_t)-1e6);
+					ct::iAABB boundingBox(
+						glyphInfos->simpleGlyph.rc.xy(), 
+						glyphInfos->simpleGlyph.rc.zw());
 					ct::ivec2 last;
 					int contourIdx = 0;
 					for (auto &contour : simpleGlyph.coords)
@@ -479,15 +481,8 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 						int pointIdx = 0;
 						for (auto &pt : contour)
 						{
-							pt.x = (int32_t)ct::round((double)pt.x * scale.x);
-							pt.y = (int32_t)ct::round((double)pt.y * scale.y);
-
-							if (pointIdx == 0 && contourIdx == 0)
-							{
-								// need to found the good translation system
-								//pt.x += trans.x;
-								//pt.y += trans.y;
-							}
+							pt.x = (int32_t)ct::round((double)(pt.x * scale.x + trans.x));
+							pt.y = (int32_t)ct::round((double)(pt.y * scale.y + trans.y));
 
 							ct::ivec2 dv = pt - last;
 
@@ -501,7 +496,7 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 							yCoordStream.WriteShort(dv.y);
 
 							// conbine absolute points
-							boundingBox.Combine(pt);
+							//boundingBox.Combine(pt);
 							
 							last = pt;
 							pointIdx++;
@@ -513,6 +508,8 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 					ct::ivec2 inf = boundingBox.lowerBound;
 					ct::ivec2 sup = boundingBox.upperBound;
 
+#if 0
+					// reecriture de la bounding box de la font
 					inf.x = ct::mini(inf.x, 0);
 					inf.y = ct::mini(inf.y, 0);
 
@@ -537,6 +534,7 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 					if (sup.x > glyphInfos->m_FontBoundingBox.z)
 						deltaX = sup.x - glyphInfos->m_FontBoundingBox.z;
 					sup.x -= deltaX;
+#endif
 
 					headerStream.WriteShort(countContours);
 					headerStream.WriteShort(inf.x);

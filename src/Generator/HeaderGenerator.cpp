@@ -126,8 +126,8 @@ static std::string GetGlyphTableMinMax(std::string vLang, std::string vPrefix, c
 	if (vLang == "cpp" || 
 		vLang == "c")
 	{
-		header += ct::toStr("#define ICON_%s_MIN 0x%s\n", vPrefix.c_str(), ct::toHexStr(vCodePointRange.x).c_str());
-		header += ct::toStr("#define ICON_%s_MAX 0x%s\n", vPrefix.c_str(), ct::toHexStr(vCodePointRange.y).c_str());
+		header += ct::toStr("#define ICON_MIN_%s 0x%s\n", vPrefix.c_str(), ct::toHexStr(vCodePointRange.x).c_str());
+		header += ct::toStr("#define ICON_MAX_%s 0x%s\n", vPrefix.c_str(), ct::toHexStr(vCodePointRange.y).c_str());
 	}
 	else if (vLang == "c#")
 	{

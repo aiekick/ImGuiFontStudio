@@ -228,10 +228,10 @@ void SettingsDlg::DrawPane_Style(SettingsPaneModeEnum vMode)
 
 		// Default to using internal storage as reference
 		static bool init = true;
-		if (init && ref == nullptr)
+		if (init/* && ref == nullptr*/)
 			ref_saved_style = style;
 		init = false;
-		if (ref == nullptr)
+		//if (ref == nullptr)
 			ref = &ref_saved_style;
 
 		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.50f);
