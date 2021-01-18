@@ -27,6 +27,13 @@
 #include <utility>
 #include <memory>
 
+enum RasterizerEnum
+{
+	RASTERIZER_STB = 0,
+	RASTERIZER_FREETYPE,
+	RASTERIZER_Count
+};
+
 struct GlyphsRange
 {
 //	std::set<uint32_t> datas;
@@ -37,6 +44,12 @@ struct GlyphsRange
 class ProjectFile;
 class FontInfos : public conf::ConfigAbstract
 {
+public:
+	static RasterizerEnum rasterizerMode;
+	static uint32_t freeTypeFlag;
+	static float fontsMultiply;
+	static int32_t fontsPadding;
+
 public: // not to save
 	ImFontAtlas m_ImFontAtlas;
 	std::vector<std::string> m_GlyphNames;
