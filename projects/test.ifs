@@ -5,11 +5,15 @@
 			<pathfilename>..\3rdparty\imgui\misc\fonts\Roboto-Medium.ttf</pathfilename>
 			<oversample>1</oversample>
 			<fontsize>50</fontsize>
+			<rasterizer>0</rasterizer>
+			<freetypeflag>0</freetypeflag>
+			<freetypemultiply>1</freetypemultiply>
+			<padding>1</padding>
 		</font>
 		<font name="fontawesome-webfont.ttf">
 			<glyphs>
 				<glyph orgId="61442" newId="61442" orgName="search" newName="search" trans="0;0"/>
-				<glyph orgId="61450" newId="61443" orgName="th" newName="glyphs" trans="0;-205.754"/>
+				<glyph orgId="61450" newId="61443" orgName="th" newName="glyphs" trans="0;-192.366"/>
 				<glyph orgId="61452" newId="61452" orgName="ok" newName="ok" trans="0;-148.097"/>
 				<glyph orgId="61453" newId="61453" orgName="remove" newName="cancel" trans="0;-90.516"/>
 				<glyph orgId="61460" newId="61460" orgName="trash" newName="destroy" trans="0;-76.653"/>
@@ -67,6 +71,10 @@
 			<pathfilename>..\samples_Fonts\fontawesome-webfont.ttf</pathfilename>
 			<oversample>2</oversample>
 			<fontsize>50</fontsize>
+			<rasterizer>0</rasterizer>
+			<freetypeflag>0</freetypeflag>
+			<freetypemultiply>1</freetypemultiply>
+			<padding>1</padding>
 		</font>
 		<rangecoloring show="false" hash="42.606;14.789;27.817;0.5"/>
 		<previewglyphcount>6</previewglyphcount>
@@ -88,19 +96,21 @@
 		<lastgeneratedfilename>Generated_Font</lastgeneratedfilename>
 		<zoomglyphs>false</zoomglyphs>
 		<showbaseline>true</showbaseline>
-		<showadvancex>false</showadvancex>
+		<showadvancex>true</showadvancex>
 		<finalselection>
+			<selection orgId="61450" font="fontawesome-webfont.ttf"/>
+			<selection orgId="61452" font="fontawesome-webfont.ttf"/>
+			<selection orgId="61453" font="fontawesome-webfont.ttf"/>
 		</finalselection>
 		<fonttest>
 			<fontsize>76.592</fontsize>
 			<showbaseline>true</showbaseline>
 			<fontname>Roboto-Medium.ttf</fontname>
-			<teststring> Open Font</teststring>
+			<teststring> Close Font</teststring>
 			<insertedglyphs>
-				<insert pos="0" orgId="61450" font="fontawesome-webfont.ttf"/>
-				<insert pos="23" orgId="61717" font="fontawesome-webfont.ttf"/>
-				<insert pos="24" orgId="61717" font="fontawesome-webfont.ttf"/>
-				<insert pos="2147483647" orgId="61658" font="fontawesome-webfont.ttf"/>
+				<insert pos="33" orgId="61717" font="fontawesome-webfont.ttf"/>
+				<insert pos="34" orgId="61717" font="fontawesome-webfont.ttf"/>
+				<insert pos="2147483657" orgId="61658" font="fontawesome-webfont.ttf"/>
 			</insertedglyphs>
 		</fonttest>
 	</project>
