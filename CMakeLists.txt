@@ -6,10 +6,12 @@ enable_language(C CXX)
 
 project(${PROJECT} CXX)
 
+## some defines for debug mode (before 3rdparty.cmake)
+set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
+
 include(cmake/3rdparty.cmake)
 
-## some defines for debug mode
-set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
+## other define
 add_definitions(-DPROJECT_PATH="${CMAKE_SOURCE_DIR}")
 
 add_definitions(-DIMGUI_DISABLE_OBSOLETE_FUNCTIONS)
@@ -45,7 +47,11 @@ endif ()
 file(GLOB PROJECT_MAIN ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 source_group(main FILES ${PROJECT_MAIN})
 
-file(GLOB_RECURSE PROJECT_SRC_RECURSE ${CMAKE_CURRENT_SOURCE_DIR}/src/*.*)
+file(GLOB_RECURSE PROJECT_SRC_RECURSE 
+	${CMAKE_CURRENT_SOURCE_DIR}/src/*.c
+	${CMAKE_CURRENT_SOURCE_DIR}/src/*.h
+	${CMAKE_CURRENT_SOURCE_DIR}/src/*.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX src FILES ${PROJECT_SRC_RECURSE})
 
 if (APPLE)

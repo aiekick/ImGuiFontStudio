@@ -16,20 +16,33 @@
 #pragma once
 
 #include "MemoryStream.h"
-
+#include <imgui/imgui.h>
 #include <cstdint>
 #include <string>
 #include <vector>
 #include <map>
+#include <set>
+#include <utility> // std::pair
 
  //////////////////////////////////////////////////////////////////////////////////
  //////////////////////////////////////////////////////////////////////////////////
 
 namespace FontAnalyser
 {
+	class TableDisplay
+	{
+	private:
+		std::vector<std::vector<std::string>> array;
+		ImGuiListClipper m_Clipper;
+
+	public:
+		void AddItem(std::string vItem, std::string vSize, std::string vInfos);
+		void DisplayTable(const char* vTableLabel, size_t vMaxCount = 0);
+	};
+
 	//////////////////////////////////////
 
-	class HeaderStruct
+	class HeaderStruct : public TableDisplay
 	{
 	public:
 		std::string scalerType;
@@ -45,7 +58,7 @@ namespace FontAnalyser
 
 	//////////////////////////////////////
 
-	class TableStruct
+	class TableStruct : public TableDisplay
 	{
 	public:
 		uint8_t tag[5] = {};
@@ -60,7 +73,7 @@ namespace FontAnalyser
 	
 	//////////////////////////////////////
 
-	class maxpTableStruct
+	class maxpTableStruct : public TableDisplay
 	{
 	public:
 		MemoryStream::Fixed version;
@@ -86,7 +99,7 @@ namespace FontAnalyser
 
 	//////////////////////////////////////
 
-	class postTableF2Struct
+	class postTableF2Struct : public TableDisplay
 	{
 	public:
 		uint16_t numberOfGlyphs = 0;
@@ -101,7 +114,7 @@ namespace FontAnalyser
 		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
 	};
 
-	class postTableStruct
+	class postTableStruct : public TableDisplay
 	{
 	public:
 		MemoryStream::Fixed format;
@@ -122,7 +135,7 @@ namespace FontAnalyser
 
 	//////////////////////////////////////
 
-	class headTableStruct
+	class headTableStruct : public TableDisplay
 	{
 	public:
 		MemoryStream::Fixed version;
@@ -150,7 +163,7 @@ namespace FontAnalyser
 
 	//////////////////////////////////////
 
-	class cmapSubTableF4Struct
+	class cmapSubTableF4Struct : public TableDisplay
 	{
 	public:
 		uint16_t format = 0;
@@ -175,7 +188,7 @@ namespace FontAnalyser
 		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
 	};
 
-	class cmapSubTableF0Struct
+	class cmapSubTableF0Struct : public TableDisplay
 	{
 	public:
 		uint16_t format = 0;
@@ -191,7 +204,7 @@ namespace FontAnalyser
 		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
 	};
 
-	class cmapEncodingRecordStruct
+	class cmapEncodingRecordStruct : public TableDisplay
 	{
 	public:
 		uint16_t platformID = 0;
@@ -205,7 +218,7 @@ namespace FontAnalyser
 		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
 	};
 
-	class cmapTableStruct
+	class cmapTableStruct : public TableDisplay
 	{
 	public:
 		uint16_t version = 0;
@@ -219,7 +232,7 @@ namespace FontAnalyser
 
 	//////////////////////////////////////
 
-	class locaTableStruct
+	class locaTableStruct : public TableDisplay
 	{
 	public:
 		headTableStruct *head = 0;
@@ -235,7 +248,7 @@ namespace FontAnalyser
 
 	//////////////////////////////////////
 
-	class simpleGlyphTableStruct
+	class simpleGlyphTableStruct : public TableDisplay
 	{
 	public: 
 		bool filled = false;
@@ -253,7 +266,7 @@ namespace FontAnalyser
 		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength, int16_t vCountContours);
 	};
 
-	class glyfStruct
+	class glyfStruct : public TableDisplay
 	{
 	public:
 		int16_t numberOfContours = 0;
@@ -268,7 +281,7 @@ namespace FontAnalyser
 		void parse(MemoryStream *vMem, size_t vOffset, size_t vLength);
 	};
 
-	class glyfTableStruct
+	class glyfTableStruct : public TableDisplay
 	{
 	public:
 		locaTableStruct *loca = 0;

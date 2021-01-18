@@ -344,13 +344,15 @@ bool ImGui::BeginFramedGroup(const char *vLabel, bool vSpacing, ImVec4 /*vCol*/,
     ImGui::Spacing();
     ImGui::Indent();
 
-    ImGui::BeginGroup();
+	ImGuiContext& g = *GImGui;
+	const ImGuiStyle& style = g.Style;
+
+	window->WorkRect.Max.x -= style.FramePadding.x * 3.0f;
+	
+	ImGui::BeginGroup();
 
     if (vLabel)
     {
-        ImGuiContext& g = *GImGui;
-        const ImGuiStyle& style = g.Style;
-
         ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0, 1));
 
 		// header
@@ -363,7 +365,7 @@ bool ImGui::BeginFramedGroup(const char *vLabel, bool vSpacing, ImVec4 /*vCol*/,
 		ImRect frame_bb;
 		frame_bb.Min.x = window->WorkRect.Min.x;
 		frame_bb.Min.y = window->DC.CursorPos.y - 5.0f;
-		frame_bb.Max.x = window->WorkRect.Max.x;
+		frame_bb.Max.x = window->WorkRect.Max.x - style.FramePadding.x * 4.0f;
 		frame_bb.Max.y = window->DC.CursorPos.y + frame_height;
 
 		ImGui::ItemSize(frame_bb, style.FramePadding.y);
@@ -379,27 +381,29 @@ bool ImGui::BeginFramedGroup(const char *vLabel, bool vSpacing, ImVec4 /*vCol*/,
 		}
 
         ImGui::PopStyleVar();
-    }
+	}
 
     return true;
 }
 
 void ImGui::EndFramedGroup(bool vSpacing)
 {
-    ImGui::EndGroup();
+	ImGui::EndGroup();
 
     ImGui::Unindent();
     ImGui::Spacing();
-
-    if (vSpacing)
-        ImGui::Spacing();
 
     ImDrawList* draw_list = ImGui::GetWindowDrawList();
     ImGuiContext& g = *GImGui;
     const ImGuiStyle& style = g.Style;
     ImGuiWindow* window = ImGui::GetCurrentWindow();
 
-    draw_list->ChannelsSetCurrent(0); // Layer Background
+	window->WorkRect.Max.x += style.FramePadding.x * 3.0f;
+
+	if (vSpacing)
+		ImGui::Spacing();
+	
+	draw_list->ChannelsSetCurrent(0); // Layer Background
 
     ImVec2 p_min = ImGui::GetItemRectMin();
     p_min.x = window->WorkRect.Min.x;

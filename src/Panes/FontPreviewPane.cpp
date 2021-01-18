@@ -304,8 +304,8 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 							{
 								const auto glyph = &glyphInfos->glyph;
 								auto glyphFont = glyphInsert->second->m_ImFontAtlas.Fonts[0];
-								ImVec2 trans = glyphInfos->m_Translation * glyphInsert->second->m_Point;
-								ImVec2 scale = glyphInfos->m_Scale;
+								ct::fvec2 trans = glyphInfos->m_Translation * glyphInsert->second->m_Point;
+								ct::fvec2 scale = glyphInfos->m_Scale;
 								check = DrawGlyphButton(vProjectFile,
 									glyphFont, glyphFont->FontSize, &selected,
 									glyph_size, glyph, trans, scale);
@@ -408,77 +408,80 @@ void FontPreviewPane::DrawMixedFontResult(ProjectFile* vProjectFile)
 
 		ImGuiID id = window->GetID("#MixedFontDisplay");
 
-		float baseFontRatioX = 1.0f;
-		if (font->ContainerAtlas->TexHeight > 0)
-			baseFontRatioX = (float)font->ContainerAtlas->TexWidth / (float)font->ContainerAtlas->TexHeight;
-
-		ImVec2 pos = window->DC.CursorPos;
-		ImVec2 size = ImVec2(aw, vProjectFile->m_FontTestInfos.m_PreviewFontSize);
-		const ImRect bb(pos, pos + size);
-		ImGui::ItemSize(bb);
-		if (!ImGui::ItemAdd(bb, id))
-			return;
-
-		uint32_t count = (uint32_t)vProjectFile->m_FontTestInfos.m_TestString.size();
-		for (uint32_t idx = 0; idx <= count; idx++)
+		if (font->ContainerAtlas)
 		{
-			if (vProjectFile->m_FontTestInfos.m_GlyphToInsert.find(idx) != 
-				vProjectFile->m_FontTestInfos.m_GlyphToInsert.end())
-			{
-				// on dessin le glyph
-				auto glyphInfos = &vProjectFile->m_FontTestInfos.m_GlyphToInsert[idx];
-				if (glyphInfos->second)
-				{
-					if (glyphInfos->second->m_SelectedGlyphs.find(glyphInfos->first) != glyphInfos->second->m_SelectedGlyphs.end())
-					{
-						ImFont* glyphFont = glyphInfos->second->m_ImFontAtlas.Fonts[0];
-						if (glyphFont)
-						{
-							float scale = (font->FontSize / glyphInfos->second->m_FontSize) * (vProjectFile->m_FontTestInfos.m_PreviewFontSize / font->FontSize);
-							float glyphFontAscent = glyphFont->Ascent * scale;
-							float ascOffset = glyphFontAscent - testFontAscent;
-							
-							if (glyphInfos->second->m_SelectedGlyphs[glyphInfos->first])
-							{
-								ImVec2 trans = glyphInfos->second->m_SelectedGlyphs[glyphInfos->first]->m_Translation * glyphInfos->second->m_Point * scale;
-								
-								auto glyph = glyphInfos->second->m_SelectedGlyphs[glyphInfos->first]->glyph;
-								ImVec2 pMin = ImVec2(pos.x + offsetX + trans.x, pos.y - ascOffset - trans.y);
-								
-								ImTextureID texId = (ImTextureID)glyphFont->ContainerAtlas->TexID;
+			float baseFontRatioX = 1.0f;
+			if (font->ContainerAtlas->TexHeight > 0)
+				baseFontRatioX = (float)font->ContainerAtlas->TexWidth / (float)font->ContainerAtlas->TexHeight;
 
-								window->DrawList->PushTextureID(texId);
-								glyphFont->RenderChar(
-									window->DrawList, vProjectFile->m_FontTestInfos.m_PreviewFontSize,
-									pMin, colFont, (ImWchar)glyphInfos->first);
-								window->DrawList->PopTextureID();
-								offsetX += glyph.AdvanceX * scale;
+			ImVec2 pos = window->DC.CursorPos;
+			ImVec2 size = ImVec2(aw, vProjectFile->m_FontTestInfos.m_PreviewFontSize);
+			const ImRect bb(pos, pos + size);
+			ImGui::ItemSize(bb);
+			if (!ImGui::ItemAdd(bb, id))
+				return;
+
+			uint32_t count = (uint32_t)vProjectFile->m_FontTestInfos.m_TestString.size();
+			for (uint32_t idx = 0; idx <= count; idx++)
+			{
+				if (vProjectFile->m_FontTestInfos.m_GlyphToInsert.find(idx) !=
+					vProjectFile->m_FontTestInfos.m_GlyphToInsert.end())
+				{
+					// on dessin le glyph
+					auto glyphInfos = &vProjectFile->m_FontTestInfos.m_GlyphToInsert[idx];
+					if (glyphInfos->second)
+					{
+						if (glyphInfos->second->m_SelectedGlyphs.find(glyphInfos->first) != glyphInfos->second->m_SelectedGlyphs.end())
+						{
+							ImFont* glyphFont = glyphInfos->second->m_ImFontAtlas.Fonts[0];
+							if (glyphFont)
+							{
+								float scale = (font->FontSize / glyphInfos->second->m_FontSize) * (vProjectFile->m_FontTestInfos.m_PreviewFontSize / font->FontSize);
+								float glyphFontAscent = glyphFont->Ascent * scale;
+								float ascOffset = glyphFontAscent - testFontAscent;
+
+								if (glyphInfos->second->m_SelectedGlyphs[glyphInfos->first])
+								{
+									ct::fvec2 trans = glyphInfos->second->m_SelectedGlyphs[glyphInfos->first]->m_Translation * glyphInfos->second->m_Point * scale;
+
+									auto glyph = glyphInfos->second->m_SelectedGlyphs[glyphInfos->first]->glyph;
+									ImVec2 pMin = ImVec2(pos.x + offsetX + trans.x, pos.y - ascOffset - trans.y);
+
+									ImTextureID texId = (ImTextureID)glyphFont->ContainerAtlas->TexID;
+
+									window->DrawList->PushTextureID(texId);
+									glyphFont->RenderChar(
+										window->DrawList, vProjectFile->m_FontTestInfos.m_PreviewFontSize,
+										pMin, colFont, (ImWchar)glyphInfos->first);
+									window->DrawList->PopTextureID();
+									offsetX += glyph.AdvanceX * scale;
+								}
 							}
 						}
 					}
 				}
-			}
 
-			if (idx < count)
-			{
-				ImWchar c = vProjectFile->m_FontTestInfos.m_TestString[idx];
-				auto glyph = font->FindGlyph(c);
-				if (glyph)
+				if (idx < count)
 				{
-					ImVec2 pMin = ImVec2(pos.x + offsetX, pos.y);
-					ImTextureID texId = (ImTextureID)font->ContainerAtlas->TexID;
-					window->DrawList->PushTextureID(texId);
-					font->RenderChar(window->DrawList, vProjectFile->m_FontTestInfos.m_PreviewFontSize, pMin, colFont, (ImWchar)c);
-					window->DrawList->PopTextureID();
-					offsetX += glyph->AdvanceX * testFontScale;
+					ImWchar c = vProjectFile->m_FontTestInfos.m_TestString[idx];
+					auto glyph = font->FindGlyph(c);
+					if (glyph)
+					{
+						ImVec2 pMin = ImVec2(pos.x + offsetX, pos.y);
+						ImTextureID texId = (ImTextureID)font->ContainerAtlas->TexID;
+						window->DrawList->PushTextureID(texId);
+						font->RenderChar(window->DrawList, vProjectFile->m_FontTestInfos.m_PreviewFontSize, pMin, colFont, (ImWchar)c);
+						window->DrawList->PopTextureID();
+						offsetX += glyph->AdvanceX * testFontScale;
+					}
 				}
-			}
-			
-			if (vProjectFile->m_FontTestInfos.m_ShowBaseLine)
-			{
-				// Base Line
-				float asc = font->Ascent * testFontScale;
-				window->DrawList->AddLine(ImVec2(bb.Min.x, bb.Min.y + asc), ImVec2(bb.Max.x, bb.Min.y + asc), ImGui::GetColorU32(ImGuiCol_PlotHistogram), 1.0f); // base line
+
+				if (vProjectFile->m_FontTestInfos.m_ShowBaseLine)
+				{
+					// Base Line
+					float asc = font->Ascent * testFontScale;
+					window->DrawList->AddLine(ImVec2(bb.Min.x, bb.Min.y + asc), ImVec2(bb.Max.x, bb.Min.y + asc), ImGui::GetColorU32(ImGuiCol_PlotHistogram), 1.0f); // base line
+				}
 			}
 		}
 	}
@@ -487,7 +490,7 @@ void FontPreviewPane::DrawMixedFontResult(ProjectFile* vProjectFile)
 int FontPreviewPane::DrawGlyphButton(
 	ProjectFile* vProjectFile, ImFont *vFont, float vFontSize,
 	bool* vSelected, ImVec2 vGlyphSize, const ImFontGlyph *vGlyph, 
-	ImVec2 vTranslation, ImVec2 vScale)
+	ct::fvec2 vTranslation, ct::fvec2 vScale)
 {
 	int res = 0;
 
@@ -538,11 +541,11 @@ int FontPreviewPane::DrawGlyphButton(
 		bb.Min += style.FramePadding;
 		bb.Max -= style.FramePadding;
 		
-		ImVec2 pScale = vGlyphSize / vFontSize;
+		ct::fvec2 pScale = vGlyphSize / vFontSize;
 		float adv = vGlyph->AdvanceX * pScale.y;
 		float offsetX = bb.GetSize().x * 0.5f - adv * 0.5f;
-		ImVec2 trans = vTranslation * pScale;
-		ImVec2 scale = vScale;
+		ct::fvec2 trans = vTranslation * pScale;
+		ct::fvec2 scale = vScale;
 
 		if (vProjectFile->m_ShowBaseLine)// draw base line
 		{
@@ -576,7 +579,7 @@ int FontPreviewPane::DrawGlyphButton(
 	return res;
 }
 
-void FontPreviewPane::RenderChar(ImFont *vFont, ImDrawList* draw_list, float size, ImVec2 pos, ImU32 col, ImWchar c, ImVec2 vTrans, ImVec2 vScale) const
+void FontPreviewPane::RenderChar(ImFont *vFont, ImDrawList* draw_list, float size, ImVec2 pos, ImU32 col, ImWchar c, ct::fvec2 vTrans, ct::fvec2 vScale) const
 {
 	if (vFont && draw_list)
 	{

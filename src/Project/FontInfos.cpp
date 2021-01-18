@@ -25,7 +25,7 @@
 #include <ctools/Logger.h>
 #include <Panes/ParamsPane.h>
 
-#include <imgui/misc/freetype/imgui_freetype.h>
+#include <ImguiImpl/freetype/imgui_freetype.h>
 
 #define STB_TRUETYPE_IMPLEMENTATION  
 #include <imgui/imstb_truetype.h>
@@ -34,11 +34,19 @@
 
 #include <array>
 
-RasterizerEnum FontInfos::rasterizerMode = RasterizerEnum::RASTERIZER_STB;
-uint32_t FontInfos::freeTypeFlag = 0;
-float FontInfos::fontsMultiply = 1.0f;
-int32_t FontInfos::fontsPadding = 1;
-
+///////////////////////////////////////////////////////////////////////////////////
+// https://stackoverflow.com/questions/31161284/how-can-i-get-the-corresponding-error-string-from-an-ft-error-code
+#include <ft2build.h>
+#include FT_FREETYPE_H
+const char* getErrorMessage(FT_Error err)
+{
+#undef FTERRORS_H_
+#define FT_ERRORDEF( e, v, s )  case e: return s;
+#define FT_ERROR_START_LIST     switch (err) {
+#define FT_ERROR_END_LIST       }
+#include FT_ERRORS_H
+	return "(Unknown error)";
+}
 ///////////////////////////////////////////////////////////////////////////////////
 static ProjectFile defaultProjectValues;
 static FontInfos defaultFontInfosValues;
@@ -114,22 +122,28 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 			{
 				bool success = false;
 
-				m_ImFontAtlas.TexGlyphPadding = fontsPadding;
+				m_ImFontAtlas.TexGlyphPadding = fontPadding;
 
 				for (int n = 0; n < m_ImFontAtlas.ConfigData.Size; n++)
 				{
 					freeTypeFlag = (rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE) ? freeTypeFlag : 0x00;
 
 					ImFontConfig* font_config = (ImFontConfig*)&m_ImFontAtlas.ConfigData[n];
-					font_config->RasterizerMultiply = fontsMultiply;
+					font_config->RasterizerMultiply = fontMultiply;
 					font_config->RasterizerFlags = freeTypeFlag;
 					font_config->OversampleH = m_Oversample;
 					font_config->OversampleV = m_Oversample;
 				}
+				
+				FT_Error freetypeError = 0;
 				if (rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
-					success = ImGuiFreeType::BuildFontAtlas(&m_ImFontAtlas, freeTypeFlag);
+				{
+					success = ImGuiFreeType::BuildFontAtlas(&m_ImFontAtlas, freeTypeFlag, &freetypeError);
+				}
 				else if (rasterizerMode == RasterizerEnum::RASTERIZER_STB)
+				{
 					success = m_ImFontAtlas.Build();
+				}
 
 				if (success)
 				{
@@ -173,8 +187,17 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 				}
 				else
 				{
-					Messaging::Instance()->AddError(true, nullptr, nullptr,
-					        "The  File %s.%s seem to be bad. Can't load", ps.name.c_str(), ps.ext.c_str());
+					if (rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
+					{
+						auto reason = getErrorMessage(freetypeError);
+						Messaging::Instance()->AddError(true, nullptr, nullptr,
+							"Feetype fail to load font file %s.%s. Reason : %s", ps.name.c_str(), ps.ext.c_str(), reason);
+					}
+					else
+					{
+						Messaging::Instance()->AddError(true, nullptr, nullptr,
+							"The  File %s.%s seem to be bad. Can't load", ps.name.c_str(), ps.ext.c_str());
+					}
 				}
 			}
 			else
@@ -203,6 +226,10 @@ void FontInfos::Clear()
 	m_GlyphCodePointToName.clear();
 	m_SelectedGlyphs.clear();
 	m_Filters.clear();
+	rasterizerMode = RasterizerEnum::RASTERIZER_STB;
+	freeTypeFlag = 0;
+	fontMultiply = 1.0f;
+	fontPadding = 1;
 }
 
 static const char *standardMacNames[258] = { ".notdef", ".null", "nonmarkingreturn", "space", "exclam", "quotedbl", "numbersign", "dollar", "percent", "ampersand", "quotesingle", "parenleft", "parenright", "asterisk", "plus", "comma", "hyphen", "period", "slash", "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "colon", "semicolon", "less", "equal", "greater", "question", "at", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "bracketleft", "backslash", "bracketright", "asciicircum", "underscore", "grave", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "braceleft", "bar", "braceright", "asciitilde", "Adieresis", "Aring", "Ccedilla", "Eacute", "Ntilde", "Odieresis", "Udieresis", "aacute", "agrave", "acircumflex", "adieresis", "atilde", "aring", "ccedilla", "eacute", "egrave", "ecircumflex", "edieresis", "iacute", "igrave", "icircumflex", "idieresis", "ntilde", "oacute", "ograve", "ocircumflex", "odieresis", "otilde", "uacute", "ugrave", "ucircumflex", "udieresis", "dagger", "degree", "cent", "sterling", "section", "bullet", "paragraph", "germandbls", "registered", "copyright", "trademark", "acute", "dieresis", "notequal", "AE", "Oslash", "infinity", "plusminus", "lessequal", "greaterequal", "yen", "mu", "partialdiff", "summation", "product", "pi", "integral", "ordfeminine", "ordmasculine", "Omega", "ae", "oslash", "questiondown", "exclamdown", "logicalnot", "radical", "florin", "approxequal", "Delta", "guillemotleft", "guillemotright", "ellipsis", "nonbreakingspace", "Agrave", "Atilde", "Otilde", "OE", "oe", "endash", "emdash", "quotedblleft", "quotedblright", "quoteleft", "quoteright", "divide", "lozenge", "ydieresis", "Ydieresis", "fraction", "currency", "guilsinglleft", "guilsinglright", "fi", "fl", "daggerdbl", "periodcentered", "quotesinglbase", "quotedblbase", "perthousand", "Acircumflex", "Ecircumflex", "Aacute", "Edieresis", "Egrave", "Iacute", "Icircumflex", "Idieresis", "Igrave", "Oacute", "Ocircumflex", "apple", "Ograve", "Uacute", "Ucircumflex", "Ugrave", "dotlessi", "circumflex", "tilde", "macron", "breve", "dotaccent", "ring", "cedilla", "hungarumlaut", "ogonek", "caron", "Lslash", "lslash", "Scaron", "scaron", "Zcaron", "zcaron", "brokenbar", "Eth", "eth", "Yacute", "yacute", "Thorn", "thorn", "minus", "multiply", "onesuperior", "twosuperior", "threesuperior", "onehalf", "onequarter", "threequarters", "franc", "Gbreve", "gbreve", "Idotaccent", "Scedilla", "scedilla", "Cacute", "cacute", "Ccaron", "ccaron", "dcroat" };
@@ -301,6 +328,8 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 	{
 		bool needFontReGen = false;
 		
+		float aw = 0.0f;
+
 		if (ImGui::BeginFramedGroup("Selected Font Infos"))
 		{
 			float aw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 2.0f;
@@ -351,6 +380,11 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 
 			ImGui::Text("Selecteds : %u", (uint32_t)m_SelectedGlyphs.size());
 
+			if (ImGui::Button("Clear Transforms (All Glyphs)", ImVec2(0,0)))
+			{
+				ResetTransforms(vProjectFile);
+			}
+			
 			ImGui::FramedGroupSeparator();
 
 			needFontReGen |= ImGui::SliderIntDefaultCompact(ImGui::GetContentRegionAvail().x, "Font Size", &vProjectFile->m_SelectedFont->m_FontSize, 7, 50, defaultFontInfosValues.m_FontSize);
@@ -361,9 +395,9 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 
 		if (ImGui::BeginFramedGroup("Rasterizer"))
 		{
-			const float aww = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 3.0f;
+			aw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 3.0f;
 
-			ImGui::PushItemWidth(aww * 0.5f);
+			ImGui::PushItemWidth(aw * 0.5f);
 			if (ImGui::RadioButtonLabeled("Stb (Default)", "Use Stb Raterizer", FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_STB))
 			{
 				needFontReGen = true;
@@ -373,7 +407,7 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 
 			ImGui::SameLine();
 
-			ImGui::PushItemWidth(aww * 0.5f);
+			ImGui::PushItemWidth(aw * 0.5f);
 			if (ImGui::RadioButtonLabeled("FreeType", "Use FreeType Raterizer", FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE))
 			{
 				needFontReGen = true;
@@ -383,32 +417,32 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 
 			ImGui::FramedGroupSeparator();
 
-			const float aw = ImGui::GetContentRegionAvail().x;
+			aw = ImGui::GetContentRegionAvail().x;
 
-			needFontReGen |= ImGui::SliderIntDefaultCompact(aw, "Padding", &FontInfos::fontsPadding, 0, 16, 1);
+			needFontReGen |= ImGui::SliderIntDefaultCompact(aw, "Padding", &fontPadding, 0, 16, 1);
 
 			if (FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
 			{
 				ImGui::FramedGroupSeparator();
 
-				if (ImGui::CollapsingHeader("Settings"))
+				if (ImGui::CollapsingHeader("Freetype Settings"))
 				{
 					const float aw = ImGui::GetContentRegionAvail().x;
 
 					ImGui::FramedGroupSeparator();
 					
-					needFontReGen |= ImGui::SliderFloatDefaultCompact(aw, "Multiply", &FontInfos::fontsMultiply, 0.0f, 2.0f, 1.0f);
+					needFontReGen |= ImGui::SliderFloatDefaultCompact(aw, "Multiply", &fontMultiply, 0.0f, 2.0f, 1.0f);
 
 					ImGui::FramedGroupSeparator();
 
-					needFontReGen |= ImGui::CheckboxFlags("NoHinting", &FontInfos::freeTypeFlag, ImGuiFreeType::NoHinting);
-					needFontReGen |= ImGui::CheckboxFlags("NoAutoHint", &FontInfos::freeTypeFlag, ImGuiFreeType::NoAutoHint);
-					needFontReGen |= ImGui::CheckboxFlags("ForceAutoHint", &FontInfos::freeTypeFlag, ImGuiFreeType::ForceAutoHint);
-					needFontReGen |= ImGui::CheckboxFlags("LightHinting", &FontInfos::freeTypeFlag, ImGuiFreeType::LightHinting);
-					needFontReGen |= ImGui::CheckboxFlags("MonoHinting", &FontInfos::freeTypeFlag, ImGuiFreeType::MonoHinting);
-					needFontReGen |= ImGui::CheckboxFlags("Bold", &FontInfos::freeTypeFlag, ImGuiFreeType::Bold);
-					needFontReGen |= ImGui::CheckboxFlags("Oblique", &FontInfos::freeTypeFlag, ImGuiFreeType::Oblique);
-					needFontReGen |= ImGui::CheckboxFlags("Monochrome", &FontInfos::freeTypeFlag, ImGuiFreeType::Monochrome);
+					needFontReGen |= ImGui::CheckboxFlags("NoHinting", &freeTypeFlag, ImGuiFreeType::NoHinting);
+					needFontReGen |= ImGui::CheckboxFlags("NoAutoHint", &freeTypeFlag, ImGuiFreeType::NoAutoHint);
+					needFontReGen |= ImGui::CheckboxFlags("ForceAutoHint", &freeTypeFlag, ImGuiFreeType::ForceAutoHint);
+					needFontReGen |= ImGui::CheckboxFlags("LightHinting", &freeTypeFlag, ImGuiFreeType::LightHinting);
+					needFontReGen |= ImGui::CheckboxFlags("MonoHinting", &freeTypeFlag, ImGuiFreeType::MonoHinting);
+					needFontReGen |= ImGui::CheckboxFlags("Bold", &freeTypeFlag, ImGuiFreeType::Bold);
+					needFontReGen |= ImGui::CheckboxFlags("Oblique", &freeTypeFlag, ImGuiFreeType::Oblique);
+					needFontReGen |= ImGui::CheckboxFlags("Monochrome", &freeTypeFlag, ImGuiFreeType::Monochrome);
 					//needFontReGen |= ImGui::CheckboxFlags("LoadColor", &FontInfos::freeTypeFlag, ImGuiFreeType::LoadColor);
 				}
 			}
@@ -527,6 +561,24 @@ void FontInfos::UpdateFiltering()
 	}
 }
 
+void FontInfos::ResetTransforms(ProjectFile* vProjectFile)
+{
+	if (vProjectFile)
+	{
+		for (auto glyph : m_SelectedGlyphs)
+		{
+			if (glyph.second)
+			{
+				glyph.second->m_Translation = 0.0f;
+				glyph.second->m_Scale = 1.0f;
+				glyph.second->simpleGlyph.ClearTransform();
+			}
+		}
+
+		vProjectFile->SetProjectChange();
+	}
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //// FONT TEXTURE ////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
@@ -607,7 +659,12 @@ std::string FontInfos::getXml(const std::string& vOffset, const std::string& vUs
 	res += vOffset + "\t<pathfilename>" + m_FontFilePathName + "</pathfilename>\n";
 	res += vOffset + "\t<oversample>" + ct::toStr(m_Oversample) + "</oversample>\n";
 	res += vOffset + "\t<fontsize>" + ct::toStr(m_FontSize) + "</fontsize>\n";
-	
+
+	res += vOffset + "\t<rasterizer>" + ct::toStr(rasterizerMode) + "</rasterizer>\n";
+	res += vOffset + "\t<freetypeflag>" + ct::toStr(freeTypeFlag) + "</freetypeflag>\n";
+	res += vOffset + "\t<freetypemultiply>" + ct::toStr(fontMultiply) + "</freetypemultiply>\n";
+	res += vOffset + "\t<padding>" + ct::toStr(fontPadding) + "</padding>\n";
+
 	if (!m_Filters.empty())
 	{
 		res += vOffset + "\t<filters>\n";
@@ -661,6 +718,14 @@ bool FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 			m_Oversample = ct::ivariant(strValue).GetI();
 		else if (strName == "fontsize")
 			m_FontSize = ct::ivariant(strValue).GetI();
+		else if (strName == "rasterizer")
+			rasterizerMode = (RasterizerEnum)ct::ivariant(strValue).GetI();
+		else if (strName == "freetypeflag")
+			freeTypeFlag = ct::ivariant(strValue).GetI();
+		else if (strName == "freetypemultiply")
+			fontMultiply = ct::fvariant(strValue).GetF();
+		else if (strName == "padding")
+			fontPadding = ct::ivariant(strValue).GetI();
 		else if (strName == "glyphs" || strName == "filters")
 		{
 			for (tinyxml2::XMLElement* child = vElem->FirstChildElement(); child != nullptr; child = child->NextSiblingElement())

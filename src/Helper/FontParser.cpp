@@ -21,8 +21,65 @@
 #include "FontParser.h"
 #include <ctools/FileHelper.h>
 #include <imgui/imgui.h>
+#include <ctools/cTools.h>
 
 using namespace FontAnalyser;
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+void TableDisplay::AddItem(std::string vItem, std::string vSize, std::string vInfos)
+{
+	std::vector<std::string> arr;
+	arr.push_back(vItem);
+	arr.push_back(vSize);
+	arr.push_back(vInfos);
+	array.push_back(arr);
+}
+void TableDisplay::DisplayTable(const char* vTableLabel, size_t vMaxCount)
+{
+	ImGuiTableFlags flags = ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg | ImGuiTableFlags_Borders;
+	ImVec2 Size = ImVec2(-FLT_MIN, 0);
+	if (vMaxCount)
+	{
+		Size.y = ImGui::GetTextLineHeightWithSpacing() * (vMaxCount + 1);
+		flags |= ImGuiTableFlags_ScrollY;
+	}
+
+	if (ImGui::BeginTable(vTableLabel, 3, flags, Size))
+	{
+		ImGui::TableSetupScrollFreeze(0, 1); // Make header always visible
+		ImGui::TableSetupColumn("Item", ImGuiTableColumnFlags_WidthFixed, -1, 0);
+		ImGui::TableSetupColumn("Size", ImGuiTableColumnFlags_WidthFixed, -1, 1);
+		ImGui::TableSetupColumn("Infos", ImGuiTableColumnFlags_WidthStretch, -1, 1);
+		ImGui::TableHeadersRow(); // draw headers
+
+		m_Clipper.Begin((int)array.size(), ImGui::GetTextLineHeightWithSpacing());
+		while (m_Clipper.Step())
+		{
+			for (int i = m_Clipper.DisplayStart; i < m_Clipper.DisplayEnd; i++)
+			{
+				if (i < 0) continue;
+
+				auto line = array[i];
+
+				ImGui::TableNextRow();
+				int idx = 0;
+				for (auto column : line)
+				{
+					if (idx > 2) break; //3 columns max
+					if (ImGui::TableSetColumnIndex(idx++))
+					{
+						ImGui::Text("%s", column.c_str());
+					}
+				}
+			}
+		}
+
+		ImGui::EndTable();
+	}
+}
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
@@ -34,11 +91,7 @@ int FontAnalyser::HeaderStruct::draw(int vWidgetId)
 
 	if (ImGui::TreeNode("Header"))
 	{
-		ImGui::Text("scalerType    (4 bytes) : %s", (scalerType[0] == 0 ? (scalerType[1] == 1 ? "TRUE" : "") : scalerType.c_str()));
-		ImGui::Text("numTables     (2 bytes) : %i", numTables);
-		ImGui::Text("searchRange   (2 bytes) : %i", searchRange);
-		ImGui::Text("entrySelector (2 bytes) : %i", entrySelector);
-		ImGui::Text("rangeShift    (2 bytes) : %i", rangeShift);
+		DisplayTable("Header");
 
 		ImGui::TreePop();
 	}
@@ -59,6 +112,12 @@ void FontAnalyser::HeaderStruct::parse(MemoryStream *vMem)
 		searchRange = (uint16_t)vMem->ReadUShort();
 		entrySelector = (uint16_t)vMem->ReadUShort();
 		rangeShift = (uint16_t)vMem->ReadUShort();
+
+		AddItem("scalerType", "(4 bytes)", ct::toStr("% s", (scalerType[0] == 0 ? (scalerType[1] == 1 ? "TRUE" : "") : scalerType.c_str())));
+		AddItem("numTables", "(2 bytes)", ct::toStr("%i", numTables));
+		AddItem("searchRange", "(2 bytes)", ct::toStr("%i", searchRange));
+		AddItem("entrySelector", "(2 bytes)", ct::toStr("%i", entrySelector));
+		AddItem("rangeShift", "(4 bytes)", ct::toStr("%i", rangeShift));
 	}
 }
 
@@ -72,10 +131,7 @@ int FontAnalyser::TableStruct::draw(int vWidgetId)
 
 	if (ImGui::TreeNode(&tag, "Table : %s", tag))
 	{
-		ImGui::Text("tag      (4 bytes) : %s", tag);
-		ImGui::Text("checkSum (4 bytes) : %i", checkSum);
-		ImGui::Text("offset   (4 bytes) : %i", offset);
-		ImGui::Text("length   (4 bytes) : %i", length);
+		DisplayTable("Table s");
 
 		ImGui::TreePop();
 	}
@@ -99,67 +155,11 @@ void FontAnalyser::TableStruct::parse(MemoryStream *vMem)
 		checkSum = (uint32_t)vMem->ReadULong();
 		offset = (uint32_t)vMem->ReadULong();
 		length = (uint32_t)vMem->ReadULong();
-	}
-}
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-
-int FontAnalyser::locaTableStruct::draw(int vWidgetId)
-{
-	ImGui::PushID(++vWidgetId);
-
-	if (ImGui::TreeNode("loca Table :"))
-	{
-		if (head)
-		{
-			if (head->indexToLocFormat == 0) // short format
-			{
-				for (auto & it : offsets)
-				{
-					ImGui::Text("offsets      (2 bytes) : %hu", it);
-				}
-			}
-			else if (head->indexToLocFormat == 1) // long format
-			{
-				for (auto & it : offsets)
-				{
-					ImGui::Text("offsets      (4 bytes) : %u", it);
-				}
-			}
-		}
-
-		ImGui::TreePop();
-	}
-
-	ImGui::PopID();
-
-	ImGui::Separator();
-
-	return vWidgetId;
-}
-
-void FontAnalyser::locaTableStruct::parse(MemoryStream *vMem, size_t vOffset, size_t /*vLength*/)
-{
-	if (vMem && head && maxp)
-	{
-		vMem->SetPos(vOffset);
-
-		if (head->indexToLocFormat == 0) // short format
-		{
-			for (int i = 0; i < maxp->numGlyphs; i++)
-			{
-				offsets.push_back(((uint32_t)vMem->ReadUShort()) * 2);
-			}
-		}
-		else if (head->indexToLocFormat == 1) // long format
-		{
-			for (int i = 0; i < maxp->numGlyphs; i++)
-			{
-				offsets.push_back((uint32_t)vMem->ReadULong());
-			}
-		}
+		AddItem("tag", "(4 bytes)", ct::toStr("%s", tag));
+		AddItem("checkSum", "(4 bytes)", ct::toStr("%i", checkSum));
+		AddItem("offset", "(4 bytes)", ct::toStr("%i", offset));
+		AddItem("length", "(4 bytes)", ct::toStr("%i", length));
 	}
 }
 
@@ -173,21 +173,7 @@ int FontAnalyser::maxpTableStruct::draw(int vWidgetId)
 
 	if (ImGui::TreeNode("maxp Table :"))
 	{
-		ImGui::Text("version               (4 bytes) : %hi.%hi", version.high, version.low);
-		ImGui::Text("numGlyphs             (2 bytes) : %hu", numGlyphs);
-		ImGui::Text("maxPoints             (2 bytes) : %hu", maxPoints);
-		ImGui::Text("maxContours           (2 bytes) : %hu", maxContours);
-		ImGui::Text("maxComponentPoints    (2 bytes) : %hu", maxComponentPoints);
-		ImGui::Text("maxComponentContours  (2 bytes) : %hu", maxComponentContours);
-		ImGui::Text("maxZones              (2 bytes) : %hu", maxZones);
-		ImGui::Text("maxTwilightPoints     (2 bytes) : %hu", maxTwilightPoints);
-		ImGui::Text("maxStorage            (2 bytes) : %hu", maxStorage);
-		ImGui::Text("maxFunctionDefs       (2 bytes) : %hu", maxFunctionDefs);
-		ImGui::Text("maxInstructionDefs    (2 bytes) : %hu", maxInstructionDefs);
-		ImGui::Text("maxStackElements      (2 bytes) : %hu", maxStackElements);
-		ImGui::Text("maxSizeOfInstructions (2 bytes) : %hu", maxSizeOfInstructions);
-		ImGui::Text("maxComponentElements  (2 bytes) : %hu", maxComponentElements);
-		ImGui::Text("maxComponentDepth     (2 bytes) : %hu", maxComponentDepth);
+		DisplayTable("maxp Table");
 
 		ImGui::TreePop();
 	}
@@ -220,6 +206,82 @@ void FontAnalyser::maxpTableStruct::parse(MemoryStream *vMem, size_t vOffset, si
 		maxSizeOfInstructions = (uint16_t)vMem->ReadUShort();
 		maxComponentElements = (uint16_t)vMem->ReadUShort();
 		maxComponentDepth = (uint16_t)vMem->ReadUShort();
+
+		AddItem("version","(4 bytes)",ct::toStr("%hi.%hi", version.high, version.low));
+		AddItem("numGlyphs", "(2 bytes)",ct::toStr("%hu", numGlyphs));
+		AddItem("maxPoints", "(2 bytes)",ct::toStr("%hu", maxPoints));
+		AddItem("maxContours", "(2 bytes)",ct::toStr("%hu", maxContours));
+		AddItem("maxComponentPoints", "(2 bytes)",ct::toStr("%hu", maxComponentPoints));
+		AddItem("maxComponentContours", "(2 bytes)",ct::toStr("%hu", maxComponentContours));
+		AddItem("maxZones", "(2 bytes)",ct::toStr("%hu", maxZones));
+		AddItem("maxTwilightPoints", "(2 bytes)",ct::toStr("%hu", maxTwilightPoints));
+		AddItem("maxStorage", "(2 bytes)",ct::toStr("%hu", maxStorage));
+		AddItem("maxFunctionDefs", "(2 bytes)",ct::toStr("%hu", maxFunctionDefs));
+		AddItem("maxInstructionDefs", "(2 bytes)",ct::toStr("%hu", maxInstructionDefs));
+		AddItem("maxStackElements", "(2 bytes)",ct::toStr("%hu", maxStackElements));
+		AddItem("maxSizeOfInstructions", "(2 bytes)",ct::toStr("%hu", maxSizeOfInstructions));
+		AddItem("maxComponentElements", "(2 bytes)",ct::toStr("%hu", maxComponentElements));
+		AddItem("maxComponentDepth", "(2 bytes)",ct::toStr("%hu", maxComponentDepth));
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+int FontAnalyser::locaTableStruct::draw(int vWidgetId)
+{
+	ImGui::PushID(++vWidgetId);
+
+	if (ImGui::TreeNode("loca Table :"))
+	{
+		DisplayTable("loca Table", 20);
+
+		ImGui::TreePop();
+	}
+
+	ImGui::PopID();
+
+	ImGui::Separator();
+
+	return vWidgetId;
+}
+
+void FontAnalyser::locaTableStruct::parse(MemoryStream* vMem, size_t vOffset, size_t /*vLength*/)
+{
+	if (vMem && head && maxp)
+	{
+		vMem->SetPos(vOffset);
+
+		if (head->indexToLocFormat == 0) // short format
+		{
+			for (int i = 0; i < maxp->numGlyphs; i++)
+			{
+				offsets.push_back(((uint32_t)vMem->ReadUShort()) * 2);
+			}
+		}
+		else if (head->indexToLocFormat == 1) // long format
+		{
+			for (int i = 0; i < maxp->numGlyphs; i++)
+			{
+				offsets.push_back((uint32_t)vMem->ReadULong());
+			}
+		}
+
+		if (head->indexToLocFormat == 0) // short format
+		{
+			for (auto& it : offsets)
+			{
+				AddItem("offsets", "(2 bytes)", ct::toStr("%hu", it));
+			}
+		}
+		else if (head->indexToLocFormat == 1) // long format
+		{
+			for (auto& it : offsets)
+			{
+				AddItem("offsets", "(4 bytes)", ct::toStr("%u", it));
+			}
+		}
 	}
 }
 
@@ -237,7 +299,7 @@ int FontAnalyser::simpleGlyphTableStruct::draw(int vWidgetId)
 		{
 			if (ImGui::TreeNode("endPtsOfContours :"))
 			{
-				for (auto & it : endPtsOfContours)
+				for (auto& it : endPtsOfContours)
 				{
 					ImGui::Text("End pt            (1 byte) : %hu", it);
 				}
@@ -249,7 +311,7 @@ int FontAnalyser::simpleGlyphTableStruct::draw(int vWidgetId)
 			{
 				if (ImGui::TreeNode("instructions :"))
 				{
-					for (auto & it : endPtsOfContours)
+					for (auto& it : endPtsOfContours)
 					{
 						ImGui::Text("Instruction       (1 byte) : %hu", it);
 					}
@@ -269,7 +331,7 @@ int FontAnalyser::simpleGlyphTableStruct::draw(int vWidgetId)
   (byte & 0x04 ? '1' : '0'), \
   (byte & 0x02 ? '1' : '0'), \
   (byte & 0x01 ? '1' : '0') 
-				for (auto & it : flags)
+				for (auto& it : flags)
 				{
 					ImGui::Text("flag              (1 byte) :" BYTE_TO_BINARY_PATTERN, BYTE_TO_BINARY(it));
 				}
@@ -281,7 +343,7 @@ int FontAnalyser::simpleGlyphTableStruct::draw(int vWidgetId)
 			{
 				int shortX = (1 << 1);
 				int idx = 0;
-				for (auto & it : xCoordinates)
+				for (auto& it : xCoordinates)
 				{
 					if (flags[idx] & shortX)
 						ImGui::Text("xCoordinates      (1 byte) : %hi", it);
@@ -296,7 +358,7 @@ int FontAnalyser::simpleGlyphTableStruct::draw(int vWidgetId)
 			{
 				int shortY = (1 << 2);
 				int idx = 0;
-				for (auto & it : yCoordinates)
+				for (auto& it : yCoordinates)
 				{
 					if (flags[idx] & shortY)
 						ImGui::Text("yCoordinates      (1 byte) : %hi", it);
@@ -390,11 +452,7 @@ int FontAnalyser::glyfStruct::draw(int vWidgetId)
 
 	if (ImGui::TreeNode("glyf :"))
 	{
-		ImGui::Text("numberOfContours (2 bytes) : %hu", numberOfContours);
-		ImGui::Text("xMin             (2 bytes) : %hi", xMin);
-		ImGui::Text("yMin             (2 bytes) : %hi", yMin);
-		ImGui::Text("xMax             (2 bytes) : %hi", xMax);
-		ImGui::Text("yMax             (2 bytes) : %hi", yMax);
+		DisplayTable("glyf");
 
 		vWidgetId = simpleGlyph.draw(vWidgetId);
 
@@ -426,6 +484,12 @@ void FontAnalyser::glyfStruct::parse(MemoryStream *vMem, size_t vOffset, size_t 
 		{
 
 		}
+
+		AddItem("numberOfContours", "(2 bytes)", ct::toStr("%hu", numberOfContours));
+		AddItem("xMin", "(2 bytes)", ct::toStr("%hi", xMin));
+		AddItem("yMin", "(2 bytes)", ct::toStr("%hi", yMin));
+		AddItem("xMax", "(2 bytes)", ct::toStr("%hi", xMax));
+		AddItem("yMax", "(2 bytes)", ct::toStr("%hi", yMax));
 	}
 }
 
@@ -439,6 +503,8 @@ int FontAnalyser::glyfTableStruct::draw(int vWidgetId)
 
 	if (ImGui::TreeNode("glyf Table :"))
 	{
+		DisplayTable("glyf");
+
 		for (auto & it : glyfs)
 		{
 			vWidgetId = it.draw(vWidgetId);
@@ -483,30 +549,25 @@ int FontAnalyser::cmapSubTableF4Struct::draw(int vWidgetId)
 	{
 		ImGui::PushID(++vWidgetId);
 
-		if (ImGui::TreeNode("cmap Sub Table F0 :"))
+		if (ImGui::TreeNode("cmap Sub Table F4 :"))
 		{
-			ImGui::Text("format             (2 bytes) : %hu", format);
-			ImGui::Text("length             (2 bytes) : %hu", length);
-			ImGui::Text("language           (2 bytes) : %hu", language);
-			ImGui::Text("segCountX2         (2 bytes) : %hu", segCountX2);
-			ImGui::Text("entrySelector      (2 bytes) : %hu", entrySelector);
-			ImGui::Text("rangeShift         (2 bytes) : %hu", rangeShift);
+			DisplayTable("cmap Sub Table F4");
 
 			if (ImGui::TreeNode("endCode :"))
 			{
-				for (auto & it : endCode)
+				for (auto& it : endCode)
 				{
 					ImGui::Text("                   (2 bytes) : %hu", it);
 				}
-				
+
 				ImGui::TreePop();
 			}
 
 			ImGui::Text("reservedPad        (2 bytes) : %hu", rangeShift);
-			
+
 			if (ImGui::TreeNode("startCode :"))
 			{
-				for (auto & it : startCode)
+				for (auto& it : startCode)
 				{
 					ImGui::Text("                   (2 bytes) : %hu", it);
 				}
@@ -516,7 +577,7 @@ int FontAnalyser::cmapSubTableF4Struct::draw(int vWidgetId)
 
 			if (ImGui::TreeNode("idDelta :"))
 			{
-				for (auto & it : idDelta)
+				for (auto& it : idDelta)
 				{
 					ImGui::Text("                   (2 bytes) : %hi", it);
 				}
@@ -526,7 +587,7 @@ int FontAnalyser::cmapSubTableF4Struct::draw(int vWidgetId)
 
 			if (ImGui::TreeNode("idRangeOffset :"))
 			{
-				for (auto & it : idRangeOffset)
+				for (auto& it : idRangeOffset)
 				{
 					ImGui::Text("                   (2 bytes) : %hu", it);
 				}
@@ -536,7 +597,7 @@ int FontAnalyser::cmapSubTableF4Struct::draw(int vWidgetId)
 
 			if (ImGui::TreeNode("glyphIdArray :"))
 			{
-				for (auto & it : glyphIdArray)
+				for (auto& it : glyphIdArray)
 				{
 					ImGui::Text("                   (2 bytes) : %hu", it);
 				}
@@ -565,12 +626,20 @@ void FontAnalyser::cmapSubTableF4Struct::parse(MemoryStream *vMem, size_t /*vOff
 		entrySelector = (uint16_t)vMem->ReadUShort();
 		rangeShift = (uint16_t)vMem->ReadUShort();
 
+		AddItem("format", "(2 bytes)", ct::toStr("%hu", format));
+		AddItem("length", "(2 bytes)", ct::toStr("%hu", length));
+		AddItem("language", "(2 bytes)", ct::toStr("%hu", language));
+		AddItem("segCountX2", "(2 bytes)", ct::toStr("%hu", segCountX2));
+		AddItem("entrySelector", "(2 bytes)", ct::toStr("%hu", entrySelector));
+		AddItem("rangeShift", "(2 bytes)", ct::toStr("%hu", rangeShift));
+		
 		int segCount = segCountX2 / 2;
 		for (int i = 0; i < segCount; i++)
 		{
 			endCode.push_back((uint16_t)vMem->ReadUShort());
 		}
 		reservedPad = (uint16_t)vMem->ReadUShort();
+		AddItem("reservedPad", "(2 bytes)", ct::toStr("%hu", reservedPad));
 		for (int i = 0; i < segCount; i++)
 		{
 			startCode.push_back((uint16_t)vMem->ReadUShort());
@@ -584,7 +653,7 @@ void FontAnalyser::cmapSubTableF4Struct::parse(MemoryStream *vMem, size_t /*vOff
 			idRangeOffset.push_back((uint16_t)vMem->ReadUShort());
 		}
 
-		//std::vector<uint16_t> glyphIdArray;
+		
 	}
 }
 
@@ -600,13 +669,11 @@ int FontAnalyser::cmapSubTableF0Struct::draw(int vWidgetId)
 
 		if (ImGui::TreeNode("cmap Sub Table F0 :"))
 		{
-			ImGui::Text("format             (2 bytes) : %hu", format);
-			ImGui::Text("length             (2 bytes) : %hu", length);
-			ImGui::Text("language           (2 bytes) : %hu", language);
-			
+			DisplayTable("cmap Sub Table F0");
+
 			if (ImGui::TreeNode("glyphIndexArray :"))
 			{
-				for (auto & it : glyphIndexArray)
+				for (auto& it : glyphIndexArray)
 				{
 					ImGui::Text("(1 byte) : %hu", it);
 				}
@@ -634,6 +701,10 @@ void FontAnalyser::cmapSubTableF0Struct::parse(MemoryStream *vMem, size_t /*vOff
 		{
 			glyphIndexArray[i] = vMem->ReadByte();
 		}
+
+		AddItem("format", "(2 bytes)", ct::toStr("%hu", format));
+		AddItem("length", "(2 bytes)", ct::toStr("%hu", length));
+		AddItem("language", "(2 bytes)", ct::toStr("%hu", language));
 	}
 }
 
@@ -647,10 +718,8 @@ int FontAnalyser::cmapEncodingRecordStruct::draw(int vWidgetId)
 
 	if (ImGui::TreeNode("cmap SubTable"))
 	{
-		ImGui::Text("platformID         (2 bytes) : %hu", platformID);
-		ImGui::Text("platformSpecificID (2 bytes) : %hu", encodingID);
-		ImGui::Text("offset             (4 bytes) : %u", offset);
-		
+		DisplayTable("cmap Sub Table");
+
 		vWidgetId = subTableF0.draw(vWidgetId);
 		vWidgetId = subTableF4.draw(vWidgetId);
 
@@ -669,6 +738,10 @@ void FontAnalyser::cmapEncodingRecordStruct::parse(MemoryStream *vMem, size_t /*
 		platformID = (uint16_t)vMem->ReadUShort();
 		encodingID = (uint16_t)vMem->ReadUShort();
 		offset = (uint16_t)vMem->ReadULong();
+
+		AddItem("platformID", "(2 bytes)", ct::toStr("%hu", platformID));
+		AddItem("platformSpecificID", "(2 bytes)", ct::toStr("%hu", encodingID));
+		AddItem("offset", "(4 bytes)", ct::toStr("%u", offset));
 
 		uint16_t format = (uint16_t)vMem->ReadUShort();
 		uint16_t length = (uint16_t)vMem->ReadUShort();
@@ -702,8 +775,7 @@ int FontAnalyser::cmapTableStruct::draw(int vWidgetId)
 
 	if (ImGui::TreeNode("cmap Table :"))
 	{
-		ImGui::Text("version            (2 bytes) : %hu", version);
-		ImGui::Text("numEncodingRecords (2 bytes) : %hu", numEncodingRecords);
+		DisplayTable("cmap Table");
 
 		for (auto & it : encodingRecords)
 		{
@@ -729,6 +801,9 @@ void FontAnalyser::cmapTableStruct::parse(MemoryStream *vMem, size_t vOffset, si
 		version = (uint16_t)vMem->ReadUShort();
 		numEncodingRecords = (uint16_t)vMem->ReadUShort();
 
+		AddItem("version", "(2 bytes)", ct::toStr("%hu", version));
+		AddItem("numEncodingRecords", "(2 bytes)", ct::toStr("%hu", numEncodingRecords));
+
 		for (int i = 0; i < numEncodingRecords; i++)
 		{
 			cmapEncodingRecordStruct enc;
@@ -748,23 +823,7 @@ int FontAnalyser::headTableStruct::draw(int vWidgetId)
 
 	if (ImGui::TreeNode("head Table :"))
 	{
-		ImGui::Text("version            (4 bytes) : %hi.%hi", version.high, version.low);
-		ImGui::Text("fontRevision       (4 bytes) : %hi.%hi", fontRevision.high, fontRevision.low);
-		ImGui::Text("checkSumAdjustment (4 bytes) : %u", checkSumAdjustment);
-		ImGui::Text("magicNumber		(4 bytes) : %X%s", magicNumber, (magicNumber==0x5F0F3CF5?" (Valid)":" (Not Valid)"));
-		ImGui::Text("flags              (2 bytes) : %hu", flags); // bitset
-		ImGui::Text("unitsPerEm         (2 bytes) : %hu", unitsPerEm);
-		ImGui::Text("created            (8 bytes) : %lli", created);
-		ImGui::Text("modified           (8 bytes) : %lli", modified);
-		ImGui::Text("xMin               (2 bytes) : %hi", xMin);
-		ImGui::Text("yMin               (2 bytes) : %hi", yMin);
-		ImGui::Text("xMax               (2 bytes) : %hi", xMax);
-		ImGui::Text("yMax               (2 bytes) : %hi", yMax);
-		ImGui::Text("macStyle           (2 bytes) : %hu", macStyle); // bitset
-		ImGui::Text("lowestRecPPEM      (2 bytes) : %hu", lowestRecPPEM);
-		ImGui::Text("fontDirectionHint  (2 bytes) : %hi", fontDirectionHint);
-		ImGui::Text("indexToLocFormat   (2 bytes) : %hi", indexToLocFormat);
-		ImGui::Text("glyphDataFormat    (2 bytes) : %hi", glyphDataFormat);
+		DisplayTable("head Table");
 
 		ImGui::TreePop();
 	}
@@ -799,6 +858,24 @@ void FontAnalyser::headTableStruct::parse(MemoryStream *vMem, size_t vOffset, si
 		fontDirectionHint = (int16_t)vMem->ReadShort();
 		indexToLocFormat = (int16_t)vMem->ReadShort();
 		glyphDataFormat = (int16_t)vMem->ReadShort();
+
+		AddItem("version", "(4 bytes)", ct::toStr("%hi.%hi", version.high, version.low));
+		AddItem("fontRevision", "(4 bytes)", ct::toStr("%hi.%hi", fontRevision.high, fontRevision.low));
+		AddItem("checkSumAdjustment", "(4 bytes)", ct::toStr("%u", checkSumAdjustment));
+		AddItem("magicNumber", "(4 bytes)", ct::toStr("%X%s", magicNumber, (magicNumber == 0x5F0F3CF5 ? " (Valid)" : " (Not Valid)")));
+		AddItem("flags", "(2 bytes)", ct::toStr("%hu", flags)); // bitset
+		AddItem("unitsPerEm", "(2 bytes)", ct::toStr("%hu", unitsPerEm));
+		AddItem("created", "(8 bytes)", ct::toStr("%lli", created));
+		AddItem("modified", "(8 bytes)", ct::toStr("%lli", modified));
+		AddItem("xMin", "(2 bytes)", ct::toStr("%hi", xMin));
+		AddItem("yMin", "(2 bytes)", ct::toStr("%hi", yMin));
+		AddItem("xMax", "(2 bytes)", ct::toStr("%hi", xMax));
+		AddItem("yMax", "(2 bytes)", ct::toStr("%hi", yMax));
+		AddItem("macStyle", "(2 bytes)", ct::toStr("%hu", macStyle)); // bitset
+		AddItem("lowestRecPPEM", "(2 bytes)", ct::toStr("%hu", lowestRecPPEM));
+		AddItem("fontDirectionHint", "(2 bytes)", ct::toStr("%hi", fontDirectionHint));
+		AddItem("indexToLocFormat", "(2 bytes)", ct::toStr("%hi", indexToLocFormat));
+		AddItem("glyphDataFormat", "(2 bytes)", ct::toStr("%hi", glyphDataFormat));
 	}
 }
 
@@ -840,16 +917,17 @@ int FontAnalyser::postTableF2Struct::draw(int vWidgetId)
 		ImGui::PushID(++vWidgetId);
 		if (ImGui::TreeNode("post Table Format 2 :"))
 		{
-			ImGui::Text("numberOfGlyphs  (2 bytes) : %hu", numberOfGlyphs);
+			DisplayTable("head Table");
+
 			if (ImGui::TreeNode("glyphNameIndexs (2 bytes array of numberOfGlyphs)"))
 			{
-				for (auto & it : glyphNameIndex)
+				for (auto& it : glyphNameIndex)
 					ImGui::Text("glyph id        (2 bytes) : %hu", it);
 				ImGui::TreePop();
 			}
 			if (ImGui::TreeNode("names :"))
 			{
-				for (auto & it : names)
+				for (auto& it : names)
 					ImGui::Text("%s", it.c_str());
 				ImGui::TreePop();
 			}
@@ -865,6 +943,9 @@ void FontAnalyser::postTableF2Struct::parse(MemoryStream *vMem, size_t vOffset, 
 	if (vMem)
 	{
 		numberOfGlyphs = (uint16_t)vMem->ReadUShort();
+		
+		AddItem("numberOfGlyphs", "(2 bytes)", ct::toStr("%hu", numberOfGlyphs));
+
 		if (numberOfGlyphs)
 		{
 			for (int i = 0; i < numberOfGlyphs; i++)
@@ -912,15 +993,7 @@ int FontAnalyser::postTableStruct::draw(int vWidgetId)
 
 	if (ImGui::TreeNode("post Table :"))
 	{
-		ImGui::Text("format             (4 bytes) : %hi.%hi", format.high, format.low);
-		ImGui::Text("italicAngle        (4 bytes) : %hi.%hi", italicAngle.high, italicAngle.low);
-		ImGui::Text("underlinePosition  (2 bytes) : %hi", underlinePosition);
-		ImGui::Text("underlineThickness (2 bytes) : %hi", underlineThickness);
-		ImGui::Text("isFixedPitch       (4 bytes) : %u", isFixedPitch);
-		ImGui::Text("minMemType42       (4 bytes) : %u", minMemType42);
-		ImGui::Text("maxMemType42       (4 bytes) : %u", maxMemType42);
-		ImGui::Text("minMemType1        (4 bytes) : %u", minMemType1);
-		ImGui::Text("maxMemType1        (4 bytes) : %u", maxMemType1);
+		DisplayTable("post Table");
 
 		vWidgetId = tableF2.draw(vWidgetId);
 
@@ -952,6 +1025,17 @@ void FontAnalyser::postTableStruct::parse(MemoryStream *vMem, size_t vOffset, si
 
 		if (format.high == 2)
 			tableF2.parse(vMem, vOffset, vLength);
+
+		AddItem("format", "(4 bytes)", ct::toStr("%hi.%hi", format.high, format.low));
+		AddItem("italicAngle", "(4 bytes)", ct::toStr("%hi.%hi", italicAngle.high, italicAngle.low));
+		AddItem("underlinePosition", "(2 bytes)", ct::toStr("%hi", underlinePosition));
+		AddItem("underlineThickness", "(2 bytes)", ct::toStr("%hi", underlineThickness));
+		AddItem("isFixedPitch", "(4 bytes)", ct::toStr("%u", isFixedPitch));
+		AddItem("minMemType42", "(4 bytes)", ct::toStr("%u", minMemType42));
+		AddItem("maxMemType42", "(4 bytes)", ct::toStr("%u", maxMemType42));
+		AddItem("minMemType1", "(4 bytes)", ct::toStr("%u", minMemType1));
+		AddItem("maxMemType1", "(4 bytes)", ct::toStr("%u", maxMemType1));
+
 	}
 }
 

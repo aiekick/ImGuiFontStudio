@@ -47,8 +47,8 @@ public:
 	std::vector<std::vector<ct::ivec2>> coords;
 	std::vector<std::vector<bool>> onCurve;
 	ct::ivec4 rc;
-	ImVec2 m_Translation = ImVec2(0.0f, 0.0f); // translation in first
-	ImVec2 m_Scale = ImVec2(1.0f, 1.0f); // scale in second
+	ct::fvec2 m_Translation; // translation in first
+	ct::fvec2 m_Scale = 1.0f; // scale in second
 
 public:
 	void Clear();
@@ -58,6 +58,7 @@ public:
 	bool IsOnCurve(int32_t vContour, int32_t vPoint);
 	ct::ivec2 Scale(ct::ivec2 p, double scale) const;
 	ct::ivec2 GetCoords(int32_t vContour, int32_t vPoint, double scale);
+	void ClearTransform();
 };
 
 class FontInfos;
@@ -83,8 +84,8 @@ public:
 	ct::ivec4 m_FontBoundingBox;
 	int m_FontAscent = 0;
 	int m_FontDescent = 0;
-	ImVec2 m_Translation = ImVec2(0, 0);
-	ImVec2 m_Scale = ImVec2(1, 1);
+	ct::fvec2 m_Translation = 0.0f;
+	ct::fvec2 m_Scale = 1.0f;
 
 public: // for interaction only
 	bool m_editingName = false;

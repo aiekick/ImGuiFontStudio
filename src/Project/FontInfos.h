@@ -44,12 +44,6 @@ struct GlyphsRange
 class ProjectFile;
 class FontInfos : public conf::ConfigAbstract
 {
-public:
-	static RasterizerEnum rasterizerMode;
-	static uint32_t freeTypeFlag;
-	static float fontsMultiply;
-	static int32_t fontsPadding;
-
 public: // not to save
 	ImFontAtlas m_ImFontAtlas;
 	std::vector<std::string> m_GlyphNames;
@@ -79,7 +73,11 @@ public: // to save
 	int m_Oversample = 1;
 	int m_FontSize = 17;
 	std::set<std::string> m_Filters; // use map just for have binary tree search
-	
+	RasterizerEnum rasterizerMode = RasterizerEnum::RASTERIZER_STB;
+	uint32_t freeTypeFlag = 0;
+	float fontMultiply = 1.0f;
+	int32_t fontPadding = 1;
+
 public: // callable
 	bool LoadFont(ProjectFile *vProjectFile, const std::string& vFontFilePathName);
 	void Clear();
@@ -87,6 +85,7 @@ public: // callable
 	void DrawInfos(ProjectFile* vProjectFile);
 	void UpdateInfos();
 	void UpdateFiltering();
+	void ResetTransforms(ProjectFile* vProjectFile);
 
 private: // Glyph Names Extraction / DB
 	void FillGlyphNames();

@@ -446,7 +446,19 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 			auto glyphInfos = GetGlyphInfosFromGlyphId(vFontId, vGlyphId);
 			if (glyphInfos)
 			{
-				//m_FontBoundingBox.Combine(glyphInfos->m_FontBoundingBox);
+				m_FontBoundingBox.Combine(glyphInfos->m_FontBoundingBox);
+				
+				if (!glyphInfos->m_Translation.emptyAND())
+				{
+					auto sglyph = down_cast<sfntly::GlyphTable::SimpleGlyph*>(glyph.p_);
+					glyphInfos->simpleGlyph.LoadSimpleGlyph(sglyph);
+					if (glyphInfos->simpleGlyph.isValid)
+					{
+						glyphInfos->simpleGlyph.m_Translation = 
+							ImVec2(	(float)glyphInfos->m_Translation.x, 
+									(float)glyphInfos->m_Translation.y	);
+					}
+				}
 
 				if (glyphInfos->simpleGlyph.isValid)
 				{
@@ -500,7 +512,7 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 							yCoordStream.WriteShort(dv.y);
 
 							// conbine absolute points
-							boundingBox.Combine(pt);
+							//boundingBox.Combine(pt);
 							
 							last = pt;
 							pointIdx++;
@@ -512,35 +524,7 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 					ct::ivec2 inf = boundingBox.lowerBound;
 					ct::ivec2 sup = boundingBox.upperBound;
 
-					m_FontBoundingBox.Combine(boundingBox);
-
-#if 0
-					// reecriture de la bounding box de la font
-					inf.x = ct::mini(inf.x, 0);
-					inf.y = ct::mini(inf.y, 0);
-
-					int deltaY = 0;
-					if (inf.y < glyphInfos->m_FontBoundingBox.y)
-						deltaY = glyphInfos->m_FontBoundingBox.y - inf.y;
-					inf.y += deltaY;
-					sup.y += deltaY;
-
-					deltaY = 0;
-					if (sup.y > glyphInfos->m_FontBoundingBox.w)
-						deltaY = sup.y - glyphInfos->m_FontBoundingBox.w;
-					sup.y -= deltaY;
-
-					int deltaX = 0;
-					if (inf.x < glyphInfos->m_FontBoundingBox.x)
-						deltaX = glyphInfos->m_FontBoundingBox.x - inf.x;
-					inf.x += deltaX;
-					sup.x += deltaX;
-
-					deltaX = 0;
-					if (sup.x > glyphInfos->m_FontBoundingBox.z)
-						deltaX = sup.x - glyphInfos->m_FontBoundingBox.z;
-					sup.x -= deltaX;
-#endif
+					//m_FontBoundingBox.Combine(boundingBox);
 
 					headerStream.WriteShort(countContours);
 					headerStream.WriteShort(inf.x);
@@ -880,7 +864,7 @@ bool FontHelper::Assemble_Head_Table()
 	offset += head->WriteULong(offset, 0); // checkSumAdjustment
 	offset += head->WriteULong(offset, 0x5F0F3CF5); // magicNumber
 	offset += head->WriteUShort(offset, 0); // flags
-	offset += head->WriteUShort(offset, 0); // unitsPerEm
+	offset += head->WriteUShort(offset, m_FontBoundingBox.upperBound.x - m_FontBoundingBox.lowerBound.x); // unitsPerEm
 	offset += head->WriteDateTime(offset, 0); // created
 	offset += head->WriteDateTime(offset, 0); // modified
 	offset += head->WriteShort(offset, m_FontBoundingBox.lowerBound.x); // xMin

@@ -157,7 +157,7 @@ ct::ivec2 SimpleGlyph_Solo::GetCoords(int32_t vContour, int32_t vPoint)
 	// apply transformation
 	p.x = (int)(p.x * m_Scale.x);
 	p.y = (int)(p.y * m_Scale.y);
-	p += m_Translation;
+	p += ct::ivec2(m_Translation);
 
 	return p;
 }
@@ -178,6 +178,12 @@ ct::ivec2 SimpleGlyph_Solo::Scale(ct::ivec2 p, double scale) const
 ct::ivec2 SimpleGlyph_Solo::GetCoords(int32_t vContour, int32_t vPoint, double scale)
 {
 	return Scale(GetCoords(vContour, vPoint), scale);
+}
+
+void SimpleGlyph_Solo::ClearTransform()
+{
+	m_Translation = 0.0f;
+	m_Scale = 1.0f;
 }
 
 //////////////////////////////////////////////////////////
