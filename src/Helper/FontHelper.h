@@ -87,6 +87,7 @@ public:
 private:
 	size_t m_BaseFontIdx = 0;
 	FontInstance* GetBaseFontInstance();
+	ct::iAABB m_FontBoundingBox;
 
 private:
 	std::vector<FontInstance> m_Fonts;

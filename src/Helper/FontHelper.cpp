@@ -303,6 +303,8 @@ sfntly::Font* FontHelper::AssembleFont(bool vUsePostTable)
 	{
 		if (!m_Fonts.empty())
 		{
+			m_FontBoundingBox = ct::iAABB(INT_MAX, -INT_MAX);
+
 			m_FontFactory.Attach(sfntly::FontFactory::GetInstance());
 			m_FontBuilder.Attach(m_FontFactory->NewFontBuilder());
 
@@ -388,6 +390,7 @@ bool FontHelper::Assemble_Glyf_Loca_Maxp_Tables()
 			sfntly::Ptr<sfntly::WritableFontData> newGlyfTable = ReScale_Glyph(fontId, resolved_glyph_id, actualGlyfData);
 			glyphOffset += newGlyfTable->Length();
 			my_loca_list.emplace_back(glyphOffset);
+
 			////////////////////////////////////////////////////////////////////////////
 			////////////////////////////////////////////////////////////////////////////
 			////////////////////////////////////////////////////////////////////////////
@@ -441,9 +444,10 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 		if (glyph->GlyphType() == sfntly::GlyphType::kSimple)
 		{
 			auto glyphInfos = GetGlyphInfosFromGlyphId(vFontId, vGlyphId);
-
 			if (glyphInfos)
 			{
+				//m_FontBoundingBox.Combine(glyphInfos->m_FontBoundingBox);
+
 				if (glyphInfos->simpleGlyph.isValid)
 				{
 					SimpleGlyph_Solo simpleGlyph = glyphInfos->simpleGlyph;
@@ -496,7 +500,7 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 							yCoordStream.WriteShort(dv.y);
 
 							// conbine absolute points
-							//boundingBox.Combine(pt);
+							boundingBox.Combine(pt);
 							
 							last = pt;
 							pointIdx++;
@@ -507,6 +511,8 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 					// arrange bounding box
 					ct::ivec2 inf = boundingBox.lowerBound;
 					ct::ivec2 sup = boundingBox.upperBound;
+
+					m_FontBoundingBox.Combine(boundingBox);
 
 #if 0
 					// reecriture de la bounding box de la font
@@ -877,10 +883,10 @@ bool FontHelper::Assemble_Head_Table()
 	offset += head->WriteUShort(offset, 0); // unitsPerEm
 	offset += head->WriteDateTime(offset, 0); // created
 	offset += head->WriteDateTime(offset, 0); // modified
-	offset += head->WriteShort(offset, 0); // xMin
-	offset += head->WriteShort(offset, 0); // yMin
-	offset += head->WriteShort(offset, 0); // xMax
-	offset += head->WriteShort(offset, 0); // yMax
+	offset += head->WriteShort(offset, m_FontBoundingBox.lowerBound.x); // xMin
+	offset += head->WriteShort(offset, m_FontBoundingBox.lowerBound.y); // yMin
+	offset += head->WriteShort(offset, m_FontBoundingBox.upperBound.x); // xMax
+	offset += head->WriteShort(offset, m_FontBoundingBox.upperBound.y); // yMax
 	offset += head->WriteUShort(offset, 0); // macStyle
 	offset += head->WriteUShort(offset, 0); // lowestRecPPEM
 	offset += head->WriteShort(offset, 0); // fontDirectionHint

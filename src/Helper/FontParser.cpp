@@ -34,7 +34,7 @@ int FontAnalyser::HeaderStruct::draw(int vWidgetId)
 
 	if (ImGui::TreeNode("Header"))
 	{
-		ImGui::Text("scalerType    (4 bytes) : %s", (scalerType[0] == 0?(scalerType[1] == 1?"TRUE":""): scalerType.c_str()));
+		ImGui::Text("scalerType    (4 bytes) : %s", (scalerType[0] == 0 ? (scalerType[1] == 1 ? "TRUE" : "") : scalerType.c_str()));
 		ImGui::Text("numTables     (2 bytes) : %i", numTables);
 		ImGui::Text("searchRange   (2 bytes) : %i", searchRange);
 		ImGui::Text("entrySelector (2 bytes) : %i", entrySelector);
