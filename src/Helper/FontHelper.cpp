@@ -92,9 +92,14 @@ bool FontHelper::OpenFontFile(
 			{
 				fontInstance.m_GlyfTable = down_cast<sfntly::GlyphTable*>(fontInstance.m_Font->GetTable(sfntly::Tag::glyf));
 				fontInstance.m_LocaTable = down_cast<sfntly::LocaTable*>(fontInstance.m_Font->GetTable(sfntly::Tag::loca));
-
-				if (fontInstance.m_GlyfTable && fontInstance.m_LocaTable)
+				fontInstance.m_HeadTable = down_cast<sfntly::FontHeaderTable*>(fontInstance.m_Font->GetTable(sfntly::Tag::head));
+				if (fontInstance.m_GlyfTable && fontInstance.m_LocaTable && fontInstance.m_HeadTable)
 				{
+					m_FontBoundingBox.lowerBound.x = fontInstance.m_HeadTable->XMin();
+					m_FontBoundingBox.lowerBound.y = fontInstance.m_HeadTable->YMin();
+					m_FontBoundingBox.upperBound.x = fontInstance.m_HeadTable->XMax();
+					m_FontBoundingBox.upperBound.y = fontInstance.m_HeadTable->YMax();
+
 					fontInstance.m_NewGlyphNames = std::move(vNewNames);
 					fontInstance.m_NewGlyphCodePoints = std::move(vNewCodePoints);
 					fontInstance.m_NewGlyphInfos = std::move(vNewGlyphInfos);
@@ -446,7 +451,7 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 			auto glyphInfos = GetGlyphInfosFromGlyphId(vFontId, vGlyphId);
 			if (glyphInfos)
 			{
-				m_FontBoundingBox.Combine(glyphInfos->m_FontBoundingBox);
+				//m_FontBoundingBox.Combine(glyphInfos->m_FontBoundingBox);
 				
 				if (!glyphInfos->m_Translation.emptyAND())
 				{
@@ -512,7 +517,7 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 							yCoordStream.WriteShort(dv.y);
 
 							// conbine absolute points
-							//boundingBox.Combine(pt);
+							boundingBox.Combine(pt);
 							
 							last = pt;
 							pointIdx++;
@@ -524,7 +529,7 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 					ct::ivec2 inf = boundingBox.lowerBound;
 					ct::ivec2 sup = boundingBox.upperBound;
 
-					//m_FontBoundingBox.Combine(boundingBox);
+					m_FontBoundingBox.Combine(boundingBox);
 
 					headerStream.WriteShort(countContours);
 					headerStream.WriteShort(inf.x);
@@ -855,27 +860,56 @@ bool FontHelper::Assemble_Name_Table()
 
 bool FontHelper::Assemble_Head_Table()
 {
-	//4+4+4+4+2+2+8+8+2+2+2+2+2+2+2+2+2 => 54
 	sfntly::WritableFontDataPtr head;
 	head.Attach(sfntly::WritableFontData::CreateWritableFontData(54));
-	int32_t offset = 0;
-	offset += head->WriteFixed(offset, 0x00010000); // version
-	offset += head->WriteFixed(offset, 0x00010000); // fontRevision
-	offset += head->WriteULong(offset, 0); // checkSumAdjustment
-	offset += head->WriteULong(offset, 0x5F0F3CF5); // magicNumber
-	offset += head->WriteUShort(offset, 0); // flags
-	offset += head->WriteUShort(offset, m_FontBoundingBox.upperBound.x - m_FontBoundingBox.lowerBound.x); // unitsPerEm
-	offset += head->WriteDateTime(offset, 0); // created
-	offset += head->WriteDateTime(offset, 0); // modified
-	offset += head->WriteShort(offset, m_FontBoundingBox.lowerBound.x); // xMin
-	offset += head->WriteShort(offset, m_FontBoundingBox.lowerBound.y); // yMin
-	offset += head->WriteShort(offset, m_FontBoundingBox.upperBound.x); // xMax
-	offset += head->WriteShort(offset, m_FontBoundingBox.upperBound.y); // yMax
-	offset += head->WriteUShort(offset, 0); // macStyle
-	offset += head->WriteUShort(offset, 0); // lowestRecPPEM
-	offset += head->WriteShort(offset, 0); // fontDirectionHint
-	offset += head->WriteShort(offset, 0); // indexToLocFormat
-	offset += head->WriteShort(offset, 0); // glyphDataFormat
+	
+	auto inst = GetBaseFontInstance();
+	if (inst)
+	{
+		auto hea = inst->m_HeadTable;
+		//4+4+4+4+2+2+8+8+2+2+2+2+2+2+2+2+2 => 54
+		int32_t offset = 0;
+		offset += head->WriteFixed(offset, 0x00010000); // version
+		offset += head->WriteFixed(offset, 0x00010000); // fontRevision
+		offset += head->WriteULong(offset, hea->ChecksumAdjustment()); // checkSumAdjustment
+		offset += head->WriteULong(offset, 0x5F0F3CF5); // magicNumber
+		offset += head->WriteUShort(offset, hea->FlagsAsInt()); // flags
+		offset += head->WriteUShort(offset, hea->UnitsPerEm()); // unitsPerEm
+		offset += head->WriteDateTime(offset, hea->Created()); // created
+		offset += head->WriteDateTime(offset, hea->Modified()); // modified
+		offset += head->WriteShort(offset, hea->XMin()); // xMin
+		offset += head->WriteShort(offset, hea->YMin()); // yMin
+		offset += head->WriteShort(offset, hea->XMax()); // xMax
+		offset += head->WriteShort(offset, hea->YMax()); // yMax
+		offset += head->WriteUShort(offset, hea->MacStyleAsInt()); // macStyle
+		offset += head->WriteUShort(offset, hea->LowestRecPPEM()); // lowestRecPPEM
+		offset += head->WriteShort(offset, hea->FontDirectionHint()); // fontDirectionHint
+		offset += head->WriteShort(offset, hea->IndexToLocFormat()); // indexToLocFormat
+		offset += head->WriteShort(offset, hea->GlyphDataFormat()); // glyphDataFormat
+	}
+	else
+	{
+		//4+4+4+4+2+2+8+8+2+2+2+2+2+2+2+2+2 => 54
+		int32_t offset = 0;
+		offset += head->WriteFixed(offset, 0x00010000); // version
+		offset += head->WriteFixed(offset, 0x00010000); // fontRevision
+		offset += head->WriteULong(offset, 0); // checkSumAdjustment
+		offset += head->WriteULong(offset, 0x5F0F3CF5); // magicNumber
+		offset += head->WriteUShort(offset, 0); // flags
+		offset += head->WriteUShort(offset, m_FontBoundingBox.upperBound.x - m_FontBoundingBox.lowerBound.x); // unitsPerEm
+		offset += head->WriteDateTime(offset, 0); // created
+		offset += head->WriteDateTime(offset, 0); // modified
+		offset += head->WriteShort(offset, m_FontBoundingBox.lowerBound.x); // xMin
+		offset += head->WriteShort(offset, m_FontBoundingBox.lowerBound.y); // yMin
+		offset += head->WriteShort(offset, m_FontBoundingBox.upperBound.x); // xMax
+		offset += head->WriteShort(offset, m_FontBoundingBox.upperBound.y); // yMax
+		offset += head->WriteUShort(offset, 0); // macStyle
+		offset += head->WriteUShort(offset, 0); // lowestRecPPEM
+		offset += head->WriteShort(offset, 0); // fontDirectionHint
+		offset += head->WriteShort(offset, 0); // indexToLocFormat
+		offset += head->WriteShort(offset, 0); // glyphDataFormat
+	}
+	
 
 	m_FontBuilder->NewTableBuilder(sfntly::Tag::head, head);
 

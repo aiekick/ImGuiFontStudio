@@ -10,6 +10,7 @@
 #include <MainFrame.h>
 #include <Res/CustomFont.cpp>
 #include <Res/Roboto_Medium.cpp>
+#include <ImguiImpl/freetype/imgui_freetype.h>
 
 #include <glad/glad.h> 
 #include <GLFW/glfw3.h>

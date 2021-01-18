@@ -58,6 +58,7 @@ public:
 
 public:
 	sfntly::Ptr<sfntly::Font> m_Font;
+	sfntly::Ptr<sfntly::FontHeaderTable> m_HeadTable;
 	sfntly::Ptr<sfntly::CMapTable::CMap> m_CMapTable;
 	sfntly::Ptr<sfntly::LocaTable> m_LocaTable;
 	sfntly::Ptr<sfntly::GlyphTable> m_GlyfTable;
