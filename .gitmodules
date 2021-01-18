@@ -33,3 +33,7 @@
 	path = 3rdparty/stb
 	url = https://github.com/nothings/stb
 	branch = master
+[submodule "3rdparty/freetype2"]
+	path = 3rdparty/freetype2
+	url = https://github.com/freetype/freetype2.git
+	branch = master
