@@ -362,10 +362,8 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 		const ImVec2 UV0 = ImVec2(vGlyph->glyph.U0, vGlyph->glyph.V0);
 		const ImVec2 UV1 = ImVec2(vGlyph->glyph.U1, vGlyph->glyph.V1);
 
-		ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
 		res = GlyphInfos::DrawGlyphButton(vProjectFile, vFontInfos, &selected, vSize, vGlyph->glyph, hostTextureSize, -1, vShowRect ? 3.0f : 0.0f);
-		ImGui::PopStyleVar();
-
+		
 		if (res)
 		{
 			// left button : check == 1

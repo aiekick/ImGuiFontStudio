@@ -388,10 +388,8 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 											win->DrawList->ChannelsSetCurrent(0);
 
 											// draw glyph in channel 0
-											ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
 											int check = GlyphInfos::DrawGlyphButton(vProjectFile, vFontInfos, &selected, glyph_size, glyph, hostTextureSize);
-											ImGui::PopStyleVar();
-
+											
 											if (check)
 											{
 												// left button : check == 1

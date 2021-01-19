@@ -130,7 +130,6 @@ void FontPreviewPane::DrawFontPreviewPane(ProjectFile *vProjectFile)
 
 				ImGui::Text("Left click for insert the font icon at the pos into the test string");
 				
-				ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
 				bool change = false;
 				ImVec2 cell_size, glyph_size;
 				uint32_t glyphCountX = GlyphDisplayHelper::CalcGlyphsCountAndSize(vProjectFile, &cell_size, &glyph_size);
@@ -187,8 +186,7 @@ void FontPreviewPane::DrawFontPreviewPane(ProjectFile *vProjectFile)
 						}
 					}
 				}
-				ImGui::PopStyleVar();
-
+				
 				ImGui::Separator();
 				
 				if (ImGui::Button("Clear##glyphselection"))
@@ -291,7 +289,6 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 					ImVec2 off = ImGui::GetCursorScreenPos();
 					bool selected = (_TextCursorPos == idx);
 					int check = 0;
-					ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
 					bool found = false;
 					if (vProjectFile->m_FontTestInfos.m_GlyphToInsert.find(idx) != vProjectFile->m_FontTestInfos.m_GlyphToInsert.end())
 					{
@@ -318,8 +315,7 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 					{
 						check = DrawGlyphButton(vProjectFile, font, font->FontSize, &selected, glyph_size, defaultGlyph);
 					}
-					ImGui::PopStyleVar();
-
+					
 					if (check)
 					{
 						_TextCursorPos = idx;
@@ -357,9 +353,7 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 						}
 
 						bool selected = false;
-						ImGui::PushStyleVar(ImGuiStyleVar_FrameRounding, 12.0f);
 						DrawGlyphButton(vProjectFile, font, font->FontSize, &selected, glyph_size, glyph);
-						ImGui::PopStyleVar();
 					}
 				}
 			}

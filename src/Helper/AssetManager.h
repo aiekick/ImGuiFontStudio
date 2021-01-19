@@ -1,5 +1,6 @@
 #pragma once
 
+#ifdef USE_SHADOW
 #include <glad/glad.h>
 #include <ctools/cTools.h>
 
@@ -34,3 +35,4 @@ protected:
 	AssetManager& operator =(const AssetManager&) { return *this; }; // Prevent assignment
 	~AssetManager(); // Prevent unwanted destruction
 };
+#endif

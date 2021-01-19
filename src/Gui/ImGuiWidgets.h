@@ -22,8 +22,6 @@
 #include <cstdarg> // variadic
 #include <cstdint> // types like uint32_t
 
-//#define USE_GRADIENT
-
 struct ImGuiWindow;
 
 namespace ImGui

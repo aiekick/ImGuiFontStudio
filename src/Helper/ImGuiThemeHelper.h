@@ -21,13 +21,21 @@
 #include <string>
 #include <map>
 
+//#define USE_SHADOW
+
 class ImGuiThemeHelper : public conf::ConfigAbstract
 {
 public:
+#ifdef USE_SHADOW
+	static float m_ShadowStrength; // low value is darker than higt (0.0f - 2.0f)
+	static bool m_UseShadow;
+	static bool m_UseTextureForShadow;
+#endif
+
+public:
 	ImVec4 goodColor = ImVec4(0.2f, 0.8f, 0.2f, 1.0f);
 	ImVec4 badColor = ImVec4(0.8f, 0.2f, 0.2f, 1.0f);
-	float m_ShadowStrength = 0.5f; // low value is darker than higt (0.0f - 2.0f)
-
+	
 private:
 	std::map<std::string, IGFD::FileExtentionInfosStruct> m_FileTypeInfos;
 

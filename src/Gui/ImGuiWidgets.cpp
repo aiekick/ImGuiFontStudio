@@ -430,7 +430,7 @@ void ImGui::FramedGroupSeparator()
 	const ImGuiStyle& style = g.Style;
 	
 	ImRect bb;
-	bb.Min.x = window->WorkRect.Min.x;
+	bb.Min.x = window->DC.CursorPos.x;
 	bb.Min.y = window->DC.CursorPos.y;
 	bb.Max.x = window->WorkRect.Max.x;
 	bb.Max.y = window->DC.CursorPos.y + style.FramePadding.y;
@@ -440,8 +440,8 @@ void ImGui::FramedGroupSeparator()
 	{
 		const ImU32 lineCol = ImGui::GetColorU32(ImGuiCol_FrameBg);
 		window->DrawList->AddLine(
-			ImVec2(bb.Min.x + style.ItemInnerSpacing.x, bb.Max.y - style.FramePadding.y * 0.5f), 
-			ImVec2(bb.Max.x - style.ItemInnerSpacing.x, bb.Max.y - style.FramePadding.y * 0.5f), lineCol);
+			ImVec2(bb.Min.x, bb.Max.y - style.FramePadding.y * 0.5f), 
+			ImVec2(bb.Max.x, bb.Max.y - style.FramePadding.y * 0.5f), lineCol);
 		if (g.LogEnabled)
 			LogRenderedText(&bb.Min, "--------------------------------");
 	}
@@ -1133,19 +1133,25 @@ bool ImGui::SliderScalarCompact(float width, const char* label, ImGuiDataType da
 
 	// Draw frame
 
-#ifndef USE_GRADIENT
-	const ImU32 frame_col = GetColorU32(g.ActiveId == id ? ImGuiCol_FrameBgActive : g.HoveredId == id ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
-	RenderNavHighlight(total_bb, id);
-	RenderFrame(total_bb.Min, total_bb.Max, frame_col, true, g.Style.FrameRounding);
-#else
-	const ImVec4 col = GetStyleColorVec4(g.ActiveId == id ? ImGuiCol_FrameBgActive : g.HoveredId == id ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
-	float sha = ImGuiThemeHelper::Instance()->m_ShadowStrength;
-	ImVec4 col_darker = ImVec4(col.x * sha, col.y * sha, col.z * sha, col.w * 0.9f);
-	const ImU32 c = GetColorU32(col);
-	const ImU32 cd = GetColorU32(col_darker);
-	window->DrawList->AddRectFilledMultiColor(total_bb.Min, grab_bb.Max, c, c, cd, cd);
+#ifdef USE_SHADOW
+	if (!ImGuiThemeHelper::m_UseShadow)
+	{
 #endif
-
+		const ImU32 frame_col = GetColorU32(g.ActiveId == id ? ImGuiCol_FrameBgActive : g.HoveredId == id ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
+		RenderNavHighlight(total_bb, id);
+		RenderFrame(total_bb.Min, total_bb.Max, frame_col, true, g.Style.FrameRounding);
+#ifdef USE_SHADOW
+	}
+	else
+	{
+		const ImVec4 col = GetStyleColorVec4(g.ActiveId == id ? ImGuiCol_FrameBgActive : g.HoveredId == id ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg);
+		float sha = ImGuiThemeHelper::Instance()->m_ShadowStrength;
+		ImVec4 col_darker = ImVec4(col.x * sha, col.y * sha, col.z * sha, col.w * 0.9f);
+		const ImU32 c = GetColorU32(col);
+		const ImU32 cd = GetColorU32(col_darker);
+		window->DrawList->AddRectFilledMultiColor(total_bb.Min, total_bb.Max, c, c, cd, cd);
+	}
+#endif
 	// Slider behavior
 	ImRect grab_bb;
 	const bool value_changed = SliderBehavior(total_bb, id, data_type, p_data, p_min, p_max, format, ImGuiSliderFlags_None, &grab_bb);
@@ -1155,15 +1161,22 @@ bool ImGui::SliderScalarCompact(float width, const char* label, ImGuiDataType da
 	// Render grab
 	if (grab_bb.Max.x > grab_bb.Min.x)
 	{
-#ifdef USE_GRADIENT
-		const ImVec4 col = GetStyleColorVec4(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab);
-		float sha = ImGuiThemeHelper::Instance()->m_ShadowStrength;
-		ImVec4 col_darker = ImVec4(col.x * sha, col.y * sha, col.z * sha, col.w * 0.9f);
-		const ImU32 c = GetColorU32(col);
-		const ImU32 cd = GetColorU32(col_darker);
-		window->DrawList->AddRectFilledMultiColor(grab_bb.Min, grab_bb.Max, c, c, cd, cd);
-#else
-		window->DrawList->AddRectFilled(grab_bb.Min, grab_bb.Max, GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
+#ifdef USE_SHADOW
+		if (ImGuiThemeHelper::m_UseShadow)
+		{
+			const ImVec4 col = GetStyleColorVec4(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab);
+			float sha = ImGuiThemeHelper::Instance()->m_ShadowStrength;
+			ImVec4 col_darker = ImVec4(col.x * sha, col.y * sha, col.z * sha, col.w * 0.9f);
+			const ImU32 c = GetColorU32(col);
+			const ImU32 cd = GetColorU32(col_darker);
+			window->DrawList->AddRectFilledMultiColor(grab_bb.Min, grab_bb.Max, c, c, cd, cd);
+		}
+		else
+		{
+#endif
+			window->DrawList->AddRectFilled(grab_bb.Min, grab_bb.Max, GetColorU32(g.ActiveId == id ? ImGuiCol_SliderGrabActive : ImGuiCol_SliderGrab), style.GrabRounding);
+#ifdef USE_SHADOW
+		}
 #endif
 	}
 
@@ -1217,6 +1230,11 @@ bool ImGui::SliderUIntDefaultCompact(float width, const char* label, uint32_t* v
 
 	ImGui::SameLine();
 
+	if (IS_FLOAT_EQUAL(width, 0.0f))
+	{
+		width = ImGui::GetContentRegionAvail().x;
+	}
+
 	float w = width - ImGui::GetCursorPosX() + ax;
 
 	change |= SliderScalarCompact(w, label, ImGuiDataType_U32, v, &v_min, &v_max, format);
@@ -1240,6 +1258,11 @@ bool ImGui::SliderIntDefaultCompact(float width, const char* label, int* v, int 
 
 	ImGui::SameLine();
 
+	if (IS_FLOAT_EQUAL(width, 0.0f))
+	{
+		width = ImGui::GetContentRegionAvail().x;
+	}
+
 	float w = width - ImGui::GetCursorPosX() + ax;
 
 	change |= SliderScalarCompact(w, label, ImGuiDataType_S32, v, &v_min, &v_max, format);
@@ -1262,6 +1285,11 @@ bool ImGui::SliderFloatDefaultCompact(float width, const char* label, float* v, 
 	ImGui::PopID();
 
 	ImGui::SameLine();
+
+	if (IS_FLOAT_EQUAL(width, 0.0f))
+	{
+		width = ImGui::GetContentRegionAvail().x;
+	}
 
 	float w = width - ImGui::GetCursorPosX() + ax;
 

@@ -24,6 +24,16 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 
+//// STATIC ///////////////////////////////////////////////////////////////////////////////////
+
+#ifdef USE_SHADOW
+float ImGuiThemeHelper::m_ShadowStrength = 0.5f; // low value is darker than higt (0.0f - 2.0f)
+bool ImGuiThemeHelper::m_UseShadow = false;
+bool ImGuiThemeHelper::m_UseTextureForShadow = false;
+#endif
+
+///////////////////////////////////////////////////////////////////////////////////////////////
+
 ImGuiThemeHelper::ImGuiThemeHelper()
 {
 	m_FileTypeInfos[".ttf"].color = ImVec4(0.1f, 0.1f, 0.5f, 1.0f);
@@ -45,8 +55,6 @@ void ImGuiThemeHelper::DrawMenu()
 	if (ImGui::MenuItem("Light"))	ApplyStyleColorsLight();
 	
 	ImGui::Separator();
-
-	ImGui::SliderFloatDefaultCompact(300.0f, "Inner Shadow", &m_ShadowStrength, 2.0f, 0.0f, 0.5f);
 
 	ImGui::Separator();
 
@@ -703,7 +711,11 @@ std::string ImGuiThemeHelper::getXml(const std::string& vOffset, const std::stri
 	str += vOffset + "\t<PopupBorderSize value=\"" + ct::toStr(style->PopupBorderSize) + "\"/>\n";
 	str += vOffset + "\t<FrameBorderSize value=\"" + ct::toStr(style->FrameBorderSize) + "\"/>\n";
 	str += vOffset + "\t<TabBorderSize value=\"" + ct::toStr(style->TabBorderSize) + "\"/>\n";
-
+#ifdef USE_SHADOW
+	str += vOffset + "\t<useshadow value=\"" + (m_UseShadow ? "true" : "false") +"\"/>\n";
+	str += vOffset + "\t<shadowstrength value=\"" + ct::toStr(m_ShadowStrength) + "\"/>\n";
+	str += vOffset + "\t<useshadowtexture value=\"" + (m_UseTextureForShadow ? "true" : "false") + "\"/>\n";
+#endif
 	str += vOffset + "</ImGui_Styles>\n";
 
 	str += vOffset + "<FileTypes>\n";
@@ -789,6 +801,11 @@ bool ImGuiThemeHelper::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElem
 			else if (strName == "PopupBorderSize") style->PopupBorderSize = ct::fvariant(strValue).GetF();
 			else if (strName == "FrameBorderSize") style->FrameBorderSize = ct::fvariant(strValue).GetF();
 			else if (strName == "TabBorderSize") style->TabBorderSize = ct::fvariant(strValue).GetF();
+#ifdef USE_SHADOW
+			else if (strName == "useshadow") m_UseShadow = ct::ivariant(strValue).GetB();
+			else if (strName == "shadowstrength") m_ShadowStrength = ct::fvariant(strValue).GetF();
+			else if (strName == "useshadowtexture") m_UseTextureForShadow = ct::ivariant(strValue).GetB();
+#endif
 		}
 	}
 
@@ -954,10 +971,16 @@ void ImGuiThemeHelper::ShowCustomStyleEditor(bool* vOpen, ImGuiStyle* ref)
 		{ bool frame_border = (style.FrameBorderSize > 0.0f); if (ImGui::Checkbox("FrameBorder", &frame_border)) style.FrameBorderSize = frame_border ? 1.0f : 0.0f; }
 		ImGui::SameLine();
 		{ bool popup_border = (style.PopupBorderSize > 0.0f); if (ImGui::Checkbox("PopupBorder", &popup_border)) style.PopupBorderSize = popup_border ? 1.0f : 0.0f; }
-		
-		// Custom Shadow
-		ImGui::SliderFloatDefaultCompact(300.0f, "Inner Shadow", &m_ShadowStrength, 2.0f, 0.0f, 0.5f);
 
+#ifdef USE_SHADOW
+		// Custom Shadow
+		ImGui::Checkbox("Use Shadow", &m_UseShadow);
+		if (m_UseShadow)
+		{
+			ImGui::SliderFloatDefaultCompact(300.0f, "Inner Shadow", &m_ShadowStrength, 2.0f, 0.0f, 0.5f);
+			ImGui::Checkbox("Use Texture for Shadow", &m_UseTextureForShadow);
+		}
+#endif
 		// Save/Revert button
 		if (ImGui::Button("Save Ref"))
 			*ref = ref_saved_style = style;

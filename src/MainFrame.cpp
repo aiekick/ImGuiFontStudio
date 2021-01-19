@@ -57,7 +57,9 @@ MainFrame::MainFrame(GLFWwindow *vWin)
 
 MainFrame::~MainFrame()
 {
+#ifdef USE_SHADOW
 	AssetManager::Instance()->Clear();
+#endif
 }
 
 void MainFrame::Init()
@@ -72,7 +74,9 @@ void MainFrame::Init()
 
 	LayoutManager::Instance()->Init();
 
+#ifdef USE_SHADOW
 	AssetManager::Instance()->LoadTexture2D("btn", "src/res/btn.png");
+#endif
 }
 
 void MainFrame::Unit()
@@ -262,6 +266,13 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 				Action_Menu_SaveProject();
 			}
 		}
+
+		// ImGui Infos
+		ImGuiIO io = ImGui::GetIO();
+		std::string fps = ct::toStr("Dear ImGui %s - %.1f ms/frame (%.1f fps)", ImGui::GetVersion(), 1000.0f / io.Framerate, io.Framerate);
+		ImVec2 size = ImGui::CalcTextSize(fps.c_str());
+		ImGui::Spacing(ImGui::GetContentRegionAvail().x - size.x - ImGui::GetStyle().FramePadding.x * 2.0f);
+		ImGui::Text("%s", fps.c_str());
 
 		ImGui::EndMenuBar();
 	}

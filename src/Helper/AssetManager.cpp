@@ -1,6 +1,7 @@
 // This is an independent project of an individual developer. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
+#ifdef USE_SHADOW
 #include "AssetManager.h"
 #include <ctools/Logger.h>
 
@@ -203,3 +204,4 @@ ct::texture AssetManager::CreateFromFile(const char* vFilePathName, GLenum vTexT
 
 	return res;
 }
+#endif

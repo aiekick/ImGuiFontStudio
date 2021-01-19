@@ -284,25 +284,34 @@ int GlyphInfos::DrawGlyphButton(
 		// Render
 		const ImU32 col = ImGui::GetColorU32(((held && hovered) || (vSelected && *vSelected)) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
 		ImGui::RenderNavHighlight(bb, id);
+
 		float rounding = ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding);
-#ifndef USE_GRADIENT
-		// normal
-		ImGui::RenderFrame(bb.Min, bb.Max, col, true, ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding));
-#else
-
-#if 1
-		// inner shadow
-		ImVec4 cb = ImColor(col).Value; // color base : cb
-		float sha = ImGuiThemeHelper::Instance()->m_ShadowStrength;
-		ImVec4 cbd = ImVec4(cb.x * sha, cb.y * sha, cb.z * sha, cb.w * 0.9f); // color base darker : cbd
-		ImGui::RenderInnerShadowFrame(bb.Min, bb.Max, col, ImGui::GetColorU32(cbd), ImGui::GetColorU32(ImGuiCol_WindowBg), true, rounding);
-#else
-		ImTextureID texId = (ImTextureID)AssetManager::Instance()->m_Textures["btn"].glTex;
-		window->DrawList->AddImage(texId, bb.Min, bb.Max, ImVec2(0, 0), ImVec2(1, 1), col);
+#ifdef USE_SHADOW
+		if (!ImGuiThemeHelper::m_UseShadow)
+		{
 #endif
-
-#endif
+			// normal
+			ImGui::RenderFrame(bb.Min, bb.Max, col, true, ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding));
+#ifdef USE_SHADOW
+		}
+		else
+		{
+			if (ImGuiThemeHelper::m_UseTextureForShadow)
+			{
+				ImTextureID texId = (ImTextureID)AssetManager::Instance()->m_Textures["btn"].glTex;
+				window->DrawList->AddImage(texId, bb.Min, bb.Max, ImVec2(0, 0), ImVec2(1, 1), col);
+			}
+			else
+			{
+				// inner shadow
+				ImVec4 cb = ImColor(col).Value; // color base : cb
+				float sha = ImGuiThemeHelper::Instance()->m_ShadowStrength;
+				ImVec4 cbd = ImVec4(cb.x * sha, cb.y * sha, cb.z * sha, cb.w * 0.9f); // color base darker : cbd
+				ImGui::RenderInnerShadowFrame(bb.Min, bb.Max, col, ImGui::GetColorU32(cbd), ImGui::GetColorU32(ImGuiCol_WindowBg), true, rounding);
+			}
+		}
 		ImGui::AddInvertedRectFilled(window->DrawList, bb.Min, bb.Max, ImGui::GetColorU32(ImGuiCol_WindowBg), rounding, ImDrawCornerFlags_All);
+#endif
 		if (vRectThickNess > 0.0f)
 		{
 			window->DrawList->AddRect(bb.Min, bb.Max, ImGui::GetColorU32(vRectColor), 0.0, 15, vRectThickNess);

@@ -387,14 +387,6 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 			
 			ImGui::FramedGroupSeparator();
 
-			needFontReGen |= ImGui::SliderIntDefaultCompact(ImGui::GetContentRegionAvail().x, "Font Size", &vProjectFile->m_SelectedFont->m_FontSize, 7, 50, defaultFontInfosValues.m_FontSize);
-			needFontReGen |= ImGui::SliderIntDefaultCompact(ImGui::GetContentRegionAvail().x, "Font Anti-aliasing", &vProjectFile->m_SelectedFont->m_Oversample, 1, 5, defaultFontInfosValues.m_Oversample);
-			
-			ImGui::EndFramedGroup(true);
-		}
-
-		if (ImGui::BeginFramedGroup("Rasterizer"))
-		{
 			aw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 3.0f;
 
 			ImGui::PushItemWidth(aw * 0.5f);
@@ -415,26 +407,27 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 			}
 			ImGui::PopItemWidth();
 
+			aw = ImGui::GetContentRegionAvail().x;
+
 			ImGui::FramedGroupSeparator();
 
-			aw = ImGui::GetContentRegionAvail().x;
+			needFontReGen |= ImGui::SliderIntDefaultCompact(ImGui::GetContentRegionAvail().x, "Font Size", &vProjectFile->m_SelectedFont->m_FontSize, 7, 50, defaultFontInfosValues.m_FontSize);
+			
+			if (FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_STB)
+			{
+				needFontReGen |= ImGui::SliderIntDefaultCompact(ImGui::GetContentRegionAvail().x, "Font Anti-aliasing", &vProjectFile->m_SelectedFont->m_Oversample, 1, 5, defaultFontInfosValues.m_Oversample);
+			}
+			else if (FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
+			{
+				needFontReGen |= ImGui::SliderFloatDefaultCompact(aw, "Multiply", &fontMultiply, 0.0f, 2.0f, 1.0f);
+			}
 
 			needFontReGen |= ImGui::SliderIntDefaultCompact(aw, "Padding", &fontPadding, 0, 16, 1);
 
 			if (FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
 			{
-				ImGui::FramedGroupSeparator();
-
-				if (ImGui::CollapsingHeader("Freetype Settings"))
+				if (ImGui::CollapsingHeader("Freetype Settings", ImGuiTreeNodeFlags_Bullet))
 				{
-					const float aw = ImGui::GetContentRegionAvail().x;
-
-					ImGui::FramedGroupSeparator();
-					
-					needFontReGen |= ImGui::SliderFloatDefaultCompact(aw, "Multiply", &fontMultiply, 0.0f, 2.0f, 1.0f);
-
-					ImGui::FramedGroupSeparator();
-
 					needFontReGen |= ImGui::CheckboxFlags("NoHinting", &freeTypeFlag, ImGuiFreeType::NoHinting);
 					needFontReGen |= ImGui::CheckboxFlags("NoAutoHint", &freeTypeFlag, ImGuiFreeType::NoAutoHint);
 					needFontReGen |= ImGui::CheckboxFlags("ForceAutoHint", &freeTypeFlag, ImGuiFreeType::ForceAutoHint);
@@ -443,7 +436,7 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 					needFontReGen |= ImGui::CheckboxFlags("Bold", &freeTypeFlag, ImGuiFreeType::Bold);
 					needFontReGen |= ImGui::CheckboxFlags("Oblique", &freeTypeFlag, ImGuiFreeType::Oblique);
 					needFontReGen |= ImGui::CheckboxFlags("Monochrome", &freeTypeFlag, ImGuiFreeType::Monochrome);
-					//needFontReGen |= ImGui::CheckboxFlags("LoadColor", &FontInfos::freeTypeFlag, ImGuiFreeType::LoadColor);
+					//needFontReGen |= ImGui::CheckboxFlags("LoadColor", &freeTypeFlag, ImGuiFreeType::LoadColor);
 				}
 			}
 
