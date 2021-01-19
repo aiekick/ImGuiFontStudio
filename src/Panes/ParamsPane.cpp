@@ -154,12 +154,15 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 
 						ImGui::FramedGroupText("Opened Fonts");
 
+						static int _countLines = 4;
+						ImGui::SliderIntDefaultCompact(ImGui::GetContentRegionAvail().x, "Count Lines", &_countLines, 0, 100, 4);
+
 						static int selection = 0;
 						static ImGuiTableFlags flags =
 							ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg |
 							ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
 							ImGuiTableFlags_NoHostExtendY | ImGuiTableFlags_Borders;
-						if (ImGui::BeginTable("##fileTable", 2, flags, ImVec2(maxWidth - ImGui::GetStyle().FramePadding.x, 100)))
+						if (ImGui::BeginTable("##fileTable", 2, flags, ImVec2(maxWidth - ImGui::GetStyle().FramePadding.x, _countLines * ImGui::GetTextLineHeightWithSpacing())))
 						{
 							ImGui::TableSetupScrollFreeze(0, 1); // Make header always visible
 							ImGui::TableSetupColumn("Font Files", ImGuiTableColumnFlags_WidthStretch, -1, 0);

@@ -240,8 +240,8 @@ void SimpleGlyph_Solo::DrawCurves(
 			//drawList->AddRect(fontBBox.Min, fontBBox.Max, ImGui::GetColorU32(ImGuiCol_Text));
 			const float tlh = ImGui::GetTextLineHeight();
 
-#define LocalToScreen(a) getLocalToScreen(ImVec2((float)a.x, (float)a.y), contentStart, fbboxOrign, fontBBoxSize, newScale, ImVec2(frc.x, frc.y))
-#define ScreenToLocal(a) getScreenToLocal(ImVec2((float)a.x, (float)a.y), contentStart, fbboxOrign, fontBBoxSize, newScale, ImVec2(frc.x, frc.y))
+#define LocalToScreen(a) getLocalToScreen(ImVec2((float)a.x, (float)a.y), contentStart, fbboxOrign, fontBBoxSize, newScale, ImVec2((float)frc.x, (float)frc.y))
+#define ScreenToLocal(a) getScreenToLocal(ImVec2((float)a.x, (float)a.y), contentStart, fbboxOrign, fontBBoxSize, newScale, ImVec2((float)frc.x, (float)frc.y))
 
 			///////////////////////////////////////////////////////////////
 			// show pos in local space
@@ -252,9 +252,9 @@ void SimpleGlyph_Solo::DrawCurves(
 			}
 			///////////////////////////////////////////////////////////////
 
-			int ascent = vFontInfos->m_Ascent;
-			int descent = vFontInfos->m_Descent;
-			int advanceX = vGlyphInfos->glyph.AdvanceX / vFontInfos->m_Point;
+			float ascent = (float)vFontInfos->m_Ascent;
+			float descent = (float)vFontInfos->m_Descent;
+			float advanceX = vGlyphInfos->glyph.AdvanceX / vFontInfos->m_Point;
 
 			ImVec2 min, max;
 			float triangleWidth = 20.0f;
@@ -337,8 +337,8 @@ void SimpleGlyph_Solo::DrawCurves(
 			if (vGlyphDrawingFlags & GLYPH_DRAWING_GLYPH_ADVANCEX)
 			{
 				const ImU32 advxCol = ImGui::GetColorU32(ImGuiCol_PlotLines);
-				min = LocalToScreen(ImVec2((float)advanceX, oy));
-				max = LocalToScreen(ImVec2((float)advanceX, ly));
+				min = LocalToScreen(ImVec2(advanceX, oy));
+				max = LocalToScreen(ImVec2(advanceX, ly));
 				if (vGlyphDrawingFlags & GLYPH_DRAWING_LEGENDS)
 					drawList->AddText(ImVec2(min.x + tlh, max.y - tlh), textCol, "Glyph Advance X");
 				drawList->AddLine(min, max, advxCol, 2.0f);
@@ -348,8 +348,8 @@ void SimpleGlyph_Solo::DrawCurves(
 			if (vGlyphDrawingFlags & GLYPH_DRAWING_FONT_ASCENT)
 			{
 				const ImU32 ascCol = ImGui::GetColorU32(ImVec4(1, 0, 0, 1));
-				min = LocalToScreen(ImVec2(ox, (float)ascent));
-				max = LocalToScreen(ImVec2(lx, (float)ascent));
+				min = LocalToScreen(ImVec2(ox, ascent));
+				max = LocalToScreen(ImVec2(lx, ascent));
 				if (vGlyphDrawingFlags & GLYPH_DRAWING_LEGENDS)
 					drawList->AddText(ImVec2(min.x + tlh, max.y - tlh), textCol, "Font Ascent");
 				drawList->AddLine(min, max, ascCol, 2.0f);
@@ -359,8 +359,8 @@ void SimpleGlyph_Solo::DrawCurves(
 			if (vGlyphDrawingFlags & GLYPH_DRAWING_FONT_DESCENT)
 			{
 				const ImU32 descCol = ImGui::GetColorU32(ImVec4(1, 0, 0, 1));
-				min = LocalToScreen(ImVec2(ox, (float)descent));
-				max = LocalToScreen(ImVec2(lx, (float)descent));
+				min = LocalToScreen(ImVec2(ox, descent));
+				max = LocalToScreen(ImVec2(lx, descent));
 				if (vGlyphDrawingFlags & GLYPH_DRAWING_LEGENDS)
 					drawList->AddText(ImVec2(min.x + tlh, max.y - tlh), textCol, "Font Descent");
 				drawList->AddLine(min, max, descCol, 2.0f);

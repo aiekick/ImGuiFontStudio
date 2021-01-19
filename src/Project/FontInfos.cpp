@@ -339,7 +339,7 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 
 		if (ImGui::BeginFramedGroup("Selected Font Infos"))
 		{
-			float aw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 2.0f;
+			aw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 2.0f;
 
 			static ImGuiTableFlags flags = 
 				ImGuiTableFlags_SizingFixedFit |
