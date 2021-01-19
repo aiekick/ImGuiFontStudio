@@ -38,6 +38,8 @@ public:
 		bool vForceEditModeOneColumn = false);	/* edition in one column				*/
 };
 
+class FontInfos;
+class GlyphInfos;
 class SimpleGlyph_Solo
 {
 public:
@@ -61,10 +63,13 @@ public:
 	void ClearTransform();
 
 public: // ImGui
-	void DrawCurves(float vGlobalScale, int vFontAscent, int vFontDescent, int vMaxContour, int vQuadBezierCountSegments, bool vShowControlLines);
+	void DrawCurves(
+		float vGlobalScale,
+		std::shared_ptr<FontInfos> vFontInfos,
+		std::shared_ptr<GlyphInfos> vGlyphInfos,
+		int vMaxContour, int vQuadBezierCountSegments, bool vShowControlLines);
 };
 
-class FontInfos;
 class GlyphInfos
 {
 public:

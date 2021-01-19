@@ -274,12 +274,13 @@ bool GlyphPane::DrawSimpleGlyph(ProjectFile* vProjectFile)
 					vProjectFile->SetProjectChange();
 				}
 
-				auto fontInfos = glyphInfosPtr->GetFontInfos();
-				if (fontInfos)
+				auto fontInfosPtr = glyphInfosPtr->GetFontInfos();
+				if (fontInfosPtr && glyphInfosPtr)
 				{
 					g->DrawCurves(
 						vProjectFile->m_GlyphPreview_Scale,
-						fontInfos->m_Ascent, fontInfos->m_Descent,
+						fontInfosPtr,
+						glyphInfosPtr,
 						limitContour,
 						vProjectFile->m_GlyphPreview_QuadBezierCountSegments,
 						vProjectFile->m_GlyphPreview_ShowControlLines);

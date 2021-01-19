@@ -188,10 +188,15 @@ void SimpleGlyph_Solo::ClearTransform()
 }
 
 // https://github.com/rillig/sfntly/tree/master/java/src/com/google/typography/font/tools/fontviewer
-void SimpleGlyph_Solo::DrawCurves(float vGlobalScale, int vFontAscent, int vFontDescent, int vMaxContour, int vQuadBezierCountSegments, bool vShowControlLines)
+void SimpleGlyph_Solo::DrawCurves(
+	float vGlobalScale, 
+	std::shared_ptr<FontInfos> vFontInfos,
+	std::shared_ptr<GlyphInfos> vGlyphInfos,
+	int vMaxContour, int vQuadBezierCountSegments, bool vShowControlLines)
 {
-	if (isValid)
+	if (isValid && vFontInfos && vGlyphInfos)
 	{
+
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (window->SkipItems)
 			return;
@@ -213,7 +218,12 @@ void SimpleGlyph_Solo::DrawCurves(float vGlobalScale, int vFontAscent, int vFont
 
 		ImVec2 glyphCenter = glypRect.GetCenter();
 		ImVec2 glyphSize = glypRect.GetSize();
-		glyphSize.y = ImMax(glyphSize.y, (float)vFontAscent - (float)vFontDescent);
+
+		int ascent = vFontInfos->m_Ascent;
+		int descent = vFontInfos->m_Descent;
+		int advanceX = vGlyphInfos->glyph.AdvanceX / vFontInfos->m_Point;
+
+		glyphSize.y = ImMax(glyphSize.y, (float)(ascent - descent));
 
 		ImVec2 pScale = contentSize / glyphSize;
 		float newScale = ImMin(pScale.x, pScale.y) * vGlobalScale;
@@ -223,28 +233,34 @@ void SimpleGlyph_Solo::DrawCurves(float vGlobalScale, int vFontAscent, int vFont
 
 		ImVec2 pos = contentCenter - glyphSize * 0.5f;
 
-		// x 0 + blue
+		// origin x
 		drawList->AddLine(
 			ct::toImVec2(Scale(ct::ivec2(0, (int32_t)ct::floor(rc.y)), newScale)) + pos,
 			ct::toImVec2(Scale(ct::ivec2(0, (int32_t)ct::floor(rc.w)), newScale)) + pos,
-			ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), 2.0f);
+			ImGui::GetColorU32(ImGuiCol_PlotLinesHovered), 2.0f);
 
-		// Ascent
+		// adv x
 		drawList->AddLine(
-			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.x), vFontAscent), newScale)) + pos,
-			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.z), vFontAscent), newScale)) + pos,
-			ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
+			ct::toImVec2(Scale(ct::ivec2(advanceX, (int32_t)ct::floor(rc.y)), newScale)) + pos,
+			ct::toImVec2(Scale(ct::ivec2(advanceX, (int32_t)ct::floor(rc.w)), newScale)) + pos,
+			ImGui::GetColorU32(ImGuiCol_PlotLines), 2.0f);
 
-		// y 0
+		// base line
 		drawList->AddLine(
 			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.x), 0), newScale)) + pos,
 			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.z), 0), newScale)) + pos,
-			ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 1.0f);
+			ImGui::GetColorU32(ImGuiCol_PlotHistogram), 1.0f);
+
+		// Ascent
+		drawList->AddLine(
+			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.x), ascent), newScale)) + pos,
+			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.z), ascent), newScale)) + pos,
+			ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
 
 		// Descent
 		drawList->AddLine(
-			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.x), vFontDescent), newScale)) + pos,
-			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.z), vFontDescent), newScale)) + pos,
+			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.x), descent), newScale)) + pos,
+			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.z), descent), newScale)) + pos,
 			ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
 
 		for (int c = 0; c < cmax; c++)

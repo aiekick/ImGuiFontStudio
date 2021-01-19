@@ -85,7 +85,8 @@ public: // callable
 	void DrawInfos(ProjectFile* vProjectFile);
 	void UpdateInfos();
 	void UpdateFiltering();
-	void ResetTransforms(ProjectFile* vProjectFile);
+	void ClearTransforms(ProjectFile* vProjectFile);
+	ImFont* GetImFont();
 
 private: // Glyph Names Extraction / DB
 	void FillGlyphNames();

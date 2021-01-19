@@ -382,7 +382,7 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 
 			if (ImGui::Button("Clear Transforms (All Glyphs)", ImVec2(0,0)))
 			{
-				ResetTransforms(vProjectFile);
+				ClearTransforms(vProjectFile);
 			}
 			
 			ImGui::FramedGroupSeparator();
@@ -554,7 +554,7 @@ void FontInfos::UpdateFiltering()
 	}
 }
 
-void FontInfos::ResetTransforms(ProjectFile* vProjectFile)
+void FontInfos::ClearTransforms(ProjectFile* vProjectFile)
 {
 	if (vProjectFile)
 	{
@@ -570,6 +570,15 @@ void FontInfos::ResetTransforms(ProjectFile* vProjectFile)
 
 		vProjectFile->SetProjectChange();
 	}
+}
+
+ImFont* FontInfos::GetImFont()
+{
+	if (!m_ImFontAtlas.Fonts.empty())
+	{
+		return m_ImFontAtlas.Fonts[0];
+	}
+	return nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////////////
