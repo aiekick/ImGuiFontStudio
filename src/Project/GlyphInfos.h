@@ -59,6 +59,9 @@ public:
 	ct::ivec2 Scale(ct::ivec2 p, double scale) const;
 	ct::ivec2 GetCoords(int32_t vContour, int32_t vPoint, double scale);
 	void ClearTransform();
+
+public: // ImGui
+	void DrawCurves(float vGlobalScale, int vFontAscent, int vFontDescent, int vMaxContour, int vQuadBezierCountSegments, bool vShowControlLines);
 };
 
 class FontInfos;
@@ -67,9 +70,18 @@ class GlyphInfos
 public:
 	// 0 => none, 1 => left pressed, 2 => right pressed
 	static int DrawGlyphButton(
-		ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
-		bool* vSelected, ImVec2 vGlyphSize, ImFontGlyph vGlyph, ImVec2 vHostTextureSize,
+		int& vWidgetPushId, // by adress because we want modify it
+		ProjectFile* vProjectFile, ImFont* vFont,
+		bool* vSelected, ImVec2 vGlyphSize, const ImFontGlyph* vGlyph,
+		ImVec2 vTranslation = ImVec2(0, 0), ImVec2 vScale = ImVec2(1, 1),
 		int frame_padding = -1, float vRectThickNess = 0.0f, ImVec4 vRectColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
+	static void RenderGlyph(
+		ImFont* vFont, ImDrawList* vDrawList, 
+		float vGlyphHeight, ImVec2 vMin, ImVec2 vMax, ImVec2 vOffset,
+		ImU32 vCol, 
+		ImWchar vGlyphCodePoint, 
+		ImVec2 vTranslation, ImVec2 vScale, 
+		bool vZoomed);
 
 private:
 	std::weak_ptr<FontInfos> fontInfos;
@@ -81,12 +93,15 @@ public:
 	std::string newHeaderName;
 	uint32_t newCodePoint = 0;
 	SimpleGlyph_Solo simpleGlyph;
-	ct::ivec4 m_FontBoundingBox;
-	int m_FontAscent = 0;
-	int m_FontDescent = 0;
 	ct::fvec2 m_Translation = 0.0f;
 	ct::fvec2 m_Scale = 1.0f;
 
+	// filled during generation only
+	// not to use outside of generation
+	ct::ivec4 m_FontBoundingBox;
+	int m_FontAscent = 0;
+	int m_FontDescent = 0;
+	
 public: // for interaction only
 	bool m_editingName = false;
 	bool m_editingCodePoint = false;

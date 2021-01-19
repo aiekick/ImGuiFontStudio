@@ -88,7 +88,7 @@ private:
 		std::shared_ptr<FontInfos> vFontInfos, const ImVec2& vSize,
 		std::shared_ptr<GlyphInfos> vGlyph, bool vShowRect,
 		bool *vNameupdated, bool *vCodePointUpdated,
-		bool vForceEditMode = false) const;
+		bool vForceEditMode = false);
 	
 	void DrawSelectionsByFontNoOrder(ProjectFile *vProjectFile,
 		bool vShowTooltipInfos = false);

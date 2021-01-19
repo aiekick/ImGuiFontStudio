@@ -28,6 +28,7 @@
 #include <Gui/ImGuiWidgets.h>
 #include <Helper/ImGuiThemeHelper.h>
 #include <Helper/AssetManager.h>
+#include <Panes/DebugPane.h>
 
  ///////////////////////////////////////////////////////////////////////////////////
  //// PUBLIC : STATIC //////////////////////////////////////////////////////////////
@@ -186,6 +187,148 @@ void SimpleGlyph_Solo::ClearTransform()
 	m_Scale = 1.0f;
 }
 
+// https://github.com/rillig/sfntly/tree/master/java/src/com/google/typography/font/tools/fontviewer
+void SimpleGlyph_Solo::DrawCurves(float vGlobalScale, int vFontAscent, int vFontDescent, int vMaxContour, int vQuadBezierCountSegments, bool vShowControlLines)
+{
+	if (isValid)
+	{
+		ImGuiWindow* window = ImGui::GetCurrentWindow();
+		if (window->SkipItems)
+			return;
+		auto drawList = window->DrawList;
+
+		int cmax = (int)coords.size();
+
+		ImVec2 contentStart = ImGui::GetCursorScreenPos();
+		ImVec2 contentSize = ImGui::GetContentRegionAvail();
+		ImVec2 contentCenter = contentStart + contentSize * 0.5f;
+
+		drawList->AddRectFilled(contentStart, contentStart + contentSize, ImGui::GetColorU32(ImGuiCol_FrameBg));
+
+		ImRect glypRect = ImRect(
+			((float)rc.x),
+			((float)rc.y),
+			((float)(rc.z - rc.x)),
+			((float)(rc.w - rc.y)));
+
+		ImVec2 glyphCenter = glypRect.GetCenter();
+		ImVec2 glyphSize = glypRect.GetSize();
+		glyphSize.y = ImMax(glyphSize.y, (float)vFontAscent - (float)vFontDescent);
+
+		ImVec2 pScale = contentSize / glyphSize;
+		float newScale = ImMin(pScale.x, pScale.y) * vGlobalScale;
+		glypRect.Min *= newScale;
+		glypRect.Max *= newScale;
+		glyphSize = glypRect.GetSize();
+
+		ImVec2 pos = contentCenter - glyphSize * 0.5f;
+
+		// x 0 + blue
+		drawList->AddLine(
+			ct::toImVec2(Scale(ct::ivec2(0, (int32_t)ct::floor(rc.y)), newScale)) + pos,
+			ct::toImVec2(Scale(ct::ivec2(0, (int32_t)ct::floor(rc.w)), newScale)) + pos,
+			ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), 2.0f);
+
+		// Ascent
+		drawList->AddLine(
+			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.x), vFontAscent), newScale)) + pos,
+			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.z), vFontAscent), newScale)) + pos,
+			ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
+
+		// y 0
+		drawList->AddLine(
+			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.x), 0), newScale)) + pos,
+			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.z), 0), newScale)) + pos,
+			ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 1.0f);
+
+		// Descent
+		drawList->AddLine(
+			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.x), vFontDescent), newScale)) + pos,
+			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.z), vFontDescent), newScale)) + pos,
+			ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
+
+		for (int c = 0; c < cmax; c++)
+		{
+			if (c >= vMaxContour) break;
+
+			int pmax = (int)coords[c].size();
+
+			int firstOn = 0;
+			for (int p = 0; p < pmax; p++)
+			{
+				if (IsOnCurve(c, p))
+				{
+					firstOn = p;
+					break;
+				}
+			}
+
+			// curve
+
+			drawList->PathLineTo(ct::toImVec2(GetCoords(c, firstOn, newScale)) + pos);
+
+			for (int i = 0; i < pmax; i++)
+			{
+				int icurr = firstOn + i + 1;
+				int inext = firstOn + i + 2;
+				ct::ivec2 cur = GetCoords(c, icurr, newScale);
+
+				if (IsOnCurve(c, icurr))
+				{
+					drawList->PathLineTo(ct::toImVec2(cur) + pos);
+				}
+				else
+				{
+					ct::ivec2 nex = GetCoords(c, inext, newScale);
+					if (!IsOnCurve(c, inext))
+					{
+						nex.x = (int)(((double)nex.x + (double)cur.x) * 0.5);
+						nex.y = (int)(((double)nex.y + (double)cur.y) * 0.5);
+					}
+					drawList->PathBezierQuadraticCurveTo(
+						ct::toImVec2(cur) + pos,
+						ct::toImVec2(nex) + pos, vQuadBezierCountSegments);
+				}
+			}
+
+			drawList->PathStroke(ImGui::GetColorU32(ImGuiCol_Text), true);
+
+#ifdef _DEBUG
+			DebugPane::Instance()->DrawGlyphCurrentPoint(newScale, pos, drawList);
+#endif
+
+			if (vShowControlLines) // control lines
+			{
+				drawList->PathLineTo(ct::toImVec2(GetCoords(c, firstOn, newScale)) + pos);
+
+				for (int i = 0; i < pmax; i++)
+				{
+					int icurr = firstOn + i + 1;
+					int inext = firstOn + i + 2;
+					ct::ivec2 cur = GetCoords(c, icurr, newScale);
+					if (IsOnCurve(c, icurr))
+					{
+						drawList->PathLineTo(ct::toImVec2(cur) + pos);
+					}
+					else
+					{
+						ct::ivec2 nex = GetCoords(c, inext, newScale);
+						if (!IsOnCurve(c, inext))
+						{
+							nex.x = (int)(((double)nex.x + (double)cur.x) * 0.5);
+							nex.y = (int)(((double)nex.y + (double)cur.y) * 0.5);
+						}
+						drawList->PathLineTo(ct::toImVec2(cur) + pos);
+						drawList->PathLineTo(ct::toImVec2(nex) + pos);
+					}
+				}
+
+				drawList->PathStroke(ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), true);
+			}
+		}
+	}
+}
+
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
@@ -239,13 +382,15 @@ void GlyphInfos::SetFontInfos(std::shared_ptr<FontInfos> vFontInfos)
 }
 
 int GlyphInfos::DrawGlyphButton(
-	ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos, 
-	bool* vSelected, ImVec2 vGlyphSize, ImFontGlyph vGlyph, ImVec2 vHostTextureSize,
+	int &vWidgetPushId, // by adress because we want modify it
+	ProjectFile* vProjectFile, ImFont* vFont,
+	bool* vSelected, ImVec2 vGlyphSize, const ImFontGlyph *vGlyph, 
+	ImVec2 vTranslation, ImVec2 vScale,
 	int frame_padding, float vRectThickNess, ImVec4 vRectColor)
 {
 	int res = 0;
 
-	if (vFontInfos)
+	if (vFont && vGlyph)
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (window->SkipItems)
@@ -254,20 +399,20 @@ int GlyphInfos::DrawGlyphButton(
 		ImGuiContext& g = *GImGui;
 		const ImGuiStyle& style = g.Style;
 
-		ImGui::PushID((void*)(intptr_t)vFontInfos->m_ImFontAtlas.TexID);
+		ImGui::PushID(++vWidgetPushId);
+		ImGui::PushID((void*)(intptr_t)vFont->ContainerAtlas->TexID);
 		const ImGuiID id = window->GetID("#image");
 		ImGui::PopID();
-		
+		ImGui::PopID();
+
 		const ImVec2 padding = (frame_padding >= 0) ? ImVec2((float)frame_padding, (float)frame_padding) : style.FramePadding;
-		const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + vGlyphSize + padding * 2);
+		ImRect bb(window->DC.CursorPos, window->DC.CursorPos + vGlyphSize + padding * 2);
 		ImGui::ItemSize(bb);
 		if (!ImGui::ItemAdd(bb, id))
 			return false;
 
 		bool hovered, held;
-		bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, 
-			ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
-
+		bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
 		if (pressed)
 		{
 			if (vSelected)
@@ -275,9 +420,9 @@ int GlyphInfos::DrawGlyphButton(
 				*vSelected = !*vSelected;
 			}
 
-			if (g.ActiveIdMouseButton == 0)
+			if (g.ActiveIdMouseButton == 0) // left click
 				res = 1;
-			if (g.ActiveIdMouseButton == 1)
+			if (g.ActiveIdMouseButton == 1) // right click
 				res = 2;
 		}
 
@@ -285,13 +430,13 @@ int GlyphInfos::DrawGlyphButton(
 		const ImU32 col = ImGui::GetColorU32(((held && hovered) || (vSelected && *vSelected)) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
 		ImGui::RenderNavHighlight(bb, id);
 
-		float rounding = ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding);
+		const float rounding = ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding);
 #ifdef USE_SHADOW
 		if (!ImGuiThemeHelper::m_UseShadow)
 		{
 #endif
 			// normal
-			ImGui::RenderFrame(bb.Min, bb.Max, col, true, ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding));
+			ImGui::RenderFrame(bb.Min, bb.Max, col, true, rounding);
 #ifdef USE_SHADOW
 		}
 		else
@@ -312,76 +457,98 @@ int GlyphInfos::DrawGlyphButton(
 		}
 		ImGui::AddInvertedRectFilled(window->DrawList, bb.Min, bb.Max, ImGui::GetColorU32(ImGuiCol_WindowBg), rounding, ImDrawCornerFlags_All);
 #endif
+
+		// double codepoint / name rect display
 		if (vRectThickNess > 0.0f)
 		{
 			window->DrawList->AddRect(bb.Min, bb.Max, ImGui::GetColorU32(vRectColor), 0.0, 15, vRectThickNess);
 		}
 
-		ImVec2 startPos = bb.Min + padding;
-		ImVec2 endPos = startPos + vGlyphSize;
-
-		ImVec2 uv0 = ImVec2(vGlyph.U0, vGlyph.V0);
-		ImVec2 uv1 = ImVec2(vGlyph.U1, vGlyph.V1);
-		ImVec2 center = ImVec2(0, 0);
-		ImVec2 glyphSize = ImVec2(0, 0);
-
-		float hostRatioX = 1.0f;
-		if (vHostTextureSize.y > 0)
-			hostRatioX = vHostTextureSize.x / vHostTextureSize.y;
-		ImVec2 uvSize = uv1 - uv0;
-		float ratioX = uvSize.x * hostRatioX / uvSize.y;
-
 		ImGui::PushClipRect(bb.Min, bb.Max, true);
+		
+		bb.Min += style.FramePadding;
+		bb.Max -= style.FramePadding;
 
-		if (vProjectFile->m_ZoomGlyphs)
+		ImVec2 pScale = vGlyphSize / vFont->FontSize;
+		float adv = vGlyph->AdvanceX * pScale.y;
+		float offsetX = bb.GetSize().x * 0.5f - adv * 0.5f; // horizontal centering of the glyph
+		ImVec2 trans = vTranslation * pScale;
+		ImVec2 scale = vScale;
+
+		if (!vProjectFile->m_ZoomGlyphs)
 		{
-			float newX = vGlyphSize.y * ratioX;
-			glyphSize = ImVec2(vGlyphSize.x, vGlyphSize.x / ratioX) * 0.5f;
-			if (newX < vGlyphSize.x)
-				glyphSize = ImVec2(newX, vGlyphSize.y) * 0.5f;
-			center = bb.GetCenter();
-		}
-		else
-		{
-			ImVec2 pScale = vGlyphSize / (float)vFontInfos->m_FontSize;
-
-			ImVec2 xy0 = ImVec2(vGlyph.X0, vGlyph.Y0) * pScale;
-			ImVec2 xy1 = ImVec2(vGlyph.X1, vGlyph.Y1) * pScale;
-			ImRect realGlyphRect = ImRect(startPos + xy0, startPos + xy1);
-			ImVec2 realGlyphSize = realGlyphRect.GetSize();
-
-			// redim with ratio
-			float newX = realGlyphSize.y * ratioX;
-			glyphSize = ImVec2(realGlyphSize.x, realGlyphSize.x / ratioX) * 0.5f;
-			if (newX < realGlyphSize.x)
-				glyphSize = ImVec2(newX, realGlyphSize.y) * 0.5f;
-			center = realGlyphRect.GetCenter();
-
-			float offsetX = vGlyphSize.x * 0.5f - realGlyphSize.x * 0.5f;
-			center.x += offsetX; // center the glyph
-
 			if (vProjectFile->m_ShowBaseLine)// draw base line
 			{
-				float asc = vFontInfos->m_Ascent * vFontInfos->m_Point * pScale.y;
-				window->DrawList->AddLine(ImVec2(bb.Min.x, startPos.y + asc), ImVec2(bb.Max.x, startPos.y + asc), ImGui::GetColorU32(ImGuiCol_PlotHistogram), 2.0f); // base line
+				float asc = vFont->Ascent * pScale.y;
+				window->DrawList->AddLine(ImVec2(bb.Min.x, bb.Min.y + asc), ImVec2(bb.Max.x, bb.Min.y + asc), ImGui::GetColorU32(ImGuiCol_PlotHistogram), 2.0f); // base line
 			}
 
 			if (vProjectFile->m_ShowOriginX) // draw origin x
 			{
-				window->DrawList->AddLine(ImVec2(startPos.x + offsetX, bb.Min.y), ImVec2(startPos.x + offsetX, bb.Max.y), ImGui::GetColorU32(ImGuiCol_PlotLinesHovered), 2.0f); // base line
+				window->DrawList->AddLine(ImVec2(bb.Min.x + offsetX, bb.Min.y), ImVec2(bb.Min.x + offsetX, bb.Max.y), ImGui::GetColorU32(ImGuiCol_PlotLinesHovered), 2.0f); // base line
 			}
 
 			if (vProjectFile->m_ShowAdvanceX) // draw advance X
 			{
-				float adv = vGlyph.AdvanceX * pScale.y + offsetX;
-				window->DrawList->AddLine(ImVec2(startPos.x + adv, bb.Min.y), ImVec2(startPos.x + adv, bb.Max.y), ImGui::GetColorU32(ImGuiCol_PlotLines), 2.0f); // base line
+				window->DrawList->AddLine(ImVec2(bb.Min.x + adv + offsetX, bb.Min.y), ImVec2(bb.Min.x + adv + offsetX, bb.Max.y), ImGui::GetColorU32(ImGuiCol_PlotLines), 2.0f); // base line
 			}
 		}
 
-		window->DrawList->AddImage(vFontInfos->m_ImFontAtlas.TexID, center - glyphSize, center + glyphSize, uv0, uv1, ImGui::GetColorU32(ImGuiCol_Text)); // glyph
-
+		RenderGlyph(vFont, window->DrawList,
+			vGlyphSize.y, 
+			bb.Min, bb.Max, ImVec2(offsetX,0),
+			ImGui::GetColorU32(ImGuiCol_Text), 
+			(ImWchar)vGlyph->Codepoint, 
+			trans, scale,
+			vProjectFile->m_ZoomGlyphs);
+		
 		ImGui::PopClipRect();
 	}
 
 	return res;
+}
+
+void GlyphInfos::RenderGlyph(ImFont* vFont, ImDrawList* vDrawList, float vGlyphHeight, ImVec2 vMin, ImVec2 vMax, ImVec2 vOffset, ImU32 vCol, ImWchar vGlyphCodePoint, ImVec2 vTranslation, ImVec2 vScale, bool vZoomed)
+{
+	if (vFont && vFont->ContainerAtlas && vDrawList && vGlyphHeight > 0.0f) // (vGlyphSize > 0.0 for avoid div by zero)
+	{
+		const ImFontGlyph* glyph = vFont->FindGlyph(vGlyphCodePoint);
+		if (!glyph || !glyph->Visible)
+			return;
+
+		float scale = (vGlyphHeight >= 0.0f) ? (vGlyphHeight / vFont->FontSize) : 1.0f;
+		//vPos.x = IM_FLOOR(vPos.x);
+		//vPos.y = IM_FLOOR(vPos.y);
+
+		ImVec2 pMin(0, 0), pMax(0, 0);
+
+		if (vZoomed)
+		{
+			ImVec2 gSize = ImVec2(glyph->X1 - glyph->X0, glyph->Y1 - glyph->Y0);
+			if (IS_FLOAT_EQUAL(gSize.y, 0.0f))
+				return;
+			float ratioX = gSize.x / gSize.y;
+			float newX = vGlyphHeight * ratioX;
+			gSize = ImVec2(vGlyphHeight, vGlyphHeight / ratioX) * 0.5f;
+			if (newX < vGlyphHeight)
+				gSize = ImVec2(newX, vGlyphHeight) * 0.5f;
+			ImVec2 center = ImRect(vMin, vMax).GetCenter();
+
+			pMin = center - gSize;
+			pMax = center + gSize;
+		}
+		else
+		{
+			pMin = ImVec2(vMin.x + vOffset.x + glyph->X0 * scale * vScale.x + vTranslation.x, vMin.y + vOffset.y + glyph->Y0 * scale * vScale.y - vTranslation.y);
+			pMax = ImVec2(vMin.x + vOffset.x + glyph->X1 * scale * vScale.x + vTranslation.x, vMin.y + vOffset.y + glyph->Y1 * scale * vScale.y - vTranslation.y);
+		}
+
+		ImVec2 uv0 = ImVec2(glyph->U0, glyph->V0);
+		ImVec2 uv1 = ImVec2(glyph->U1, glyph->V1);
+
+		vDrawList->PushTextureID(vFont->ContainerAtlas->TexID);
+		vDrawList->PrimReserve(6, 4);
+		vDrawList->PrimRectUV(pMin, pMax, uv0, uv1, vCol);
+		vDrawList->PopTextureID();
+	}
 }

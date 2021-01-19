@@ -122,6 +122,8 @@ void GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile)
 		{
 			if (vProjectFile &&  vProjectFile->IsLoaded())
 			{
+				ImGui::Text("You can select a glyph :\n - click on a glyph in Selected Font Pane\n - right click on a glyph in final pane\n - click on a glyph in font preview pane");
+
 				static float _ZoomPrecision = 200.0f;
 				static float _ZoomPrecisionRatio = 1.0f / _ZoomPrecision;
 				if (ImGui::SliderFloatDefaultCompact(ImGui::GetContentRegionAvail().x, "Zoom Precision", &_ZoomPrecision, 1.0f, 2000.0f, 200.0f))
@@ -241,15 +243,8 @@ void GlyphPane::Clear()
 // https://github.com/rillig/sfntly/tree/master/java/src/com/google/typography/font/tools/fontviewer
 bool GlyphPane::DrawSimpleGlyph(ProjectFile* vProjectFile)
 {
-	if (!m_GlyphToDisplay.expired() && vProjectFile->m_SelectedFont)
+	if (!m_GlyphToDisplay.expired())
 	{
-		ImGuiWindow* window = ImGui::GetCurrentWindow();
-		if (window->SkipItems)
-			return false;
-		auto drawList = window->DrawList;
-
-		/////////////////////////////////////////////////
-
 		auto glyphInfosPtr = m_GlyphToDisplay.lock();
 		if (glyphInfosPtr)
 		{
@@ -259,20 +254,18 @@ bool GlyphPane::DrawSimpleGlyph(ProjectFile* vProjectFile)
 				int cmax = (int)g->coords.size();
 				ct::ivec4 rc = g->rc;
 
-				ImVec2 contentSize = ImGui::GetContentRegionAvail();
-				ImRect glypRect = ImRect(
-					((float)rc.x) * vProjectFile->m_GlyphPreview_Scale, 
-					((float)rc.y) * vProjectFile->m_GlyphPreview_Scale, 
-					((float)(rc.z - rc.x)) * vProjectFile->m_GlyphPreview_Scale, 
-					((float)(rc.w - rc.y)) * vProjectFile->m_GlyphPreview_Scale);
+				ImGui::Text("Glyph Rect : %i %i %i %i", rc.x, rc.y, rc.z, rc.w);
+
+				ImGui::SliderIntDefaultCompact(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x, "Count Contours", &limitContour, 0, cmax, cmax);
+				limitContour = ct::mini(limitContour, cmax);
 
 				bool change = false;
-				float aw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 2.0f) * 0.5f;
+				float aw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 1.0f) * 0.5f;
 				change |= ImGui::SliderFloatDefaultCompact(aw, "Trans X", &glyphInfosPtr->m_Translation.x, (float)-rc.z, (float)rc.z, 0.0f); ImGui::SameLine();
 				change |= ImGui::SliderFloatDefaultCompact(aw, "Trans Y", &glyphInfosPtr->m_Translation.y, (float)-rc.w, (float)rc.w, 0.0f);
 				//change |= ImGui::SliderFloatDefaultCompact(aw, "Scale X", &glyphInfosPtr->m_Scale.x, 0.01f, 3.0f, 1.0f); ImGui::SameLine();
 				//change |= ImGui::SliderFloatDefaultCompact(aw, "Scale Y", &glyphInfosPtr->m_Scale.y, 0.01f, 3.0f, 1.0f);
-
+				
 				if (change)
 				{
 					// will come back with svg or/and glyph edition
@@ -281,124 +274,15 @@ bool GlyphPane::DrawSimpleGlyph(ProjectFile* vProjectFile)
 					vProjectFile->SetProjectChange();
 				}
 
-				ImVec2 glyphCenter = glypRect.GetCenter();
-				ImVec2 pos = ImGui::GetCursorScreenPos() + contentSize * 0.5f - glyphCenter;
-
-				if (ImGui::BeginMenuBar())
+				auto fontInfos = glyphInfosPtr->GetFontInfos();
+				if (fontInfos)
 				{
-					ImGui::PushItemWidth(100.0f);
-					ImGui::SliderInt("Contours", &limitContour, 0, cmax);
-					ImGui::PopItemWidth();
-
-					ImGui::EndMenuBar();
-				}
-
-				ImGui::Text("You can select glyph in Current Font Pane");
-				ImGui::Text("the transformed glyph must keep in this rect : %i %i %i %i", rc.x, rc.y, rc.z, rc.w);
-
-				// x 0 + blue
-				drawList->AddLine(
-					ct::toImVec2(g->Scale(ct::ivec2(0, (int32_t)ct::floor(rc.y)), vProjectFile->m_GlyphPreview_Scale)) + pos,
-					ct::toImVec2(g->Scale(ct::ivec2(0, (int32_t)ct::floor(rc.w)), vProjectFile->m_GlyphPreview_Scale)) + pos,
-					ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), 2.0f);
-
-				// Ascent
-				drawList->AddLine(
-					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.x), vProjectFile->m_SelectedFont->m_Ascent), vProjectFile->m_GlyphPreview_Scale)) + pos,
-					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.z), vProjectFile->m_SelectedFont->m_Ascent), vProjectFile->m_GlyphPreview_Scale)) + pos,
-					ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
-
-				// y 0
-				drawList->AddLine(
-					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.x), 0), vProjectFile->m_GlyphPreview_Scale)) + pos,
-					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.z), 0), vProjectFile->m_GlyphPreview_Scale)) + pos,
-					ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 1.0f);
-
-				// Descent
-				drawList->AddLine(
-					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.x), vProjectFile->m_SelectedFont->m_Descent), vProjectFile->m_GlyphPreview_Scale)) + pos,
-					ct::toImVec2(g->Scale(ct::ivec2((int32_t)ct::floor(rc.z), vProjectFile->m_SelectedFont->m_Descent), vProjectFile->m_GlyphPreview_Scale)) + pos,
-					ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
-
-				for (int c = 0; c < cmax; c++)
-				{
-					if (c >= limitContour) break;
-
-					int pmax = (int)g->coords[c].size();
-
-					int firstOn = 0;
-					for (int p = 0; p < pmax; p++)
-					{
-						if (g->IsOnCurve(c, p))
-						{
-							firstOn = p;
-							break;
-						}
-					}
-
-					// curve
-
-					drawList->PathLineTo(ct::toImVec2(g->GetCoords(c, firstOn, vProjectFile->m_GlyphPreview_Scale)) + pos);
-
-					for (int i = 0; i < pmax; i++)
-					{
-						int icurr = firstOn + i + 1;
-						int inext = firstOn + i + 2;
-						ct::ivec2 cur = g->GetCoords(c, icurr, vProjectFile->m_GlyphPreview_Scale);
-
-						if (g->IsOnCurve(c, icurr))
-						{
-							drawList->PathLineTo(ct::toImVec2(cur) + pos);
-						}
-						else
-						{
-							ct::ivec2 nex = g->GetCoords(c, inext, vProjectFile->m_GlyphPreview_Scale);
-							if (!g->IsOnCurve(c, inext))
-							{
-								nex.x = (int)(((double)nex.x + (double)cur.x) * 0.5);
-								nex.y = (int)(((double)nex.y + (double)cur.y) * 0.5);
-							}
-							drawList->PathBezierQuadraticCurveTo(
-								ct::toImVec2(cur) + pos,
-								ct::toImVec2(nex) + pos,
-								vProjectFile->m_GlyphPreview_QuadBezierCountSegments);
-						}
-					}
-
-					drawList->PathStroke(ImGui::GetColorU32(ImGuiCol_Text), true);
-
-#ifdef _DEBUG
-					DebugPane::Instance()->DrawGlyphCurrentPoint(vProjectFile->m_GlyphPreview_Scale, pos, drawList);
-#endif
-
-					if (vProjectFile->m_GlyphPreview_ShowControlLines) // control lines
-					{
-						drawList->PathLineTo(ct::toImVec2(g->GetCoords(c, firstOn, vProjectFile->m_GlyphPreview_Scale)) + pos);
-
-						for (int i = 0; i < pmax; i++)
-						{
-							int icurr = firstOn + i + 1;
-							int inext = firstOn + i + 2;
-							ct::ivec2 cur = g->GetCoords(c, icurr, vProjectFile->m_GlyphPreview_Scale);
-							if (g->IsOnCurve(c, icurr))
-							{
-								drawList->PathLineTo(ct::toImVec2(cur) + pos);
-							}
-							else
-							{
-								ct::ivec2 nex = g->GetCoords(c, inext, vProjectFile->m_GlyphPreview_Scale);
-								if (!g->IsOnCurve(c, inext))
-								{
-									nex.x = (int)(((double)nex.x + (double)cur.x) * 0.5);
-									nex.y = (int)(((double)nex.y + (double)cur.y) * 0.5);
-								}
-								drawList->PathLineTo(ct::toImVec2(cur) + pos);
-								drawList->PathLineTo(ct::toImVec2(nex) + pos);
-							}
-						}
-
-						drawList->PathStroke(ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), true);
-					}
+					g->DrawCurves(
+						vProjectFile->m_GlyphPreview_Scale,
+						fontInfos->m_Ascent, fontInfos->m_Descent,
+						limitContour,
+						vProjectFile->m_GlyphPreview_QuadBezierCountSegments,
+						vProjectFile->m_GlyphPreview_ShowControlLines);
 				}
 			}
 		}

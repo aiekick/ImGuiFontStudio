@@ -342,11 +342,11 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 	std::shared_ptr<FontInfos> vFontInfos, const ImVec2& vSize,
 	std::shared_ptr<GlyphInfos> vGlyph, bool vShowRect,
 	bool *vNameupdated, bool *vCodePointUpdated, 
-	bool vForceEditMode) const
+	bool vForceEditMode)
 {
 	int res = false;
 	
-	if (vGlyph)
+	if (vFontInfos && vGlyph)
 	{
 		ImGui::PushID(vGlyph.get());
 		ImGui::BeginGroup();
@@ -356,13 +356,14 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 			vFontInfos, vSize, vGlyph->glyph.Codepoint, &selected, 
 			SelectionContainerEnum::SELECTION_CONTAINER_FINAL);
 
-		const ImVec2 hostTextureSize = ImVec2(
-			(float)vFontInfos->m_ImFontAtlas.TexWidth,
-			(float)vFontInfos->m_ImFontAtlas.TexHeight);
-		const ImVec2 UV0 = ImVec2(vGlyph->glyph.U0, vGlyph->glyph.V0);
-		const ImVec2 UV1 = ImVec2(vGlyph->glyph.U1, vGlyph->glyph.V1);
-
-		res = GlyphInfos::DrawGlyphButton(vProjectFile, vFontInfos, &selected, vSize, vGlyph->glyph, hostTextureSize, -1, vShowRect ? 3.0f : 0.0f);
+		ct::fvec2 trans = vGlyph->m_Translation * vFontInfos->m_Point;
+		ct::fvec2 scale = vGlyph->m_Scale;
+		res = GlyphInfos::DrawGlyphButton(
+			paneWidgetId,
+			vProjectFile, vFontInfos->m_ImFontAtlas.Fonts[0], 
+			&selected, vSize, &vGlyph->glyph,
+			ImVec2(trans.x, trans.y), ImVec2(scale.x, scale.y), 
+			-1, vShowRect ? 3.0f : 0.0f);
 		
 		if (res)
 		{

@@ -388,8 +388,7 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 											win->DrawList->ChannelsSetCurrent(0);
 
 											// draw glyph in channel 0
-											int check = GlyphInfos::DrawGlyphButton(vProjectFile, vFontInfos, &selected, glyph_size, glyph, hostTextureSize);
-											
+											int check = GlyphInfos::DrawGlyphButton(paneWidgetId, vProjectFile, vFontInfos->m_ImFontAtlas.Fonts[0], &selected, glyph_size, &glyph);
 											if (check)
 											{
 												// left button : check == 1
