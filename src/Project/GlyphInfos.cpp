@@ -83,7 +83,7 @@ int GlyphDisplayHelper::CalcGlyphsCountAndSize(
 				const ImVec2 frame_size = ImGui::CalcItemSize(ImVec2(0, 0), ImGui::CalcItemWidth(),
 					label_size.y + ImGui::GetStyle().FramePadding.y * 2.0f);
 				float cell_size_y = frame_size.y * 2.0f + ImGui::GetStyle().FramePadding.y;
-				float cell_size_x = cell_size_y + ImGui::GetStyle().FramePadding.x + GLYPH_EDIT_CONTROl_WIDTH;
+				float cell_size_x = cell_size_y + ImGui::GetStyle().FramePadding.x + GLYPH_EDIT_CONTROL_WIDTH;
 				glyphCount = ct::maxi(1, (int)ct::floor(aw / cell_size_x));
 				*vGlyphSize = ImVec2(cell_size_y, cell_size_y);
 			}

@@ -398,7 +398,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 			{
 				vGlyph->editHeaderName = vGlyph->newHeaderName;
 				ImGui::PushItemWidth(
-					GLYPH_EDIT_CONTROl_WIDTH -
+					GLYPH_EDIT_CONTROL_WIDTH -
 					(displayResetHeaderNameBtn ? ImGui::GetFrameHeight() : 0.0f)
 				);
 			}
@@ -421,7 +421,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 				}
 				ImGui::SameLine();
 				ImGui::PushItemWidth(
-					GLYPH_EDIT_CONTROl_WIDTH - 
+					GLYPH_EDIT_CONTROL_WIDTH - 
 					ImGui::GetCursorScreenPos().x + x -
 					(displayResetHeaderNameBtn ? ImGui::GetFrameHeight() : 0.0f)
 				);
@@ -454,7 +454,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 			{
 				vGlyph->editCodePoint = vGlyph->newCodePoint;
 				ImGui::PushItemWidth(
-					GLYPH_EDIT_CONTROl_WIDTH -
+					GLYPH_EDIT_CONTROL_WIDTH -
 					(displayResetCodePointBtn ? ImGui::GetFrameHeight() : 0.0f)
 				);
 			}
@@ -482,7 +482,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 					}
 					ImGui::SameLine();
 					ImGui::PushItemWidth(
-						GLYPH_EDIT_CONTROl_WIDTH - 
+						GLYPH_EDIT_CONTROL_WIDTH - 
 						ImGui::GetCursorScreenPos().x + x -
 						(displayResetCodePointBtn ? ImGui::GetFrameHeight() : 0.0f)
 					);
@@ -490,7 +490,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 				else
 				{
 					ImGui::PushItemWidth(
-						GLYPH_EDIT_CONTROl_WIDTH -
+						GLYPH_EDIT_CONTROL_WIDTH -
 						(displayResetCodePointBtn ? ImGui::GetFrameHeight() : 0.0f)
 					);
 				}
