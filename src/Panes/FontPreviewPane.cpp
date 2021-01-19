@@ -244,7 +244,7 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 	if (!vProjectFile->m_FontTestInfos.m_TestFont.expired())
 	{
 		auto fontPtr = vProjectFile->m_FontTestInfos.m_TestFont.lock();
-		if (fontPtr)
+		if (fontPtr.use_count())
 		{
 			font = fontPtr->m_ImFontAtlas.Fonts[0];
 		}
@@ -362,7 +362,7 @@ void FontPreviewPane::DrawMixedFontResult(ProjectFile* vProjectFile)
 	if (!vProjectFile->m_FontTestInfos.m_TestFont.expired())
 	{
 		auto fontPtr = vProjectFile->m_FontTestInfos.m_TestFont.lock();
-		if (fontPtr)
+		if (fontPtr.use_count())
 		{
 			font = fontPtr->m_ImFontAtlas.Fonts[0];
 		}

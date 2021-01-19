@@ -346,7 +346,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 {
 	int res = false;
 	
-	if (vFontInfos && vGlyph)
+	if (vFontInfos.use_count() && vGlyph)
 	{
 		ImGui::PushID(vGlyph.get());
 		ImGui::BeginGroup();
@@ -547,9 +547,9 @@ void FinalFontPane::DrawSelectionsByFontNoOrder(ProjectFile *vProjectFile, bool 
 	}
 }
 
-static inline void DrawGlyphInfosToolTip(std::shared_ptr<FontInfos> vFontInfos, std::shared_ptr<GlyphInfos>vGlyphInfos)
+static inline void DrawGlyphInfosToolTip(std::shared_ptr<FontInfos> vFontInfos, std::shared_ptr<GlyphInfos> vGlyphInfos)
 {
-	if (ImGui::IsItemHovered())
+	if (ImGui::IsItemHovered() && vFontInfos.use_count() && vGlyphInfos.use_count())
 	{
 		ImGui::SetTooltip("glyph index : %i\nnew name : %s\nnew codepoint : %i\nold name : %s\nold codepoint : %i\nfont : %s",
 			vGlyphInfos->glyphIndex,
@@ -572,7 +572,7 @@ void FinalFontPane::DrawSelectionsByFontNoOrder_OneFontOnly(
 	bool vForceEditModeOneColumn,
 	bool vShowTooltipInfos)
 {
-	if (vProjectFile && vFontInfos)
+	if (vProjectFile && vFontInfos.use_count())
 	{
 		if (vFontInfos->m_SelectedGlyphs.empty())
 			return;
@@ -723,7 +723,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
 	bool vForceEditModeOneColumn,
 	bool vShowTooltipInfos)
 {
-	if (vProjectFile && vFontInfos)
+	if (vProjectFile && vFontInfos.use_count())
 	{
 		if (vFontInfos->m_GlyphsOrderedByCodePoints.empty())
 			return;
@@ -890,11 +890,11 @@ void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(
 	bool vForceEditModeOneColumn,
 	bool vShowTooltipInfos)
 {
-	if (vFontInfos->m_GlyphCodePointToName.empty())
-		return;
-
-	if (vProjectFile && vFontInfos)
+	if (vProjectFile && vFontInfos.use_count())
 	{
+		if (vFontInfos->m_GlyphCodePointToName.empty())
+			return;
+
 		if (vFontInfos->m_ImFontAtlas.IsBuilt())
 		{
 			if (vFontInfos->m_ImFontAtlas.TexID)
@@ -1047,7 +1047,7 @@ void FinalFontPane::DrawSelectionMergedNoOrder(ProjectFile *vProjectFile)
 			for (auto& glyphInfo : m_GlyphsMergedNoOrder)
 			{
 				auto vFontInfos = glyphInfo->GetFontInfos();
-				if (vFontInfos && glyphCountX)
+				if (vFontInfos.use_count() && glyphCountX)
 				{
 					if (vFontInfos->m_ImFontAtlas.IsBuilt())
 					{
@@ -1169,7 +1169,7 @@ void FinalFontPane::DrawSelectionMergedOrderedByCodePoint(ProjectFile *vProjectF
 				for (auto& glyphInfo : glyphVector)
 				{
 					auto vFontInfos = glyphInfo->GetFontInfos();
-					if (vFontInfos && glyphCountX)
+					if (vFontInfos.use_count() && glyphCountX)
 					{
 						if (vFontInfos->m_ImFontAtlas.IsBuilt())
 						{
@@ -1291,7 +1291,7 @@ void FinalFontPane::DrawSelectionMergedOrderedByGlyphNames(ProjectFile *vProject
 				for (auto& glyphInfo : glyphVector)
 				{
 					auto vFontInfos = glyphInfo->GetFontInfos();
-					if (vFontInfos && glyphCountX)
+					if (vFontInfos.use_count() && glyphCountX)
 					{
 						if (vFontInfos->m_ImFontAtlas.IsBuilt())
 						{

@@ -69,35 +69,10 @@ void GlyphPane::DrawDialogsAndPopups(ProjectFile* /*vProjectFile*/)
 int GlyphPane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas)
 {
 	UNUSED(vUserDatas);
-
+	
 	if (vProjectFile && vProjectFile->IsLoaded())
 	{
-		if (LayoutManager::Instance()->IsSpecificPaneFocused(PaneFlags::PANE_GLYPH))
-		{
-			const float maxWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 4.0f;
-			const float mrw = maxWidth / 1.0f - ImGui::GetStyle().FramePadding.x;
-
-			if (ImGui::BeginFramedGroup("Glyph Pane"))
-			{
-				if (ImGui::SliderFloatDefaultCompact(mrw, "Scale", &vProjectFile->m_GlyphPreview_Scale, 0.01f, 2.0f, 1.0f))
-				{
-					vProjectFile->SetProjectChange();
-				}
-
-				if (ImGui::SliderIntDefaultCompact(mrw, "Segments", &vProjectFile->m_GlyphPreview_QuadBezierCountSegments, 0, 50, 0))
-				{
-					vProjectFile->SetProjectChange();
-				}
-
-				//ImGui::Checkbox("Stroke or Fill", &_stroke);
-				if (ImGui::Checkbox("Control Lines", &vProjectFile->m_GlyphPreview_ShowControlLines))
-				{
-					vProjectFile->SetProjectChange();
-				}
-			}
-
-			ImGui::EndFramedGroup(true);
-		}
+		// finally not very praticable
 	}
 
 	return vWidgetId;
@@ -124,12 +99,22 @@ void GlyphPane::DrawGlyphPane(ProjectFile *vProjectFile)
 			{
 				ImGui::Text("You can select a glyph :\n - click on a glyph in Selected Font Pane\n - right click on a glyph in final pane\n - click on a glyph in font preview pane");
 
-				static float _ZoomPrecision = 200.0f;
-				static float _ZoomPrecisionRatio = 1.0f / _ZoomPrecision;
-				if (ImGui::SliderFloatDefaultCompact(ImGui::GetContentRegionAvail().x, "Zoom Precision", &_ZoomPrecision, 1.0f, 2000.0f, 200.0f))
+				const float aw = ImGui::GetContentRegionAvail().x;
+				static float _ZoomPrecisionRatio = 1.0f / vProjectFile->m_GlyphPreviewZoomPrecision;
+				if (ImGui::SliderFloatDefaultCompact(ImGui::GetContentRegionAvail().x, "Zoom Precision", &vProjectFile->m_GlyphPreviewZoomPrecision, 1.0f, 2000.0f, 200.0f))
 				{
-					_ZoomPrecision = ImMax(_ZoomPrecision, 1.0f);
-					_ZoomPrecisionRatio = 1.0f / _ZoomPrecision;
+					vProjectFile->m_GlyphPreviewZoomPrecision = ImMax(vProjectFile->m_GlyphPreviewZoomPrecision, 1.0f);
+					_ZoomPrecisionRatio = 1.0f / vProjectFile->m_GlyphPreviewZoomPrecision;
+				}
+
+				if (ImGui::SliderFloatDefaultCompact(aw, "Scale", &vProjectFile->m_GlyphPreview_Scale, 0.01f, 2.0f, 1.0f))
+				{
+					vProjectFile->SetProjectChange();
+				}
+
+				if (ImGui::SliderIntDefaultCompact(aw, "Segments", &vProjectFile->m_GlyphPreview_QuadBezierCountSegments, 0, 50, 0))
+				{
+					vProjectFile->SetProjectChange();
 				}
 
 				if (ImGui::IsWindowHovered())
@@ -161,10 +146,10 @@ bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> 
 {
 	bool res = false;
 
-	if (vFontInfos && !vGlyphInfos.expired())
+	if (vFontInfos.use_count() && !vGlyphInfos.expired())
 	{
 		auto glyphInfosPtr = vGlyphInfos.lock();
-		if (glyphInfosPtr)
+		if (glyphInfosPtr.use_count())
 		{
 			std::string fontPathName = vProjectFile->GetAbsolutePath(vFontInfos->m_FontFilePathName);
 
@@ -226,7 +211,7 @@ void GlyphPane::Clear()
 	if (!m_GlyphToDisplay.expired())
 	{
 		auto glyphInfosPtr = m_GlyphToDisplay.lock();
-		if (glyphInfosPtr)
+		if (glyphInfosPtr.use_count())
 		{
 			glyphInfosPtr->simpleGlyph.Clear();
 
@@ -246,7 +231,7 @@ bool GlyphPane::DrawSimpleGlyph(ProjectFile* vProjectFile)
 	if (!m_GlyphToDisplay.expired())
 	{
 		auto glyphInfosPtr = m_GlyphToDisplay.lock();
-		if (glyphInfosPtr)
+		if (glyphInfosPtr.use_count())
 		{
 			auto g = &glyphInfosPtr->simpleGlyph;
 			if (g->isValid)
@@ -254,9 +239,7 @@ bool GlyphPane::DrawSimpleGlyph(ProjectFile* vProjectFile)
 				int cmax = (int)g->coords.size();
 				ct::ivec4 rc = g->rc;
 
-				ImGui::Text("Glyph Rect : %i %i %i %i", rc.x, rc.y, rc.z, rc.w);
-
-				ImGui::SliderIntDefaultCompact(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x, "Count Contours", &limitContour, 0, cmax, cmax);
+				ImGui::SliderIntDefaultCompact(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x, "Count Contours", &limitContour, 1, cmax, cmax);
 				limitContour = ct::mini(limitContour, cmax);
 
 				bool change = false;
@@ -266,6 +249,35 @@ bool GlyphPane::DrawSimpleGlyph(ProjectFile* vProjectFile)
 				//change |= ImGui::SliderFloatDefaultCompact(aw, "Scale X", &glyphInfosPtr->m_Scale.x, 0.01f, 3.0f, 1.0f); ImGui::SameLine();
 				//change |= ImGui::SliderFloatDefaultCompact(aw, "Scale Y", &glyphInfosPtr->m_Scale.y, 0.01f, 3.0f, 1.0f);
 				
+				ImGui::Separator();
+
+				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Grid", "Show/Hide Canvas Grid", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_CANVAS_GRID);
+				ImGui::SameLine();
+				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Legends", "Show/Hide Legends", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_LEGENDS);
+				ImGui::SameLine();
+				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Axis X", "Show/Hide Font Axis X", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_AXIS_X);
+				ImGui::SameLine();
+				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Axis Y", "Show/Hide Font Axis Y", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_AXIS_Y);
+				ImGui::SameLine();
+				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Zero Pt", "Show/Hide Font Zero Point", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_ORIGIN_XY);
+				ImGui::SameLine();
+				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Font BBox", "Show/Hide Font Bounding Box", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_BBOX);
+				ImGui::SameLine();
+				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Ascent", "Show/Hide Font Ascent", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_ASCENT);
+				ImGui::SameLine();
+				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Descent", "Show/Hide Font Descent", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_DESCENT);
+				ImGui::SameLine();
+				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Glyph BBox", "Show/Hide Glyph Bounidng Box", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_GLYPH_BBOX);
+				ImGui::SameLine();
+				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Advance X", "Show/Hide Glyph Advance X", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_GLYPH_ADVANCEX);
+				ImGui::SameLine();
+				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Ctrl Lines", "Show/Hide Glyph Control Lines X", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_GLYPH_CONTROL_LINES);
+
+				ImGui::Separator();
+
+				ImGui::Text("Glyph Rect : %i %i %i %i", rc.x, rc.y, rc.z, rc.w);
+
+				ImGui::Separator();
 				if (change)
 				{
 					// will come back with svg or/and glyph edition
@@ -275,7 +287,7 @@ bool GlyphPane::DrawSimpleGlyph(ProjectFile* vProjectFile)
 				}
 
 				auto fontInfosPtr = glyphInfosPtr->GetFontInfos();
-				if (fontInfosPtr && glyphInfosPtr)
+				if (fontInfosPtr.use_count())
 				{
 					g->DrawCurves(
 						vProjectFile->m_GlyphPreview_Scale,
@@ -283,8 +295,7 @@ bool GlyphPane::DrawSimpleGlyph(ProjectFile* vProjectFile)
 						glyphInfosPtr,
 						limitContour,
 						vProjectFile->m_GlyphPreview_QuadBezierCountSegments,
-						vProjectFile->m_GlyphPreview_ShowControlLines,
-						vProjectFile->m_ShowGlyphLegends);
+						vProjectFile->m_GlyphDrawingFlags);
 				}
 			}
 		}

@@ -157,7 +157,7 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 #ifdef _DEBUG
 			if (ImGui::Button("Quick Font Current", btnSize))
 			{
-				vProjectFile->m_GenMode = (GenModeFlags)0;
+				vProjectFile->m_GenModeFlags = (GenModeFlags)0;
 				vProjectFile->AddGenMode(GENERATOR_MODE_CURRENT_FONT); // font + header
 				vProjectFile->AddGenMode(GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
 				std::string path = FileHelper::Instance()->GetAppPath() + "/exports";
@@ -168,7 +168,7 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 			if (ImGui::Button("Quick Font Merged", btnSize))
 			{
 				bool disableGlyphReScale = vProjectFile->IsGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE);
-				vProjectFile->m_GenMode = (GenModeFlags)0;
+				vProjectFile->m_GenModeFlags = (GenModeFlags)0;
 				vProjectFile->AddGenMode(GENERATOR_MODE_MERGED_FONT); // font + header
 				vProjectFile->AddGenMode(GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
 				if (disableGlyphReScale)
@@ -180,7 +180,7 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 			}
 			if (ImGui::Button("Quick Header Font Current", btnSize))
 			{
-				vProjectFile->m_GenMode = (GenModeFlags)0;
+				vProjectFile->m_GenModeFlags = (GenModeFlags)0;
 				vProjectFile->AddGenMode(GENERATOR_MODE_CURRENT_HEADER); // header
 				std::string path = FileHelper::Instance()->GetAppPath() + "/exports";
 				path = FileHelper::Instance()->CorrectSlashTypeForFilePathName(path);
@@ -189,7 +189,7 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 			}
 			if (ImGui::Button("Quick Card Font Current", btnSize))
 			{
-				vProjectFile->m_GenMode = (GenModeFlags)0;
+				vProjectFile->m_GenModeFlags = (GenModeFlags)0;
 				vProjectFile->AddGenMode(GENERATOR_MODE_CURRENT_CARD); // card
 				std::string path = FileHelper::Instance()->GetAppPath() + "/exports";
 				path = FileHelper::Instance()->CorrectSlashTypeForFilePathName(path);
@@ -231,15 +231,15 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 
 			float mrw = maxWidth / 3.0f - ImGui::GetStyle().FramePadding.x;
 			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Current", "Current Font",
-				&vProjectFile->m_GenMode, GENERATOR_MODE_CURRENT, mrw, true, true,
+				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_CURRENT, mrw, true, true,
 				GENERATOR_MODE_RADIO_CUR_BAT_MER);
 			ImGui::SameLine();
 			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Batch", "Font by Font",
-				&vProjectFile->m_GenMode, GENERATOR_MODE_BATCH, mrw, true, true,
+				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_BATCH, mrw, true, true,
 				GENERATOR_MODE_RADIO_CUR_BAT_MER, batchModeDisabled);
 			ImGui::SameLine();
 			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Merged", "Fonts Merged in one",
-				&vProjectFile->m_GenMode, GENERATOR_MODE_MERGED, mrw, true, true,
+				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_MERGED, mrw, true, true,
 				GENERATOR_MODE_RADIO_CUR_BAT_MER, mergeModeDisabled);
 
 			ImGui::FramedGroupText("Features");
@@ -256,21 +256,21 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 
 			mrw = maxWidth / 2.0f - ImGui::GetStyle().FramePadding.x;
 			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Header", "Header File",
-				&vProjectFile->m_GenMode, GENERATOR_MODE_HEADER, mrw,
+				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_HEADER, mrw,
 				false, false, GENERATOR_MODE_NONE, headerModeDisabled);
 			ImGui::SameLine();
 			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Card", "Card Picture",
-				&vProjectFile->m_GenMode, GENERATOR_MODE_CARD, mrw,
+				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_CARD, mrw,
 				false, false, GENERATOR_MODE_NONE, headerModeDisabled);
 
 			// un header est lié a un TTF ou un CPP ne petu aps etre les deux
 			// donc on fait soit l'un soit l'autre
 			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Font", "Font File",
-				&vProjectFile->m_GenMode, GENERATOR_MODE_FONT, mrw,
+				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_FONT, mrw,
 				true, false, GENERATOR_MODE_RADIO_FONT_SRC);
 			ImGui::SameLine();
 			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Src", "Source File for C++/C#\n\twith font as a bytes array",
-				&vProjectFile->m_GenMode, GENERATOR_MODE_SRC, mrw,
+				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_SRC, mrw,
 				true, false, GENERATOR_MODE_RADIO_FONT_SRC);
 
 			ImGui::FramedGroupText("Settings");
@@ -281,33 +281,33 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 				ImGui::Text("Header / Src Languages : ");
 				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
 					"C", "Embedded font as a Byte Array for C",
-					&vProjectFile->m_GenMode, GENERATOR_MODE_LANG_C, mrw,
+					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_LANG_C, mrw,
 					false, false, GENERATOR_MODE_RADIO_LANG);
 				ImGui::SameLine();
 				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
 					"C++", "Embedded font as a Byte Array for C++",
-					&vProjectFile->m_GenMode, GENERATOR_MODE_LANG_CPP, mrw,
+					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_LANG_CPP, mrw,
 					false, false, GENERATOR_MODE_RADIO_LANG);
 				ImGui::SameLine();
 				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
 					"C#", "Embedded font as a Byte Array for C#",
-					&vProjectFile->m_GenMode, GENERATOR_MODE_LANG_CSHARP, mrw,
+					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_LANG_CSHARP, mrw,
 					false, false, GENERATOR_MODE_RADIO_LANG);
 
 #ifdef _DEBUG
 /*				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
 					"Lua", "Embedded font as a Byte Array for LUA",
-					&vProjectFile->m_GenMode, GENERATOR_MODE_LANG_LUA, mrw,
+					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_LANG_LUA, mrw,
 					false, false, GENERATOR_MODE_RADIO_LANG);
 				ImGui::SameLine();
 				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
 					"Python", "Embedded font as a Byte Array for Python",
-					&vProjectFile->m_GenMode, GENERATOR_MODE_LANG_PYTHON, mrw,
+					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_LANG_PYTHON, mrw,
 					false, false, GENERATOR_MODE_RADIO_LANG);
 				ImGui::SameLine();*/
 				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
 					"Rust", "Embedded font as a Byte Array for Rust",
-					&vProjectFile->m_GenMode, GENERATOR_MODE_LANG_RUST, mrw,
+					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_LANG_RUST, mrw,
 					false, false, GENERATOR_MODE_RADIO_LANG);
 #endif
 			}
@@ -317,7 +317,7 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 				ImGui::FramedGroupText("Merged Mode");
 				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
 					"Disable Glyph Re Write", "if your fonts have same size,\nit can be more safe for the moment (bad generated font is some case)\nto disable glyph re write.\nonly needed if we must change glyph scale",
-					&vProjectFile->m_GenMode, GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE, 
+					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE, 
 					maxWidth - ImGui::GetStyle().FramePadding.x);
 			}
 
@@ -325,7 +325,7 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 			{
 				ImGui::FramedGroupText("Font");
 				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Export Names", "export glyph names in font file (increase size)",
-					&vProjectFile->m_GenMode, GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES, 
+					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES, 
 					maxWidth - ImGui::GetStyle().FramePadding.x);
 			}
 

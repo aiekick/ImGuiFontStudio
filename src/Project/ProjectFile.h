@@ -51,7 +51,7 @@ public: // to save
 	std::string m_LastGeneratedPath = ".";
 	std::string m_LastGeneratedFileName = "Generated_Font";
 	std::string m_MergedFontPrefix;
-	GenModeFlags m_GenMode =
+	GenModeFlags m_GenModeFlags =
 		GENERATOR_MODE_CURRENT_HEADER |					// current font + header
 		GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES |	// tables exported in font
 		GENERATOR_MODE_LANG_CPP;						// cpp style for header or source
@@ -61,7 +61,8 @@ public: // to save
 	std::string m_FontToMergeIn;
 	float m_GlyphPreview_Scale = 1.0f;
 	int m_GlyphPreview_QuadBezierCountSegments = 0; // count segments per bezier quad, 0 mean auto tesselation
-	bool m_GlyphPreview_ShowControlLines = false;
+	float m_GlyphPreviewZoomPrecision = 20.0f;
+	GlyphDrawingFlags m_GlyphDrawingFlags = GLYPH_DRAWING_GLYPH_Default;
 	GlyphDisplayTuningModeFlags m_GlyphDisplayTuningMode =
 		GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT;
 	SourceFontPaneFlags m_SourceFontPaneFlags = 
@@ -73,8 +74,8 @@ public: // to save
 	bool m_ShowAdvanceX = false; // show the advance x of the glyph only when m_ZoomGlyphs is false
 	bool m_ShowOriginX = false; // show the origin x of the glyph only when m_ZoomGlyphs is false
 	FontTestInfos m_FontTestInfos;
-	bool m_ShowGlyphLegends = false; // will show glyph legent in glyph pane
-
+	
+	
 public: // dont save
 	std::shared_ptr<FontInfos> m_SelectedFont = nullptr;
 	size_t m_CountSelectedGlyphs = 0; // for all fonts

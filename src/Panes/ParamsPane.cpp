@@ -511,7 +511,7 @@ void ParamsPane::SelectFont(ProjectFile *vProjectFile, std::shared_ptr<FontInfos
 	if (vProjectFile && vProjectFile->IsLoaded())
 	{
 		vProjectFile->m_SelectedFont = vFontInfos;
-		if (vFontInfos)
+		if (vFontInfos.use_count())
 		{
 			vProjectFile->m_FontToMergeIn = vFontInfos->m_FontFileName;
 		}

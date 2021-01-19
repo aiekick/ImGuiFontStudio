@@ -124,10 +124,10 @@ ct::ivec2 DebugPane::GetGlyphCurrentPoint()
 
 void DebugPane::DrawGlyphCurrentPoint(float vPreviewScale, ImVec2 vScreenPos, ImDrawList *vImDrawList)
 {
-	if (!m_GlyphToDisplay.expired())
+	/*if (!m_GlyphToDisplay.expired())
 	{
 		auto m_GlyphPtr = m_GlyphToDisplay.lock();
-		if (m_GlyphPtr)
+		if (m_GlyphPtr.use_count())
 		{
 			auto g = &(m_GlyphPtr->simpleGlyph);
 			if (g->isValid)
@@ -154,7 +154,7 @@ void DebugPane::DrawGlyphCurrentPoint(float vPreviewScale, ImVec2 vScreenPos, Im
 				}
 			}
 		}
-	}
+	}*/
 }
 
 void DebugPane::DrawDebugGlyphPane(ProjectFile* /*vProjectFile*/)
@@ -162,7 +162,7 @@ void DebugPane::DrawDebugGlyphPane(ProjectFile* /*vProjectFile*/)
 	if (!m_GlyphToDisplay.expired())
 	{
 		auto m_GlyphPtr = m_GlyphToDisplay.lock();
-		if (m_GlyphPtr)
+		if (m_GlyphPtr.use_count())
 		{
 			auto g = &(m_GlyphPtr->simpleGlyph);
 			if (g->isValid)

@@ -76,7 +76,7 @@ void Generator::Generate(
 					mainPS.GetFPNE(),
 					vProjectFile, 
 					vProjectFile->m_SelectedFont, 
-					vProjectFile->m_GenMode);
+					vProjectFile->m_GenModeFlags);
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
 			{
@@ -91,7 +91,7 @@ void Generator::Generate(
 								ps.GetFPNE_WithPath(vFilePath),
 								vProjectFile,
 								font.second,
-								vProjectFile->m_GenMode);
+								vProjectFile->m_GenModeFlags);
 						}
 					}
 				}
@@ -112,7 +112,7 @@ void Generator::Generate(
 					mainPS.GetFPNE(),
 					vProjectFile, 
 					vProjectFile->m_SelectedFont, 
-					vProjectFile->m_GenMode);
+					vProjectFile->m_GenModeFlags);
 #ifdef AUTO_OPEN_FONT_IN_APP_AFTER_GENERATION_FOR_DEBUG_PURPOSE
 				ParamsPane::Instance()->OpenFont(vProjectFile, mainPS.GetFPNE(), false); // directly load the generated font file
 #endif
@@ -130,7 +130,7 @@ void Generator::Generate(
 								ps.GetFPNE_WithPath(vFilePath),
 								vProjectFile,
 								font.second,
-								vProjectFile->m_GenMode);
+								vProjectFile->m_GenModeFlags);
 #ifdef AUTO_OPEN_FONT_IN_APP_AFTER_GENERATION_FOR_DEBUG_PURPOSE
 							ParamsPane::Instance()->OpenFont(vProjectFile, mainPS.GetFPNE(), false); // directly load the generated font file
 #endif
@@ -143,7 +143,7 @@ void Generator::Generate(
 				GenerateFontFile_Merged(
 					mainPS.GetFPNE(),
 					vProjectFile,
-					vProjectFile->m_GenMode);
+					vProjectFile->m_GenModeFlags);
 #ifdef AUTO_OPEN_FONT_IN_APP_AFTER_GENERATION_FOR_DEBUG_PURPOSE
 				ParamsPane::Instance()->OpenFont(vProjectFile, mainPS.GetFPNE(), false); // directly load the generated font file
 #endif
@@ -473,7 +473,7 @@ void Generator::GenerateCard_One(
 	const uint32_t& vGlyphHeight,	// max height of glyph
 	const uint32_t& vMaxRows)		// max row count
 {
-	if (!vFilePathName.empty() && vFontInfos)
+	if (!vFilePathName.empty() && vFontInfos.use_count())
 	{
 		std::string filePathName = vFilePathName;
 		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
@@ -592,7 +592,7 @@ void Generator::GenerateFontFile_One(
 	std::shared_ptr<FontInfos> vFontInfos,
 	const GenModeFlags& vFlags)
 {
-	if (vProjectFile && !vFilePathName.empty() && vFontInfos)
+	if (vProjectFile && !vFilePathName.empty() && vFontInfos.use_count())
 	{
 		FontHelper fontHelper;
 
@@ -854,7 +854,7 @@ void Generator::GenerateSource_One(
 	std::shared_ptr<FontInfos> vFontInfos,
 	const GenModeFlags& vFlags)
 {
-	if (vProjectFile && !vFilePathName.empty() && vFontInfos)
+	if (vProjectFile && !vFilePathName.empty() && vFontInfos.use_count())
 	{
 		std::string filePathName = vFilePathName;
 		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);

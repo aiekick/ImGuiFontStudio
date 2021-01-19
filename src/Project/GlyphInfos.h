@@ -38,6 +38,35 @@ public:
 		bool vForceEditModeOneColumn = false);	/* edition in one column				*/
 };
 
+typedef int GlyphDrawingFlags;
+enum _GlyphDrawingFlags
+{
+	GLYPH_DRAWING_NONE = 0,
+	GLYPH_DRAWING_LEGENDS = (1 << 0), // show legends
+	GLYPH_DRAWING_FONT_AXIS_X = (1 << 1), // show font axis
+	GLYPH_DRAWING_FONT_AXIS_Y = (1 << 2), // show font axis
+	GLYPH_DRAWING_FONT_ORIGIN_XY = (1 << 3), // show font axis
+	GLYPH_DRAWING_FONT_BBOX = (1 << 4), // show font bounding box
+	GLYPH_DRAWING_FONT_ASCENT = (1 << 5), // show font ascent
+	GLYPH_DRAWING_FONT_DESCENT = (1 << 6), // show font descent
+	GLYPH_DRAWING_GLYPH_BBOX = (1 << 7), // show glyph bounding box
+	GLYPH_DRAWING_GLYPH_ADVANCEX = (1 << 8), // show glyph advance x
+	GLYPH_DRAWING_GLYPH_CONTROL_LINES = (1 << 9), // show glyph advance x
+	GLYPH_DRAWING_CANVAS_GRID = (1 << 9), // show font axis
+
+	GLYPH_DRAWING_GLYPH_Default =
+		GLYPH_DRAWING_LEGENDS |
+		GLYPH_DRAWING_FONT_AXIS_X |
+		GLYPH_DRAWING_FONT_AXIS_Y |
+		GLYPH_DRAWING_FONT_ORIGIN_XY |
+		GLYPH_DRAWING_FONT_BBOX |
+		GLYPH_DRAWING_FONT_ASCENT |
+		GLYPH_DRAWING_FONT_DESCENT |
+		GLYPH_DRAWING_GLYPH_BBOX |
+		GLYPH_DRAWING_GLYPH_ADVANCEX |
+		GLYPH_DRAWING_CANVAS_GRID
+};
+
 class FontInfos;
 class GlyphInfos;
 class SimpleGlyph_Solo
@@ -59,7 +88,7 @@ public:
 	ct::ivec2 GetCoords(int32_t vContour, int32_t vPoint);
 	bool IsOnCurve(int32_t vContour, int32_t vPoint);
 	ct::ivec2 Scale(ct::ivec2 p, double scale) const;
-	ct::ivec2 GetCoords(int32_t vContour, int32_t vPoint, double scale);
+	//ct::ivec2 GetCoords(int32_t vContour, int32_t vPoint, double scale);
 	void ClearTransform();
 
 public: // ImGui
@@ -68,7 +97,7 @@ public: // ImGui
 		std::shared_ptr<FontInfos> vFontInfos,
 		std::shared_ptr<GlyphInfos> vGlyphInfos,
 		int vMaxContour, int vQuadBezierCountSegments, 
-		bool vShowControlLines, bool vShowGlyphLegends);
+		GlyphDrawingFlags vGlyphDrawingFlags);
 };
 
 class GlyphInfos

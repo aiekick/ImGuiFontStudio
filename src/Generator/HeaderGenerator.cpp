@@ -216,7 +216,7 @@ void HeaderGenerator::GenerateHeader_One(
 	std::string vFontBufferName, // for header generation wehn using a cpp bytes array instead of a file
 	size_t vFontBufferSize) // for header generation wehn using a cpp bytes array instead of a file
 {
-	if (!vFilePathName.empty() && vFontInfos)
+	if (!vFilePathName.empty() && vFontInfos.use_count())
 	{
 		std::string filePathName = vFilePathName;
 		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);

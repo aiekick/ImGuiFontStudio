@@ -169,7 +169,7 @@ void SourceFontPane::DrawSourceFontPane(ProjectFile *vProjectFile)
 
 void SourceFontPane::DrawFilterBar(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos)
 {
-	if (vProjectFile && vFontInfos)
+	if (vProjectFile && vFontInfos.use_count())
 	{
 		ImGui::PushID(vFontInfos.get());
 		ImGui::Text("Filters");
@@ -210,7 +210,7 @@ bool SourceFontPane::DrawGlyphButton(ProjectFile* vProjectFile, std::shared_ptr<
 
 	bool res = false;
 
-	if (vFontInfos)
+	if (vFontInfos.use_count())
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (window->SkipItems)
@@ -317,7 +317,7 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 		win->DrawList->ChannelsSplit(2);
 
 		if (vProjectFile && vProjectFile->IsLoaded() &&
-			vFontInfos)
+			vFontInfos.use_count())
 		{
 			vProjectFile->m_Preview_Glyph_CountX = ct::maxi(vProjectFile->m_Preview_Glyph_CountX, 1);
 
@@ -435,7 +435,7 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 
 void SourceFontPane::DrawFontTexture(std::shared_ptr<FontInfos> vFontInfos)
 {
-	if (vFontInfos)
+	if (vFontInfos.use_count())
 	{
 		if (vFontInfos->m_ImFontAtlas.IsBuilt())
 		{

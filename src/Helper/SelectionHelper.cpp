@@ -59,7 +59,7 @@ bool SelectionHelper::IsGlyphSelected(
 
 	if (vSelectionContainerEnum == SelectionContainerEnum::SELECTION_CONTAINER_SOURCE)
 	{
-		if (vFontInfos)
+		if (vFontInfos.use_count())
 			res = (vFontInfos->m_SelectedGlyphs.find(vCodePoint) !=
 				vFontInfos->m_SelectedGlyphs.end()); // trouv?
 	}
@@ -745,7 +745,7 @@ void SelectionHelper::SelectAllGlyphs(ProjectFile * vProjectFile, std::shared_pt
 {
 	if (vProjectFile && vProjectFile->IsLoaded())
 	{
-		if (vFontInfos)
+		if (vFontInfos.use_count())
 		{
 			if (vSelectionContainerEnum == SelectionContainerEnum::SELECTION_CONTAINER_SOURCE)
 			{
@@ -787,7 +787,7 @@ void SelectionHelper::UnSelectAllGlyphs(ProjectFile * vProjectFile, std::shared_
 {
 	if (vProjectFile && vProjectFile->IsLoaded())
 	{
-		if (vFontInfos)
+		if (vFontInfos.use_count())
 		{
 			if (vSelectionContainerEnum == SelectionContainerEnum::SELECTION_CONTAINER_SOURCE)
 			{
@@ -829,7 +829,7 @@ void SelectionHelper::SelectGlyph(ProjectFile * vProjectFile, std::shared_ptr<Fo
 {
 	if (vProjectFile && vProjectFile->IsLoaded())
 	{
-		if (vFontInfos)
+		if (vFontInfos.use_count())
 		{
 			if (vSelectionContainerEnum == SelectionContainerEnum::SELECTION_CONTAINER_SOURCE)
 			{
@@ -871,7 +871,7 @@ void SelectionHelper::SelectGlyph(ProjectFile * vProjectFile, std::shared_ptr<Fo
 {
 	if (vProjectFile && vProjectFile->IsLoaded())
 	{
-		if (vFontInfos)
+		if (vFontInfos.use_count())
 		{
 			if (vSelectionContainerEnum == SelectionContainerEnum::SELECTION_CONTAINER_SOURCE)
 			{
@@ -910,7 +910,7 @@ void SelectionHelper::UnSelectGlyph(ProjectFile * vProjectFile, std::shared_ptr<
 {
 	if (vProjectFile && vProjectFile->IsLoaded())
 	{
-		if (vFontInfos)
+		if (vFontInfos.use_count())
 		{
 			if (vSelectionContainerEnum == SelectionContainerEnum::SELECTION_CONTAINER_SOURCE)
 			{
@@ -1052,7 +1052,7 @@ void SelectionHelper::SelectGlyphByRangeFromStartCodePoint(
 {
 	if (vProjectFile && vProjectFile->IsLoaded())
 	{
-		if (vFontInfos)
+		if (vFontInfos.use_count())
 		{
 			if (vSelectionContainerEnum == SelectionContainerEnum::SELECTION_CONTAINER_SOURCE)
 			{
@@ -1194,7 +1194,7 @@ void SelectionHelper::UnSelectGlyphByRangeFromStartCodePoint(
 {
 	if (vProjectFile && vProjectFile->IsLoaded())
 	{
-		if (vFontInfos)
+		if (vFontInfos.use_count())
 		{
 			if (vSelectionContainerEnum == SelectionContainerEnum::SELECTION_CONTAINER_SOURCE)
 			{
@@ -1246,7 +1246,7 @@ void SelectionHelper::UnSelectGlyphByRangeFromStartCodePoint(
 {
 	if (vProjectFile && vProjectFile->IsLoaded())
 	{
-		if (vFontInfos)
+		if (vFontInfos.use_count())
 		{
 			if (vSelectionContainerEnum == SelectionContainerEnum::SELECTION_CONTAINER_SOURCE)
 			{

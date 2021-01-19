@@ -176,15 +176,31 @@ ct::ivec2 SimpleGlyph_Solo::Scale(ct::ivec2 p, double scale) const
 		(int)round(scale * ((double)rc.w - (double)p.y))};
 }
 
-ct::ivec2 SimpleGlyph_Solo::GetCoords(int32_t vContour, int32_t vPoint, double scale)
+/*ct::ivec2 SimpleGlyph_Solo::GetCoords(int32_t vContour, int32_t vPoint, double scale)
 {
 	return Scale(GetCoords(vContour, vPoint), scale);
-}
+}*/
 
 void SimpleGlyph_Solo::ClearTransform()
 {
 	m_Translation = 0.0f;
 	m_Scale = 1.0f;
+}
+
+inline static ImVec2 getScreenToLocal(ImVec2 vScreenPos, ImVec2 vZoneStart, ImVec2 vWorldBBoxOrigin, ImVec2 vWorlBBoxSize, float vWorldScale, ImVec2 vLocalBBoxOrigin)
+{
+	ImVec2 localPos;
+	localPos.x = (vScreenPos.x - vZoneStart.x - vWorldBBoxOrigin.x) / vWorldScale + vLocalBBoxOrigin.x;
+	localPos.y = (vWorlBBoxSize.y - (vScreenPos.y - vZoneStart.y - vWorldBBoxOrigin.y)) / vWorldScale + vLocalBBoxOrigin.y;
+	return localPos;
+}
+
+inline static ImVec2 getLocalToScreen(ImVec2 vLocalPos, ImVec2 vZoneStart, ImVec2 vWorldBBoxOrigin, ImVec2 vWorlBBoxSize, float vWorldScale, ImVec2 vLocalBBoxOrigin)
+{
+	ImVec2 screenPos;
+	screenPos.x = (vLocalPos.x - vLocalBBoxOrigin.x) * vWorldScale + vWorldBBoxOrigin.x + vZoneStart.x;
+	screenPos.y = vWorlBBoxSize.y - (vLocalPos.y - vLocalBBoxOrigin.y) * vWorldScale + vWorldBBoxOrigin.y + vZoneStart.y;
+	return screenPos;
 }
 
 // https://github.com/rillig/sfntly/tree/master/java/src/com/google/typography/font/tools/fontviewer
@@ -194,9 +210,9 @@ void SimpleGlyph_Solo::DrawCurves(
 	std::shared_ptr<FontInfos> vFontInfos,
 	std::shared_ptr<GlyphInfos> vGlyphInfos,
 	int vMaxContour, int vQuadBezierCountSegments, 
-	bool vShowControlLines, bool vShowGlyphLegends)
+	GlyphDrawingFlags vGlyphDrawingFlags)
 {
-	if (isValid && vFontInfos && vGlyphInfos)
+	if (isValid && vFontInfos.use_count() && vGlyphInfos.use_count())
 	{
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (window->SkipItems)
@@ -209,31 +225,30 @@ void SimpleGlyph_Solo::DrawCurves(
 
 		ImGui::PushClipRect(contentStart, contentStart + contentSize, false);
 		{
-			drawList->AddRectFilled(contentStart, contentStart + contentSize, ImGui::GetColorU32(ImGuiCol_FrameBg));
+			drawList->AddRectFilled(contentStart, contentStart + contentSize, ImGui::GetColorU32(ImGuiCol_ChildBg));
+			drawList->AddRect(contentStart, contentStart + contentSize, ImGui::GetColorU32(ImGuiCol_Text));
 
 			auto frc = vFontInfos->m_BoundingBox;
 			ImRect fontBBox = ImRect((float)frc.x, (float)frc.y, (float)frc.z, (float)frc.w);
-			ImRect glyphBBox = ImRect((float)rc.x, (float)rc.y, (float)rc.z, (float)rc.w);
-			
 			ImVec2 pScale = contentSize / fontBBox.GetSize();
 			float newScale = ImMin(pScale.x, pScale.y) * vGlobalScale;
-
 			fontBBox = ImRect(contentCenter - fontBBox.GetSize() * 0.5f * newScale, contentCenter + fontBBox.GetSize() * 0.5f * newScale);
 			ImVec2 fontBBoxSize = fontBBox.GetSize();
+			ImVec2 fbboxOrign = fontBBox.Min - contentStart;
 
-			drawList->AddCircleFilled(contentCenter, 10.0f, ImGui::GetColorU32(ImGuiCol_Text));
-			drawList->AddRect(fontBBox.Min, fontBBox.Max, ImGui::GetColorU32(ImGuiCol_Text));
+			//drawList->AddCircleFilled(contentCenter, 10.0f, ImGui::GetColorU32(ImGuiCol_Text));
+			//drawList->AddRect(fontBBox.Min, fontBBox.Max, ImGui::GetColorU32(ImGuiCol_Text));
+			const float tlh = ImGui::GetTextLineHeight();
 
-			ImVec2 posOrigin = contentCenter - fontBBoxSize * 0.5f - ImVec2(frc.x, frc.y) * newScale;
+#define LocalToScreen(a) getLocalToScreen(ImVec2((float)a.x, (float)a.y), contentStart, fbboxOrign, fontBBoxSize, newScale, ImVec2(frc.x, frc.y))
+#define ScreenToLocal(a) getScreenToLocal(ImVec2((float)a.x, (float)a.y), contentStart, fbboxOrign, fontBBoxSize, newScale, ImVec2(frc.x, frc.y))
 
 			///////////////////////////////////////////////////////////////
 			// show pos in local space
 			if (ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(fontBBox.Min, fontBBox.Max))
 			{
-				ImVec2 mousePos = ImGui::GetMousePos() - contentStart;
-				float px = (mousePos.x - (fontBBox.Min.x - contentStart.x)) / newScale + frc.x;
-				float py = (fontBBoxSize.y - (mousePos.y - (fontBBox.Min.y - contentStart.y))) / newScale + frc.y;
-				ImGui::SetTooltip("px : %.2f\npy : %.2f", px, py);
+				ImVec2 localPos = ScreenToLocal(ImGui::GetMousePos());
+				ImGui::SetTooltip("px : %.2f\npy : %.2f", localPos.x, localPos.y);
 			}
 			///////////////////////////////////////////////////////////////
 
@@ -251,73 +266,109 @@ void SimpleGlyph_Solo::DrawCurves(
 			float oy = descent - step;
 			float ly = ascent + step;
 
+			
+			// canvas grid // code from ImGui::Demo::CustomRendering::Canvas
+			if (vGlyphDrawingFlags & GLYPH_DRAWING_CANVAS_GRID)
+			{
+				const ImU32 lineCol = ImGui::GetColorU32(ImGuiCol_Text, 0.25f);
+				ImVec2 canvas_org = LocalToScreen(ImVec2(0.0f, 0.0f));
+				min = contentStart;
+				max = contentStart + contentSize;
+				const float GRID_STEP = 32.0f;
+				float x0 = canvas_org.x - ImFloor((canvas_org.x - min.x) / GRID_STEP) * GRID_STEP;
+				float y0 = canvas_org.y - ImFloor((canvas_org.y - min.y) / GRID_STEP) * GRID_STEP;
+				for (float x = x0; x < max.x; x += GRID_STEP)
+					drawList->AddLine(ImVec2(x, min.y), ImVec2(x, max.y), lineCol);
+				for (float y = y0; y < max.y; y += GRID_STEP)
+					drawList->AddLine(ImVec2(min.x, y), ImVec2(max.x, y), lineCol);
+			}
+			
+			const ImU32 textCol = ImGui::GetColorU32(ImGuiCol_Text);
+			
 			// origin axis X
-			const ImU32 XAxisCol = ImGui::GetColorU32(ImGuiCol_PlotLinesHovered, 0.8f);
-			min = ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(ox), 0), newScale)) + posOrigin;
-			max = ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(lx), 0), newScale)) + posOrigin;
-			drawList->AddLine(min, max, XAxisCol, 2.0f);
-			drawList->AddTriangleFilled(
-				max,
-				max - ImVec2(triangleWidth, triangleHeight * 0.5f),
-				max - ImVec2(triangleWidth, triangleHeight * -0.5f),
-				XAxisCol);
+			if (vGlyphDrawingFlags & GLYPH_DRAWING_FONT_AXIS_X)
+			{
+				const ImU32 XAxisCol = ImGui::GetColorU32(ImGuiCol_PlotHistogram);
+				min = LocalToScreen(ImVec2(ox, 0.0f));
+				max = LocalToScreen(ImVec2(lx, 0.0f));
+				drawList->AddLine(min, max, XAxisCol, 2.0f);
+				drawList->AddTriangleFilled(
+					max,
+					max - ImVec2(triangleWidth, triangleHeight * 0.5f),
+					max - ImVec2(triangleWidth, triangleHeight * -0.5f),
+					XAxisCol);
+			}
 
 			// origin axis Y
-			const ImU32 YAxisCol = ImGui::GetColorU32(ImGuiCol_PlotHistogramHovered, 0.8f);
-			min = ct::toImVec2(Scale(ct::ivec2(0, (int32_t)ct::floor(oy)), newScale)) + posOrigin;
-			max = ct::toImVec2(Scale(ct::ivec2(0, (int32_t)ct::floor(ly)), newScale)) + posOrigin;
-			drawList->AddLine(min, max, YAxisCol, 2.0f);
-			drawList->AddTriangleFilled(
-				max,
-				max + ImVec2(triangleWidth * 0.5f, triangleHeight),
-				max + ImVec2(triangleWidth * -0.5f, triangleHeight),
-				YAxisCol);
+			if (vGlyphDrawingFlags & GLYPH_DRAWING_FONT_AXIS_Y)
+			{
+				const ImU32 YAxisCol = ImGui::GetColorU32(ImGuiCol_PlotHistogramHovered);
+				min = LocalToScreen(ImVec2(0.0f, oy));
+				max = LocalToScreen(ImVec2(0.0f, ly));
+				drawList->AddLine(min, max, YAxisCol, 2.0f);
+				drawList->AddTriangleFilled(
+					max,
+					max + ImVec2(triangleWidth * 0.5f, triangleHeight),
+					max + ImVec2(triangleWidth * -0.5f, triangleHeight),
+					YAxisCol);
+			}
 
 			// font bounding box
-			const ImU32 FontBBoxCol = ImGui::GetColorU32(ImVec4(1,0,0,1));
-			min = ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(frc.x), (int32_t)ct::floor(frc.y)), newScale)) + posOrigin;
-			max = ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(frc.z), (int32_t)ct::floor(frc.w)), newScale)) + posOrigin;
-			drawList->AddText(min + ImVec2(1, -1) * ImGui::GetTextLineHeight(), FontBBoxCol, "Font BBox");
-			drawList->AddRect(min, max, FontBBoxCol, 0.0f, 15, 2.0f);
+			if (vGlyphDrawingFlags & GLYPH_DRAWING_FONT_BBOX)
+			{
+				min = LocalToScreen(ImVec2((float)frc.x, (float)frc.y));
+				max = LocalToScreen(ImVec2((float)frc.z, (float)frc.w));
+				if (vGlyphDrawingFlags & GLYPH_DRAWING_LEGENDS)
+					drawList->AddText(ImVec2(min.x + tlh, min.y - tlh), textCol, "Font BBox");
+				drawList->AddRect(min, max, textCol, 0.0f, 15, 2.0f);
+			}
 
 			// glyph bounding box
-			/*const ImU32 GlyphBBoxCol = ImGui::GetColorU32(ImGuiCol_Text, 0.8f);
-			min = ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.x), (int32_t)ct::floor(rc.y)), newScale)) + posOrigin;
-			max = ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.z), (int32_t)ct::floor(rc.w)), newScale)) + posOrigin;
-			drawList->AddText(min + ImVec2(1, 1) * ImGui::GetTextLineHeight(), GlyphBBoxCol, "Glyph BBox");
-			drawList->AddRect(min, max, GlyphBBoxCol, 0.0f, 15, 2.0f);*/
-
-			// origin x
-			/*drawList->AddLine(
-				ct::toImVec2(Scale(ct::ivec2(0, (int32_t)ct::floor(rc.y)), newScale)) + posOrigin,
-				ct::toImVec2(Scale(ct::ivec2(0, (int32_t)ct::floor(rc.w)), newScale)) + posOrigin,
-				ImGui::GetColorU32(ImGuiCol_PlotLinesHovered), 2.0f);
+			if (vGlyphDrawingFlags & GLYPH_DRAWING_GLYPH_BBOX)
+			{
+				min = LocalToScreen(ImVec2((float)rc.x, (float)rc.y));
+				max = LocalToScreen(ImVec2((float)rc.z, (float)rc.w));
+				if (vGlyphDrawingFlags & GLYPH_DRAWING_LEGENDS)
+					drawList->AddText(ImVec2(min.x + tlh, max.y - tlh), textCol, "Glyph BBox");
+				drawList->AddRect(min, max, textCol, 0.0f, 15, 2.0f);
+			}
 
 			// adv x
-			drawList->AddLine(
-				ct::toImVec2(Scale(ct::ivec2(advanceX, (int32_t)ct::floor(oy)), newScale)) + posOrigin,
-				ct::toImVec2(Scale(ct::ivec2(advanceX, (int32_t)ct::floor(ly)), newScale)) + posOrigin,
-				ImGui::GetColorU32(ImGuiCol_PlotLines), 2.0f);
-
-			// base line
-			drawList->AddLine(
-				ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.x), 0), newScale)) + posOrigin,
-				ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.z), 0), newScale)) + posOrigin,
-				ImGui::GetColorU32(ImGuiCol_PlotHistogram), 1.0f);
+			if (vGlyphDrawingFlags & GLYPH_DRAWING_GLYPH_ADVANCEX)
+			{
+				const ImU32 advxCol = ImGui::GetColorU32(ImGuiCol_PlotLines);
+				min = LocalToScreen(ImVec2((float)advanceX, oy));
+				max = LocalToScreen(ImVec2((float)advanceX, ly));
+				if (vGlyphDrawingFlags & GLYPH_DRAWING_LEGENDS)
+					drawList->AddText(ImVec2(min.x + tlh, max.y - tlh), textCol, "Glyph Advance X");
+				drawList->AddLine(min, max, advxCol, 2.0f);
+			}
 
 			// Ascent
-			drawList->AddLine(
-				ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(ox), ascent), newScale)) + posOrigin,
-				ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(lx), ascent), newScale)) + posOrigin,
-				ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
+			if (vGlyphDrawingFlags & GLYPH_DRAWING_FONT_ASCENT)
+			{
+				const ImU32 ascCol = ImGui::GetColorU32(ImVec4(1, 0, 0, 1));
+				min = LocalToScreen(ImVec2(ox, (float)ascent));
+				max = LocalToScreen(ImVec2(lx, (float)ascent));
+				if (vGlyphDrawingFlags & GLYPH_DRAWING_LEGENDS)
+					drawList->AddText(ImVec2(min.x + tlh, max.y - tlh), textCol, "Font Ascent");
+				drawList->AddLine(min, max, ascCol, 2.0f);
+			}
 
 			// Descent
-			drawList->AddLine(
-				ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(ox), descent), newScale)) + posOrigin,
-				ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(lx), descent), newScale)) + posOrigin,
-				ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);*/
+			if (vGlyphDrawingFlags & GLYPH_DRAWING_FONT_DESCENT)
+			{
+				const ImU32 descCol = ImGui::GetColorU32(ImVec4(1, 0, 0, 1));
+				min = LocalToScreen(ImVec2(ox, (float)descent));
+				max = LocalToScreen(ImVec2(lx, (float)descent));
+				if (vGlyphDrawingFlags & GLYPH_DRAWING_LEGENDS)
+					drawList->AddText(ImVec2(min.x + tlh, max.y - tlh), textCol, "Font Descent");
+				drawList->AddLine(min, max, descCol, 2.0f);
+			}
 
-			/*int cmax = (int)coords.size();
+
+			// glyph
+			int cmax = (int)coords.size();
 			for (int c = 0; c < cmax; c++)
 			{
 				if (c >= vMaxContour) break;
@@ -336,67 +387,76 @@ void SimpleGlyph_Solo::DrawCurves(
 
 				// curve
 
-				drawList->PathLineTo(ct::toImVec2(GetCoords(c, firstOn, newScale)) + posOrigin);
+				drawList->PathLineTo(LocalToScreen(GetCoords(c, firstOn)));
 
 				for (int i = 0; i < pmax; i++)
 				{
 					int icurr = firstOn + i + 1;
 					int inext = firstOn + i + 2;
-					ct::ivec2 cur = GetCoords(c, icurr, newScale);
+					ct::ivec2 cur = GetCoords(c, icurr);
 
 					if (IsOnCurve(c, icurr))
 					{
-						drawList->PathLineTo(ct::toImVec2(cur) + posOrigin);
+						drawList->PathLineTo(LocalToScreen(cur));
 					}
 					else
 					{
-						ct::ivec2 nex = GetCoords(c, inext, newScale);
+						ct::ivec2 nex = GetCoords(c, inext);
 						if (!IsOnCurve(c, inext))
 						{
 							nex.x = (int)(((double)nex.x + (double)cur.x) * 0.5);
 							nex.y = (int)(((double)nex.y + (double)cur.y) * 0.5);
 						}
-						drawList->PathBezierQuadraticCurveTo(
-							ct::toImVec2(cur) + posOrigin,
-							ct::toImVec2(nex) + posOrigin, vQuadBezierCountSegments);
+						drawList->PathBezierQuadraticCurveTo(LocalToScreen(cur), LocalToScreen(nex), vQuadBezierCountSegments);
 					}
 				}
 
 				drawList->PathStroke(ImGui::GetColorU32(ImGuiCol_Text), true);
 
 #ifdef _DEBUG
-				DebugPane::Instance()->DrawGlyphCurrentPoint(newScale, posOrigin, drawList);
+				//DebugPane::Instance()->DrawGlyphCurrentPoint(newScale, posOrigin, drawList);
 #endif
 
-				if (vShowControlLines) // control lines
+				if (vGlyphDrawingFlags & GLYPH_DRAWING_GLYPH_CONTROL_LINES) // control lines
 				{
-					drawList->PathLineTo(ct::toImVec2(GetCoords(c, firstOn, newScale)) + posOrigin);
+					drawList->PathLineTo(LocalToScreen(GetCoords(c, firstOn)));
 
 					for (int i = 0; i < pmax; i++)
 					{
 						int icurr = firstOn + i + 1;
 						int inext = firstOn + i + 2;
-						ct::ivec2 cur = GetCoords(c, icurr, newScale);
+						ct::ivec2 cur = GetCoords(c, icurr);
 						if (IsOnCurve(c, icurr))
 						{
-							drawList->PathLineTo(ct::toImVec2(cur) + posOrigin);
+							drawList->PathLineTo(LocalToScreen(cur));
 						}
 						else
 						{
-							ct::ivec2 nex = GetCoords(c, inext, newScale);
+							ct::ivec2 nex = GetCoords(c, inext);
 							if (!IsOnCurve(c, inext))
 							{
 								nex.x = (int)(((double)nex.x + (double)cur.x) * 0.5);
 								nex.y = (int)(((double)nex.y + (double)cur.y) * 0.5);
 							}
-							drawList->PathLineTo(ct::toImVec2(cur) + posOrigin);
-							drawList->PathLineTo(ct::toImVec2(nex) + posOrigin);
+							drawList->PathLineTo(LocalToScreen(cur));
+							drawList->PathLineTo(LocalToScreen(nex));
 						}
 					}
 
 					drawList->PathStroke(ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), true);
 				}
-			}*/
+			}
+
+			// origin point
+			if (vGlyphDrawingFlags & GLYPH_DRAWING_FONT_ORIGIN_XY)
+			{
+				const ImU32 PointCol = ImGui::GetColorU32(ImGuiCol_Text, 1.0f);
+				min = LocalToScreen(ImVec2(0.0f, 0.0f));
+				drawList->AddCircleFilled(min, 5.0f, PointCol);
+			}
+
+#undef LocalToScreen
+#undef ScreenToLocal
 		}
 		ImGui::PopClipRect();
 	}
@@ -412,7 +472,7 @@ std::shared_ptr<GlyphInfos> GlyphInfos::Create(
 	std::string vNewName, uint32_t vNewCodePoint,
 	ImVec2 vTranslation)
 {
-	assert(vFontInfos != nullptr);
+	assert(vFontInfos.use_count() != 0);
 	return std::make_shared<GlyphInfos>(vFontInfos, vGlyph, vOldName, vNewName, vNewCodePoint, vTranslation);
 }
 
@@ -462,7 +522,7 @@ std::shared_ptr<FontInfos> GlyphInfos::GetFontInfos()
 void GlyphInfos::SetFontInfos(std::shared_ptr<FontInfos> vFontInfos)
 {
 	fontInfos = vFontInfos;
-	if (!vFontInfos)
+	if (vFontInfos.use_count())
 		fontInfos.reset();
 }
 

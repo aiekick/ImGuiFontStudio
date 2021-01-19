@@ -54,7 +54,7 @@ void ProjectFile::Clear()
 	m_CountSelectedGlyphs = 0; // for all fonts
 	m_IsLoaded = false;
 	m_IsThereAnyNotSavedChanged = false;
-	m_GenMode = GENERATOR_MODE_CURRENT_HEADER_CARD |
+	m_GenModeFlags = GENERATOR_MODE_CURRENT_HEADER_CARD |
 		GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES;
 	m_SourcePane_ShowGlyphTooltip = true;
 	m_FinalPane_ShowGlyphTooltip = true;
@@ -258,9 +258,10 @@ std::string ProjectFile::getXml(const std::string& vOffset, const std::string& /
 	str += vOffset + "\t<srcglyphtooltip>" + (m_SourcePane_ShowGlyphTooltip ? "true" : "false") +"</srcglyphtooltip>\n";
 	str += vOffset + "\t<dstglyphtooltip>" + (m_FinalPane_ShowGlyphTooltip ? "true" : "false") +"</dstglyphtooltip>\n";
 	str += vOffset + "\t<glyphpreviewscale>" + ct::toStr(m_GlyphPreview_Scale) + "</glyphpreviewscale>\n";
-	str += vOffset + "\t<glyphpreviewshowcontrollines>" + (m_GlyphPreview_ShowControlLines ? "true" : "false") + "</glyphpreviewshowcontrollines>\n";
+	str += vOffset + "\t<glyphdrawingflags>" + ct::toStr(m_GlyphDrawingFlags) + "</glyphdrawingflags>\n";
 	str += vOffset + "\t<glyphpreviewquadbeziercounsegment>" + ct::toStr(m_GlyphPreview_QuadBezierCountSegments) + "</glyphpreviewquadbeziercounsegment>\n";
-	str += vOffset + "\t<genmode>" + ct::toStr(m_GenMode) + "</genmode>\n";
+	str += vOffset + "\t<glyphpreviewzoomprecision>" + ct::toStr(m_GlyphPreviewZoomPrecision) + "</glyphpreviewzoomprecision>\n";
+	str += vOffset + "\t<genmodeflags>" + ct::toStr(m_GenModeFlags) + "</genmodeflags>\n";
 	str += vOffset + "\t<fonttomergein>" + m_FontToMergeIn + "</fonttomergein>\n";
 	str += vOffset + "\t<glyphdisplaytuningmode>" + ct::toStr(m_GlyphDisplayTuningMode) + "</glyphdisplaytuningmode>\n";
 	str += vOffset + "\t<sourcefontpaneflags>" + ct::toStr(m_SourceFontPaneFlags) + "</sourcefontpaneflags>\n";
@@ -271,7 +272,7 @@ std::string ProjectFile::getXml(const std::string& vOffset, const std::string& /
 	str += vOffset + "\t<zoomglyphs>" + (m_ZoomGlyphs ? "true" : "false") +"</zoomglyphs>\n";
 	str += vOffset + "\t<showbaseline>" + (m_ShowBaseLine ? "true" : "false") + "</showbaseline>\n";
 	str += vOffset + "\t<showadvancex>" + (m_ShowAdvanceX ? "true" : "false") + "</showadvancex>\n";
-	str += vOffset + "\t<showglyphlegends>" + (m_ShowGlyphLegends ? "true" : "false") + "</showglyphlegends>\n";
+	str += vOffset + "\t<glyphdrawingflags>" + ct::toStr(m_GlyphDrawingFlags) + "</glyphdrawingflags>\n";
 	str += SelectionHelper::Instance()->getXml(vOffset + "\t");
 	str += m_FontTestInfos.getXml(vOffset + "\t");
 	str += vOffset + "</project>\n";
@@ -333,8 +334,8 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 			m_Preview_Glyph_Width = ct::fvariant(strValue).GetF();
 		else if (strName == "mergedfontprefix")
 			m_MergedFontPrefix = strValue;
-		else if (strName == "genmode")
-			m_GenMode = (GenModeFlags)ct::ivariant(strValue).GetI();
+		else if (strName == "genmodeflags")
+			m_GenModeFlags = (GenModeFlags)ct::ivariant(strValue).GetI();
 		else if (strName == "fonttomergein")
 			m_FontToMergeIn = strValue;
 		else if (strName == "curglyphtooltip")
@@ -345,10 +346,12 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 			m_FinalPane_ShowGlyphTooltip = ct::ivariant(strValue).GetB();
 		else if (strName == "glyphpreviewscale")
 			m_GlyphPreview_Scale = ct::fvariant(strValue).GetF();
-		else if (strName == "glyphpreviewshowcontrollines")
-			m_GlyphPreview_ShowControlLines = ct::ivariant(strValue).GetB();
 		else if (strName == "glyphpreviewquadbeziercounsegment")
 			m_GlyphPreview_QuadBezierCountSegments = ct::ivariant(strValue).GetI();
+		else if (strName == "glyphdrawingflags")
+			m_GlyphDrawingFlags = (GlyphDrawingFlags)ct::ivariant(strValue).GetI();
+		else if (strName == "glyphpreviewzoomprecision")
+			m_GlyphPreviewZoomPrecision = ct::fvariant(strValue).GetF();
 		else if (strName == "glyphdisplaytuningmode")
 			m_GlyphDisplayTuningMode = (GlyphDisplayTuningModeFlags)ct::ivariant(strValue).GetI();
 		else if (strName == "sourcefontpaneflags")
@@ -371,8 +374,6 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 			m_FontTestInfos.setFromXml(vElem, vParent);
 		else if (strName == "finalselection")
 			SelectionHelper::Instance()->setFromXml(vElem, vParent);
-		else if (strName == "showglyphlegends")
-			m_ShowGlyphLegends = ct::ivariant(strValue).GetB();
 	}
 
 	return true;
@@ -395,21 +396,21 @@ ImVec4 ProjectFile::GetColorFromInteger(uint32_t vInteger) const
 
 void ProjectFile::AddGenMode(GenModeFlags vFlags)
 {
-	m_GenMode |= vFlags;
+	m_GenModeFlags |= vFlags;
 }
 
 void ProjectFile::RemoveGenMode(GenModeFlags vFlags)
 {
-	m_GenMode &= ~vFlags;
+	m_GenModeFlags &= ~vFlags;
 }
 
 GenModeFlags ProjectFile::GetGenMode() const
 {
-	return m_GenMode;
+	return m_GenModeFlags;
 }
 
  bool ProjectFile::IsGenMode(GenModeFlags vFlags) const
 {
-	return (m_GenMode & vFlags);
+	return (m_GenModeFlags & vFlags);
 }
 
