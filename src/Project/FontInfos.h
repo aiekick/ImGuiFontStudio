@@ -48,8 +48,7 @@ public:
 	static std::shared_ptr<FontInfos> Create();
 	
 public: // not to save
-	std::shared_ptr<FontInfos> m_This = 0;
-
+	std::weak_ptr<FontInfos> m_This;
 	ImFontAtlas m_ImFontAtlas;
 	std::vector<std::string> m_GlyphNames;
 	std::map<uint32_t, std::string> m_GlyphCodePointToName;

@@ -326,8 +326,8 @@ void SimpleGlyph_Solo::DrawCurves(
 			// glyph bounding box
 			if (vGlyphDrawingFlags & GLYPH_DRAWING_GLYPH_BBOX)
 			{
-				min = LocalToScreen(ImVec2((float)rc.x, (float)rc.y));
-				max = LocalToScreen(ImVec2((float)rc.z, (float)rc.w));
+				min = LocalToScreen(ImVec2((float)rc.x + m_Translation.x, (float)rc.y + m_Translation.y));
+				max = LocalToScreen(ImVec2((float)rc.z + m_Translation.x, (float)rc.w + m_Translation.y));
 				if (vGlyphDrawingFlags & GLYPH_DRAWING_LEGENDS)
 					drawList->AddText(ImVec2(min.x + tlh, max.y - tlh), textCol, "Glyph BBox");
 				drawList->AddRect(min, max, textCol, 0.0f, 15, 2.0f);
@@ -452,6 +452,12 @@ void SimpleGlyph_Solo::DrawCurves(
 			{
 				const ImU32 PointCol = ImGui::GetColorU32(ImGuiCol_Text, 1.0f);
 				min = LocalToScreen(ImVec2(0.0f, 0.0f));
+				if (vGlyphDrawingFlags & GLYPH_DRAWING_LEGENDS)
+				{
+					const char* txt = "Origin";
+					ImVec2 txtSize = ImGui::CalcTextSize(txt);
+					drawList->AddText(ImVec2(min.x - txtSize.x - tlh * 0.5f, min.y - tlh), textCol, txt);
+				}
 				drawList->AddCircleFilled(min, 5.0f, PointCol);
 			}
 
@@ -467,7 +473,7 @@ void SimpleGlyph_Solo::DrawCurves(
 //////////////////////////////////////////////////////////
 
 std::shared_ptr<GlyphInfos> GlyphInfos::Create(
-	std::shared_ptr<FontInfos> vFontInfos,
+	std::weak_ptr<FontInfos> vFontInfos,
 	ImFontGlyph vGlyph, std::string vOldName,
 	std::string vNewName, uint32_t vNewCodePoint,
 	ImVec2 vTranslation)
@@ -492,7 +498,7 @@ GlyphInfos::GlyphInfos()
 }
 
 GlyphInfos::GlyphInfos(
-	std::shared_ptr<FontInfos> vFontInfos,
+	std::weak_ptr<FontInfos> vFontInfos,
 	ImFontGlyph vGlyph, std::string vOldName, 
 	std::string vNewName, uint32_t vNewCodePoint,
 	ImVec2 vTranslation)
@@ -509,21 +515,14 @@ GlyphInfos::GlyphInfos(
 
 GlyphInfos::~GlyphInfos() = default;
 
-std::shared_ptr<FontInfos> GlyphInfos::GetFontInfos()
+std::weak_ptr<FontInfos> GlyphInfos::GetFontInfos()
 {
-	if (!fontInfos.expired())
-	{
-		return fontInfos.lock();
-	}
-
-	return 0;
+	return fontInfos;
 }
 
-void GlyphInfos::SetFontInfos(std::shared_ptr<FontInfos> vFontInfos)
+void GlyphInfos::SetFontInfos(std::weak_ptr<FontInfos> vFontInfos)
 {
 	fontInfos = vFontInfos;
-	if (vFontInfos.use_count())
-		fontInfos.reset();
 }
 
 int GlyphInfos::DrawGlyphButton(

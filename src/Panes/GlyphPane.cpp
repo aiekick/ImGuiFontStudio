@@ -35,6 +35,8 @@
 
 #include <sfntly/font_factory.h>
 
+#include <Helper/Messaging.h>
+
 GlyphPane::GlyphPane() = default;
 GlyphPane::~GlyphPane() = default;
 
@@ -196,6 +198,16 @@ bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> 
 									res = true;
 								}
 							}
+							else if (g->GlyphType() == sfntly::GlyphType::kComposite)
+							{
+								m_GlyphToDisplay.reset();
+
+								// show and active the glyph pane
+								LayoutManager::Instance()->ShowAndFocusSpecificPane(PaneFlags::PANE_GLYPH);
+
+								Messaging::Instance()->AddWarning(true, nullptr, nullptr,
+									"Composite glyph drawing is not supported for the moment");
+							}
 						}
 					}
 				}
@@ -236,66 +248,72 @@ bool GlyphPane::DrawSimpleGlyph(ProjectFile* vProjectFile)
 			auto g = &glyphInfosPtr->simpleGlyph;
 			if (g->isValid)
 			{
-				int cmax = (int)g->coords.size();
-				ct::ivec4 rc = g->rc;
+				auto fontInfos = glyphInfosPtr->GetFontInfos();
+				if (!fontInfos.expired())
+				{
+					auto fontInfosPtr = fontInfos.lock();
+					if (fontInfosPtr.use_count())
+					{
+						int cmax = (int)g->coords.size();
+						ct::ivec4 rc = g->rc;
 
-				ImGui::SliderIntDefaultCompact(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x, "Count Contours", &limitContour, 1, cmax, cmax);
-				limitContour = ct::mini(limitContour, cmax);
+						ImGui::SliderIntDefaultCompact(ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x, "Count Contours", &limitContour, 1, cmax, cmax);
+						limitContour = ct::mini(limitContour, cmax);
 
-				bool change = false;
-				float aw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 1.0f) * 0.5f;
-				change |= ImGui::SliderFloatDefaultCompact(aw, "Trans X", &glyphInfosPtr->m_Translation.x, (float)-rc.z, (float)rc.z, 0.0f); ImGui::SameLine();
-				change |= ImGui::SliderFloatDefaultCompact(aw, "Trans Y", &glyphInfosPtr->m_Translation.y, (float)-rc.w, (float)rc.w, 0.0f);
-				//change |= ImGui::SliderFloatDefaultCompact(aw, "Scale X", &glyphInfosPtr->m_Scale.x, 0.01f, 3.0f, 1.0f); ImGui::SameLine();
-				//change |= ImGui::SliderFloatDefaultCompact(aw, "Scale Y", &glyphInfosPtr->m_Scale.y, 0.01f, 3.0f, 1.0f);
+						bool change = false;
+						float aw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 1.0f) * 0.5f;
+						change |= ImGui::SliderFloatDefaultCompact(aw, "Trans X", &glyphInfosPtr->m_Translation.x, (float)-rc.z, (float)rc.z, 0.0f); ImGui::SameLine();
+						change |= ImGui::SliderFloatDefaultCompact(aw, "Trans Y", &glyphInfosPtr->m_Translation.y, (float)-rc.w, (float)rc.w, 0.0f);
+						//change |= ImGui::SliderFloatDefaultCompact(aw, "Scale X", &glyphInfosPtr->m_Scale.x, 0.01f, 3.0f, 1.0f); ImGui::SameLine();
+						//change |= ImGui::SliderFloatDefaultCompact(aw, "Scale Y", &glyphInfosPtr->m_Scale.y, 0.01f, 3.0f, 1.0f);
 				
-				ImGui::Separator();
+						ImGui::Separator();
 
-				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Grid", "Show/Hide Canvas Grid", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_CANVAS_GRID);
-				ImGui::SameLine();
-				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Legends", "Show/Hide Legends", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_LEGENDS);
-				ImGui::SameLine();
-				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Axis X", "Show/Hide Font Axis X", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_AXIS_X);
-				ImGui::SameLine();
-				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Axis Y", "Show/Hide Font Axis Y", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_AXIS_Y);
-				ImGui::SameLine();
-				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Zero Pt", "Show/Hide Font Zero Point", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_ORIGIN_XY);
-				ImGui::SameLine();
-				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Font BBox", "Show/Hide Font Bounding Box", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_BBOX);
-				ImGui::SameLine();
-				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Ascent", "Show/Hide Font Ascent", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_ASCENT);
-				ImGui::SameLine();
-				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Descent", "Show/Hide Font Descent", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_DESCENT);
-				ImGui::SameLine();
-				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Glyph BBox", "Show/Hide Glyph Bounidng Box", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_GLYPH_BBOX);
-				ImGui::SameLine();
-				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Advance X", "Show/Hide Glyph Advance X", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_GLYPH_ADVANCEX);
-				ImGui::SameLine();
-				change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Ctrl Lines", "Show/Hide Glyph Control Lines X", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_GLYPH_CONTROL_LINES);
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Grid", "Show/Hide Canvas Grid", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_CANVAS_GRID);
+						ImGui::SameLine();
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Legends", "Show/Hide Legends", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_LEGENDS);
+						ImGui::SameLine();
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Axis X", "Show/Hide Font Axis X", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_AXIS_X);
+						ImGui::SameLine();
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Axis Y", "Show/Hide Font Axis Y", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_AXIS_Y);
+						ImGui::SameLine();
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Zero Pt", "Show/Hide Font Zero Point", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_ORIGIN_XY);
+						ImGui::SameLine();
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Font BBox", "Show/Hide Font Bounding Box", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_BBOX);
+						ImGui::SameLine();
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Ascent", "Show/Hide Font Ascent", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_ASCENT);
+						ImGui::SameLine();
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Descent", "Show/Hide Font Descent", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_DESCENT);
+						ImGui::SameLine();
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Glyph BBox", "Show/Hide Glyph Bounidng Box", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_GLYPH_BBOX);
+						ImGui::SameLine();
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Advance X", "Show/Hide Glyph Advance X", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_GLYPH_ADVANCEX);
+						ImGui::SameLine();
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Ctrl Lines", "Show/Hide Glyph Control Lines X", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_GLYPH_CONTROL_LINES);
 
-				ImGui::Separator();
+						ImGui::Separator();
 
-				ImGui::Text("Glyph Rect : %i %i %i %i", rc.x, rc.y, rc.z, rc.w);
+						if (change)
+						{
+							// will come back with svg or/and glyph edition
+							g->m_Translation = glyphInfosPtr->m_Translation; // wip
+							g->m_Scale = glyphInfosPtr->m_Scale;// for the moment scale is overwrite by merged system
+							vProjectFile->SetProjectChange();
+						}
 
-				ImGui::Separator();
-				if (change)
-				{
-					// will come back with svg or/and glyph edition
-					g->m_Translation = glyphInfosPtr->m_Translation; // wip
-					g->m_Scale = glyphInfosPtr->m_Scale;// for the moment scale is overwrite by merged system
-					vProjectFile->SetProjectChange();
-				}
+						ct::ivec4 frc = fontInfosPtr->m_BoundingBox;
 
-				auto fontInfosPtr = glyphInfosPtr->GetFontInfos();
-				if (fontInfosPtr.use_count())
-				{
-					g->DrawCurves(
-						vProjectFile->m_GlyphPreview_Scale,
-						fontInfosPtr,
-						glyphInfosPtr,
-						limitContour,
-						vProjectFile->m_GlyphPreview_QuadBezierCountSegments,
-						vProjectFile->m_GlyphDrawingFlags);
+						ImGui::Text("Font BBox : %i %i %i %i | Glyph BBox : %i %i %i %i", frc.x, frc.y, frc.z, frc.w, rc.x, rc.y, rc.z, rc.w);
+
+						ImGui::Separator();
+						g->DrawCurves(
+							vProjectFile->m_GlyphPreview_Scale,
+							fontInfosPtr,
+							glyphInfosPtr,
+							limitContour,
+							vProjectFile->m_GlyphPreview_QuadBezierCountSegments,
+							vProjectFile->m_GlyphDrawingFlags);
+					}
 				}
 			}
 		}

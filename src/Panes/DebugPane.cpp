@@ -124,6 +124,10 @@ ct::ivec2 DebugPane::GetGlyphCurrentPoint()
 
 void DebugPane::DrawGlyphCurrentPoint(float vPreviewScale, ImVec2 vScreenPos, ImDrawList *vImDrawList)
 {
+	UNUSED(vPreviewScale);
+	UNUSED(vScreenPos);
+	UNUSED(vImDrawList);
+
 	/*if (!m_GlyphToDisplay.expired())
 	{
 		auto m_GlyphPtr = m_GlyphToDisplay.lock();

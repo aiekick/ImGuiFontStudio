@@ -52,7 +52,7 @@ enum _GlyphDrawingFlags
 	GLYPH_DRAWING_GLYPH_BBOX = (1 << 7), // show glyph bounding box
 	GLYPH_DRAWING_GLYPH_ADVANCEX = (1 << 8), // show glyph advance x
 	GLYPH_DRAWING_GLYPH_CONTROL_LINES = (1 << 9), // show glyph advance x
-	GLYPH_DRAWING_CANVAS_GRID = (1 << 9), // show font axis
+	GLYPH_DRAWING_CANVAS_GRID = (1 << 10), // show font axis
 
 	GLYPH_DRAWING_GLYPH_Default =
 		GLYPH_DRAWING_LEGENDS |
@@ -104,7 +104,7 @@ class GlyphInfos
 {
 public:
 	static std::shared_ptr<GlyphInfos> Create(
-		std::shared_ptr<FontInfos> vFontInfos,
+		std::weak_ptr<FontInfos> vFontInfos,
 		ImFontGlyph vGlyph, std::string vOldName,
 		std::string vNewName, uint32_t vNewCodePoint = 0,
 		ImVec2 vTranslation = ImVec2(0, 0));
@@ -151,12 +151,12 @@ public: // for interaction only
 public:
 	GlyphInfos();
 	GlyphInfos(
-		std::shared_ptr<FontInfos> vFontInfos,
+		std::weak_ptr<FontInfos> vFontInfos,
 		ImFontGlyph vGlyph, std::string vOldName,
 		std::string vNewName, uint32_t vNewCodePoint, 
 		ImVec2 vTranslation);
 	~GlyphInfos();
 
-	std::shared_ptr<FontInfos> GetFontInfos();
-	void SetFontInfos(std::shared_ptr<FontInfos> vFontInfos);
+	std::weak_ptr<FontInfos> GetFontInfos();
+	void SetFontInfos(std::weak_ptr<FontInfos> vFontInfos);
 };
