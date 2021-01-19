@@ -484,7 +484,7 @@ void ParamsPane::OpenFont(ProjectFile *vProjectFile, const std::string& vFontFil
 			if (vProjectFile->m_Fonts.find(fontName) == vProjectFile->m_Fonts.end())
 			{
 				// create font 
-				vProjectFile->m_Fonts[fontName] = std::make_shared<FontInfos>();
+				vProjectFile->m_Fonts[fontName] = FontInfos::Create();
 			}
 						
 			auto font = vProjectFile->m_Fonts[fontName];

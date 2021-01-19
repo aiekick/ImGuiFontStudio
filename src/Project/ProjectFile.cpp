@@ -271,6 +271,7 @@ std::string ProjectFile::getXml(const std::string& vOffset, const std::string& /
 	str += vOffset + "\t<zoomglyphs>" + (m_ZoomGlyphs ? "true" : "false") +"</zoomglyphs>\n";
 	str += vOffset + "\t<showbaseline>" + (m_ShowBaseLine ? "true" : "false") + "</showbaseline>\n";
 	str += vOffset + "\t<showadvancex>" + (m_ShowAdvanceX ? "true" : "false") + "</showadvancex>\n";
+	str += vOffset + "\t<showglyphlegends>" + (m_ShowGlyphLegends ? "true" : "false") + "</showglyphlegends>\n";
 	str += SelectionHelper::Instance()->getXml(vOffset + "\t");
 	str += m_FontTestInfos.getXml(vOffset + "\t");
 	str += vOffset + "</project>\n";
@@ -302,11 +303,15 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 		
 		if (strName == "font")
 		{
-			FontInfos f;
-			f.setFromXml(vElem, vParent);
-			if (!f.m_FontFileName.empty())
+			auto f = FontInfos::Create();
+			f->setFromXml(vElem, vParent);
+			if (!f->m_FontFileName.empty())
 			{
-				m_Fonts[f.m_FontFileName] = std::make_shared<FontInfos>(f);
+				m_Fonts[f->m_FontFileName] = f;
+			}
+			else
+			{
+				f.reset();
 			}
 		}
 		else if (strName == "rangecoloring")
@@ -366,6 +371,8 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 			m_FontTestInfos.setFromXml(vElem, vParent);
 		else if (strName == "finalselection")
 			SelectionHelper::Instance()->setFromXml(vElem, vParent);
+		else if (strName == "showglyphlegends")
+			m_ShowGlyphLegends = ct::ivariant(strValue).GetB();
 	}
 
 	return true;

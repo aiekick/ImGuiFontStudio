@@ -73,6 +73,7 @@ public: // to save
 	bool m_ShowAdvanceX = false; // show the advance x of the glyph only when m_ZoomGlyphs is false
 	bool m_ShowOriginX = false; // show the origin x of the glyph only when m_ZoomGlyphs is false
 	FontTestInfos m_FontTestInfos;
+	bool m_ShowGlyphLegends = false; // will show glyph legent in glyph pane
 
 public: // dont save
 	std::shared_ptr<FontInfos> m_SelectedFont = nullptr;

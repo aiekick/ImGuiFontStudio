@@ -44,7 +44,12 @@ struct GlyphsRange
 class ProjectFile;
 class FontInfos : public conf::ConfigAbstract
 {
+public:
+	static std::shared_ptr<FontInfos> Create();
+	
 public: // not to save
+	std::shared_ptr<FontInfos> m_This = 0;
+
 	ImFontAtlas m_ImFontAtlas;
 	std::vector<std::string> m_GlyphNames;
 	std::map<uint32_t, std::string> m_GlyphCodePointToName;

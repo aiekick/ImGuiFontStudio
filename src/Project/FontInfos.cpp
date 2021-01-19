@@ -73,6 +73,13 @@ static std::string GetPrefixFromFontFileName(const std::string& vFileName)
     return res;
 }
 
+std::shared_ptr<FontInfos> FontInfos::Create()
+{
+	auto res = std::make_shared<FontInfos>();
+	res->m_This = res;
+	return res;
+}
+
 FontInfos::FontInfos() = default;
 FontInfos::~FontInfos()
 {
@@ -765,7 +772,7 @@ bool FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 
 		ImFontGlyph g{};
 		g.Codepoint = oldcodepoint;
-		m_SelectedGlyphs[oldcodepoint] = std::make_shared<GlyphInfos>(g, oldName, newName, newcodepoint, translation);
+		m_SelectedGlyphs[oldcodepoint] = GlyphInfos::Create(m_This, g, oldName, newName, newcodepoint, translation);
 	}
 	else if (strParentName == "filters" &&  strName == "filter")
 	{

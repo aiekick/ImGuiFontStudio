@@ -67,12 +67,18 @@ public: // ImGui
 		float vGlobalScale,
 		std::shared_ptr<FontInfos> vFontInfos,
 		std::shared_ptr<GlyphInfos> vGlyphInfos,
-		int vMaxContour, int vQuadBezierCountSegments, bool vShowControlLines);
+		int vMaxContour, int vQuadBezierCountSegments, 
+		bool vShowControlLines, bool vShowGlyphLegends);
 };
 
 class GlyphInfos
 {
 public:
+	static std::shared_ptr<GlyphInfos> Create(
+		std::shared_ptr<FontInfos> vFontInfos,
+		ImFontGlyph vGlyph, std::string vOldName,
+		std::string vNewName, uint32_t vNewCodePoint = 0,
+		ImVec2 vTranslation = ImVec2(0, 0));
 	// 0 => none, 1 => left pressed, 2 => right pressed
 	static int DrawGlyphButton(
 		int& vWidgetPushId, // by adress because we want modify it
@@ -116,9 +122,10 @@ public: // for interaction only
 public:
 	GlyphInfos();
 	GlyphInfos(
+		std::shared_ptr<FontInfos> vFontInfos,
 		ImFontGlyph vGlyph, std::string vOldName,
-		std::string vNewName, uint32_t vNewCodePoint = 0, 
-		ImVec2 vTranslation = ImVec2(0, 0));
+		std::string vNewName, uint32_t vNewCodePoint, 
+		ImVec2 vTranslation);
 	~GlyphInfos();
 
 	std::shared_ptr<FontInfos> GetFontInfos();

@@ -283,7 +283,8 @@ bool GlyphPane::DrawSimpleGlyph(ProjectFile* vProjectFile)
 						glyphInfosPtr,
 						limitContour,
 						vProjectFile->m_GlyphPreview_QuadBezierCountSegments,
-						vProjectFile->m_GlyphPreview_ShowControlLines);
+						vProjectFile->m_GlyphPreview_ShowControlLines,
+						vProjectFile->m_ShowGlyphLegends);
 				}
 			}
 		}

@@ -188,143 +188,165 @@ void SimpleGlyph_Solo::ClearTransform()
 }
 
 // https://github.com/rillig/sfntly/tree/master/java/src/com/google/typography/font/tools/fontviewer
+// we will display the glyph metrics like here : https://www.libsdl.org/projects/SDL_ttf/docs/metrics.png
 void SimpleGlyph_Solo::DrawCurves(
 	float vGlobalScale, 
 	std::shared_ptr<FontInfos> vFontInfos,
 	std::shared_ptr<GlyphInfos> vGlyphInfos,
-	int vMaxContour, int vQuadBezierCountSegments, bool vShowControlLines)
+	int vMaxContour, int vQuadBezierCountSegments, 
+	bool vShowControlLines, bool vShowGlyphLegends)
 {
 	if (isValid && vFontInfos && vGlyphInfos)
 	{
-
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (window->SkipItems)
 			return;
 		auto drawList = window->DrawList;
 
-		int cmax = (int)coords.size();
-
 		ImVec2 contentStart = ImGui::GetCursorScreenPos();
 		ImVec2 contentSize = ImGui::GetContentRegionAvail();
 		ImVec2 contentCenter = contentStart + contentSize * 0.5f;
 
-		drawList->AddRectFilled(contentStart, contentStart + contentSize, ImGui::GetColorU32(ImGuiCol_FrameBg));
-
-		ImRect glypRect = ImRect(
-			((float)rc.x),
-			((float)rc.y),
-			((float)(rc.z - rc.x)),
-			((float)(rc.w - rc.y)));
-
-		ImVec2 glyphCenter = glypRect.GetCenter();
-		ImVec2 glyphSize = glypRect.GetSize();
-
-		int ascent = vFontInfos->m_Ascent;
-		int descent = vFontInfos->m_Descent;
-		int advanceX = vGlyphInfos->glyph.AdvanceX / vFontInfos->m_Point;
-
-		glyphSize.y = ImMax(glyphSize.y, (float)(ascent - descent));
-
-		ImVec2 pScale = contentSize / glyphSize;
-		float newScale = ImMin(pScale.x, pScale.y) * vGlobalScale;
-		glypRect.Min *= newScale;
-		glypRect.Max *= newScale;
-		glyphSize = glypRect.GetSize();
-
-		ImVec2 pos = contentCenter - glyphSize * 0.5f;
-
-		// origin x
-		drawList->AddLine(
-			ct::toImVec2(Scale(ct::ivec2(0, (int32_t)ct::floor(rc.y)), newScale)) + pos,
-			ct::toImVec2(Scale(ct::ivec2(0, (int32_t)ct::floor(rc.w)), newScale)) + pos,
-			ImGui::GetColorU32(ImGuiCol_PlotLinesHovered), 2.0f);
-
-		// adv x
-		drawList->AddLine(
-			ct::toImVec2(Scale(ct::ivec2(advanceX, (int32_t)ct::floor(rc.y)), newScale)) + pos,
-			ct::toImVec2(Scale(ct::ivec2(advanceX, (int32_t)ct::floor(rc.w)), newScale)) + pos,
-			ImGui::GetColorU32(ImGuiCol_PlotLines), 2.0f);
-
-		// base line
-		drawList->AddLine(
-			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.x), 0), newScale)) + pos,
-			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.z), 0), newScale)) + pos,
-			ImGui::GetColorU32(ImGuiCol_PlotHistogram), 1.0f);
-
-		// Ascent
-		drawList->AddLine(
-			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.x), ascent), newScale)) + pos,
-			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.z), ascent), newScale)) + pos,
-			ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
-
-		// Descent
-		drawList->AddLine(
-			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.x), descent), newScale)) + pos,
-			ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.z), descent), newScale)) + pos,
-			ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
-
-		for (int c = 0; c < cmax; c++)
+		ImGui::PushClipRect(contentStart, contentStart + contentSize, false);
 		{
-			if (c >= vMaxContour) break;
+			drawList->AddRectFilled(contentStart, contentStart + contentSize, ImGui::GetColorU32(ImGuiCol_FrameBg));
 
-			int pmax = (int)coords[c].size();
+			auto frc = vFontInfos->m_BoundingBox;
+			ImRect fontBBox = ImRect((float)frc.x, (float)frc.y, (float)frc.z, (float)frc.w);
+			ImRect glyphBBox = ImRect((float)rc.x, (float)rc.y, (float)rc.z, (float)rc.w);
+			
+			ImVec2 pScale = contentSize / fontBBox.GetSize();
+			float newScale = ImMin(pScale.x, pScale.y) * vGlobalScale;
 
-			int firstOn = 0;
-			for (int p = 0; p < pmax; p++)
+			fontBBox = ImRect(contentCenter - fontBBox.GetSize() * 0.5f * newScale, contentCenter + fontBBox.GetSize() * 0.5f * newScale);
+			ImVec2 fontBBoxSize = fontBBox.GetSize();
+
+			drawList->AddCircleFilled(contentCenter, 10.0f, ImGui::GetColorU32(ImGuiCol_Text));
+			drawList->AddRect(fontBBox.Min, fontBBox.Max, ImGui::GetColorU32(ImGuiCol_Text));
+
+			ImVec2 posOrigin = contentCenter - fontBBoxSize * 0.5f - ImVec2(frc.x, frc.y) * newScale;
+
+			///////////////////////////////////////////////////////////////
+			// show pos in local space
+			if (ImGui::IsWindowHovered() && ImGui::IsMouseHoveringRect(fontBBox.Min, fontBBox.Max))
 			{
-				if (IsOnCurve(c, p))
-				{
-					firstOn = p;
-					break;
-				}
+				ImVec2 mousePos = ImGui::GetMousePos() - contentStart;
+				float px = (mousePos.x - (fontBBox.Min.x - contentStart.x)) / newScale + frc.x;
+				float py = (fontBBoxSize.y - (mousePos.y - (fontBBox.Min.y - contentStart.y))) / newScale + frc.y;
+				ImGui::SetTooltip("px : %.2f\npy : %.2f", px, py);
 			}
+			///////////////////////////////////////////////////////////////
 
-			// curve
+			int ascent = vFontInfos->m_Ascent;
+			int descent = vFontInfos->m_Descent;
+			int advanceX = vGlyphInfos->glyph.AdvanceX / vFontInfos->m_Point;
 
-			drawList->PathLineTo(ct::toImVec2(GetCoords(c, firstOn, newScale)) + pos);
+			ImVec2 min, max;
+			float triangleWidth = 20.0f;
+			float triangleHeight = 20.0f;
 
-			for (int i = 0; i < pmax; i++)
+			float step = 200.0f;
+			float ox = 0.0f - step;
+			float lx = advanceX + step;
+			float oy = descent - step;
+			float ly = ascent + step;
+
+			// origin axis X
+			const ImU32 XAxisCol = ImGui::GetColorU32(ImGuiCol_PlotLinesHovered, 0.8f);
+			min = ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(ox), 0), newScale)) + posOrigin;
+			max = ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(lx), 0), newScale)) + posOrigin;
+			drawList->AddLine(min, max, XAxisCol, 2.0f);
+			drawList->AddTriangleFilled(
+				max,
+				max - ImVec2(triangleWidth, triangleHeight * 0.5f),
+				max - ImVec2(triangleWidth, triangleHeight * -0.5f),
+				XAxisCol);
+
+			// origin axis Y
+			const ImU32 YAxisCol = ImGui::GetColorU32(ImGuiCol_PlotHistogramHovered, 0.8f);
+			min = ct::toImVec2(Scale(ct::ivec2(0, (int32_t)ct::floor(oy)), newScale)) + posOrigin;
+			max = ct::toImVec2(Scale(ct::ivec2(0, (int32_t)ct::floor(ly)), newScale)) + posOrigin;
+			drawList->AddLine(min, max, YAxisCol, 2.0f);
+			drawList->AddTriangleFilled(
+				max,
+				max + ImVec2(triangleWidth * 0.5f, triangleHeight),
+				max + ImVec2(triangleWidth * -0.5f, triangleHeight),
+				YAxisCol);
+
+			// font bounding box
+			const ImU32 FontBBoxCol = ImGui::GetColorU32(ImVec4(1,0,0,1));
+			min = ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(frc.x), (int32_t)ct::floor(frc.y)), newScale)) + posOrigin;
+			max = ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(frc.z), (int32_t)ct::floor(frc.w)), newScale)) + posOrigin;
+			drawList->AddText(min + ImVec2(1, -1) * ImGui::GetTextLineHeight(), FontBBoxCol, "Font BBox");
+			drawList->AddRect(min, max, FontBBoxCol, 0.0f, 15, 2.0f);
+
+			// glyph bounding box
+			/*const ImU32 GlyphBBoxCol = ImGui::GetColorU32(ImGuiCol_Text, 0.8f);
+			min = ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.x), (int32_t)ct::floor(rc.y)), newScale)) + posOrigin;
+			max = ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.z), (int32_t)ct::floor(rc.w)), newScale)) + posOrigin;
+			drawList->AddText(min + ImVec2(1, 1) * ImGui::GetTextLineHeight(), GlyphBBoxCol, "Glyph BBox");
+			drawList->AddRect(min, max, GlyphBBoxCol, 0.0f, 15, 2.0f);*/
+
+			// origin x
+			/*drawList->AddLine(
+				ct::toImVec2(Scale(ct::ivec2(0, (int32_t)ct::floor(rc.y)), newScale)) + posOrigin,
+				ct::toImVec2(Scale(ct::ivec2(0, (int32_t)ct::floor(rc.w)), newScale)) + posOrigin,
+				ImGui::GetColorU32(ImGuiCol_PlotLinesHovered), 2.0f);
+
+			// adv x
+			drawList->AddLine(
+				ct::toImVec2(Scale(ct::ivec2(advanceX, (int32_t)ct::floor(oy)), newScale)) + posOrigin,
+				ct::toImVec2(Scale(ct::ivec2(advanceX, (int32_t)ct::floor(ly)), newScale)) + posOrigin,
+				ImGui::GetColorU32(ImGuiCol_PlotLines), 2.0f);
+
+			// base line
+			drawList->AddLine(
+				ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.x), 0), newScale)) + posOrigin,
+				ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(rc.z), 0), newScale)) + posOrigin,
+				ImGui::GetColorU32(ImGuiCol_PlotHistogram), 1.0f);
+
+			// Ascent
+			drawList->AddLine(
+				ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(ox), ascent), newScale)) + posOrigin,
+				ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(lx), ascent), newScale)) + posOrigin,
+				ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);
+
+			// Descent
+			drawList->AddLine(
+				ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(ox), descent), newScale)) + posOrigin,
+				ct::toImVec2(Scale(ct::ivec2((int32_t)ct::floor(lx), descent), newScale)) + posOrigin,
+				ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), 2.0f);*/
+
+			/*int cmax = (int)coords.size();
+			for (int c = 0; c < cmax; c++)
 			{
-				int icurr = firstOn + i + 1;
-				int inext = firstOn + i + 2;
-				ct::ivec2 cur = GetCoords(c, icurr, newScale);
+				if (c >= vMaxContour) break;
 
-				if (IsOnCurve(c, icurr))
+				int pmax = (int)coords[c].size();
+
+				int firstOn = 0;
+				for (int p = 0; p < pmax; p++)
 				{
-					drawList->PathLineTo(ct::toImVec2(cur) + pos);
-				}
-				else
-				{
-					ct::ivec2 nex = GetCoords(c, inext, newScale);
-					if (!IsOnCurve(c, inext))
+					if (IsOnCurve(c, p))
 					{
-						nex.x = (int)(((double)nex.x + (double)cur.x) * 0.5);
-						nex.y = (int)(((double)nex.y + (double)cur.y) * 0.5);
+						firstOn = p;
+						break;
 					}
-					drawList->PathBezierQuadraticCurveTo(
-						ct::toImVec2(cur) + pos,
-						ct::toImVec2(nex) + pos, vQuadBezierCountSegments);
 				}
-			}
 
-			drawList->PathStroke(ImGui::GetColorU32(ImGuiCol_Text), true);
+				// curve
 
-#ifdef _DEBUG
-			DebugPane::Instance()->DrawGlyphCurrentPoint(newScale, pos, drawList);
-#endif
-
-			if (vShowControlLines) // control lines
-			{
-				drawList->PathLineTo(ct::toImVec2(GetCoords(c, firstOn, newScale)) + pos);
+				drawList->PathLineTo(ct::toImVec2(GetCoords(c, firstOn, newScale)) + posOrigin);
 
 				for (int i = 0; i < pmax; i++)
 				{
 					int icurr = firstOn + i + 1;
 					int inext = firstOn + i + 2;
 					ct::ivec2 cur = GetCoords(c, icurr, newScale);
+
 					if (IsOnCurve(c, icurr))
 					{
-						drawList->PathLineTo(ct::toImVec2(cur) + pos);
+						drawList->PathLineTo(ct::toImVec2(cur) + posOrigin);
 					}
 					else
 					{
@@ -334,20 +356,65 @@ void SimpleGlyph_Solo::DrawCurves(
 							nex.x = (int)(((double)nex.x + (double)cur.x) * 0.5);
 							nex.y = (int)(((double)nex.y + (double)cur.y) * 0.5);
 						}
-						drawList->PathLineTo(ct::toImVec2(cur) + pos);
-						drawList->PathLineTo(ct::toImVec2(nex) + pos);
+						drawList->PathBezierQuadraticCurveTo(
+							ct::toImVec2(cur) + posOrigin,
+							ct::toImVec2(nex) + posOrigin, vQuadBezierCountSegments);
 					}
 				}
 
-				drawList->PathStroke(ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), true);
-			}
+				drawList->PathStroke(ImGui::GetColorU32(ImGuiCol_Text), true);
+
+#ifdef _DEBUG
+				DebugPane::Instance()->DrawGlyphCurrentPoint(newScale, posOrigin, drawList);
+#endif
+
+				if (vShowControlLines) // control lines
+				{
+					drawList->PathLineTo(ct::toImVec2(GetCoords(c, firstOn, newScale)) + posOrigin);
+
+					for (int i = 0; i < pmax; i++)
+					{
+						int icurr = firstOn + i + 1;
+						int inext = firstOn + i + 2;
+						ct::ivec2 cur = GetCoords(c, icurr, newScale);
+						if (IsOnCurve(c, icurr))
+						{
+							drawList->PathLineTo(ct::toImVec2(cur) + posOrigin);
+						}
+						else
+						{
+							ct::ivec2 nex = GetCoords(c, inext, newScale);
+							if (!IsOnCurve(c, inext))
+							{
+								nex.x = (int)(((double)nex.x + (double)cur.x) * 0.5);
+								nex.y = (int)(((double)nex.y + (double)cur.y) * 0.5);
+							}
+							drawList->PathLineTo(ct::toImVec2(cur) + posOrigin);
+							drawList->PathLineTo(ct::toImVec2(nex) + posOrigin);
+						}
+					}
+
+					drawList->PathStroke(ImGui::GetColorU32(ImVec4(0, 0, 1, 1)), true);
+				}
+			}*/
 		}
+		ImGui::PopClipRect();
 	}
 }
 
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////
+
+std::shared_ptr<GlyphInfos> GlyphInfos::Create(
+	std::shared_ptr<FontInfos> vFontInfos,
+	ImFontGlyph vGlyph, std::string vOldName,
+	std::string vNewName, uint32_t vNewCodePoint,
+	ImVec2 vTranslation)
+{
+	assert(vFontInfos != nullptr);
+	return std::make_shared<GlyphInfos>(vFontInfos, vGlyph, vOldName, vNewName, vNewCodePoint, vTranslation);
+}
 
 GlyphInfos::GlyphInfos()
 {
@@ -365,10 +432,12 @@ GlyphInfos::GlyphInfos()
 }
 
 GlyphInfos::GlyphInfos(
+	std::shared_ptr<FontInfos> vFontInfos,
 	ImFontGlyph vGlyph, std::string vOldName, 
 	std::string vNewName, uint32_t vNewCodePoint,
 	ImVec2 vTranslation)
 {
+	fontInfos = vFontInfos;
 	glyph = vGlyph;
 	oldHeaderName = vOldName;
 	newHeaderName = vNewName;

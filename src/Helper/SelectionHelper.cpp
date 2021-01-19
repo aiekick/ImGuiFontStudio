@@ -838,7 +838,7 @@ void SelectionHelper::SelectGlyph(ProjectFile * vProjectFile, std::shared_ptr<Fo
 					std::string res = vFontInfos->GetGlyphName(vGlyph.Codepoint);
 					if (res.empty())
 						res = "Symbol Name";
-					vFontInfos->m_SelectedGlyphs[vGlyph.Codepoint] = std::make_shared<GlyphInfos>(vGlyph, res, res);
+					vFontInfos->m_SelectedGlyphs[vGlyph.Codepoint] = GlyphInfos::Create(vFontInfos, vGlyph, res, res);
 					vProjectFile->SetProjectChange();
 
 					if (vUpdateMaps)
