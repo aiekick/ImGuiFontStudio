@@ -264,6 +264,11 @@ namespace ImGui
 	IMGUI_API bool SliderFloatCompact(float width,
 		const char* label, float* v, float v_min,
 		float v_max, const char* format = "%.3f");
+
+	IMGUI_API bool SliderScalarDefaultCompact(float width,
+		const char* label, ImGuiDataType data_type,
+		void* p_data, const void* p_min, const void* p_max,
+		const void* p_default, const char* format = NULL);
 	IMGUI_API bool SliderUIntDefaultCompact(float width,
 		const char* label, uint32_t* v, uint32_t v_min,
 		uint32_t v_max, uint32_t v_default, const char* format = "%d");

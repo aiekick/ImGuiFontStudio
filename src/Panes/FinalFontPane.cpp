@@ -284,17 +284,17 @@ void FinalFontPane::DrawSelectedFontPane(ProjectFile *vProjectFile)
 
 void FinalFontPane::SetFinalFontPaneMode(FinalFontPaneModeFlags vFinalFontPaneModeFlags)
 {
-	m_FinalFontPaneModeFlags = (FinalFontPaneModeFlags)(m_FinalFontPaneModeFlags | vFinalFontPaneModeFlags);
+	m_FinalFontPaneModeFlags = (FinalFontPaneModeFlags)(vFinalFontPaneModeFlags); /// set
 }
 
 bool FinalFontPane::IsFinalFontPaneMode(FinalFontPaneModeFlags vFinalFontPaneModeFlags)
 {
-	return (m_FinalFontPaneModeFlags & vFinalFontPaneModeFlags);
+	return (m_FinalFontPaneModeFlags & vFinalFontPaneModeFlags) == vFinalFontPaneModeFlags; // check
 }
 
 bool FinalFontPane::IsSelectedFontPaneMode(SelectedFontPaneModeFlags vSelectedFontPaneModeFlags)
 {
-	return (m_SelectedFontPaneModeFlags & vSelectedFontPaneModeFlags);
+	return (m_SelectedFontPaneModeFlags & vSelectedFontPaneModeFlags) == vSelectedFontPaneModeFlags; // check
 }
 
 void FinalFontPane::PrepareSelection(ProjectFile *vProjectFile)
@@ -360,7 +360,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 		ct::fvec2 scale = vGlyph->m_Scale;
 		res = GlyphInfos::DrawGlyphButton(
 			paneWidgetId,
-			vProjectFile, vFontInfos->m_ImFontAtlas.Fonts[0], 
+			vProjectFile, vFontInfos->GetImFont(),
 			&selected, vSize, &vGlyph->glyph,
 			ImVec2(trans.x, trans.y), ImVec2(scale.x, scale.y), 
 			-1, vShowRect ? 3.0f : 0.0f);
@@ -537,9 +537,6 @@ void FinalFontPane::DrawSelectionsByFontNoOrder(ProjectFile *vProjectFile, bool 
 		for (auto it : vProjectFile->m_Fonts)
 		{
 			DrawSelectionsByFontNoOrder_OneFontOnly(vProjectFile, it.second, true, false, false, vShowTooltipInfos);
-
-			if (vProjectFile->m_Fonts.size() > 1)
-				ImGui::Separator();
 		}
 		
 		SelectionHelper::Instance()->SelectWithToolOrApply(
@@ -702,9 +699,6 @@ void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint(ProjectFile *vProject
 		for (auto it : vProjectFile->m_Fonts)
 		{
 			DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(vProjectFile, it.second, true, false, false, vShowTooltipInfos);
-
-			if (vProjectFile->m_Fonts.size() > 1)
-				ImGui::Separator();
 		}
 
 		SelectionHelper::Instance()->SelectWithToolOrApply(
@@ -869,9 +863,6 @@ void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames(ProjectFile *vProjec
 		for (auto it : vProjectFile->m_Fonts)
 		{
 			DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(vProjectFile, it.second, true, false, false, vShowTooltipInfos);
-
-			if (vProjectFile->m_Fonts.size() > 1)
-				ImGui::Separator();
 		}
 
 		SelectionHelper::Instance()->SelectWithToolOrApply(

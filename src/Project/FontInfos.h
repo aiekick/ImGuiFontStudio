@@ -19,6 +19,7 @@
 #include <tinyxml2/tinyxml2.h>
 
 #include <Project/GlyphInfos.h>
+#include <ImguiImpl/freetype/imgui_freetype.h>
 
 #include <imgui/imgui.h>
 #include <string>
@@ -77,8 +78,8 @@ public: // to save
 	int m_Oversample = 1;
 	int m_FontSize = 17;
 	std::set<std::string> m_Filters; // use map just for have binary tree search
-	RasterizerEnum rasterizerMode = RasterizerEnum::RASTERIZER_STB;
-	uint32_t freeTypeFlag = 0;
+	RasterizerEnum rasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
+	uint32_t freeTypeFlag = ImGuiFreeType::NoHinting;
 	float fontMultiply = 1.0f;
 	int32_t fontPadding = 1;
 

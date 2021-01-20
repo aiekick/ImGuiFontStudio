@@ -152,16 +152,13 @@ bool SelectionHelper::IsSelectionMode(GlyphSelectionModeFlags vGlyphSelectionMod
 
 void SelectionHelper::DrawMenu(ProjectFile * vProjectFile)
 {
-	float maxWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 3.0f;
-	ImVec2 btnSize = ImVec2(maxWidth - ImGui::GetStyle().FramePadding.x, 0.0f);
-
 	if (!m_SelectionForOperation.empty())
 	{
 		if (ImGui::BeginFramedGroup("Selection Operations"))
 		{
 			ImGui::FramedGroupText("Selection : %u Glyphs", m_SelectionForOperation.size());
 
-			if (ImGui::Button("Remove From Final", btnSize))
+			if (ImGui::Button("Remove From Final", ImVec2(-1,0)))
 			{
 				RemoveSelectionFromFinal(vProjectFile);
 			}
@@ -170,7 +167,7 @@ void SelectionHelper::DrawMenu(ProjectFile * vProjectFile)
 
 			if (!m_ReRangeStruct.startCodePoint.valid)
 				ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.8f, 0.2f, 0.2f, 0.8f));
-			bool edited = ImGui::SliderUIntCompact(maxWidth + ImGui::GetStyle().FramePadding.x,
+			bool edited = ImGui::SliderUIntCompact(-1.0f,
 				"Start CodePoint", &m_ReRangeStruct.startCodePoint.codePoint, 0U, 65535U);
 			if (!m_ReRangeStruct.startCodePoint.valid)
 				ImGui::PopStyleColor();
@@ -183,7 +180,7 @@ void SelectionHelper::DrawMenu(ProjectFile * vProjectFile)
 
 			if (!m_ReRangeStruct.endCodePoint.valid)
 				ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.8f, 0.2f, 0.2f, 0.8f));
-			edited = ImGui::SliderUIntCompact(maxWidth + ImGui::GetStyle().FramePadding.x,
+			edited = ImGui::SliderUIntCompact(-1.0f,
 				"End CodePoint", &m_ReRangeStruct.endCodePoint.codePoint, 0U, 65535U);
 			if (!m_ReRangeStruct.endCodePoint.valid)
 				ImGui::PopStyleColor();
@@ -197,7 +194,7 @@ void SelectionHelper::DrawMenu(ProjectFile * vProjectFile)
 			if (m_ReRangeStruct.startCodePoint.codePoint + (int)m_SelectionForOperation.size() <=
 				m_ReRangeStruct.MaxCodePoint)
 			{
-				if (ImGui::Button("ReRange after start", btnSize))
+				if (ImGui::Button("ReRange after start", ImVec2(-1, 0)))
 				{
 					ReRange_Offset_After_Start(vProjectFile, (uint32_t)m_ReRangeStruct.startCodePoint.codePoint);
 				}
@@ -206,7 +203,7 @@ void SelectionHelper::DrawMenu(ProjectFile * vProjectFile)
 			if (m_ReRangeStruct.endCodePoint.codePoint - (int)m_SelectionForOperation.size() >=
 				m_ReRangeStruct.MinCodePoint)
 			{
-				if (ImGui::Button("ReRange before end", btnSize))
+				if (ImGui::Button("ReRange before end", ImVec2(-1, 0)))
 				{
 					ReRange_Offset_Before_End(vProjectFile, (uint32_t)m_ReRangeStruct.endCodePoint.codePoint);
 				}
@@ -228,7 +225,8 @@ void SelectionHelper::DrawMenu(ProjectFile * vProjectFile)
 		ImGui::Text("Dst UnSel Count : %zu", m_TmpSelectionDst.tmpUnSel.size());*/
 #endif
 
-		float mrw = maxWidth / 3.0f - ImGui::GetStyle().FramePadding.x;
+		float mrw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.33333f;
+
 		ImGui::RadioButtonLabeled_BitWize<GlyphSelectionTypeFlags>("Zone", "by Zone",
 			&m_GlyphSelectionTypeFlags, GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_ZONE, mrw, true);
 		ImGui::SameLine();
@@ -240,14 +238,16 @@ void SelectionHelper::DrawMenu(ProjectFile * vProjectFile)
 
 		if (IsSelectionType(GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_ZONE))
 		{
-			ImGui::SliderFloatDefaultCompact(maxWidth + ImGui::GetStyle().FramePadding.x,
+			ImGui::SliderFloatDefaultCompact(-1.0f,
 				"Zone Radius", &m_Zone.z, 0.5f, 150.0f, m_Zone.w);
 		}
 
 		if (!IsSelectionType(GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_RANGE))
 		{
 			ImGui::FramedGroupText("Selection Mode");
-			mrw = maxWidth / 2.0f - ImGui::GetStyle().FramePadding.x;
+
+			mrw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
+
 			ImGui::RadioButtonLabeled_BitWize<GlyphSelectionModeFlags>(
 				"Add", "Select glyphs in additive mode",
 				&m_GlyphSelectionModeFlags, GlyphSelectionModeFlags::GLYPH_SELECTION_MODE_ADD, mrw, true);
@@ -656,7 +656,7 @@ void SelectionHelper::ApplySelection(ProjectFile * vProjectFile,
 					{
 						if (codePoint.second->m_ImFontAtlas.IsBuilt())
 						{
-							ImFont* font = codePoint.second->m_ImFontAtlas.Fonts[0];
+							ImFont* font = codePoint.second->GetImFont();
 							if (font)
 							{
 								auto ptr = font->FindGlyph((ImWchar)codePoint.first);
@@ -686,7 +686,7 @@ void SelectionHelper::ApplySelection(ProjectFile * vProjectFile,
 					{
 						if (codePoint.second->m_ImFontAtlas.IsBuilt())
 						{
-							ImFont* font = codePoint.second->m_ImFontAtlas.Fonts[0];
+							ImFont* font = codePoint.second->GetImFont();
 							if (font)
 							{
 								auto ptr = font->FindGlyph((ImWchar)codePoint.first);
@@ -751,7 +751,7 @@ void SelectionHelper::SelectAllGlyphs(ProjectFile * vProjectFile, std::shared_pt
 			{
 				if (!vFontInfos->m_ImFontAtlas.Fonts.empty())
 				{
-					ImFont* font = vFontInfos->m_ImFontAtlas.Fonts[0];
+					ImFont* font = vFontInfos->GetImFont();
 
 					if (font)
 					{
@@ -793,7 +793,7 @@ void SelectionHelper::UnSelectAllGlyphs(ProjectFile * vProjectFile, std::shared_
 			{
 				if (!vFontInfos->m_ImFontAtlas.Fonts.empty())
 				{
-					ImFont* font = vFontInfos->m_ImFontAtlas.Fonts[0];
+					ImFont* font = vFontInfos->GetImFont();
 
 					if (font)
 					{
@@ -1062,7 +1062,7 @@ void SelectionHelper::SelectGlyphByRangeFromStartCodePoint(
 
 				if (vFontInfos->m_ImFontAtlas.IsBuilt())
 				{
-					ImFont* font = vFontInfos->m_ImFontAtlas.Fonts[0];
+					ImFont* font = vFontInfos->GetImFont();
 					if (font)
 					{
 						int idx = vFontGlyphIndex;
@@ -1204,7 +1204,7 @@ void SelectionHelper::UnSelectGlyphByRangeFromStartCodePoint(
 
 				if (vFontInfos->m_ImFontAtlas.IsBuilt())
 				{
-					ImFont* font = vFontInfos->m_ImFontAtlas.Fonts[0];
+					ImFont* font = vFontInfos->GetImFont();
 					if (font)
 					{
 						int glyphIndex = 0;
@@ -1256,7 +1256,7 @@ void SelectionHelper::UnSelectGlyphByRangeFromStartCodePoint(
 
 				if (vFontInfos->m_ImFontAtlas.IsBuilt())
 				{
-					ImFont* font = vFontInfos->m_ImFontAtlas.Fonts[0];
+					ImFont* font = vFontInfos->GetImFont();
 					if (font)
 					{
 						int idx = vFontGlyphIndex;
@@ -1399,88 +1399,91 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile * vProjectFile)
 		std::set<uint32_t> codePointsGlobal; vProjectFile->m_CodePointFoundInDouble = false;
 		std::set<std::string> namesLocal;
 		std::set<uint32_t> codePointsLocal;
-		for (auto font : vProjectFile->m_Fonts)
+		for (const auto& font : vProjectFile->m_Fonts)
 		{
-			font.second->m_NameInDoubleFound = false;
-			font.second->m_CodePointInDoubleFound = false;
-			namesLocal.clear();
-			codePointsLocal.clear();
-
-			for (auto& selection : font.second->m_SelectedGlyphs)
+			if (!font.second->m_NeedFilePathResolve) // if font have issue not take it into account
 			{
-				// local in current font
-				if (!font.second->m_CodePointInDoubleFound)
+				font.second->m_NameInDoubleFound = false;
+				font.second->m_CodePointInDoubleFound = false;
+				namesLocal.clear();
+				codePointsLocal.clear();
+
+				for (auto& selection : font.second->m_SelectedGlyphs)
 				{
-					if (selection.second)
+					// local in current font
+					if (!font.second->m_CodePointInDoubleFound)
 					{
-						if (codePointsLocal.find(selection.second->newCodePoint) == codePointsLocal.end()) // not found 
+						if (selection.second)
 						{
-							codePointsLocal.emplace(selection.second->newCodePoint);
-						}
-						else
-						{
-							// double detected => cast an error
-							font.second->m_CodePointInDoubleFound = true;
+							if (codePointsLocal.find(selection.second->newCodePoint) == codePointsLocal.end()) // not found 
+							{
+								codePointsLocal.emplace(selection.second->newCodePoint);
+							}
+							else
+							{
+								// double detected => cast an error
+								font.second->m_CodePointInDoubleFound = true;
+							}
 						}
 					}
-				}
 
-				// local in current font
-				if (!font.second->m_NameInDoubleFound)
-				{
-					if (selection.second)
+					// local in current font
+					if (!font.second->m_NameInDoubleFound)
 					{
-						if (namesLocal.find(selection.second->newHeaderName) == namesLocal.end()) // not found 
+						if (selection.second)
 						{
-							namesLocal.emplace(selection.second->newHeaderName);
-						}
-						else
-						{
-							// double detected => cast an error
-							font.second->m_NameInDoubleFound = true;
+							if (namesLocal.find(selection.second->newHeaderName) == namesLocal.end()) // not found 
+							{
+								namesLocal.emplace(selection.second->newHeaderName);
+							}
+							else
+							{
+								// double detected => cast an error
+								font.second->m_NameInDoubleFound = true;
+							}
 						}
 					}
-				}
 
-				// global for all fonts
-				if (!vProjectFile->m_CodePointFoundInDouble)
-				{
-					if (selection.second)
+					// global for all fonts
+					if (!vProjectFile->m_CodePointFoundInDouble)
 					{
-						if (codePointsGlobal.find(selection.second->newCodePoint) == codePointsGlobal.end()) // not found 
+						if (selection.second)
 						{
-							codePointsGlobal.emplace(selection.second->newCodePoint);
-						}
-						else
-						{
-							// double detected => cast an error
-							vProjectFile->m_CodePointFoundInDouble = true;
+							if (codePointsGlobal.find(selection.second->newCodePoint) == codePointsGlobal.end()) // not found 
+							{
+								codePointsGlobal.emplace(selection.second->newCodePoint);
+							}
+							else
+							{
+								// double detected => cast an error
+								vProjectFile->m_CodePointFoundInDouble = true;
+							}
 						}
 					}
-				}
 
-				// global for all fonts
-				if (!vProjectFile->m_NameFoundInDouble)
-				{
-					if (selection.second)
+					// global for all fonts
+					if (!vProjectFile->m_NameFoundInDouble)
 					{
-						if (namesGlobal.find(selection.second->newHeaderName) == namesGlobal.end()) // not found 
+						if (selection.second)
 						{
-							namesGlobal.emplace(selection.second->newHeaderName);
-						}
-						else
-						{
-							// double detected => cast an error
-							vProjectFile->m_NameFoundInDouble = true;
+							if (namesGlobal.find(selection.second->newHeaderName) == namesGlobal.end()) // not found 
+							{
+								namesGlobal.emplace(selection.second->newHeaderName);
+							}
+							else
+							{
+								// double detected => cast an error
+								vProjectFile->m_NameFoundInDouble = true;
+							}
 						}
 					}
-				}
 
-				if (vProjectFile->m_CodePointFoundInDouble &&
-					vProjectFile->m_NameFoundInDouble &&
-					font.second->m_CodePointInDoubleFound &&
-					font.second->m_NameInDoubleFound)
-					break;
+					if (vProjectFile->m_CodePointFoundInDouble &&
+						vProjectFile->m_NameFoundInDouble &&
+						font.second->m_CodePointInDoubleFound &&
+						font.second->m_NameInDoubleFound)
+						break;
+				}
 			}
 		}
 

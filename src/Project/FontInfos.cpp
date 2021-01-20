@@ -239,7 +239,32 @@ void FontInfos::Clear()
 	fontPadding = 1;
 }
 
-static const char *standardMacNames[258] = { ".notdef", ".null", "nonmarkingreturn", "space", "exclam", "quotedbl", "numbersign", "dollar", "percent", "ampersand", "quotesingle", "parenleft", "parenright", "asterisk", "plus", "comma", "hyphen", "period", "slash", "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "colon", "semicolon", "less", "equal", "greater", "question", "at", "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "bracketleft", "backslash", "bracketright", "asciicircum", "underscore", "grave", "a", "b", "c", "d", "e", "f", "g", "h", "i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "braceleft", "bar", "braceright", "asciitilde", "Adieresis", "Aring", "Ccedilla", "Eacute", "Ntilde", "Odieresis", "Udieresis", "aacute", "agrave", "acircumflex", "adieresis", "atilde", "aring", "ccedilla", "eacute", "egrave", "ecircumflex", "edieresis", "iacute", "igrave", "icircumflex", "idieresis", "ntilde", "oacute", "ograve", "ocircumflex", "odieresis", "otilde", "uacute", "ugrave", "ucircumflex", "udieresis", "dagger", "degree", "cent", "sterling", "section", "bullet", "paragraph", "germandbls", "registered", "copyright", "trademark", "acute", "dieresis", "notequal", "AE", "Oslash", "infinity", "plusminus", "lessequal", "greaterequal", "yen", "mu", "partialdiff", "summation", "product", "pi", "integral", "ordfeminine", "ordmasculine", "Omega", "ae", "oslash", "questiondown", "exclamdown", "logicalnot", "radical", "florin", "approxequal", "Delta", "guillemotleft", "guillemotright", "ellipsis", "nonbreakingspace", "Agrave", "Atilde", "Otilde", "OE", "oe", "endash", "emdash", "quotedblleft", "quotedblright", "quoteleft", "quoteright", "divide", "lozenge", "ydieresis", "Ydieresis", "fraction", "currency", "guilsinglleft", "guilsinglright", "fi", "fl", "daggerdbl", "periodcentered", "quotesinglbase", "quotedblbase", "perthousand", "Acircumflex", "Ecircumflex", "Aacute", "Edieresis", "Egrave", "Iacute", "Icircumflex", "Idieresis", "Igrave", "Oacute", "Ocircumflex", "apple", "Ograve", "Uacute", "Ucircumflex", "Ugrave", "dotlessi", "circumflex", "tilde", "macron", "breve", "dotaccent", "ring", "cedilla", "hungarumlaut", "ogonek", "caron", "Lslash", "lslash", "Scaron", "scaron", "Zcaron", "zcaron", "brokenbar", "Eth", "eth", "Yacute", "yacute", "Thorn", "thorn", "minus", "multiply", "onesuperior", "twosuperior", "threesuperior", "onehalf", "onequarter", "threequarters", "franc", "Gbreve", "gbreve", "Idotaccent", "Scedilla", "scedilla", "Cacute", "cacute", "Ccaron", "ccaron", "dcroat" };
+static const char *standardMacNames[258] = 
+{ ".notdef", ".null", "nonmarkingreturn", "space", "exclam", "quotedbl", "numbersign", "dollar", "percent", 
+"ampersand", "quotesingle", "parenleft", "parenright", "asterisk", "plus", "comma", "hyphen", "period", 
+"slash", "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "colon", 
+"semicolon", "less", "equal", "greater", "question", "at", "A", "B", "C", "D", "E", "F", "G", "H", 
+"I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "bracketleft", 
+"backslash", "bracketright", "asciicircum", "underscore", "grave", "a", "b", "c", "d", "e", "f", "g", "h", 
+"i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "braceleft", "bar", 
+"braceright", "asciitilde", "Adieresis", "Aring", "Ccedilla", "Eacute", "Ntilde", "Odieresis", "Udieresis", 
+"aacute", "agrave", "acircumflex", "adieresis", "atilde", "aring", "ccedilla", "eacute", "egrave", "ecircumflex", 
+"edieresis", "iacute", "igrave", "icircumflex", "idieresis", "ntilde", "oacute", "ograve", "ocircumflex", "odieresis", 
+"otilde", "uacute", "ugrave", "ucircumflex", "udieresis", "dagger", "degree", "cent", "sterling", "section", "bullet", 
+"paragraph", "germandbls", "registered", "copyright", "trademark", "acute", "dieresis", "notequal", "AE", "Oslash", 
+"infinity", "plusminus", "lessequal", "greaterequal", "yen", "mu", "partialdiff", "summation", "product", "pi", 
+"integral", "ordfeminine", "ordmasculine", "Omega", "ae", "oslash", "questiondown", "exclamdown", "logicalnot", 
+"radical", "florin", "approxequal", "Delta", "guillemotleft", "guillemotright", "ellipsis", "nonbreakingspace", 
+"Agrave", "Atilde", "Otilde", "OE", "oe", "endash", "emdash", "quotedblleft", "quotedblright", "quoteleft", 
+"quoteright", "divide", "lozenge", "ydieresis", "Ydieresis", "fraction", "currency", "guilsinglleft", "guilsinglright", 
+"fi", "fl", "daggerdbl", "periodcentered", "quotesinglbase", "quotedblbase", "perthousand", "Acircumflex", "Ecircumflex", 
+"Aacute", "Edieresis", "Egrave", "Iacute", "Icircumflex", "Idieresis", "Igrave", "Oacute", "Ocircumflex", "apple", "Ograve", 
+"Uacute", "Ucircumflex", "Ugrave", "dotlessi", "circumflex", "tilde", "macron", "breve", "dotaccent", "ring", "cedilla", 
+"hungarumlaut", "ogonek", "caron", "Lslash", "lslash", "Scaron", "scaron", "Zcaron", "zcaron", "brokenbar", "Eth", "eth", 
+"Yacute", "yacute", "Thorn", "thorn", "minus", "multiply", "onesuperior", "twosuperior", "threesuperior", "onehalf", 
+"onequarter", "threequarters", "franc", "Gbreve", "gbreve", "Idotaccent", "Scedilla", "scedilla", "Cacute", "cacute", 
+"Ccaron", "ccaron", "dcroat" };
+
 void FontInfos::FillGlyphNames()
 {
 	if (!m_ImFontAtlas.ConfigData.empty())
@@ -337,99 +362,98 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 		
 		float aw = 0.0f;
 
-		if (ImGui::BeginFramedGroup("Selected Font Infos"))
+		if (ImGui::BeginFramedGroup("Selected Font"))
 		{
 			aw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 2.0f;
 
-			static ImGuiTableFlags flags = 
-				ImGuiTableFlags_SizingFixedFit |
-				ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable |
-				ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
-				ImGuiTableFlags_NoHostExtendY | ImGuiTableFlags_Borders;
-			if (ImGui::BeginTable("##fontinfosTable", 2, flags, ImVec2(aw, ImGui::GetTextLineHeightWithSpacing() * 7)))
+			if (ImGui::CollapsingHeader("Infos", ImGuiTreeNodeFlags_Bullet))
 			{
-				ImGui::TableSetupScrollFreeze(0, 1); // Make header always visible
-				ImGui::TableSetupColumn("Item", ImGuiTableColumnFlags_WidthFixed, -1, 0);
-				ImGui::TableSetupColumn("Infos", ImGuiTableColumnFlags_WidthStretch, -1, 1);
-				ImGui::TableHeadersRow(); // draw headers
-
-				m_InfosToDisplayClipper.Begin((int)m_InfosToDisplay.size(), ImGui::GetTextLineHeightWithSpacing());
-				while (m_InfosToDisplayClipper.Step())
+				static ImGuiTableFlags flags =
+					ImGuiTableFlags_SizingFixedFit |
+					ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable |
+					ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
+					ImGuiTableFlags_NoHostExtendY | ImGuiTableFlags_Borders;
+				if (ImGui::BeginTable("##fontinfosTable", 2, flags, ImVec2(aw, ImGui::GetTextLineHeightWithSpacing() * 7)))
 				{
-					for (int i = m_InfosToDisplayClipper.DisplayStart; i < m_InfosToDisplayClipper.DisplayEnd; i++)
+					ImGui::TableSetupScrollFreeze(0, 1); // Make header always visible
+					ImGui::TableSetupColumn("Item", ImGuiTableColumnFlags_WidthFixed, -1, 0);
+					ImGui::TableSetupColumn("Infos", ImGuiTableColumnFlags_WidthStretch, -1, 1);
+					ImGui::TableHeadersRow(); // draw headers
+
+					m_InfosToDisplayClipper.Begin((int)m_InfosToDisplay.size(), ImGui::GetTextLineHeightWithSpacing());
+					while (m_InfosToDisplayClipper.Step())
 					{
-						if (i < 0) continue;
-
-						const auto& infos = m_InfosToDisplay[i];
-
-						ImGui::TableNextRow();
-
-						if (ImGui::TableSetColumnIndex(0)) // first column
+						for (int i = m_InfosToDisplayClipper.DisplayStart; i < m_InfosToDisplayClipper.DisplayEnd; i++)
 						{
-							ImGui::Selectable(infos.first.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap);
-						}
-						if (ImGui::TableSetColumnIndex(1)) // second column
-						{
-							float sw = ImGui::CalcTextSize(infos.second.c_str()).x;
-							ImGui::Text("%s", infos.second.c_str());
-							if (sw > aw - ImGui::GetCursorPosX())
+							if (i < 0) continue;
+
+							const auto& infos = m_InfosToDisplay[i];
+
+							ImGui::TableNextRow();
+
+							if (ImGui::TableSetColumnIndex(0)) // first column
 							{
-								if (ImGui::IsItemHovered())
-									ImGui::SetTooltip(infos.second.c_str());
+								ImGui::Selectable(infos.first.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap);
+							}
+							if (ImGui::TableSetColumnIndex(1)) // second column
+							{
+								float sw = ImGui::CalcTextSize(infos.second.c_str()).x;
+								ImGui::Text("%s", infos.second.c_str());
+								if (sw > aw - ImGui::GetCursorPosX())
+								{
+									if (ImGui::IsItemHovered())
+										ImGui::SetTooltip(infos.second.c_str());
+								}
 							}
 						}
 					}
+					ImGui::EndTable();
 				}
-				ImGui::EndTable();
 			}
 			
 			ImGui::FramedGroupSeparator();
 
-			ImGui::Text("Selecteds : %u", (uint32_t)m_SelectedGlyphs.size());
+			ImGui::Text("Selected glyphs : %u", (uint32_t)m_SelectedGlyphs.size());
 
-			if (ImGui::Button("Clear Transforms (All Glyphs)", ImVec2(0,0)))
+			if (ImGui::Button("Clear Glyph Transforms (All Glyphs)", ImVec2(-1,0)))
 			{
 				ClearTransforms(vProjectFile);
 			}
 			
 			ImGui::FramedGroupSeparator();
 
-			aw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 3.0f;
+			aw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
 
-			ImGui::PushItemWidth(aw * 0.5f);
-			if (ImGui::RadioButtonLabeled("Stb (Default)", "Use Stb Raterizer", FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_STB))
+			ImGui::PushItemWidth(aw);
+			if (ImGui::RadioButtonLabeled("FreeType (Default)", "Use FreeType Raterizer", FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE))
+			{
+				needFontReGen = true;
+				FontInfos::rasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
+			}
+			
+			ImGui::SameLine();
+
+			if (ImGui::RadioButtonLabeled("Stb", "Use Stb Raterizer", FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_STB))
 			{
 				needFontReGen = true;
 				FontInfos::rasterizerMode = RasterizerEnum::RASTERIZER_STB;
 			}
 			ImGui::PopItemWidth();
-
-			ImGui::SameLine();
-
-			ImGui::PushItemWidth(aw * 0.5f);
-			if (ImGui::RadioButtonLabeled("FreeType", "Use FreeType Raterizer", FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE))
-			{
-				needFontReGen = true;
-				FontInfos::rasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
-			}
-			ImGui::PopItemWidth();
-
-			aw = ImGui::GetContentRegionAvail().x;
-
+			
 			ImGui::FramedGroupSeparator();
 
-			needFontReGen |= ImGui::SliderIntDefaultCompact(ImGui::GetContentRegionAvail().x, "Font Size", &vProjectFile->m_SelectedFont->m_FontSize, 7, 50, defaultFontInfosValues.m_FontSize);
+			needFontReGen |= ImGui::SliderIntDefaultCompact(-1.0f, "Font Size", &vProjectFile->m_SelectedFont->m_FontSize, 7, 50, defaultFontInfosValues.m_FontSize);
 			
 			if (FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_STB)
 			{
-				needFontReGen |= ImGui::SliderIntDefaultCompact(ImGui::GetContentRegionAvail().x, "Font Anti-aliasing", &vProjectFile->m_SelectedFont->m_Oversample, 1, 5, defaultFontInfosValues.m_Oversample);
+				needFontReGen |= ImGui::SliderIntDefaultCompact(-1.0f, "Font Anti-aliasing", &vProjectFile->m_SelectedFont->m_Oversample, 1, 5, defaultFontInfosValues.m_Oversample);
 			}
 			else if (FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
 			{
-				needFontReGen |= ImGui::SliderFloatDefaultCompact(aw, "Multiply", &fontMultiply, 0.0f, 2.0f, 1.0f);
+				needFontReGen |= ImGui::SliderFloatDefaultCompact(-1.0f, "Multiply", &fontMultiply, 0.0f, 2.0f, 1.0f);
 			}
 
-			needFontReGen |= ImGui::SliderIntDefaultCompact(aw, "Padding", &fontPadding, 0, 16, 1);
+			needFontReGen |= ImGui::SliderIntDefaultCompact(-1.0f, "Padding", &fontPadding, 0, 16, 1);
 
 			if (FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
 			{
@@ -476,7 +500,10 @@ void FontInfos::UpdateInfos()
 	//--------------------------------------------------------
 	m_InfosToDisplay.clear();
 	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Font", m_FontFilePathName));
-	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("N Glyphs :", ct::toStr(m_ImFontAtlas.Fonts[0]->Glyphs.size())));
+	if (GetImFont())
+	{
+		m_InfosToDisplay.push_back(std::pair<std::string, std::string>("N Glyphs :", ct::toStr(GetImFont()->Glyphs.size())));
+	}
 	//m_InfosToDisplay.push_back(std::pair<std::string, std::string>("N Sel Glyphs :", ct::toStr(m_SelectedGlyphs.size())));
 	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Texture Size :", ct::toStr("%i x %i", m_ImFontAtlas.TexWidth, m_ImFontAtlas.TexHeight)));
 	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Ascent / Descent :", ct::toStr("%i / %i", m_Ascent, m_Descent)));
@@ -503,7 +530,7 @@ void FontInfos::GenerateCodePointToGlypNamesDB()
 		{
 			if (m_ImFontAtlas.IsBuilt())
 			{
-				ImFont* font = m_ImFontAtlas.Fonts[0];
+				ImFont* font = GetImFont();
 				if (font)
 				{
 					for (auto glyph : font->Glyphs)
@@ -530,7 +557,7 @@ void FontInfos::UpdateFiltering()
 {
 	m_FilteredGlyphs.clear();
 
-	ImFont* font = m_ImFontAtlas.Fonts[0];
+	ImFont* font = GetImFont();
 	if (font)
 	{
 		uint32_t countGlyphs = (uint32_t)font->Glyphs.size();

@@ -131,11 +131,11 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 		{
 			if (vProjectFile && vProjectFile->IsLoaded())
 			{
-				float maxWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 4.0f;
-				float mrw = maxWidth / 2.0f - ImGui::GetStyle().FramePadding.x;
-				
 				if (ImGui::BeginFramedGroup("Font File"))
 				{
+					float maxWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x;
+					float mrw = maxWidth / 2.0f;
+
 					if (ImGui::Button(ICON_IGFS_FOLDER_OPEN " Open Font", ImVec2(mrw, 0.0f)))
 					{
 						Action_Menu_OpenFont();
@@ -154,22 +154,22 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 
 						ImGui::FramedGroupText("Opened Fonts");
 
-						static int _countLines = 4;
-						ImGui::SliderIntDefaultCompact(ImGui::GetContentRegionAvail().x, "Count Lines", &_countLines, 0, 100, 4);
+						static int _countLines = 7;
+						//ImGui::SliderIntDefaultCompact(ImGui::GetContentRegionAvail().x, "Count Lines", &_countLines, 0, 100, 7);
 
 						static int selection = 0;
 						static ImGuiTableFlags flags =
 							ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg |
 							ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
 							ImGuiTableFlags_NoHostExtendY | ImGuiTableFlags_Borders;
-						if (ImGui::BeginTable("##fileTable", 2, flags, ImVec2(maxWidth - ImGui::GetStyle().FramePadding.x, _countLines * ImGui::GetTextLineHeightWithSpacing())))
+						if (ImGui::BeginTable("##fileTable", 2, flags, ImVec2(-1.0f, _countLines * ImGui::GetTextLineHeightWithSpacing())))
 						{
 							ImGui::TableSetupScrollFreeze(0, 1); // Make header always visible
 							ImGui::TableSetupColumn("Font Files", ImGuiTableColumnFlags_WidthStretch, -1, 0);
 							ImGui::TableSetupColumn("Edit", ImGuiTableColumnFlags_WidthFixed, 32, 1);
 							ImGui::TableHeadersRow();
 							
-							for (auto itFont : vProjectFile->m_Fonts)
+							for (const auto& itFont : vProjectFile->m_Fonts) // importnat need to sahre by address for the userdatas when need to resolve
 							{
 								bool sel = false;
 
@@ -183,7 +183,7 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 									ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_AllowDoubleClick;
 									selectableFlags |= ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
 									sel = ImGui::Selectable(itFont.first.c_str(), vProjectFile->m_SelectedFont == itFont.second, 
-										selectableFlags, ImVec2(0, ImGui::GetTextLineHeightWithSpacing()));
+										selectableFlags, ImVec2(0, 0));
 
 									if (itFont.second->m_NeedFilePathResolve)
 										ImGui::PopStyleColor();
@@ -202,7 +202,7 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 									if (itFont.second->m_NeedFilePathResolve)
 										ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 0.8f));
 									if (ImGui::TransparentButton((itFont.second->m_NeedFilePathResolve ? ICON_IGFS_WARNING : ICON_IGFS_EDIT), 
-										ImVec2(24, ImGui::GetTextLineHeightWithSpacing())))
+										ImVec2(24, 0)))
 									{
 										std::string label;
 										if (itFont.second->m_NeedFilePathResolve)
@@ -213,7 +213,7 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 										ImGuiFileDialog::Instance()->OpenModal(
 											"SolveBadFilePathName",
 											label.c_str(), "Font File (*.ttf *.otf){.ttf,.otf}", ".",
-											itFont.first.c_str(), 1, (IGFD::UserDatas)itFont.first.c_str());
+											itFont.first.c_str(), 1, IGFDUserDatas(itFont.first.c_str()));
 									}
 									if (itFont.second->m_NeedFilePathResolve)
 										ImGui::PopStyleColor();
@@ -250,8 +250,7 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 
 					if (ImGui::BeginFramedGroup("Glyphs"))
 					{
-						maxWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 2.0f;
-						mrw = maxWidth / 4.0f - ImGui::GetStyle().FramePadding.x;
+						const float mrw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x * 2.0f) * 0.25f;
 
 						ImGui::PushItemWidth(mrw);
 						ImGui::RadioButtonLabeled("Zoom", "Zoom Each Glyphs for best fit", &vProjectFile->m_ZoomGlyphs);
@@ -270,9 +269,8 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 					{
 						if (vProjectFile->m_SourceFontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH)
 						{
-							const auto style = &ImGui::GetStyle();
 							static float radioButtonWidth = ImGui::GetFrameHeight();
-							float aw = ImGui::GetContentRegionAvail().x - style->ItemSpacing.x - radioButtonWidth;
+							const float aw = ImGui::GetContentRegionAvail().x - radioButtonWidth - ImGui::GetStyle().ItemSpacing.x * 3.0f;
 
 							bool change = false;
 							if (ImGui::SliderIntDefaultCompact(aw, "Glyph Count X", &vProjectFile->m_Preview_Glyph_CountX, 
@@ -318,10 +316,10 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 							ImGui::Checkbox("Differential Colorations", &vProjectFile->m_ShowRangeColoring);
 							if (vProjectFile->IsRangeColoringShown())
 							{
-								change |= ImGui::SliderFloatDefaultCompact(aw, "H x", &vProjectFile->m_RangeColoringHash.x, 0, 50, defaultProjectValues.m_RangeColoringHash.x);
-								change |= ImGui::SliderFloatDefaultCompact(aw, "H y", &vProjectFile->m_RangeColoringHash.y, 0, 50, defaultProjectValues.m_RangeColoringHash.y);
-								change |= ImGui::SliderFloatDefaultCompact(aw, "H z", &vProjectFile->m_RangeColoringHash.z, 0, 50, defaultProjectValues.m_RangeColoringHash.z);
-								//change |= ImGui::SliderFloatDefaultCompact(aw, "Alpha", &vProjectFile->m_RangeColoringHash.w, 0, 1, defaultProjectValues.m_RangeColoringHash.w);
+								change |= ImGui::SliderFloatDefaultCompact(-1.0f, "H x", &vProjectFile->m_RangeColoringHash.x, 0, 50, defaultProjectValues.m_RangeColoringHash.x);
+								change |= ImGui::SliderFloatDefaultCompact(-1.0f, "H y", &vProjectFile->m_RangeColoringHash.y, 0, 50, defaultProjectValues.m_RangeColoringHash.y);
+								change |= ImGui::SliderFloatDefaultCompact(-1.0f, "H z", &vProjectFile->m_RangeColoringHash.z, 0, 50, defaultProjectValues.m_RangeColoringHash.z);
+								//change |= ImGui::SliderFloatDefaultCompact(-1.0f, "Alpha", &vProjectFile->m_RangeColoringHash.w, 0, 1, defaultProjectValues.m_RangeColoringHash.w);
 							}
 
 							if (change)
@@ -426,11 +424,8 @@ bool ParamsPane::Display_ConfirmToCloseFont_Dialog()
 	{
 		ImGui::OpenPopup("Are you sure to close this font ?");
 		if (ImGui::BeginPopupModal("Are you sure to close this font ?", (bool*)0,
-			ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking))
+			ImGuiWindowFlags_NoResize))
 		{
-			ImGui::SetWindowPos(MainFrame::Instance()->m_DisplaySize * 0.5f - 
-				ImGui::GetWindowSize() * 0.5f); // put the dlg in center of the frame
-
 			ImGui::Text("You will lose your glyph selection / tuning");
 
 			/*

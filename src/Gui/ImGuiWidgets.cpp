@@ -347,8 +347,9 @@ bool ImGui::BeginFramedGroup(const char *vLabel, bool vSpacing, ImVec4 /*vCol*/,
 	ImGuiContext& g = *GImGui;
 	const ImGuiStyle& style = g.Style;
 
+	window->ContentRegionRect.Max.x -= style.FramePadding.x * 3.0f;
 	window->WorkRect.Max.x -= style.FramePadding.x * 3.0f;
-	
+
 	ImGui::BeginGroup();
 
     if (vLabel)
@@ -398,6 +399,7 @@ void ImGui::EndFramedGroup(bool vSpacing)
     const ImGuiStyle& style = g.Style;
     ImGuiWindow* window = ImGui::GetCurrentWindow();
 
+	window->ContentRegionRect.Max.x += style.FramePadding.x * 3.0f;
 	window->WorkRect.Max.x += style.FramePadding.x * 3.0f;
 
 	if (vSpacing)
@@ -1091,8 +1093,13 @@ bool ImGui::SliderScalarCompact(float width, const char* label, ImGuiDataType da
 	ImGuiContext& g = *GImGui;
 	const ImGuiStyle& style = g.Style;
 	const ImGuiID id = window->GetID(label);
-	const float w = width - style.FramePadding.x * 2.0f;
 
+	float w = width;
+	if (width <= 0.0f)
+	{
+		w = ImGui::GetContentRegionMaxAbs().x - window->DC.CursorPos.x;
+	}
+	
 	const ImVec2 label_size = CalcTextSize(label, NULL, true);
 	const ImRect total_bb(window->DC.CursorPos, window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y * 2.0f));
 	
@@ -1214,7 +1221,7 @@ bool ImGui::SliderFloatCompact(float width,
 	return SliderScalarCompact(width, label, ImGuiDataType_Float, v, &v_min, &v_max, format);
 }
 
-bool ImGui::SliderUIntDefaultCompact(float width, const char* label, uint32_t* v, uint32_t v_min, uint32_t v_max, uint32_t v_default, const char* format)
+bool ImGui::SliderScalarDefaultCompact(float width, const char* label, ImGuiDataType data_type,	void* p_data, const void* p_min, const void* p_max,	const void* p_default, const char* format)
 {
 	bool change = false;
 
@@ -1223,79 +1230,49 @@ bool ImGui::SliderUIntDefaultCompact(float width, const char* label, uint32_t* v
 	ImGui::PushID(label);
 	if (CustomButton(ICON_IGFS_RESET))
 	{
-		*v = v_default;
+		switch (data_type)
+		{
+		case ImGuiDataType_S8: *(ImS8*)(p_data) = *(ImS8*)(p_default); break;
+		case ImGuiDataType_U8: *(ImU8*)(p_data) = *(ImU8*)(p_default); break;
+		case ImGuiDataType_S16: *(ImS16*)(p_data) = *(ImS16*)(p_default); break;
+		case ImGuiDataType_U16: *(ImU16*)(p_data) = *(ImU16*)(p_default); break;
+		case ImGuiDataType_S32: *(ImS32*)(p_data) = *(ImS32*)(p_default); break;
+		case ImGuiDataType_U32: *(ImU32*)(p_data) = *(ImU32*)(p_default); break;
+		case ImGuiDataType_S64: *(ImS64*)(p_data) = *(ImS64*)(p_default); break;
+		case ImGuiDataType_U64: *(ImU64*)(p_data) = *(ImU64*)(p_default); break;
+		case ImGuiDataType_Float: *(float*)(p_data) = *(float*)(p_default); break;
+		case ImGuiDataType_Double: *(double*)(p_data) = *(double*)(p_default); break;
+		case ImGuiDataType_COUNT: break;
+		}
 		change = true;
 	}
 	ImGui::PopID();
 
 	ImGui::SameLine();
 
-	if (IS_FLOAT_EQUAL(width, 0.0f))
+	if (width > 0.0f)
 	{
-		width = ImGui::GetContentRegionAvail().x;
+		width -= ImGui::GetItemRectSize().x - ImGui::GetStyle().ItemSpacing.x;
 	}
 
-	float w = width - ImGui::GetCursorPosX() + ax;
-
-	change |= SliderScalarCompact(w, label, ImGuiDataType_U32, v, &v_min, &v_max, format);
+	change |= SliderScalarCompact(width, label, data_type, p_data, p_min, p_max, format);
 
 	return change;
+}
+
+bool ImGui::SliderUIntDefaultCompact(float width, const char* label, uint32_t* v, uint32_t v_min, uint32_t v_max, uint32_t v_default, const char* format)
+{
+	return SliderScalarDefaultCompact(width, label, ImGuiDataType_U32, v, &v_min, &v_max, &v_default, format);
 }
 
 bool ImGui::SliderIntDefaultCompact(float width, const char* label, int* v, int v_min, int v_max, int v_default, const char* format)
 {
-	bool change = false;
-
-	float ax = ImGui::GetCursorPosX();
-
-	ImGui::PushID(label);
-	if (CustomButton(ICON_IGFS_RESET))
-	{
-		*v = v_default;
-		change = true;
-	}
-	ImGui::PopID();
-
-	ImGui::SameLine();
-
-	if (IS_FLOAT_EQUAL(width, 0.0f))
-	{
-		width = ImGui::GetContentRegionAvail().x;
-	}
-
-	float w = width - ImGui::GetCursorPosX() + ax;
-
-	change |= SliderScalarCompact(w, label, ImGuiDataType_S32, v, &v_min, &v_max, format);
-
-	return change;
+	return SliderScalarDefaultCompact(width, label, ImGuiDataType_S32, v, &v_min, &v_max, &v_default, format);
 }
 
 bool ImGui::SliderFloatDefaultCompact(float width, const char* label, float* v, float v_min, float v_max, float v_default, const char* format)
 {
-	bool change = false;
-
-	float ax = ImGui::GetCursorPosX();
-
-	ImGui::PushID(label);
-	if (CustomButton(ICON_IGFS_RESET))
-	{
-		*v = v_default;
-		change = true;
-	}
-	ImGui::PopID();
-
-	ImGui::SameLine();
-
-	if (IS_FLOAT_EQUAL(width, 0.0f))
-	{
-		width = ImGui::GetContentRegionAvail().x;
-	}
-
-	float w = width - ImGui::GetCursorPosX() + ax;
-
-	change |= SliderScalarCompact(w, label, ImGuiDataType_Float, v, &v_min, &v_max, format);
-
-	return change;
+	return SliderScalarDefaultCompact(width, label, ImGuiDataType_Float, v, &v_min, &v_max, &v_default, format);
 }
 
 bool ImGui::TransparentButton(const char* label, const ImVec2& size_arg, ImGuiButtonFlags flags)

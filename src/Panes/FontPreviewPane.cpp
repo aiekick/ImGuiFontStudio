@@ -156,7 +156,7 @@ void FontPreviewPane::DrawFontPreviewPane(ProjectFile *vProjectFile)
 									{
 										if (x) ImGui::SameLine();
 
-										auto glyphFont = glyph.second->m_ImFontAtlas.Fonts[0];
+										auto glyphFont = glyph.second->GetImFont();
 										if (GlyphInfos::DrawGlyphButton(paneWidgetId, vProjectFile, glyphFont, 0, glyph_size, &glyphInfos->glyph) == 1) // left
 										{
 											vProjectFile->m_FontTestInfos.m_GlyphToInsert[_TextCursorPos] = glyph;
@@ -246,7 +246,7 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 		auto fontPtr = vProjectFile->m_FontTestInfos.m_TestFont.lock();
 		if (fontPtr.use_count())
 		{
-			font = fontPtr->m_ImFontAtlas.Fonts[0];
+			font = fontPtr->GetImFont();
 		}
 	}
 
@@ -291,7 +291,7 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 							if (glyphInfos)
 							{
 								const auto glyph = &glyphInfos->glyph;
-								auto glyphFont = glyphInsert->second->m_ImFontAtlas.Fonts[0];
+								auto glyphFont = glyphInsert->second->GetImFont();
 								ct::fvec2 trans = glyphInfos->m_Translation * glyphInsert->second->m_Point;
 								ct::fvec2 scale = glyphInfos->m_Scale;
 								check = GlyphInfos::DrawGlyphButton(paneWidgetId, vProjectFile,
@@ -364,7 +364,7 @@ void FontPreviewPane::DrawMixedFontResult(ProjectFile* vProjectFile)
 		auto fontPtr = vProjectFile->m_FontTestInfos.m_TestFont.lock();
 		if (fontPtr.use_count())
 		{
-			font = fontPtr->m_ImFontAtlas.Fonts[0];
+			font = fontPtr->GetImFont();
 		}
 	}
 
@@ -420,7 +420,7 @@ void FontPreviewPane::DrawMixedFontResult(ProjectFile* vProjectFile)
 					{
 						if (glyphInfos->second->m_SelectedGlyphs.find(glyphInfos->first) != glyphInfos->second->m_SelectedGlyphs.end())
 						{
-							ImFont* glyphFont = glyphInfos->second->m_ImFontAtlas.Fonts[0];
+							ImFont* glyphFont = glyphInfos->second->GetImFont();
 							if (glyphFont)
 							{
 								float scale = (font->FontSize / glyphInfos->second->m_FontSize) * (vProjectFile->m_FontTestInfos.m_PreviewFontSize / font->FontSize);

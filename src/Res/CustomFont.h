@@ -5,7 +5,7 @@
 #pragma once
 
 #define FONT_ICON_BUFFER_NAME_IGFS compressed_data_base85
-#define FONT_ICON_BUFFER_SIZE_IGFS 0x33ea
+#define FONT_ICON_BUFFER_SIZE_IGFS 0x3453
 
 #define ICON_MIN_IGFS 0xf002
 #define ICON_MAX_IGFS 0xf26c

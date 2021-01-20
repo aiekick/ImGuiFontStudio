@@ -137,7 +137,6 @@ public:
 public: // save : on quit or project loading
 	void IWantToCloseTheApp(); // user want close app, but we want to ensure its saved
 
-
 private: // imgui pane / dialogs
 	void DrawDockPane(ImVec2 vPos, ImVec2 vSize);
 	void DisplayDialogsAndPopups();
@@ -159,8 +158,8 @@ private: // actions
 	void Action_Menu_CloseProject();
 	// view the window
 	void Action_Window_CloseApp();
-	// vai the unsaved dialog
-	void Action_UnSavedDialog_SaveProject();
+	// via the unsaved dialog
+	bool Action_UnSavedDialog_SaveProject();
 	void Action_UnSavedDialog_SaveAsProject();
 	void Action_UnSavedDialog_Cancel();
 	// others

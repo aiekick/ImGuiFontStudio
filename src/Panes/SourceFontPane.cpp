@@ -77,11 +77,11 @@ int SourceFontPane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::s
 	{
 		if (LayoutManager::Instance()->IsSpecificPaneFocused(PaneFlags::PANE_SOURCE))
 		{
-			const float maxWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 4.0f;
-			const float mrw = maxWidth / 2.0f - ImGui::GetStyle().FramePadding.x;
-
 			if (ImGui::BeginFramedGroup("Source Font Pane"))
 			{
+				const float maxWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x;
+				const float mrw = maxWidth * 0.5f;
+
 				ImGui::RadioButtonLabeled_BitWize<SourceFontPaneFlags>(
 					ICON_IGFS_GLYPHS " Glyphs", "Show Font Glyphs",
 					&vProjectFile->m_SourceFontPaneFlags, SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH, mrw, true);
@@ -388,7 +388,7 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 											win->DrawList->ChannelsSetCurrent(0);
 
 											// draw glyph in channel 0
-											int check = GlyphInfos::DrawGlyphButton(paneWidgetId, vProjectFile, vFontInfos->m_ImFontAtlas.Fonts[0], &selected, glyph_size, &glyph);
+											int check = GlyphInfos::DrawGlyphButton(paneWidgetId, vProjectFile, vFontInfos->GetImFont(), &selected, glyph_size, &glyph);
 											if (check)
 											{
 												// left button : check == 1
@@ -446,7 +446,7 @@ void SourceFontPane::DrawFontTexture(std::shared_ptr<FontInfos> vFontInfos)
 					if (ImGui::MenuItem("Save to File"))
 					{
 						ImGuiFileDialog::Instance()->OpenModal("SaveFontToPictureFile", "Svae Font Testure to File", ".png", 
-							".", 0, IGFD::UserDatas(&vFontInfos->m_ImFontAtlas), ImGuiFileDialogFlags_ConfirmOverwrite);
+							".", 0, IGFDUserDatas(&vFontInfos->m_ImFontAtlas), ImGuiFileDialogFlags_ConfirmOverwrite);
 					}
 
 					ImGui::EndMenuBar();

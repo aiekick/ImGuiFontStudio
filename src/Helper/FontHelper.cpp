@@ -451,8 +451,6 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 			auto glyphInfos = GetGlyphInfosFromGlyphId(vFontId, vGlyphId);
 			if (glyphInfos)
 			{
-				//m_FontBoundingBox.Combine(glyphInfos->m_FontBoundingBox);
-				
 				if (!glyphInfos->m_Translation.emptyAND())
 				{
 					auto sglyph = down_cast<sfntly::GlyphTable::SimpleGlyph*>(glyph.p_);
@@ -481,7 +479,7 @@ sfntly::Ptr<sfntly::WritableFontData> FontHelper::ReScale_Glyph(
 					//auto instructionSize = sglyph->InstructionSize();
 
 					ct::ivec2 trans = glyphInfos->simpleGlyph.m_Translation; // first apply
-					ct::dvec2 scale = 1.0;// glyphInfos->simpleGlyph.m_Scale; // second apply
+					ct::dvec2 scale = glyphInfos->simpleGlyph.m_Scale; // second apply
 
 					/////////////////////////////////////////////////////////////////////////////////////////////
 					// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6glyf.html
@@ -874,13 +872,30 @@ bool FontHelper::Assemble_Head_Table()
 		offset += head->WriteULong(offset, hea->ChecksumAdjustment()); // checkSumAdjustment
 		offset += head->WriteULong(offset, 0x5F0F3CF5); // magicNumber
 		offset += head->WriteUShort(offset, hea->FlagsAsInt()); // flags
-		offset += head->WriteUShort(offset, hea->UnitsPerEm()); // unitsPerEm
+		if (m_FontBoundingBox.Size().emptyOR())
+		{
+			offset += head->WriteUShort(offset, hea->UnitsPerEm()); // unitsPerEm
+		}
+		else
+		{
+			offset += head->WriteUShort(offset, m_FontBoundingBox.upperBound.x - m_FontBoundingBox.lowerBound.x); // unitsPerEm
+		}
 		offset += head->WriteDateTime(offset, hea->Created()); // created
 		offset += head->WriteDateTime(offset, hea->Modified()); // modified
-		offset += head->WriteShort(offset, hea->XMin()); // xMin
-		offset += head->WriteShort(offset, hea->YMin()); // yMin
-		offset += head->WriteShort(offset, hea->XMax()); // xMax
-		offset += head->WriteShort(offset, hea->YMax()); // yMax
+		if (m_FontBoundingBox.Size().emptyOR())
+		{
+			offset += head->WriteShort(offset, hea->XMin()); // xMin
+			offset += head->WriteShort(offset, hea->YMin()); // yMin
+			offset += head->WriteShort(offset, hea->XMax()); // xMax
+			offset += head->WriteShort(offset, hea->YMax()); // yMax
+		}
+		else
+		{
+			offset += head->WriteShort(offset, m_FontBoundingBox.lowerBound.x); // xMin
+			offset += head->WriteShort(offset, m_FontBoundingBox.lowerBound.y); // yMin
+			offset += head->WriteShort(offset, m_FontBoundingBox.upperBound.x); // xMax
+			offset += head->WriteShort(offset, m_FontBoundingBox.upperBound.y); // yMax
+		}
 		offset += head->WriteUShort(offset, hea->MacStyleAsInt()); // macStyle
 		offset += head->WriteUShort(offset, hea->LowestRecPPEM()); // lowestRecPPEM
 		offset += head->WriteShort(offset, hea->FontDirectionHint()); // fontDirectionHint

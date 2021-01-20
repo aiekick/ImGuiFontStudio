@@ -121,7 +121,7 @@ void GeneratorPane::DrawGeneratorPane(ProjectFile *vProjectFile)
 		if (ImGui::Begin<PaneFlags>(GENERATOR_PANE,
 			&LayoutManager::m_Pane_Shown, PaneFlags::PANE_GENERATOR,
 			//ImGuiWindowFlags_NoTitleBar |
-			ImGuiWindowFlags_MenuBar |
+			//ImGuiWindowFlags_MenuBar |
 			//ImGuiWindowFlags_NoMove |
 			ImGuiWindowFlags_NoCollapse |
 			//ImGuiWindowFlags_NoResize |
@@ -531,9 +531,11 @@ bool GeneratorPane::CheckGenerationConditions(ProjectFile *vProjectFile)
 }
 
 // file dialog pane
-void GeneratorPane::GeneratorFileDialogPane(std::string /*vFilter*/, IGFD::UserDatas vUserDatas,
+void GeneratorPane::GeneratorFileDialogPane(const char* vFilter, IGFDUserDatas vUserDatas,
 	bool *vCantContinue) // if vCantContinue is false, the user cant validate the dialog
 {
+	UNUSED(vFilter);
+
 	LogAssert(vCantContinue != 0, "ImGuiFileDialog Pane param vCantContinue is NULL");
 
 	bool canContinue = true;

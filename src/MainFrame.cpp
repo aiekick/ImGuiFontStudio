@@ -422,6 +422,8 @@ limitations under the License.)", "https://github.com/aiekick/ImGuiFontStudio/bl
 		ImGui::ClickableTextUrl("cTools (MIT)", "https://github.com/aiekick/cTools");
 		//ImGuiFileDialog
 		ImGui::ClickableTextUrl("ImGuiFileDialog (MIT)", "https://github.com/aiekick/ImGuiFileDialog");
+		//Freetype2
+		ImGui::ClickableTextUrl("FreeType2 (FTL)", "https://github.com/freetype/freetype2");
 	}
 	ImGui::Unindent();
 
@@ -484,7 +486,7 @@ bool MainFrame::ShowUnSavedDialog()
 				{
 					if (ImGui::Button("Save"))
 					{
-						Action_UnSavedDialog_SaveProject();
+						res = Action_UnSavedDialog_SaveProject();
 					}
 					ImGui::SameLine();
 					if (ImGui::Button("Save As"))
@@ -692,9 +694,10 @@ void MainFrame::Action_Cancel()
 	m_NeedToCloseApp = false;
 }
 
-void MainFrame::Action_UnSavedDialog_SaveProject()
+bool MainFrame::Action_UnSavedDialog_SaveProject()
 {
-	if (!SaveProject())
+	bool res = SaveProject();
+	if (!res)
 	{
 		m_ActionSystem.Insert([this]()
 			{
@@ -709,6 +712,7 @@ void MainFrame::Action_UnSavedDialog_SaveProject()
 				return true;
 			});
 	}
+	return res;
 }
 
 void MainFrame::Action_UnSavedDialog_SaveAsProject()
@@ -802,15 +806,15 @@ void MainFrame::ReRouteFontToFile(const std::string& vFontNameToReRoute, const s
 	auto ps = FileHelper::Instance()->ParsePathFileName(vGoodFilePathName);
 	if (ps.isOk)
 	{
-		auto font = m_ProjectFile.m_Fonts[vFontNameToReRoute];
-		if (font)
+		auto fontInfos = m_ProjectFile.m_Fonts[vFontNameToReRoute];
+		if (fontInfos.use_count())
 		{
-			font->m_FontFilePathName = m_ProjectFile.GetRelativePath(vGoodFilePathName);
-			font->m_FontFileName = ps.name + "." + ps.ext;
-			m_ProjectFile.m_Fonts[font->m_FontFileName] = font;
-			if (font->m_FontFileName != vFontNameToReRoute)
+			fontInfos->m_FontFilePathName = m_ProjectFile.GetRelativePath(vGoodFilePathName);
+			fontInfos->m_FontFileName = ps.name + "." + ps.ext;
+			m_ProjectFile.m_Fonts[fontInfos->m_FontFileName] = fontInfos;
+			if (fontInfos->m_FontFileName != vFontNameToReRoute)
 				m_ProjectFile.m_Fonts.erase(vFontNameToReRoute);
-			ParamsPane::Instance()->OpenFont(&m_ProjectFile, font->m_FontFilePathName, true);
+			ParamsPane::Instance()->OpenFont(&m_ProjectFile, fontInfos->m_FontFilePathName, true);
 		}
 	}
 }
