@@ -229,7 +229,7 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 
 								if (sel)
 								{
-									if (!itFont.second->m_NeedFilePathResolve)
+									//if (!itFont.second->m_NeedFilePathResolve)
 									{
 										SelectFont(vProjectFile, itFont.second);
 									}

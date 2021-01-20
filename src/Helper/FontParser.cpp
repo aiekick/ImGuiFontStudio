@@ -503,8 +503,6 @@ int FontAnalyser::glyfTableStruct::draw(int vWidgetId)
 
 	if (ImGui::TreeNode("glyf Table :"))
 	{
-		DisplayTable("glyf");
-
 		for (auto & it : glyfs)
 		{
 			vWidgetId = it.draw(vWidgetId);
