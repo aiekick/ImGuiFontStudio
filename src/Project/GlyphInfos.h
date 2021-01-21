@@ -107,7 +107,7 @@ public:
 		std::weak_ptr<FontInfos> vFontInfos,
 		ImFontGlyph vGlyph, std::string vOldName,
 		std::string vNewName, uint32_t vNewCodePoint = 0,
-		ImVec2 vTranslation = ImVec2(0, 0), ImVec2 vScale = ImVec2(0, 0));
+		ImVec2 vTranslation = ImVec2(0, 0), ImVec2 vScale = ImVec2(1, 1));
 	// 0 => none, 1 => left pressed, 2 => right pressed
 	static int DrawGlyphButton(
 		int& vWidgetPushId, // by adress because we want modify it
