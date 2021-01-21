@@ -137,6 +137,9 @@ public:
 public: // save : on quit or project loading
 	void IWantToCloseTheApp(); // user want close app, but we want to ensure its saved
 
+public: // drop
+	void JustDropFiles(int count, const char** paths);
+
 private: // imgui pane / dialogs
 	void DrawDockPane(ImVec2 vPos, ImVec2 vSize);
 	void DisplayDialogsAndPopups();

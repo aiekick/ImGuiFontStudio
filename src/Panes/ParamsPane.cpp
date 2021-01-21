@@ -477,7 +477,6 @@ void ParamsPane::OpenFonts(ProjectFile *vProjectFile, const std::map<std::string
 
 		if (res) // si au moins est bon
 			vProjectFile->UpdateCountSelectedGlyphs();
-		
 	}
 }
 

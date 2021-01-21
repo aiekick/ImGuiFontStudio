@@ -820,12 +820,50 @@ void MainFrame::ReRouteFontToFile(const std::string& vFontNameToReRoute, const s
 }
 
 ///////////////////////////////////////////////////////
-//// APP CLSING ///////////////////////////////////////
+//// APP CLOSING //////////////////////////////////////
 ///////////////////////////////////////////////////////
 
 void MainFrame::IWantToCloseTheApp()
 {
 	Action_Window_CloseApp();
+}
+
+///////////////////////////////////////////////////////
+//// DROP /////////////////////////////////////////////
+///////////////////////////////////////////////////////
+
+void MainFrame::JustDropFiles(int count, const char** paths)
+{
+	std::map<std::string, std::string> dico;
+
+	for (int i = 0; i < count; i++)
+	{
+		// file
+		auto f = std::string(paths[i]);
+		
+		// lower case
+		auto f_opt = f;
+		for (auto& c : f_opt)
+			c = std::tolower(c);
+
+		// well known extention
+		if (f_opt.find(".ttf") != std::string::npos ||  // truetype (.ttf)
+			f_opt.find(".otf") != std::string::npos)	// opentype (.otf)
+		{
+			dico[f] = f;
+		}
+	}
+
+	// some file are ok for opening
+	if (!dico.empty())
+	{
+		// if no project is available, we will create it
+		if (!m_ProjectFile.IsLoaded())
+			NewProject(""); // with empty path, will have to ne saved later
+
+		// try to open fonts
+		ParamsPane::Instance()->OpenFonts(&m_ProjectFile, dico);
+	}
 }
 
 ///////////////////////////////////////////////////////
