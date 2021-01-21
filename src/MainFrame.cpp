@@ -847,9 +847,9 @@ void MainFrame::JustDropFiles(int count, const char** paths)
 			c = std::tolower(c);
 
 		// well known extention
-		if (f_opt.find(".ttf") != std::string::npos ||  // truetype (.ttf)
-			f_opt.find(".otf") != std::string::npos ||	// opentype (.otf)
-			//f_opt.find(".ttc") != std::string::npos		// ttf/otf collection for futur (.ttc)
+		if (	f_opt.find(".ttf") != std::string::npos			// truetype (.ttf)
+			||	f_opt.find(".otf") != std::string::npos			// opentype (.otf)
+			//||	f_opt.find(".ttc") != std::string::npos		// ttf/otf collection for futur (.ttc)
 			)
 		{
 			dico[f] = f;

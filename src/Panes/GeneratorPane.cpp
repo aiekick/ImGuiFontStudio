@@ -368,7 +368,7 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 #else
 				strncpy(extTypes, exts.c_str(), exts.size());
 #endif
-				if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER))
+				if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER_CARD))
 				{
 					ImGuiFileDialog::Instance()->OpenModal(
 						"GenerateFileDlg",
