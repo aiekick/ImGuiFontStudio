@@ -24,6 +24,11 @@
 #pragma comment(lib, "legacy_stdio_definitions")
 #endif
 
+static void glfw_window_drop_callback(GLFWwindow* window, int count, const char** paths)
+{
+    MainFrame::Instance()->JustDropFiles(count, paths);
+}
+
 static void glfw_error_callback(int error, const char* description)
 {
     fprintf(stderr, "Glfw Error %d: %s\n", error, description);
@@ -72,6 +77,7 @@ int main(int, char**argv)
     glfwMakeContextCurrent(mainWindow);
     glfwSwapInterval(1); // Enable vsync
 	glfwSetWindowCloseCallback(mainWindow, glfw_window_close_callback);
+    glfwSetDropCallback(mainWindow, glfw_window_drop_callback);
 
     if (gladLoadGL() == 0)
     {
