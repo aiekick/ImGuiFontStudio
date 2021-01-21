@@ -282,5 +282,9 @@ namespace ImGui
 	////////////////////////////////////////////////////////////////////////////
 
 	IMGUI_API bool TransparentButton(const char* label, const ImVec2& size_arg = ImVec2(0, 0), ImGuiButtonFlags flags = 0);
+
+	////////////////////////////////////////////////////////////////////////////
+
+	IMGUI_API void PlainImageWithBG(ImTextureID user_texture_id, const ImVec2& size, const ImVec4& bg_col, const ImVec4& tint_col);
 }
 

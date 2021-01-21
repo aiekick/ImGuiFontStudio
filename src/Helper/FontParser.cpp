@@ -289,6 +289,303 @@ void FontAnalyser::locaTableStruct::parse(MemoryStream* vMem, size_t vOffset, si
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
+int FontAnalyser::baseGlyphRecordStruct::draw(int vWidgetId)
+{
+	ImGui::PushID(++vWidgetId);
+
+	if (ImGui::TreeNode("Base Glyph Record :"))
+	{
+		DisplayTable("Base Glyph Record");
+
+		ImGui::TreePop();
+	}
+
+	ImGui::PopID();
+
+	ImGui::Separator();
+
+	return vWidgetId;
+}
+
+void FontAnalyser::baseGlyphRecordStruct::parse(MemoryStream* vMem, size_t vOffset, size_t vLength)
+{
+	if (vMem)
+	{
+		vMem->SetPos(vOffset);
+
+		glyphID = vMem->ReadUShort();
+		firstLayerIndex = vMem->ReadUShort();
+		numLayers = vMem->ReadUShort();
+
+		AddItem("glyphID", "(2 bytes)", ct::toStr("%hu", glyphID));
+		AddItem("firstLayerIndex", "(2 bytes)", ct::toStr("%hu", firstLayerIndex));
+		AddItem("numLayers", "(2 bytes)", ct::toStr("%hu", numLayers));
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+int FontAnalyser::layerRecordStruct::draw(int vWidgetId)
+{
+	ImGui::PushID(++vWidgetId);
+
+	if (ImGui::TreeNode("Layer Record :"))
+	{
+		DisplayTable("Layer Record");
+		
+		ImGui::TreePop();
+	}
+
+	ImGui::PopID();
+
+	ImGui::Separator();
+
+	return vWidgetId;
+}
+
+void FontAnalyser::layerRecordStruct::parse(MemoryStream* vMem, size_t vOffset, size_t vLength)
+{
+	if (vMem)
+	{
+		vMem->SetPos(vOffset);
+
+		glyphID = vMem->ReadUShort();
+		paletteIndex = vMem->ReadUShort();
+
+		AddItem("glyphID", "(2 bytes)", ct::toStr("%hu", glyphID));
+		AddItem("paletteIndex", "(2 bytes)", ct::toStr("%hu", paletteIndex));
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+int FontAnalyser::colrTableStruct::draw(int vWidgetId)
+{
+	ImGui::PushID(++vWidgetId);
+
+	if (ImGui::TreeNode("COLR Table :"))
+	{
+		DisplayTable("COLR Table");
+
+		if (ImGui::TreeNode("Glyph Records :", "Glyph Records : %u", numBaseGlyphRecords))
+		{
+			for (auto base : baseGlyphRecords)
+			{
+				vWidgetId = base.draw(vWidgetId);
+			}
+
+			ImGui::TreePop();
+		}
+
+		if (ImGui::TreeNode("Layer Records :", "Layer Records : %u", numLayerRecords))
+		{
+			for (auto layer : layerRecords)
+			{
+				vWidgetId = layer.draw(vWidgetId);
+			}
+
+			ImGui::TreePop();
+		}
+
+		ImGui::TreePop();
+	}
+
+	ImGui::PopID();
+
+	ImGui::Separator();
+
+	return vWidgetId;
+}
+
+void FontAnalyser::colrTableStruct::parse(MemoryStream* vMem, size_t vOffset, size_t vLength)
+{
+	if (vMem)
+	{
+		vMem->SetPos(vOffset);
+
+		version = vMem->ReadUShort();
+		numBaseGlyphRecords = vMem->ReadUShort();
+		baseGlyphRecordsOffset = vMem->ReadULong();
+		layerRecordsOffset = vMem->ReadULong();
+		numLayerRecords = vMem->ReadUShort();
+
+		AddItem("version", "(2 bytes)", ct::toStr("%hu", version));
+		AddItem("numBaseGlyphRecords", "(2 bytes)", ct::toStr("%hu", numBaseGlyphRecords));
+		AddItem("baseGlyphRecordsOffset", "(4 bytes)", ct::toStr("%hu", baseGlyphRecordsOffset));
+		AddItem("layerRecordsOffset", "(4 bytes)", ct::toStr("%hu", layerRecordsOffset));
+		AddItem("numLayerRecords", "(2 bytes)", ct::toStr("%hu", numLayerRecords));
+
+		for (int i = 0; i < numBaseGlyphRecords; i++)
+		{
+			baseGlyphRecordStruct base;
+			base.parse(vMem, vOffset + baseGlyphRecordsOffset + sizeof(baseGlyphRecordStruct) * i, sizeof(baseGlyphRecordStruct));
+			baseGlyphRecords.push_back(base);
+		}
+
+		for (int i = 0; i < numLayerRecords; i++)
+		{
+			layerRecordStruct layer;
+			layer.parse(vMem, vOffset + layerRecordsOffset + sizeof(layerRecordStruct) * i, sizeof(layerRecordStruct));
+			layerRecords.push_back(layer);
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+int cpalTableV0Struct::draw(int vWidgetId)
+{
+	ImGui::PushID(++vWidgetId);
+
+	if (ImGui::TreeNode("CPAL v0 Table :"))
+	{
+		DisplayTable("CPAL v0 Table");
+
+		ImGui::TreePop();
+	}
+
+	ImGui::PopID();
+
+	ImGui::Separator();
+
+	return vWidgetId;
+}
+
+void cpalTableV0Struct::parse(MemoryStream* vMem, size_t vOffset, size_t vLength)
+{
+	if (vMem)
+	{
+		vMem->SetPos(vOffset);
+
+		numPaletteEntries = vMem->ReadUShort();
+		numPalettes = vMem->ReadUShort();
+		numColorRecords = vMem->ReadUShort();
+		colorRecordsArrayOffset = vMem->ReadULong();
+
+		AddItem("numPaletteEntries", "(2 bytes)", ct::toStr("%hu", numPaletteEntries));
+		AddItem("numPalettes", "(2 bytes)", ct::toStr("%hu", numPalettes));
+		AddItem("numColorRecords", "(4 bytes)", ct::toStr("%hu", numColorRecords));
+		AddItem("colorRecordsArrayOffset", "(4 bytes)", ct::toStr("%hu", colorRecordsArrayOffset));
+		
+		for (int i = 0; i < numPalettes; i++)
+		{
+			//baseGlyphRecordStruct base;
+			//base.parse(vMem, vOffset + baseGlyphRecordsOffset + sizeof(baseGlyphRecordStruct) * i, sizeof(baseGlyphRecordStruct));
+			//baseGlyphRecords.push_back(base);
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+int cpalTableV1Struct::draw(int vWidgetId)
+{
+	ImGui::PushID(++vWidgetId);
+
+	if (ImGui::TreeNode("CPAL v1 Table :"))
+	{
+		DisplayTable("CPAL v1 Table");
+
+		ImGui::TreePop();
+	}
+
+	ImGui::PopID();
+
+	ImGui::Separator();
+
+	return vWidgetId;
+}
+
+void cpalTableV1Struct::parse(MemoryStream* vMem, size_t vOffset, size_t vLength)
+{
+	if (vMem)
+	{
+		vMem->SetPos(vOffset);
+
+		numPaletteEntries = vMem->ReadUShort();
+		numPalettes = vMem->ReadUShort();
+		numColorRecords = vMem->ReadUShort();
+		colorRecordsArrayOffset = vMem->ReadULong();
+
+		vMem->SetPos(vMem->GetPos() + sizeof(uint16_t) * numPalettes);
+		/*for (int i = 0; i < numPalettes; i++)
+		{
+			vMem->SetPos(vMem->GetPos() + sizeof(uint16_t) * numPalettes)
+			//baseGlyphRecordStruct base;
+			//base.parse(vMem, vOffset + baseGlyphRecordsOffset + sizeof(baseGlyphRecordStruct) * i, sizeof(baseGlyphRecordStruct));
+			//baseGlyphRecords.push_back(base);
+		}*/
+
+		paletteTypesArrayOffset = vMem->ReadULong();
+		paletteLabelsArrayOffset = vMem->ReadULong();
+		paletteEntryLabelsArrayOffset = vMem->ReadULong();
+
+		AddItem("numPaletteEntries", "(2 bytes)", ct::toStr("%hu", numPaletteEntries));
+		AddItem("numPalettes", "(2 bytes)", ct::toStr("%hu", numPalettes));
+		AddItem("numColorRecords", "(2 bytes)", ct::toStr("%hu", numColorRecords));
+		AddItem("colorRecordsArrayOffset", "(4 bytes)", ct::toStr("%hu", colorRecordsArrayOffset));
+		AddItem("paletteTypesArrayOffset", "(2 bytes)", ct::toStr("%hu", paletteTypesArrayOffset));
+		AddItem("paletteLabelsArrayOffset", "(4 bytes)", ct::toStr("%hu", paletteLabelsArrayOffset));
+		AddItem("paletteEntryLabelsArrayOffset", "(4 bytes)", ct::toStr("%hu", paletteEntryLabelsArrayOffset));
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+
+int cpalTableStruct::draw(int vWidgetId)
+{
+	ImGui::PushID(++vWidgetId);
+
+	if (ImGui::TreeNode("CPAL Table :"))
+	{
+		DisplayTable("CPAL Table");
+
+		if (version == 0U)
+		{
+			vWidgetId = tableV0Struct.draw(vWidgetId);
+		}
+		else if (version == 1U)
+		{
+			vWidgetId = tableV1Struct.draw(vWidgetId);
+		}
+
+		ImGui::TreePop();
+	}
+
+	ImGui::PopID();
+
+	ImGui::Separator();
+
+	return vWidgetId;
+}
+
+void cpalTableStruct::parse(MemoryStream* vMem, size_t vOffset, size_t vLength)
+{
+	if (vMem)
+	{
+		vMem->SetPos(vOffset);
+
+		version = vMem->ReadUShort();
+		
+		AddItem("version", "(2 bytes)", ct::toStr("%hu", version));
+		
+		if (version == 0U)
+		{
+			tableV0Struct.parse(vMem, vMem->GetPos(), vLength - vMem->GetPos());
+		}
+		else if (version == 1U)
+		{
+			tableV1Struct.parse(vMem, vMem->GetPos(), vLength - vMem->GetPos());
+		}
+	}
+}
+
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
 int FontAnalyser::simpleGlyphTableStruct::draw(int vWidgetId)
 {
 	if (filled)
@@ -443,8 +740,6 @@ void FontAnalyser::simpleGlyphTableStruct::parse(MemoryStream *vMem, size_t /*vO
 }
 
 ///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
 
 int FontAnalyser::glyfStruct::draw(int vWidgetId)
 {
@@ -493,8 +788,6 @@ void FontAnalyser::glyfStruct::parse(MemoryStream *vMem, size_t vOffset, size_t 
 	}
 }
 
-///////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
 
 int FontAnalyser::glyfTableStruct::draw(int vWidgetId)
@@ -1052,15 +1345,23 @@ int FontAnalyser::FontAnalyzedStruct::draw(int vWidgetId)
 			vWidgetId = it.second.draw(vWidgetId);
 		}
 		ImGui::Separator();
+#define DRAW_TABLE(_tag_, _class_) if (it.first == _tag_) vWidgetId = _class_.draw(vWidgetId)
+#define ELSE_DRAW_TABLE(_tag_, _class_) else DRAW_TABLE(_tag_, _class_)
+
 		for (auto & it : tables)
 		{
-			if (it.first == "head")	vWidgetId = head.draw(vWidgetId);
-			else if (it.first == "maxp") vWidgetId = maxp.draw(vWidgetId);
-			else if (it.first == "cmap") vWidgetId = cmap.draw(vWidgetId);
-			else if (it.first == "loca") vWidgetId = loca.draw(vWidgetId);
-			else if (it.first == "post") vWidgetId = post.draw(vWidgetId);
-			else if (it.first == "glyf") vWidgetId = glyf.draw(vWidgetId);
+			DRAW_TABLE("head", head);
+			ELSE_DRAW_TABLE("maxp", maxp);
+			ELSE_DRAW_TABLE("cmap", cmap);
+			ELSE_DRAW_TABLE("loca", loca);
+			ELSE_DRAW_TABLE("post", post);
+			ELSE_DRAW_TABLE("glyf", glyf);
+			ELSE_DRAW_TABLE("COLR", colr);
+			ELSE_DRAW_TABLE("CPAL", cpal);
 		}
+
+#undef DRAW_TABLE
+#undef ELSE_DRAW_TABLE
 	}
 
 	return vWidgetId;
@@ -1101,7 +1402,9 @@ void FontAnalyser::FontAnalyzedStruct::parse(MemoryStream *vMem)
 				PARSE_TABLE("glyf", glyf);
 			}
 		}
-		
+		IF_TABLE("COLR") PARSE_TABLE("COLR", colr);
+		IF_TABLE("CPAL") PARSE_TABLE("CPAL", cpal);
+
 #undef PARSE_TABLE
 #undef IF_TABLE
 	}

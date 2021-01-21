@@ -27,6 +27,8 @@
 #include <Panes/GlyphPane.h>
 #include <Project/GlyphInfos.h>
 
+#include <Helper/TranslationSystem.h>
+
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 
@@ -97,7 +99,7 @@ void FinalFontPane::DrawFinalFontPane(ProjectFile *vProjectFile)
 				{
 					if (ImGui::BeginMenuBar())
 					{
-						if (ImGui::BeginMenu("View Mode"))
+						if (ImGui::BeginMenu(TSLOC(FFP,ViewMode)))
 						{
 							ImGui::MenuItem<FinalFontPaneModeFlags>("by Font, no order", "",
 								&m_FinalFontPaneModeFlags, 
@@ -346,7 +348,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 {
 	int res = false;
 	
-	if (vFontInfos.use_count() && vGlyph)
+	if (vFontInfos.use_count() && vGlyph.use_count())
 	{
 		ImGui::PushID(vGlyph.get());
 		ImGui::BeginGroup();
@@ -361,7 +363,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 		res = GlyphInfos::DrawGlyphButton(
 			paneWidgetId,
 			vProjectFile, vFontInfos->GetImFont(),
-			&selected, vSize, &vGlyph->glyph,
+			&selected, vSize, &vGlyph->glyph, vGlyph->m_Colored,
 			ImVec2(trans.x, trans.y), ImVec2(scale.x, scale.y), 
 			-1, vShowRect ? 3.0f : 0.0f);
 		

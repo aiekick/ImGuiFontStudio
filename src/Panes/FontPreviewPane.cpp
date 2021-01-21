@@ -284,11 +284,11 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 					if (vProjectFile->m_FontTestInfos.m_GlyphToInsert.find(idx) != vProjectFile->m_FontTestInfos.m_GlyphToInsert.end())
 					{
 						auto glyphInsert = &vProjectFile->m_FontTestInfos.m_GlyphToInsert[idx];
-						if (glyphInsert->second &&
+						if (glyphInsert->second.use_count() &&
 							glyphInsert->second->m_SelectedGlyphs.find(glyphInsert->first) != glyphInsert->second->m_SelectedGlyphs.end())
 						{
 							const auto glyphInfos = glyphInsert->second->m_SelectedGlyphs[glyphInsert->first];
-							if (glyphInfos)
+							if (glyphInfos.use_count())
 							{
 								const auto glyph = &glyphInfos->glyph;
 								auto glyphFont = glyphInsert->second->GetImFont();
@@ -296,7 +296,7 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 								ct::fvec2 scale = glyphInfos->m_Scale;
 								check = GlyphInfos::DrawGlyphButton(paneWidgetId, vProjectFile,
 									glyphFont, &selected,
-									glyph_size, glyph, 
+									glyph_size, glyph, glyphInfos->m_Colored,
 									ImVec2(trans.x, trans.y), 
 									ImVec2(scale.x, scale.y));
 								found = true;

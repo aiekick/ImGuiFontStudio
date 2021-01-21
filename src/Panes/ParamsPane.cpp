@@ -252,16 +252,23 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 					{
 						const float mrw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x * 2.0f) * 0.25f;
 
+						bool change = false;
+
 						ImGui::PushItemWidth(mrw);
-						ImGui::RadioButtonLabeled("Zoom", "Zoom Each Glyphs for best fit", &vProjectFile->m_ZoomGlyphs);
+						change |= ImGui::RadioButtonLabeled("Zoom", "Zoom Each Glyphs for best fit", &vProjectFile->m_ZoomGlyphs);
 						ImGui::SameLine();
-						ImGui::RadioButtonLabeled("Base", "Show the base line of the font", &vProjectFile->m_ShowBaseLine, vProjectFile->m_ZoomGlyphs);
+						change |= ImGui::RadioButtonLabeled("Base", "Show the base line of the font", &vProjectFile->m_ShowBaseLine, vProjectFile->m_ZoomGlyphs);
 						ImGui::SameLine();
-						ImGui::RadioButtonLabeled("OrgX", "Show the Origin X of the glyph", &vProjectFile->m_ShowOriginX, vProjectFile->m_ZoomGlyphs);
+						change |= ImGui::RadioButtonLabeled("OrgX", "Show the Origin X of the glyph", &vProjectFile->m_ShowOriginX, vProjectFile->m_ZoomGlyphs);
 						ImGui::SameLine();
-						ImGui::RadioButtonLabeled("AdvX", "Show the Advance X of the glyph", &vProjectFile->m_ShowAdvanceX, vProjectFile->m_ZoomGlyphs);
+						change |= ImGui::RadioButtonLabeled("AdvX", "Show the Advance X of the glyph", &vProjectFile->m_ShowAdvanceX, vProjectFile->m_ZoomGlyphs);
 						ImGui::PopItemWidth();
 						
+						if (change)
+						{
+							vProjectFile->SetProjectChange();
+						}
+
 						ImGui::EndFramedGroup(true);
 					}
 

@@ -248,6 +248,97 @@ namespace FontAnalyser
 
 	//////////////////////////////////////
 
+	class baseGlyphRecordStruct : public TableDisplay
+	{
+	public:
+		uint16_t glyphID;
+		uint16_t firstLayerIndex;
+		uint16_t numLayers;
+
+	public:
+		int draw(int vWidgetId);
+		void parse(MemoryStream* vMem, size_t vOffset, size_t vLength);
+	};
+
+	class layerRecordStruct : public TableDisplay
+	{
+	public:
+		uint16_t glyphID;
+		uint16_t paletteIndex;
+
+	public:
+		int draw(int vWidgetId);
+		void parse(MemoryStream* vMem, size_t vOffset, size_t vLength);
+	};
+
+	class colrTableStruct : public TableDisplay
+	{
+	public:
+		uint16_t version;
+		uint16_t numBaseGlyphRecords;
+		uint32_t baseGlyphRecordsOffset;
+		uint32_t layerRecordsOffset;
+		uint16_t numLayerRecords;
+
+	public:
+		std::vector<baseGlyphRecordStruct> baseGlyphRecords;
+		std::vector<layerRecordStruct> layerRecords;
+
+	public:
+		int draw(int vWidgetId);
+		void parse(MemoryStream* vMem, size_t vOffset, size_t vLength);
+	};
+
+	//////////////////////////////////////
+
+	class cpalTableV0Struct : public TableDisplay
+	{
+	public:
+		uint16_t numPaletteEntries;
+		uint16_t numPalettes;
+		uint16_t numColorRecords;
+		uint32_t colorRecordsArrayOffset;
+	
+	public:
+		std::vector<uint16_t> colorRecordIndices; // numPalettes
+
+	public:
+		int draw(int vWidgetId);
+		void parse(MemoryStream* vMem, size_t vOffset, size_t vLength);
+	};
+
+	class cpalTableV1Struct : public TableDisplay
+	{
+	public:
+		uint16_t numPaletteEntries;
+		uint16_t numPalettes;
+		uint16_t numColorRecords;
+		uint32_t colorRecordsArrayOffset;
+		uint32_t paletteTypesArrayOffset;
+		uint32_t paletteLabelsArrayOffset;
+		uint32_t paletteEntryLabelsArrayOffset;
+
+	public:
+		std::vector<uint16_t> colorRecordIndices; // numPalettes
+
+	public:
+		int draw(int vWidgetId);
+		void parse(MemoryStream* vMem, size_t vOffset, size_t vLength);
+	};
+
+	class cpalTableStruct : public TableDisplay
+	{
+	public:
+		uint16_t version; // 0 => CPAL 0 / 1 => CPAL 1
+		cpalTableV0Struct tableV0Struct;
+		cpalTableV1Struct tableV1Struct;
+
+	public:
+		int draw(int vWidgetId);
+		void parse(MemoryStream* vMem, size_t vOffset, size_t vLength);
+	};
+
+	//////////////////////////////////////
 	class simpleGlyphTableStruct : public TableDisplay
 	{
 	public: 
@@ -308,6 +399,8 @@ namespace FontAnalyser
 		cmapTableStruct cmap;
 		locaTableStruct loca;
 		glyfTableStruct glyf;
+		colrTableStruct colr;
+		cpalTableStruct cpal;
 
 	public:
 		int draw(int vWidgetId);

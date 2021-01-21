@@ -82,15 +82,22 @@ int SourceFontPane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::s
 				const float maxWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x;
 				const float mrw = maxWidth * 0.5f;
 
-				ImGui::RadioButtonLabeled_BitWize<SourceFontPaneFlags>(
+				bool change = false;
+
+				change |= ImGui::RadioButtonLabeled_BitWize<SourceFontPaneFlags>(
 					ICON_IGFS_GLYPHS " Glyphs", "Show Font Glyphs",
 					&vProjectFile->m_SourceFontPaneFlags, SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH, mrw, true);
 
 				ImGui::SameLine();
 
-				ImGui::RadioButtonLabeled_BitWize<SourceFontPaneFlags>(
+				change |= ImGui::RadioButtonLabeled_BitWize<SourceFontPaneFlags>(
 					ICON_IGFS_TEXTURE " Texture", "Show Font Texture",
 					&vProjectFile->m_SourceFontPaneFlags, SourceFontPaneFlags::SOURCE_FONT_PANE_TEXTURE, mrw, true);
+
+				if (change)
+				{
+					vProjectFile->SetProjectChange();
+				}
 
 				ImGui::EndFramedGroup(true);
 			}
@@ -335,6 +342,7 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 						if (glyphCountX)
 						{
 							uint32_t idx = 0, lastGlyphCodePoint = 0;
+							ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
 							bool showRangeColoring = vProjectFile->IsRangeColoringShown();
 							
 							uint32_t countGlyphs = (uint32_t)vFontInfos->m_FilteredGlyphs.size();
@@ -355,6 +363,7 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 											auto glyph = *(vFontInfos->m_FilteredGlyphs.begin() + glyphIdx);
 
 											std::string name = vFontInfos->m_GlyphCodePointToName[glyph.Codepoint];
+											bool colored = vFontInfos->m_ColoredGlyphs[glyph.Codepoint];
 
 											uint32_t x = idx % glyphCountX;
 
@@ -362,8 +371,6 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 
 											if (showRangeColoring)
 											{
-												ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
-
 												if (glyph.Codepoint != lastGlyphCodePoint + 1)
 												{
 													glyphRangeColoring = vProjectFile->GetColorFromInteger(glyph.Codepoint);
@@ -388,7 +395,7 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 											win->DrawList->ChannelsSetCurrent(0);
 
 											// draw glyph in channel 0
-											int check = GlyphInfos::DrawGlyphButton(paneWidgetId, vProjectFile, vFontInfos->GetImFont(), &selected, glyph_size, &glyph);
+											int check = GlyphInfos::DrawGlyphButton(paneWidgetId, vProjectFile, vFontInfos->GetImFont(), &selected, glyph_size, &glyph, colored);
 											if (check)
 											{
 												// left button : check == 1
@@ -456,9 +463,10 @@ void SourceFontPane::DrawFontTexture(std::shared_ptr<FontInfos> vFontInfos)
 				float h = w * (float)vFontInfos->m_ImFontAtlas.TexHeight;
 				if (vFontInfos->m_ImFontAtlas.TexWidth > 0)
 					h /= (float)vFontInfos->m_ImFontAtlas.TexWidth;
-				ImGui::Image(vFontInfos->m_ImFontAtlas.TexID, 
-					ImVec2(w, h), ImVec2(0, 0), ImVec2(1, 1), 
-					ImGui::GetStyleColorVec4(ImGuiCol_Text));
+				// for colored glyph we need to render glyphs with color of Vec4(1,1,1,1).
+				// so for light theme we will paint a black background
+				ImGui::PlainImageWithBG(vFontInfos->m_ImFontAtlas.TexID,
+					ImVec2(w, h), ImVec4(0, 0, 0, 1), ImVec4(1, 1, 1, 1));
 			}
 		}
 	}

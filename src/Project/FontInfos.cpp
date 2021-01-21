@@ -34,6 +34,8 @@
 
 #include <array>
 
+using namespace ImGuiFreeType;
+
 ///////////////////////////////////////////////////////////////////////////////////
 // https://stackoverflow.com/questions/31161284/how-can-i-get-the-corresponding-error-string-from-an-ft-error-code
 #include <ft2build.h>
@@ -84,6 +86,21 @@ FontInfos::FontInfos() = default;
 FontInfos::~FontInfos()
 {
 	m_ImFontAtlas.Clear();
+	Clear();
+}
+
+void FontInfos::Clear()
+{
+	DestroyFontTexture();
+	m_ImFontAtlas.Clear();
+	m_GlyphNames.clear();
+	m_GlyphCodePointToName.clear();
+	m_SelectedGlyphs.clear();
+	m_Filters.clear();
+	rasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
+	freeTypeFlag = FreeType_Default;
+	fontMultiply = 1.0f;
+	fontPadding = 1;
 }
 
 bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFilePathName)
@@ -145,7 +162,7 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 				FT_Error freetypeError = 0;
 				if (rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
 				{
-					success = ImGuiFreeType::BuildFontAtlas(&m_ImFontAtlas, freeTypeFlag, &freetypeError);
+					success = BuildFontAtlas(&m_ImFontAtlas, freeTypeFlag, &freetypeError);
 				}
 				else if (rasterizerMode == RasterizerEnum::RASTERIZER_STB)
 				{
@@ -166,6 +183,7 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 
 						FillGlyphNames();
 						GenerateCodePointToGlypNamesDB();
+						FillGlyphColoreds();
 						UpdateInfos();
 						UpdateFiltering();
 
@@ -223,20 +241,6 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 	vProjectFile->SetProjectChange();
 
 	return res;
-}
-
-void FontInfos::Clear()
-{
-	DestroyFontTexture();
-	m_ImFontAtlas.Clear();
-	m_GlyphNames.clear();
-	m_GlyphCodePointToName.clear();
-	m_SelectedGlyphs.clear();
-	m_Filters.clear();
-	rasterizerMode = RasterizerEnum::RASTERIZER_STB;
-	freeTypeFlag = 0;
-	fontMultiply = 1.0f;
-	fontPadding = 1;
 }
 
 static const char *standardMacNames[258] = 
@@ -354,9 +358,71 @@ std::string FontInfos::GetGlyphName(uint32_t vCodePoint)
 	return "Symbol Name";
 }
 
+void FontInfos::FillGlyphColoreds()
+{
+	m_ColoredGlyphs.clear();
+
+	if (rasterizerMode != RasterizerEnum::RASTERIZER_FREETYPE) return;
+	if ((freeTypeFlag & FreeType_LoadColor) == 0) return;
+
+	if (!m_ImFontAtlas.ConfigData.empty())
+	{
+		stbtt_fontinfo fontInfo;
+		const int font_offset = stbtt_GetFontOffsetForIndex(
+			(unsigned char*)m_ImFontAtlas.ConfigData[0].FontData,
+			m_ImFontAtlas.ConfigData[0].FontNo);
+		if (!stbtt_InitFont(&fontInfo,
+			(unsigned char*)m_ImFontAtlas.ConfigData[0].FontData, font_offset))
+			return;
+
+		// get table offet and length
+		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html => Table Directory
+		stbtt_int32 num_tables = ttUSHORT(fontInfo.data + fontInfo.fontstart + 4);
+		stbtt_uint32 tabledir = fontInfo.fontstart + 12;
+		stbtt_uint32 tablePos = 0;
+		stbtt_uint32 tableLen = 0;
+		for (int i = 0; i < num_tables; ++i)
+		{
+			stbtt_uint32 loc = tabledir + 16 * i;
+			if (stbtt_tag(fontInfo.data + loc + 0, "COLR"))
+			{
+				tablePos = ttULONG(fontInfo.data + loc + 8);
+				tableLen = ttULONG(fontInfo.data + loc + 12);
+				break;
+			}
+		}
+		if (!tablePos) return;
+
+		// fill map of names
+		stbtt_uint8* data = fontInfo.data + tablePos;
+		stbtt_int32 numBaseGlyphRecords = ttUSHORT(data + 2);
+		
+		if (numBaseGlyphRecords > 0)
+		{
+			stbtt_int32 baseGlyphRecordsOffset = ttULONG(data + 4);
+			if (baseGlyphRecordsOffset >= 14)
+			{
+				for (int i = 0; i < numBaseGlyphRecords; i++)
+				{
+					int offset = baseGlyphRecordsOffset + i * 6;
+
+					stbtt_int32 glyphID = ttUSHORT(data + offset);
+					stbtt_int32 numLayers = ttUSHORT(data + offset + 4);
+
+					if (m_GlyphGlyphIndexToCodePoint.find(glyphID) != m_GlyphGlyphIndexToCodePoint.end())
+					{
+						int cdp = m_GlyphGlyphIndexToCodePoint[glyphID];
+						m_ColoredGlyphs[cdp] = (numLayers > 1);
+					}
+				}
+			}
+		}
+	}
+}
+
 void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 {
-	if (!m_ImFontAtlas.Fonts.empty() && !m_InfosToDisplay.empty())
+	if (!m_ImFontAtlas.Fonts.empty())
 	{
 		bool needFontReGen = false;
 		
@@ -366,48 +432,51 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 		{
 			aw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 2.0f;
 
-			if (ImGui::CollapsingHeader("Infos", ImGuiTreeNodeFlags_Bullet))
+			if (!m_InfosToDisplay.empty())
 			{
-				static ImGuiTableFlags flags =
-					ImGuiTableFlags_SizingFixedFit |
-					ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable |
-					ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
-					ImGuiTableFlags_NoHostExtendY | ImGuiTableFlags_Borders;
-				if (ImGui::BeginTable("##fontinfosTable", 2, flags, ImVec2(aw, ImGui::GetTextLineHeightWithSpacing() * 7)))
+				if (ImGui::CollapsingHeader("Infos", ImGuiTreeNodeFlags_Bullet))
 				{
-					ImGui::TableSetupScrollFreeze(0, 1); // Make header always visible
-					ImGui::TableSetupColumn("Item", ImGuiTableColumnFlags_WidthFixed, -1, 0);
-					ImGui::TableSetupColumn("Infos", ImGuiTableColumnFlags_WidthStretch, -1, 1);
-					ImGui::TableHeadersRow(); // draw headers
-
-					m_InfosToDisplayClipper.Begin((int)m_InfosToDisplay.size(), ImGui::GetTextLineHeightWithSpacing());
-					while (m_InfosToDisplayClipper.Step())
+					static ImGuiTableFlags flags =
+						ImGuiTableFlags_SizingFixedFit |
+						ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable |
+						ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
+						ImGuiTableFlags_NoHostExtendY | ImGuiTableFlags_Borders;
+					if (ImGui::BeginTable("##fontinfosTable", 2, flags, ImVec2(aw, ImGui::GetTextLineHeightWithSpacing() * 7)))
 					{
-						for (int i = m_InfosToDisplayClipper.DisplayStart; i < m_InfosToDisplayClipper.DisplayEnd; i++)
+						ImGui::TableSetupScrollFreeze(0, 1); // Make header always visible
+						ImGui::TableSetupColumn("Item", ImGuiTableColumnFlags_WidthFixed, -1, 0);
+						ImGui::TableSetupColumn("Infos", ImGuiTableColumnFlags_WidthStretch, -1, 1);
+						ImGui::TableHeadersRow(); // draw headers
+
+						m_InfosToDisplayClipper.Begin((int)m_InfosToDisplay.size(), ImGui::GetTextLineHeightWithSpacing());
+						while (m_InfosToDisplayClipper.Step())
 						{
-							if (i < 0) continue;
-
-							const auto& infos = m_InfosToDisplay[i];
-
-							ImGui::TableNextRow();
-
-							if (ImGui::TableSetColumnIndex(0)) // first column
+							for (int i = m_InfosToDisplayClipper.DisplayStart; i < m_InfosToDisplayClipper.DisplayEnd; i++)
 							{
-								ImGui::Selectable(infos.first.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap);
-							}
-							if (ImGui::TableSetColumnIndex(1)) // second column
-							{
-								float sw = ImGui::CalcTextSize(infos.second.c_str()).x;
-								ImGui::Text("%s", infos.second.c_str());
-								if (sw > aw - ImGui::GetCursorPosX())
+								if (i < 0) continue;
+
+								const auto& infos = m_InfosToDisplay[i];
+
+								ImGui::TableNextRow();
+
+								if (ImGui::TableSetColumnIndex(0)) // first column
 								{
-									if (ImGui::IsItemHovered())
-										ImGui::SetTooltip(infos.second.c_str());
+									ImGui::Selectable(infos.first.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap);
+								}
+								if (ImGui::TableSetColumnIndex(1)) // second column
+								{
+									float sw = ImGui::CalcTextSize(infos.second.c_str()).x;
+									ImGui::Text("%s", infos.second.c_str());
+									if (sw > aw - ImGui::GetCursorPosX())
+									{
+										if (ImGui::IsItemHovered())
+											ImGui::SetTooltip(infos.second.c_str());
+									}
 								}
 							}
 						}
+						ImGui::EndTable();
 					}
-					ImGui::EndTable();
 				}
 			}
 			
@@ -459,15 +528,15 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 			{
 				if (ImGui::CollapsingHeader("Freetype Settings", ImGuiTreeNodeFlags_Bullet))
 				{
-					needFontReGen |= ImGui::CheckboxFlags("NoHinting", &freeTypeFlag, ImGuiFreeType::NoHinting);
-					needFontReGen |= ImGui::CheckboxFlags("NoAutoHint", &freeTypeFlag, ImGuiFreeType::NoAutoHint);
-					needFontReGen |= ImGui::CheckboxFlags("ForceAutoHint", &freeTypeFlag, ImGuiFreeType::ForceAutoHint);
-					needFontReGen |= ImGui::CheckboxFlags("LightHinting", &freeTypeFlag, ImGuiFreeType::LightHinting);
-					needFontReGen |= ImGui::CheckboxFlags("MonoHinting", &freeTypeFlag, ImGuiFreeType::MonoHinting);
-					needFontReGen |= ImGui::CheckboxFlags("Bold", &freeTypeFlag, ImGuiFreeType::Bold);
-					needFontReGen |= ImGui::CheckboxFlags("Oblique", &freeTypeFlag, ImGuiFreeType::Oblique);
-					needFontReGen |= ImGui::CheckboxFlags("Monochrome", &freeTypeFlag, ImGuiFreeType::Monochrome);
-					//needFontReGen |= ImGui::CheckboxFlags("LoadColor", &freeTypeFlag, ImGuiFreeType::LoadColor);
+					needFontReGen |= ImGui::CheckboxFlags("NoHinting", &freeTypeFlag, FreeType_NoHinting);
+					needFontReGen |= ImGui::CheckboxFlags("NoAutoHint", &freeTypeFlag, FreeType_NoAutoHint);
+					needFontReGen |= ImGui::CheckboxFlags("ForceAutoHint", &freeTypeFlag, FreeType_ForceAutoHint);
+					needFontReGen |= ImGui::CheckboxFlags("LightHinting", &freeTypeFlag, FreeType_LightHinting);
+					needFontReGen |= ImGui::CheckboxFlags("MonoHinting", &freeTypeFlag, FreeType_MonoHinting);
+					needFontReGen |= ImGui::CheckboxFlags("Bold", &freeTypeFlag, FreeType_Bold);
+					needFontReGen |= ImGui::CheckboxFlags("Oblique", &freeTypeFlag, FreeType_Oblique);
+					needFontReGen |= ImGui::CheckboxFlags("Monochrome", &freeTypeFlag, FreeType_Monochrome);
+					needFontReGen |= ImGui::CheckboxFlags("LoadColor", &freeTypeFlag, FreeType_LoadColor);
 				}
 			}
 
@@ -537,6 +606,7 @@ void FontInfos::GenerateCodePointToGlypNamesDB()
 					{
 						int glyphIndex = stbtt_FindGlyphIndex(&fontInfo, (uint32_t)glyph.Codepoint);
 						m_GlyphCodePointToGlyphIndex[(uint32_t)glyph.Codepoint] = glyphIndex;
+						m_GlyphGlyphIndexToCodePoint[(uint32_t)glyphIndex] = glyph.Codepoint;
 						if (glyphIndex < (int)m_GlyphNames.size())
 						{
 							std::string name = m_GlyphNames[glyphIndex];
@@ -685,7 +755,9 @@ std::string FontInfos::getXml(const std::string& vOffset, const std::string& vUs
 					"\" newId=\"" + ct::toStr(it.second->newCodePoint) +
 					"\" orgName=\"" + it.second->oldHeaderName +
 					"\" newName=\"" + it.second->newHeaderName +
-					"\" trans=\"" + ct::fvec2(it.second->m_Translation).string() + "\"/>\n";
+					"\" trans=\"" + ct::fvec2(it.second->m_Translation).string() + 
+					"\" scale=\"" + ct::fvec2(it.second->m_Scale).string() +
+					"\"/>\n";
 			}
 		}
 		res += vOffset + "\t</glyphs>\n";
@@ -777,6 +849,7 @@ bool FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 		std::string oldName;
 		std::string newName;
 		ImVec2 translation;
+		ImVec2 scale;
 
 		for (const tinyxml2::XMLAttribute* attr = vElem->FirstAttribute(); attr != nullptr; attr = attr->Next())
 		{
@@ -795,11 +868,13 @@ bool FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 				newName = attValue;
 			else if (attName == "trans")
 				translation = ct::toImVec2(ct::fvariant(attValue).GetV2());
+			else if (attName == "scale")
+				scale = ct::toImVec2(ct::fvariant(attValue).GetV2());
 		}
 
-		ImFontGlyph g{};
+		ImFontGlyph g = {};
 		g.Codepoint = oldcodepoint;
-		m_SelectedGlyphs[oldcodepoint] = GlyphInfos::Create(m_This, g, oldName, newName, newcodepoint, translation);
+		m_SelectedGlyphs[oldcodepoint] = GlyphInfos::Create(m_This, g, oldName, newName, newcodepoint, translation, scale);
 	}
 	else if (strParentName == "filters" &&  strName == "filter")
 	{

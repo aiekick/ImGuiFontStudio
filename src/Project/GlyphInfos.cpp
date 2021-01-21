@@ -476,10 +476,10 @@ std::shared_ptr<GlyphInfos> GlyphInfos::Create(
 	std::weak_ptr<FontInfos> vFontInfos,
 	ImFontGlyph vGlyph, std::string vOldName,
 	std::string vNewName, uint32_t vNewCodePoint,
-	ImVec2 vTranslation)
+	ImVec2 vTranslation, ImVec2 vScale)
 {
 	assert(vFontInfos.use_count() != 0);
-	return std::make_shared<GlyphInfos>(vFontInfos, vGlyph, vOldName, vNewName, vNewCodePoint, vTranslation);
+	return std::make_shared<GlyphInfos>(vFontInfos, vGlyph, vOldName, vNewName, vNewCodePoint, vTranslation, vScale);
 }
 
 GlyphInfos::GlyphInfos()
@@ -500,8 +500,8 @@ GlyphInfos::GlyphInfos()
 GlyphInfos::GlyphInfos(
 	std::weak_ptr<FontInfos> vFontInfos,
 	ImFontGlyph vGlyph, std::string vOldName, 
-	std::string vNewName, uint32_t vNewCodePoint,
-	ImVec2 vTranslation)
+	std::string vNewName, uint32_t vNewCodePoint, 
+	ImVec2 vTranslation, ImVec2 vScale)
 {
 	fontInfos = vFontInfos;
 	glyph = vGlyph;
@@ -511,6 +511,16 @@ GlyphInfos::GlyphInfos(
 	if (newCodePoint == 0)
 		newCodePoint = glyph.Codepoint;
 	m_Translation = vTranslation;
+	m_Scale = vScale;
+
+	if (!fontInfos.expired())
+	{
+		auto fontInfosPtr = fontInfos.lock();
+		if (fontInfosPtr.use_count())
+		{
+			m_Colored = fontInfosPtr->m_ColoredGlyphs[vGlyph.Codepoint];
+		}
+	}
 }
 
 GlyphInfos::~GlyphInfos() = default;
@@ -529,6 +539,7 @@ int GlyphInfos::DrawGlyphButton(
 	int &vWidgetPushId, // by adress because we want modify it
 	ProjectFile* vProjectFile, ImFont* vFont,
 	bool* vSelected, ImVec2 vGlyphSize, const ImFontGlyph *vGlyph, 
+	bool vColored,
 	ImVec2 vTranslation, ImVec2 vScale,
 	int frame_padding, float vRectThickNess, ImVec4 vRectColor)
 {
@@ -638,11 +649,16 @@ int GlyphInfos::DrawGlyphButton(
 			}
 		}
 
+		ImU32 textCol = ImGui::GetColorU32(ImGuiCol_Text);
+		if (vColored)
+		{
+			textCol = ImGui::GetColorU32(ImVec4(1,1,1,1));
+		}
 		RenderGlyph(vFont, window->DrawList,
 			vGlyphSize.y, 
 			bb.Min, bb.Max, ImVec2(offsetX,0),
-			ImGui::GetColorU32(ImGuiCol_Text), 
-			(ImWchar)vGlyph->Codepoint, 
+			textCol,
+			(ImWchar)vGlyph->Codepoint,
 			trans, scale,
 			vProjectFile->m_ZoomGlyphs);
 		

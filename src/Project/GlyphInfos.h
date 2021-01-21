@@ -107,12 +107,13 @@ public:
 		std::weak_ptr<FontInfos> vFontInfos,
 		ImFontGlyph vGlyph, std::string vOldName,
 		std::string vNewName, uint32_t vNewCodePoint = 0,
-		ImVec2 vTranslation = ImVec2(0, 0));
+		ImVec2 vTranslation = ImVec2(0, 0), ImVec2 vScale = ImVec2(0, 0));
 	// 0 => none, 1 => left pressed, 2 => right pressed
 	static int DrawGlyphButton(
 		int& vWidgetPushId, // by adress because we want modify it
 		ProjectFile* vProjectFile, ImFont* vFont,
 		bool* vSelected, ImVec2 vGlyphSize, const ImFontGlyph* vGlyph,
+		bool vColored = false,
 		ImVec2 vTranslation = ImVec2(0, 0), ImVec2 vScale = ImVec2(1, 1),
 		int frame_padding = -1, float vRectThickNess = 0.0f, ImVec4 vRectColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
 	static void RenderGlyph(
@@ -135,6 +136,7 @@ public:
 	SimpleGlyph_Solo simpleGlyph;
 	ct::fvec2 m_Translation = 0.0f;
 	ct::fvec2 m_Scale = 1.0f;
+	bool m_Colored = false; // is colored or not
 
 	// filled during generation only
 	// not to use outside of generation
@@ -154,7 +156,7 @@ public:
 		std::weak_ptr<FontInfos> vFontInfos,
 		ImFontGlyph vGlyph, std::string vOldName,
 		std::string vNewName, uint32_t vNewCodePoint, 
-		ImVec2 vTranslation);
+		ImVec2 vTranslation, ImVec2 vScale);
 	~GlyphInfos();
 
 	std::weak_ptr<FontInfos> GetFontInfos();

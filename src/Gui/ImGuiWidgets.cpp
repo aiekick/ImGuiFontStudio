@@ -1225,8 +1225,6 @@ bool ImGui::SliderScalarDefaultCompact(float width, const char* label, ImGuiData
 {
 	bool change = false;
 
-	float ax = ImGui::GetCursorPosX();
-
 	ImGui::PushID(label);
 	if (CustomButton(ICON_IGFS_RESET))
 	{
@@ -1308,4 +1306,19 @@ bool ImGui::TransparentButton(const char* label, const ImVec2& size_arg, ImGuiBu
 	RenderTextClipped(bb.Min + style.FramePadding, bb.Max - style.FramePadding, label, NULL, &label_size, style.ButtonTextAlign, &bb);
 
 	return pressed;
+}
+
+void ImGui::PlainImageWithBG(ImTextureID user_texture_id, const ImVec2& size, const ImVec4& bg_col, const ImVec4& tint_col)
+{
+	ImGuiWindow* window = GetCurrentWindow();
+	if (window->SkipItems)
+		return;
+
+	ImRect bb(window->DC.CursorPos, window->DC.CursorPos + size);
+	ItemSize(bb);
+	if (!ItemAdd(bb, 0))
+		return;
+
+	window->DrawList->AddRectFilled(bb.Min, bb.Max, GetColorU32(bg_col), 0.0f);
+	window->DrawList->AddImage(user_texture_id, bb.Min, bb.Max, ImVec2(0, 0), ImVec2(1, 1), GetColorU32(tint_col));
 }

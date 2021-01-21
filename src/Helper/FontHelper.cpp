@@ -872,7 +872,9 @@ bool FontHelper::Assemble_Head_Table()
 		offset += head->WriteULong(offset, hea->ChecksumAdjustment()); // checkSumAdjustment
 		offset += head->WriteULong(offset, 0x5F0F3CF5); // magicNumber
 		offset += head->WriteUShort(offset, hea->FlagsAsInt()); // flags
-		if (m_FontBoundingBox.Size().emptyOR())
+
+		int UnitsPerEM = m_FontBoundingBox.upperBound.x - m_FontBoundingBox.lowerBound.x;
+		if (UnitsPerEM >= 16 && UnitsPerEM  <= 16384) // freetype will refused font if not ok
 		{
 			offset += head->WriteUShort(offset, hea->UnitsPerEm()); // unitsPerEm
 		}
@@ -882,7 +884,7 @@ bool FontHelper::Assemble_Head_Table()
 		}
 		offset += head->WriteDateTime(offset, hea->Created()); // created
 		offset += head->WriteDateTime(offset, hea->Modified()); // modified
-		if (m_FontBoundingBox.Size().emptyOR())
+		if (UnitsPerEM >= 16 && UnitsPerEM <= 16384) // freetype will refused font if not ok
 		{
 			offset += head->WriteShort(offset, hea->XMin()); // xMin
 			offset += head->WriteShort(offset, hea->YMin()); // yMin

@@ -54,6 +54,8 @@ public: // not to save
 	std::vector<std::string> m_GlyphNames;
 	std::map<uint32_t, std::string> m_GlyphCodePointToName;
 	std::map<uint32_t, uint32_t> m_GlyphCodePointToGlyphIndex;
+	std::map<uint32_t, uint32_t> m_GlyphGlyphIndexToCodePoint;
+	std::map<uint32_t, bool> m_ColoredGlyphs; // codepoint, true/false if colored
 	char m_SearchBuffer[1024] = "\0";
 	ImFontConfig m_FontConfig;
 	bool m_NeedFilePathResolve = false; // the path is not found, need resolve for not lost glyphs datas
@@ -79,7 +81,7 @@ public: // to save
 	int m_FontSize = 17;
 	std::set<std::string> m_Filters; // use map just for have binary tree search
 	RasterizerEnum rasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
-	uint32_t freeTypeFlag = ImGuiFreeType::NoHinting;
+	uint32_t freeTypeFlag = ImGuiFreeType::FreeType_Default;
 	float fontMultiply = 1.0f;
 	int32_t fontPadding = 1;
 
@@ -96,6 +98,7 @@ public: // callable
 private: // Glyph Names Extraction / DB
 	void FillGlyphNames();
 	void GenerateCodePointToGlypNamesDB();
+	void FillGlyphColoreds();
 
 private: // Opengl Texture
 	void CreateFontTexture();
