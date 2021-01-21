@@ -39,7 +39,7 @@
 #include <ctools/cTools.h>
 #include <ctools/FileHelper.h>
 #include <ctools/Logger.h>
-#include <Helper/FontHelper.h>
+#include <Generator/FontGenerator.h>
 #include <Helper/Messaging.h>
 #include <MainFrame.h>
 #include <Panes/SourceFontPane.h>
@@ -594,7 +594,7 @@ void Generator::GenerateFontFile_One(
 {
 	if (vProjectFile && !vFilePathName.empty() && vFontInfos.use_count())
 	{
-		FontHelper fontHelper;
+		FontGenerator fontGenerator;
 
 		bool res = false;
 
@@ -614,7 +614,7 @@ void Generator::GenerateFontFile_One(
 		if (!newHeaderNames.empty() && !newCodePoints.empty())
 		{
 			std::string absPath = vProjectFile->GetAbsolutePath(vFontInfos->m_FontFilePathName);
-			res = fontHelper.OpenFontFile(absPath, newHeaderNames, newCodePoints, newGlyphInfos, true);
+			res = fontGenerator.OpenFontFile(absPath, newHeaderNames, newCodePoints, newGlyphInfos, true);
 		}
 
 		if (res)
@@ -642,7 +642,7 @@ void Generator::GenerateFontFile_One(
 				ct::replaceString(name, "-", "_");
 				filePathName = ps.GetFPNE_WithNameExt(name, ".ttf");
 				
-				if (fontHelper.GenerateFontFile(filePathName, vFlags & GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES))
+				if (fontGenerator.GenerateFontFile(filePathName, vFlags & GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES))
 				{
 					if (vFlags & GENERATOR_MODE_HEADER)
 					{
@@ -693,7 +693,7 @@ void Generator::GenerateFontFile_Merged(
 		!vProjectFile->m_Fonts.empty() &&
 		!vProjectFile->m_FontToMergeIn.empty())
 	{
-		FontHelper fontHelper;
+		FontGenerator fontGenerator;
 
 		bool res = true;
 
@@ -764,7 +764,7 @@ void Generator::GenerateFontFile_Merged(
 				if (!newHeaderNames.empty())
 				{
 					std::string absPath = vProjectFile->GetAbsolutePath(it.second->m_FontFilePathName);
-					res &= fontHelper.OpenFontFile(absPath, newHeaderNames, newCodePoints, newGlyphInfos, !scaleChanged);
+					res &= fontGenerator.OpenFontFile(absPath, newHeaderNames, newCodePoints, newGlyphInfos, !scaleChanged);
 				}
 				else
 				{
@@ -799,7 +799,7 @@ void Generator::GenerateFontFile_Merged(
 				ct::replaceString(name, "-", "_");
 				filePathName = ps.GetFPNE_WithNameExt(name, ".ttf");
 
-				if (fontHelper.GenerateFontFile(vFilePathName, vFlags & GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES))
+				if (fontGenerator.GenerateFontFile(vFilePathName, vFlags & GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES))
 				{
 					if (vFlags & GENERATOR_MODE_HEADER)
 					{

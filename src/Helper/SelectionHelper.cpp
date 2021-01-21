@@ -836,8 +836,6 @@ void SelectionHelper::SelectGlyph(ProjectFile * vProjectFile, std::shared_ptr<Fo
 				if (vFontInfos->m_SelectedGlyphs.find(vGlyph.Codepoint) == vFontInfos->m_SelectedGlyphs.end()) // not found
 				{
 					std::string res = vFontInfos->GetGlyphName(vGlyph.Codepoint);
-					if (res.empty())
-						res = "Symbol Name";
 					vFontInfos->m_SelectedGlyphs[vGlyph.Codepoint] = GlyphInfos::Create(vFontInfos, vGlyph, res, res);
 					vProjectFile->SetProjectChange();
 
@@ -1392,7 +1390,7 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile * vProjectFile)
 {
 	if (vProjectFile && vProjectFile->IsLoaded())
 	{
-		Messaging::Instance()->ClearErrors();
+		//Messaging::Instance()->ClearErrors();
 
 		// search for codepoint and names in double => an generate an error
 		std::set<std::string> namesGlobal; vProjectFile->m_NameFoundInDouble = false;

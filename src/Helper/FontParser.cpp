@@ -309,13 +309,15 @@ int FontAnalyser::baseGlyphRecordStruct::draw(int vWidgetId)
 
 void FontAnalyser::baseGlyphRecordStruct::parse(MemoryStream* vMem, size_t vOffset, size_t vLength)
 {
+	UNUSED(vLength);
+
 	if (vMem)
 	{
 		vMem->SetPos(vOffset);
 
-		glyphID = vMem->ReadUShort();
-		firstLayerIndex = vMem->ReadUShort();
-		numLayers = vMem->ReadUShort();
+		glyphID = (uint16_t)vMem->ReadUShort();
+		firstLayerIndex = (uint16_t)vMem->ReadUShort();
+		numLayers = (uint16_t)vMem->ReadUShort();
 
 		AddItem("glyphID", "(2 bytes)", ct::toStr("%hu", glyphID));
 		AddItem("firstLayerIndex", "(2 bytes)", ct::toStr("%hu", firstLayerIndex));
@@ -345,12 +347,14 @@ int FontAnalyser::layerRecordStruct::draw(int vWidgetId)
 
 void FontAnalyser::layerRecordStruct::parse(MemoryStream* vMem, size_t vOffset, size_t vLength)
 {
+	UNUSED(vLength);
+
 	if (vMem)
 	{
 		vMem->SetPos(vOffset);
 
-		glyphID = vMem->ReadUShort();
-		paletteIndex = vMem->ReadUShort();
+		glyphID = (uint16_t)vMem->ReadUShort();
+		paletteIndex = (uint16_t)vMem->ReadUShort();
 
 		AddItem("glyphID", "(2 bytes)", ct::toStr("%hu", glyphID));
 		AddItem("paletteIndex", "(2 bytes)", ct::toStr("%hu", paletteIndex));
@@ -399,15 +403,17 @@ int FontAnalyser::colrTableStruct::draw(int vWidgetId)
 
 void FontAnalyser::colrTableStruct::parse(MemoryStream* vMem, size_t vOffset, size_t vLength)
 {
+	UNUSED(vLength);
+
 	if (vMem)
 	{
 		vMem->SetPos(vOffset);
 
-		version = vMem->ReadUShort();
-		numBaseGlyphRecords = vMem->ReadUShort();
-		baseGlyphRecordsOffset = vMem->ReadULong();
-		layerRecordsOffset = vMem->ReadULong();
-		numLayerRecords = vMem->ReadUShort();
+		version = (uint16_t)vMem->ReadUShort();
+		numBaseGlyphRecords = (uint16_t)vMem->ReadUShort();
+		baseGlyphRecordsOffset = (uint32_t)vMem->ReadULong();
+		layerRecordsOffset = (uint32_t)vMem->ReadULong();
+		numLayerRecords = (uint16_t)vMem->ReadUShort();
 
 		AddItem("version", "(2 bytes)", ct::toStr("%hu", version));
 		AddItem("numBaseGlyphRecords", "(2 bytes)", ct::toStr("%hu", numBaseGlyphRecords));
@@ -455,14 +461,16 @@ int cpalTableV0Struct::draw(int vWidgetId)
 
 void cpalTableV0Struct::parse(MemoryStream* vMem, size_t vOffset, size_t vLength)
 {
+	UNUSED(vLength);
+
 	if (vMem)
 	{
 		vMem->SetPos(vOffset);
 
-		numPaletteEntries = vMem->ReadUShort();
-		numPalettes = vMem->ReadUShort();
-		numColorRecords = vMem->ReadUShort();
-		colorRecordsArrayOffset = vMem->ReadULong();
+		numPaletteEntries = (uint16_t)vMem->ReadUShort();
+		numPalettes = (uint16_t)vMem->ReadUShort();
+		numColorRecords = (uint16_t)vMem->ReadUShort();
+		colorRecordsArrayOffset = (uint32_t)vMem->ReadULong();
 
 		AddItem("numPaletteEntries", "(2 bytes)", ct::toStr("%hu", numPaletteEntries));
 		AddItem("numPalettes", "(2 bytes)", ct::toStr("%hu", numPalettes));
@@ -500,14 +508,16 @@ int cpalTableV1Struct::draw(int vWidgetId)
 
 void cpalTableV1Struct::parse(MemoryStream* vMem, size_t vOffset, size_t vLength)
 {
+	UNUSED(vLength);
+
 	if (vMem)
 	{
 		vMem->SetPos(vOffset);
 
-		numPaletteEntries = vMem->ReadUShort();
-		numPalettes = vMem->ReadUShort();
-		numColorRecords = vMem->ReadUShort();
-		colorRecordsArrayOffset = vMem->ReadULong();
+		numPaletteEntries = (uint16_t)vMem->ReadUShort();
+		numPalettes = (uint16_t)vMem->ReadUShort();
+		numColorRecords = (uint16_t)vMem->ReadUShort();
+		colorRecordsArrayOffset = (uint32_t)vMem->ReadULong();
 
 		vMem->SetPos(vMem->GetPos() + sizeof(uint16_t) * numPalettes);
 		/*for (int i = 0; i < numPalettes; i++)
@@ -518,9 +528,9 @@ void cpalTableV1Struct::parse(MemoryStream* vMem, size_t vOffset, size_t vLength
 			//baseGlyphRecords.push_back(base);
 		}*/
 
-		paletteTypesArrayOffset = vMem->ReadULong();
-		paletteLabelsArrayOffset = vMem->ReadULong();
-		paletteEntryLabelsArrayOffset = vMem->ReadULong();
+		paletteTypesArrayOffset = (uint32_t)vMem->ReadULong();
+		paletteLabelsArrayOffset = (uint32_t)vMem->ReadULong();
+		paletteEntryLabelsArrayOffset = (uint32_t)vMem->ReadULong();
 
 		AddItem("numPaletteEntries", "(2 bytes)", ct::toStr("%hu", numPaletteEntries));
 		AddItem("numPalettes", "(2 bytes)", ct::toStr("%hu", numPalettes));
@@ -567,7 +577,7 @@ void cpalTableStruct::parse(MemoryStream* vMem, size_t vOffset, size_t vLength)
 	{
 		vMem->SetPos(vOffset);
 
-		version = vMem->ReadUShort();
+		version = (uint16_t)vMem->ReadUShort();
 		
 		AddItem("version", "(2 bytes)", ct::toStr("%hu", version));
 		
@@ -584,6 +594,71 @@ void cpalTableStruct::parse(MemoryStream* vMem, size_t vOffset, size_t vLength)
 
 ///////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////
+///////////////////////////////////////////////////////////////////////////////
+
+int FontAnalyser::compositeGlyphTableStruct::draw(int vWidgetId)
+{
+	ImGui::PushID(++vWidgetId);
+
+	if (ImGui::TreeNode("Composite Glyph :"))
+	{
+		ImGui::TreePop();
+	}
+
+	ImGui::PopID();
+
+	return vWidgetId;
+}
+
+void FontAnalyser::compositeGlyphTableStruct::parse(MemoryStream* vMem, size_t vOffset, size_t vLength, int16_t vCountContours)
+{
+	UNUSED(vLength);
+	UNUSED(vCountContours);
+
+	if (vMem)
+	{
+		vMem->SetPos(vOffset);
+
+		flags = (uint16_t)vMem->ReadUShort();
+		glyphIndex = (uint16_t)vMem->ReadUShort();
+
+		if (flags & ARG_1_AND_2_ARE_WORDS)
+		{
+			argument1_16 = (uint16_t)vMem->ReadUShort();
+			argument2_16 = (uint16_t)vMem->ReadUShort();
+		}
+		else
+		{
+			argument1_8 = (uint16_t)vMem->ReadByte();
+			argument2_8 = (uint16_t)vMem->ReadByte();
+		}
+		if (flags & WE_HAVE_A_SCALE)
+		{
+			scale = vMem->ReadF2DOT14();
+		}
+		else if (flags & WE_HAVE_AN_X_AND_Y_SCALE)
+		{
+			xscale = vMem->ReadF2DOT14();
+			yscale = vMem->ReadF2DOT14();
+		}
+		else if (flags & WE_HAVE_A_TWO_BY_TWO)
+		{
+			xscale = vMem->ReadF2DOT14();
+			scale01 = vMem->ReadF2DOT14();
+			scale10 = vMem->ReadF2DOT14();
+			yscale = vMem->ReadF2DOT14();
+		}
+		while (flags & MORE_COMPONENTS)
+		{
+			if (flags & WE_HAVE_INSTRUCTIONS)
+			{
+				/*uint16 numInstr
+					uint8 instr[numInstr]*/
+			}
+		}
+	}
+}
+
 ///////////////////////////////////////////////////////////////////////////////
 
 int FontAnalyser::simpleGlyphTableStruct::draw(int vWidgetId)

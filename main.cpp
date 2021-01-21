@@ -107,11 +107,18 @@ int main(int, char**argv)
     ImGui_ImplOpenGL3_Init(glsl_version);
 
 	// load memory font file
-	//ImGui::GetIO().Fonts->AddFontDefault();
-    ImGui::GetIO().Fonts->AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_RM, 15.0f);
+	ImGui::GetIO().Fonts->AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_RM, 15.0f);
     static const ImWchar icons_ranges[] = { ICON_MIN_IGFS, ICON_MAX_IGFS, 0 };
 	ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
 	ImGui::GetIO().Fonts->AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_IGFS, 15.0f, &icons_config, icons_ranges);
+
+    ImGuiFreeType::FT_Error freetypeError;
+    uint32_t freeTypeFlag = ImGuiFreeType::FreeType_Default;
+    if (!ImGuiFreeType::BuildFontAtlas(ImGui::GetIO().Fonts, freeTypeFlag, &freetypeError))
+    {
+        printf("Faila to load font, reason : %s \n", ImGuiFreeType::GetErrorMessage(freetypeError));
+        return 1;
+    }
 
 	MainFrame::Instance(mainWindow)->Init();
 

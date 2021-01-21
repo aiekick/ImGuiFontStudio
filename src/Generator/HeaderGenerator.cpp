@@ -28,7 +28,7 @@
 #include <ctools/cTools.h>
 #include <ctools/FileHelper.h>
 #include <ctools/Logger.h>
-#include <Helper/FontHelper.h>
+#include <Generator/FontGenerator.h>
 #include <Helper/Messaging.h>
 #include <Project/FontInfos.h>
 #include <Project/ProjectFile.h>

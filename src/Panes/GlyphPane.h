@@ -17,7 +17,7 @@
 
 #include <Panes/Abstract/AbstractPane.h>
 
-#include <Helper/FontHelper.h>
+#include <Generator/FontGenerator.h>
 
 #include <imgui/imgui.h>
 

@@ -469,16 +469,22 @@ void ParamsPane::OpenFonts(ProjectFile *vProjectFile, const std::map<std::string
 {
 	if (vProjectFile && vProjectFile->IsLoaded())
 	{
+		bool res = false;
 		for (auto & it : vFontFilePathNames)
 		{
-			OpenFont(vProjectFile, it.second, false);
+			res |= OpenFont(vProjectFile, it.second, false);
 		}
-		vProjectFile->UpdateCountSelectedGlyphs();
+
+		if (res) // si au moins est bon
+			vProjectFile->UpdateCountSelectedGlyphs();
+		
 	}
 }
 
-void ParamsPane::OpenFont(ProjectFile *vProjectFile, const std::string& vFontFilePathName, bool vUpdateCount)
+bool ParamsPane::OpenFont(ProjectFile *vProjectFile, const std::string& vFontFilePathName, bool vUpdateCount)
 {
+	bool res = false;
+
 	if (vProjectFile && vProjectFile->IsLoaded())
 	{
 		auto ps = FileHelper::Instance()->ParsePathFileName(vFontFilePathName);
@@ -505,10 +511,14 @@ void ParamsPane::OpenFont(ProjectFile *vProjectFile, const std::string& vFontFil
 
 					if (vUpdateCount)
 						vProjectFile->UpdateCountSelectedGlyphs();
+
+					res = true;
 				}
 			}
 		}
 	}
+
+	return res;
 }
 
 void ParamsPane::SelectFont(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos)

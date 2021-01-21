@@ -81,6 +81,10 @@ public:
 	ct::fvec2 m_Translation; // translation in first
 	ct::fvec2 m_Scale = 1.0f; // scale in second
 
+private:
+	ImVec2 getScreenToLocal(ImVec2 vScreenPos, ImVec2 vZoneStart, ImVec2 vWorldBBoxOrigin, ImVec2 vWorlBBoxSize, float vWorldScale, ImVec2 vLocalBBoxOrigin);
+	ImVec2 getLocalToScreen(ImVec2 vLocalPos, ImVec2 vZoneStart, ImVec2 vWorldBBoxOrigin, ImVec2 vWorlBBoxSize, float vWorldScale, ImVec2 vLocalBBoxOrigin);
+
 public:
 	void Clear();
 	void LoadSimpleGlyph(sfntly::GlyphTable::SimpleGlyph *vGlyph);
@@ -97,6 +101,41 @@ public: // ImGui
 		std::shared_ptr<FontInfos> vFontInfos,
 		std::shared_ptr<GlyphInfos> vGlyphInfos,
 		int vMaxContour, int vQuadBezierCountSegments, 
+		GlyphDrawingFlags vGlyphDrawingFlags);
+};
+
+class CompositeGlyph_Solo
+{
+public:
+	bool isValid = false;
+
+public:
+	std::vector<std::vector<ct::ivec2>> coords;
+	std::vector<std::vector<bool>> onCurve;
+	ct::ivec4 rc;
+	ct::fvec2 m_Translation; // translation in first
+	ct::fvec2 m_Scale = 1.0f; // scale in second
+
+private:
+	ImVec2 getScreenToLocal(ImVec2 vScreenPos, ImVec2 vZoneStart, ImVec2 vWorldBBoxOrigin, ImVec2 vWorlBBoxSize, float vWorldScale, ImVec2 vLocalBBoxOrigin);
+	ImVec2 getLocalToScreen(ImVec2 vLocalPos, ImVec2 vZoneStart, ImVec2 vWorldBBoxOrigin, ImVec2 vWorlBBoxSize, float vWorldScale, ImVec2 vLocalBBoxOrigin);
+
+public:
+	void Clear();
+	void LoadCompositeGlyph(sfntly::GlyphTable::CompositeGlyph* vGlyph);
+	int GetCountContours() const;
+	ct::ivec2 GetCoords(int32_t vContour, int32_t vPoint);
+	bool IsOnCurve(int32_t vContour, int32_t vPoint);
+	ct::ivec2 Scale(ct::ivec2 p, double scale) const;
+	//ct::ivec2 GetCoords(int32_t vContour, int32_t vPoint, double scale);
+	void ClearTransform();
+
+public: // ImGui
+	void DrawCurves(
+		float vGlobalScale,
+		std::shared_ptr<FontInfos> vFontInfos,
+		std::shared_ptr<GlyphInfos> vGlyphInfos,
+		int vMaxContour, int vQuadBezierCountSegments,
 		GlyphDrawingFlags vGlyphDrawingFlags);
 };
 
@@ -134,6 +173,7 @@ public:
 	std::string newHeaderName;
 	uint32_t newCodePoint = 0;
 	SimpleGlyph_Solo simpleGlyph;
+	CompositeGlyph_Solo compositeGlyph;
 	ct::fvec2 m_Translation = 0.0f;
 	ct::fvec2 m_Scale = 1.0f;
 	bool m_Colored = false; // is colored or not

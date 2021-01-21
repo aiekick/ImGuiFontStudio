@@ -8,6 +8,11 @@
 
 namespace ImGuiFreeType
 {
+    typedef int FT_Error;
+
+    // return freetype error msg for FT_Error (here replaced by int for avoid inclusion)
+    const char* GetErrorMessage(FT_Error err);
+
     // Hinting greatly impacts visuals (and glyph sizes).
     // When disabled, FreeType generates blurrier glyphs, more or less matches the stb's output.
     // The Default hinting mode usually looks good, but may distort glyphs in an unusual way.
@@ -32,7 +37,7 @@ namespace ImGuiFreeType
         FreeType_Default = FreeType_NoHinting | FreeType_NoAutoHint | FreeType_LoadColor
     };
 
-    IMGUI_API bool BuildFontAtlas(ImFontAtlas* atlas, unsigned int extra_flags = 0, int* vFreetypeError = 0);
+    IMGUI_API bool BuildFontAtlas(ImFontAtlas* atlas, unsigned int extra_flags = 0, FT_Error* vFreetypeError = 0);
 
     // By default ImGuiFreeType will use IM_ALLOC()/IM_FREE().
     // However, as FreeType does lots of allocations we provide a way for the user to redirect it to a separate memory heap if desired:

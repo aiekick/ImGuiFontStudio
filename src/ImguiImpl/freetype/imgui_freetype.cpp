@@ -44,8 +44,6 @@
 #pragma GCC diagnostic ignored "-Wunused-function"          // warning: 'xxxx' defined but not used
 #endif
 
-using namespace ImGuiFreeType;
-
 namespace
 {
     // Glyph metrics:
@@ -131,6 +129,8 @@ namespace
         if (error != 0)
             return false;
         error = FT_Select_Charmap(Face, FT_ENCODING_UNICODE);
+        if (vFT_Error)
+            *vFT_Error = error;
         if (error != 0)
             return false;
 
@@ -140,25 +140,25 @@ namespace
         // Convert to FreeType flags (NB: Bold and Oblique are processed separately)
         UserFlags = cfg.RasterizerFlags | extra_user_flags;
         LoadFlags = FT_LOAD_NO_BITMAP;
-        if (UserFlags & FreeType_NoHinting)
+        if (UserFlags & ImGuiFreeType::FreeType_NoHinting)
             LoadFlags |= FT_LOAD_NO_HINTING;
-        if (UserFlags & FreeType_NoAutoHint)
+        if (UserFlags & ImGuiFreeType::FreeType_NoAutoHint)
             LoadFlags |= FT_LOAD_NO_AUTOHINT;
-        if (UserFlags & FreeType_ForceAutoHint)
+        if (UserFlags & ImGuiFreeType::FreeType_ForceAutoHint)
             LoadFlags |= FT_LOAD_FORCE_AUTOHINT;
-        if (UserFlags & FreeType_LightHinting)
+        if (UserFlags & ImGuiFreeType::FreeType_LightHinting)
             LoadFlags |= FT_LOAD_TARGET_LIGHT;
-        else if (UserFlags & FreeType_MonoHinting)
+        else if (UserFlags & ImGuiFreeType::FreeType_MonoHinting)
             LoadFlags |= FT_LOAD_TARGET_MONO;
         else
             LoadFlags |= FT_LOAD_TARGET_NORMAL;
 
-        if (UserFlags & FreeType_Monochrome)
+        if (UserFlags & ImGuiFreeType::FreeType_Monochrome)
             RenderMode = FT_RENDER_MODE_MONO;
         else
             RenderMode = FT_RENDER_MODE_NORMAL;
 
-        if (UserFlags & FreeType_LoadColor)
+        if (UserFlags & ImGuiFreeType::FreeType_LoadColor)
             LoadFlags |= FT_LOAD_COLOR;
 
         return true;
@@ -210,9 +210,9 @@ namespace
         IM_ASSERT(slot->format == FT_GLYPH_FORMAT_OUTLINE);
 
         // Apply convenience transform (this is not picking from real "Bold"/"Italic" fonts! Merely applying FreeType helper transform. Oblique == Slanting)
-        if (UserFlags & FreeType_Bold)
+        if (UserFlags & ImGuiFreeType::FreeType_Bold)
             FT_GlyphSlot_Embolden(slot);
-        if (UserFlags & FreeType_Oblique)
+        if (UserFlags & ImGuiFreeType::FreeType_Oblique)
         {
             FT_GlyphSlot_Oblique(slot);
             //FT_BBox bbox;
@@ -770,7 +770,7 @@ bool ImFontAtlasBuildWithFreeType(FT_Library ft_library, ImFontAtlas* atlas, uns
     // 7. Allocate texture
     atlas->TexHeight = (atlas->Flags & ImFontAtlasFlags_NoPowerOfTwoHeight) ? (atlas->TexHeight + 1) : ImUpperPowerOfTwo(atlas->TexHeight);
     atlas->TexUvScale = ImVec2(1.0f / atlas->TexWidth, 1.0f / atlas->TexHeight);
-    if ((extra_flags & FreeType_LoadColor) == FreeType_LoadColor)
+    if ((extra_flags & ImGuiFreeType::FreeType_LoadColor) == ImGuiFreeType::FreeType_LoadColor)
     {
         atlas->TexPixelsRGBA32 = (unsigned int*)IM_ALLOC(atlas->TexWidth * atlas->TexHeight * 4);
         memset(atlas->TexPixelsRGBA32, 0, atlas->TexWidth * atlas->TexHeight * 4);
@@ -907,7 +907,17 @@ static void* FreeType_Realloc(FT_Memory /*memory*/, long cur_size, long new_size
     return block;
 }
 
-bool ImGuiFreeType::BuildFontAtlas(ImFontAtlas* atlas, unsigned int extra_flags, int* vFreetypeError)
+const char* ImGuiFreeType::GetErrorMessage(FT_Error err)
+{
+#undef FTERRORS_H_
+#define FT_ERRORDEF( e, v, s )  case e: return s;
+#define FT_ERROR_START_LIST     switch (err) {
+#define FT_ERROR_END_LIST       }
+#include FT_ERRORS_H
+    return "(Unknown error)";
+}
+
+bool ImGuiFreeType::BuildFontAtlas(ImFontAtlas* atlas, unsigned int extra_flags, FT_Error* vFreetypeError)
 {
     // FreeType memory management: https://www.freetype.org/freetype2/docs/design/design-4.html
     FT_MemoryRec_ memory_rec = {};

@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include "MemoryStream.h"
+#include <Generator/MemoryStream.h>
 #include <imgui/imgui.h>
 #include <cstdint>
 #include <string>
@@ -339,6 +339,51 @@ namespace FontAnalyser
 	};
 
 	//////////////////////////////////////
+
+	typedef int CompositeArgumentFlags;
+	enum CompositeArgumentFlags_
+	{
+		ARG_1_AND_2_ARE_WORDS = (1 << 0),
+		ARGS_ARE_XY_VALUES = (1 << 1),
+		ROUND_XY_TO_GRID = (1 << 2),
+		WE_HAVE_A_SCALE = (1 << 3),
+		OBSOLETE = (1 << 4),
+		MORE_COMPONENTS = (1 << 5),
+		WE_HAVE_AN_X_AND_Y_SCALE = (1 << 6),
+		WE_HAVE_A_TWO_BY_TWO = (1 << 7),
+		WE_HAVE_INSTRUCTIONS = (1 << 8),
+		USE_MY_METRICS = (1 << 9),
+		OVERLAP_COMPOUND = (1 << 10),
+		SCALED_COMPONENT_OFFSET = (1 << 11),
+		UNSCALED_COMPONENT_OFFSET = (1 << 12)
+	};
+
+	class compositeGlyphTableStruct : public TableDisplay
+	{
+	public:
+		bool filled = false;
+
+	public:
+		uint16_t flags;
+		uint16_t glyphIndex;
+
+		uint16_t argument1_16; 
+		uint16_t argument2_16;
+
+		uint8_t argument1_8;
+		uint8_t argument2_8;
+
+		MemoryStream::F2DOT14 scale;
+		MemoryStream::F2DOT14 xscale;
+		MemoryStream::F2DOT14 yscale;
+		MemoryStream::F2DOT14 scale01;
+		MemoryStream::F2DOT14 scale10;
+
+	public:
+		int draw(int vWidgetId);
+		void parse(MemoryStream* vMem, size_t vOffset, size_t vLength, int16_t vCountContours);
+	}; 
+	
 	class simpleGlyphTableStruct : public TableDisplay
 	{
 	public: 
@@ -366,6 +411,7 @@ namespace FontAnalyser
 		MemoryStream::FWord xMax = 0;
 		MemoryStream::FWord yMax = 0;
 		simpleGlyphTableStruct simpleGlyph;
+		compositeGlyphTableStruct compositeGlyph;
 
 	public:
 		int draw(int vWidgetId);

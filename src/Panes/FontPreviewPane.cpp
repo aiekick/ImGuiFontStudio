@@ -19,7 +19,7 @@
 
 #include "FontPreviewPane.h"
 
-#include <Helper/FontHelper.h>
+#include <Generator/FontGenerator.h>
 #include <MainFrame.h>
 #include <Panes/Manager/LayoutManager.h>
 #include <Gui/ImGuiWidgets.h>
@@ -27,7 +27,7 @@
 #include <Panes/DebugPane.h>
 #endif
 #include <Panes/ParamsPane.h>
-#include <Helper/FontHelper.h>
+#include <Generator/FontGenerator.h>
 #include <Panes/GlyphPane.h>
 
 #define IMGUI_DEFINE_MATH_OPERATORS

@@ -160,7 +160,7 @@ bool GlyphPane::LoadGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> 
 
 			if (FileHelper::Instance()->IsFileExist(fontPathName))
 			{
-				FontHelper m_FontHelper;
+				FontGenerator m_FontHelper;
 
 				m_fontInstance.m_Font.Attach(m_FontHelper.LoadFontFile(fontPathName.c_str()));
 				if (m_fontInstance.m_Font)

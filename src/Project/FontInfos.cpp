@@ -37,19 +37,6 @@
 using namespace ImGuiFreeType;
 
 ///////////////////////////////////////////////////////////////////////////////////
-// https://stackoverflow.com/questions/31161284/how-can-i-get-the-corresponding-error-string-from-an-ft-error-code
-#include <ft2build.h>
-#include FT_FREETYPE_H
-const char* getErrorMessage(FT_Error err)
-{
-#undef FTERRORS_H_
-#define FT_ERRORDEF( e, v, s )  case e: return s;
-#define FT_ERROR_START_LIST     switch (err) {
-#define FT_ERROR_END_LIST       }
-#include FT_ERRORS_H
-	return "(Unknown error)";
-}
-///////////////////////////////////////////////////////////////////////////////////
 static ProjectFile defaultProjectValues;
 static FontInfos defaultFontInfosValues;
 ///////////////////////////////////////////////////////////////////////////////////
@@ -169,14 +156,14 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 					success = m_ImFontAtlas.Build();
 				}
 
+				m_FontFilePathName = vProjectFile->GetRelativePath(fontFilePathName);
+
 				if (success)
 				{
 					if (!m_ImFontAtlas.Fonts.empty())
 					{
 						if (m_FontPrefix.empty())
 							m_FontPrefix = GetPrefixFromFontFileName(ps.name);
-
-						m_FontFilePathName = vProjectFile->GetRelativePath(fontFilePathName);
 
 						DestroyFontTexture();
 						CreateFontTexture();
@@ -214,9 +201,9 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 				{
 					if (rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
 					{
-						auto reason = getErrorMessage(freetypeError);
 						Messaging::Instance()->AddError(true, nullptr, nullptr,
-							"Feetype fail to load font file %s.%s. Reason : %s", ps.name.c_str(), ps.ext.c_str(), reason);
+							"Feetype fail to load font file %s.%s. Reason : %s", 
+							ps.name.c_str(), ps.ext.c_str(), ImGuiFreeType::GetErrorMessage(freetypeError));
 					}
 					else
 					{
@@ -351,11 +338,14 @@ void FontInfos::FillGlyphNames()
 
 std::string FontInfos::GetGlyphName(uint32_t vCodePoint)
 {
+	std::string res;
 	if (m_GlyphCodePointToName.find(vCodePoint) != m_GlyphCodePointToName.end())
 	{
-		return m_GlyphCodePointToName[vCodePoint];
+		res = m_GlyphCodePointToName[vCodePoint];
 	}
-	return ct::toStr("Symbol_%u", vCodePoint);
+	if (res.empty())
+		res = ct::toStr("Symbol_%u", vCodePoint);
+	return res;
 }
 
 void FontInfos::FillGlyphColoreds()
