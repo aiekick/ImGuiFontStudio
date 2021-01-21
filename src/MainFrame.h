@@ -21,6 +21,7 @@
 #include <ctools/ConfigAbstract.h>
 #include <Project/ProjectFile.h>
 #include <Helper/FrameActionSystem.h>
+#include <Gui/RibbonBar.h>
 
 #include <functional>
 #include <string>
@@ -118,6 +119,7 @@ private:
 	bool m_SaveDialogIfRequired = false;	// open save options dialog (save / save as / continue without saving / cancel)
 	bool m_SaveDialogActionWasDone = false;	// if action was done by save options dialog
 	FrameActionSystem m_ActionSystem;
+	RibbonBar m_RibbonBar;
 
 public:
 	void Init();

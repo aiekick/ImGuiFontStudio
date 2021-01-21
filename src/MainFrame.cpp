@@ -152,7 +152,7 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 	static ImGuiWindowFlags window_flags =
 		ImGuiWindowFlags_NoTitleBar |
-		ImGuiWindowFlags_MenuBar |
+		//ImGuiWindowFlags_MenuBar |
 		ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_NoCollapse |
 		ImGuiWindowFlags_NoResize |
@@ -175,7 +175,7 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 	ImGui::SetWindowSize(vSize - ImVec2(0.0f, barH));
 	ImGui::SetWindowPos(vPos);
 
-	if (ImGui::BeginMenuBar())
+	/*if (ImGui::BeginMenuBar())
 	{
 		if (ImGui::BeginMenu(ICON_IGFS_PROJECT " Project"))
 		{
@@ -241,7 +241,7 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 				SettingsDlg::Instance()->OpenDialog();
 			}*/
 
-			if (ImGui::BeginMenu(ICON_IGFS_EDIT " Styles"))
+			/*if (ImGui::BeginMenu(ICON_IGFS_EDIT " Styles"))
 			{
 				ImGuiThemeHelper::Instance()->DrawMenu();
 
@@ -275,7 +275,9 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 		ImGui::Text("%s", fps.c_str());
 
 		ImGui::EndMenuBar();
-	}
+	}*/
+
+	m_RibbonBar.Draw(&m_ProjectFile);
 
 	LayoutManager::Instance()->StartDockPane(dockspace_flags);
 
