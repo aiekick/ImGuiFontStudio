@@ -14,8 +14,8 @@
 // - v0.61: (2019/01/15) added support for imgui allocators + added FreeType only override function SetAllocatorFunctions().
 // - v0.62: (2019/02/09) added RasterizerFlags::Monochrome flag to disable font anti-aliasing (combine with ::MonoHinting for best results!)
 // - v0.63: (2020/06/04) fix for rare case where FT_Get_Char_Index() succeed but FT_Load_Glyph() fails.
-// - v0.64: (2021/01/18) add FT_Error in loading fucntion call flag for a way for get freetype error message when bad font file
-// - v0.65: (2021/01/20) add copy/past function form ImDraw and specifi for COLOR support in freetype from PR : https://github.com/ocornut/imgui/pull/336, for avoid modification of ImDraw
+// - v0.64: (2021/01/18) add FT_Error in loading function call flag for a way for get freetype error message when bad font file
+// - v0.65: (2021/01/20) add copy/past function form ImDraw and specific for COLOR support in freetype from PR : https://github.com/ocornut/imgui/pull/336, for avoid modification of ImDraw
 
 // Gamma Correct Blending:
 //  FreeType assumes blending in linear space rather than gamma space.
