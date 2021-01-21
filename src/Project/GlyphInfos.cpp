@@ -518,7 +518,7 @@ GlyphInfos::GlyphInfos(
 		auto fontInfosPtr = fontInfos.lock();
 		if (fontInfosPtr.use_count())
 		{
-			m_Colored = fontInfosPtr->m_ColoredGlyphs[vGlyph.Codepoint];
+			m_Colored = fontInfosPtr->m_ColoredGlyphs[glyph.Codepoint];
 		}
 	}
 }
@@ -533,6 +533,15 @@ std::weak_ptr<FontInfos> GlyphInfos::GetFontInfos()
 void GlyphInfos::SetFontInfos(std::weak_ptr<FontInfos> vFontInfos)
 {
 	fontInfos = vFontInfos;
+
+	if (!fontInfos.expired())
+	{
+		auto fontInfosPtr = fontInfos.lock();
+		if (fontInfosPtr.use_count())
+		{
+			m_Colored = fontInfosPtr->m_ColoredGlyphs[glyph.Codepoint];
+		}
+	}
 }
 
 int GlyphInfos::DrawGlyphButton(

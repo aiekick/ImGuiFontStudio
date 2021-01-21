@@ -355,7 +355,7 @@ std::string FontInfos::GetGlyphName(uint32_t vCodePoint)
 	{
 		return m_GlyphCodePointToName[vCodePoint];
 	}
-	return "Symbol Name";
+	return ct::toStr("Symbol_%u", vCodePoint);
 }
 
 void FontInfos::FillGlyphColoreds()
