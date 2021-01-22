@@ -90,20 +90,24 @@ class Generator
 public:
 	static bool SaveTextureToPng(GLFWwindow* vWin, const std::string& vFilePathName,
 		GLuint vTextureId, ct::uvec2 vTextureSize, uint32_t vChannelCount);
+	static bool WriteGlyphCardToPicture(
+		const std::string& vFilePathName,
+		std::map<std::string, std::pair<uint32_t, size_t>> vLabels, // lable, codepoint, FontInfos ptr
+		const uint32_t& vGlyphHeight, const uint32_t& vMaxRows);
 
 private:
 	HeaderGenerator m_HeaderGenerator;
 
 public:
-	void Generate(
+	bool Generate(
 		ProjectFile *vProjectFile,
 		const std::string& vFilePath = "",
 		const std::string& vFileName = "");
 
 private:
-	void GenerateCard_One(const std::string& vFilePathName, std::shared_ptr<FontInfos> vFontInfos,
+	bool GenerateCard_One(const std::string& vFilePathName, std::shared_ptr<FontInfos> vFontInfos,
 		const uint32_t& vGlyphHeight, const uint32_t& vMaxRows);
-	void GenerateCard_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
+	bool GenerateCard_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
 		const uint32_t& vGlyphHeight, const uint32_t& vMaxRows);
 	
 	/*void GenerateHeader_One(const std::string& vFilePathName, std::shared_ptr<FontInfos> vFontInfos,
@@ -111,14 +115,14 @@ private:
 	void GenerateHeader_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
 		std::string vFontBufferName = "", size_t vFontBufferSize = 0);*/
 	
-	void GenerateFontFile_One(const std::string& vFilePathName, ProjectFile* vProjectFile, 
+	bool GenerateFontFile_One(const std::string& vFilePathName, ProjectFile* vProjectFile,
 		std::shared_ptr<FontInfos> vFontInfos, const GenModeFlags& vFlags);
-	void GenerateFontFile_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
+	bool GenerateFontFile_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
 		const GenModeFlags& vFlags);
 	
-	void GenerateSource_One(const std::string& vFilePathName, ProjectFile* vProjectFile,
+	bool GenerateSource_One(const std::string& vFilePathName, ProjectFile* vProjectFile,
 		std::shared_ptr<FontInfos> vFontInfos, const GenModeFlags& vFlags);
-	void GenerateSource_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
+	bool GenerateSource_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
 		const GenModeFlags& vFlags);
 
 public: // singleton

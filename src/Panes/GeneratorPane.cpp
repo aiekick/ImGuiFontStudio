@@ -478,20 +478,19 @@ bool GeneratorPane::CheckGenerationConditions(ProjectFile *vProjectFile)
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED) && font.second->m_SelectedGlyphs.empty())
 			{
-				ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->badColor, "%s : NOK", font.second->m_FontFileName.c_str());
-				ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->badColor, "No Glyphs are selected.\n\tYou need it in Merged mode");
+				ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->badColor, "%s : NOK\nNo Glyphs are selected.\nYou need it in Merged mode", font.second->m_FontFileName.c_str());
 				errorsCount++;
 			}
 			else
 			{
-				ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->goodColor, "%s : OK", font.second->m_FontFileName.c_str());
 				if (font.second->m_SelectedGlyphs.empty()) // no glyphs to extract, we wille extract alls, current and batch only
 				{
-					ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->goodColor, "No Glyphs are selected.\n\tAll font glyphs will be exported");
+					ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->badColor, "%s : NOK\nNo Glyphs are selected.\nCan't generate.", font.second->m_FontFileName.c_str());
+					errorsCount++;
 				}
 				else
 				{
-					ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->goodColor, "%u Glyphs selected", font.second->m_SelectedGlyphs.size());
+					ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->goodColor, "%s : OK\n%u Glyphs selected", font.second->m_FontFileName.c_str(), font.second->m_SelectedGlyphs.size());
 					vProjectFile->m_CountFontWithSelectedGlyphs++;
 				}
 			}
@@ -507,7 +506,7 @@ bool GeneratorPane::CheckGenerationConditions(ProjectFile *vProjectFile)
 		{
 			if (errorsCount > 0)
 			{
-				ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->badColor, "Can partially generate\n\tCheck status bar");
+				ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->badColor, "Can partially generate\nCheck status bar");
 			}
 			else
 			{
@@ -517,12 +516,12 @@ bool GeneratorPane::CheckGenerationConditions(ProjectFile *vProjectFile)
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED))
 			{
 				ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->goodColor,
-					"The selected font\n\tscale / bounding box\n\twill be used for merge in\n\tall other font glyphs");
+					"The selected font\nscale / bounding box\nwill be used for merge in\nall other font glyphs");
 			}
 		}
 		else
 		{
-			ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->badColor, "Can't generate\n\tCheck status bar");
+			ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->badColor, "Can't generate\nCheck status bar");
 			res = false;
 		}
 	}
