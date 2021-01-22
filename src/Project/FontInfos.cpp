@@ -172,24 +172,7 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 						FillGlyphColoreds();
 						UpdateInfos();
 						UpdateFiltering();
-
-						// update glyph ptrs
-						for (auto &it : m_SelectedGlyphs)
-						{
-							uint32_t codePoint = it.first;
-
-							auto glyph = font->FindGlyphNoFallback((ImWchar)codePoint);
-							if (glyph)
-							{
-								if (it.second)
-								{
-									it.second->glyph = *glyph;
-									it.second->oldHeaderName = GetGlyphName(codePoint);
-									it.second->glyphIndex = m_GlyphCodePointToGlyphIndex[codePoint];
-								}
-								
-							}
-						}
+						UpdateSelectedGlyphs(font);
 
 						m_NeedFilePathResolve = false;
 
@@ -606,6 +589,30 @@ void FontInfos::UpdateInfos()
 	//m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Line gap :", ct::toStr("%i", m_LineGap))); // dont know what is it haha
 	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Scale pixel height :", ct::toStr("%.4f", m_Point))); // same.., its used internally by ImGui but dont know what is it
 #endif
+}
+
+void FontInfos::UpdateSelectedGlyphs(ImFont *vFont)
+{
+	if (vFont)
+	{
+		// update glyph ptrs
+		for (auto& it : m_SelectedGlyphs)
+		{
+			uint32_t codePoint = it.first;
+
+			auto glyph = vFont->FindGlyphNoFallback((ImWchar)codePoint);
+			if (glyph)
+			{
+				if (it.second)
+				{
+					it.second->glyph = *glyph;
+					it.second->oldHeaderName = GetGlyphName(codePoint);
+					it.second->glyphIndex = m_GlyphCodePointToGlyphIndex[codePoint];
+					it.second->m_Colored = m_ColoredGlyphs[codePoint];
+				}
+			}
+		}
+	}
 }
 
 void FontInfos::GenerateCodePointToGlypNamesDB()

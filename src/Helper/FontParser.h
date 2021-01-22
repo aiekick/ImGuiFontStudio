@@ -73,6 +73,81 @@ namespace FontAnalyser
 	
 	//////////////////////////////////////
 
+	class NameRecord : public TableDisplay
+	{
+	public:
+		uint16_t platformID = 0;
+		uint16_t encodingID = 0;
+		uint16_t languageID = 0;
+		uint16_t nameID = 0;
+		uint16_t length = 0;
+		uint16_t stringOffset = 0;
+
+		std::string name;
+
+		size_t GetSizeof() // cant use sizeof due to heritage of TableDisplay
+		{
+			return 12U; // (u16*6 = > 2*6 => 12)
+		}
+
+	public:
+		int draw(int vWidgetId);
+		void parse(MemoryStream* vMem, size_t vOffset, size_t vLength);
+	};
+
+	class nameTableV0Struct : public TableDisplay
+	{
+	public:
+		uint16_t count = 0;
+		uint16_t storageOffset = 0;
+
+		std::vector<NameRecord> nameRecords;
+
+	public:
+		int draw(int vWidgetId);
+		void parse(MemoryStream* vMem, size_t vOffset, size_t vLength);
+	};
+
+	class LangTagRecordStruct : public TableDisplay
+	{
+	public:
+
+		
+
+	public:
+		int draw(int vWidgetId);
+		void parse(MemoryStream* vMem, size_t vOffset, size_t vLength);
+	};
+
+	class nameTableV1Struct : public TableDisplay
+	{
+	public:
+		uint16_t count = 0;
+		uint16_t storageOffset = 0;
+		std::vector<NameRecord> nameRecords;
+		uint16_t langTagCount = 0;
+		std::vector<LangTagRecordStruct> langTagRecords;
+
+	public:
+		int draw(int vWidgetId);
+		void parse(MemoryStream* vMem, size_t vOffset, size_t vLength);
+	};
+
+	class nameTableStruct : public TableDisplay
+	{
+	public:
+		uint16_t version = 0;
+		
+		nameTableV0Struct nameTableV0;
+		nameTableV1Struct nameTableV1;
+
+	public:
+		int draw(int vWidgetId);
+		void parse(MemoryStream* vMem, size_t vOffset, size_t vLength);
+	};
+
+	//////////////////////////////////////
+
 	class maxpTableStruct : public TableDisplay
 	{
 	public:
@@ -255,6 +330,11 @@ namespace FontAnalyser
 		uint16_t firstLayerIndex;
 		uint16_t numLayers;
 
+		size_t GetSizeof() // cant use sizeof due to heritage of TableDisplay
+		{
+			return 6U; // (u16+u16+u16 = > 2+2+2)
+		}
+
 	public:
 		int draw(int vWidgetId);
 		void parse(MemoryStream* vMem, size_t vOffset, size_t vLength);
@@ -265,6 +345,11 @@ namespace FontAnalyser
 	public:
 		uint16_t glyphID;
 		uint16_t paletteIndex;
+
+		size_t GetSizeof() // cant use sizeof due to heritage of TableDisplay
+		{
+			return 4U; // (u16+u16 = > 2+2)
+		}
 
 	public:
 		int draw(int vWidgetId);
@@ -280,6 +365,11 @@ namespace FontAnalyser
 		uint32_t layerRecordsOffset;
 		uint16_t numLayerRecords;
 
+		size_t GetSizeof() // cant use sizeof due to heritage of TableDisplay
+		{
+			return 14U; // (u16+u16+u32+u32+u16 = > 2+2+4+4+2)
+		}
+
 	public:
 		std::vector<baseGlyphRecordStruct> baseGlyphRecords;
 		std::vector<layerRecordStruct> layerRecords;
@@ -291,16 +381,48 @@ namespace FontAnalyser
 
 	//////////////////////////////////////
 
+	class colorRecordStruct : public TableDisplay
+	{
+	public:
+		uint8_t blue;
+		uint8_t green;
+		uint8_t red;
+		uint8_t alpha;
+
+		size_t GetSizeof() // cant use sizeof due to heritage of TableDisplay
+		{
+			return 8U; // (u16+u16+u16+u16 = > 2+2+2+2)
+		}
+
+	private:
+		ImVec4 color;
+
+	public:
+		int draw(int vWidgetId);
+		void parse(MemoryStream* vMem, size_t vOffset, size_t vLength);
+	};
+
+	class paletteStruct : public TableDisplay
+	{
+	public:
+		std::vector<colorRecordStruct> colorRecords;
+
+	public:
+		int draw(int vWidgetId);
+		void parse(MemoryStream* vMem, size_t vOffset, size_t vLength);
+	};
+	
 	class cpalTableV0Struct : public TableDisplay
 	{
 	public:
 		uint16_t numPaletteEntries;
 		uint16_t numPalettes;
-		uint16_t numColorRecords;
+		uint16_t numColorRecords; // sum on each palette records count
 		uint32_t colorRecordsArrayOffset;
 	
 	public:
 		std::vector<uint16_t> colorRecordIndices; // numPalettes
+		std::vector<paletteStruct> palettes;
 
 	public:
 		int draw(int vWidgetId);
@@ -440,6 +562,7 @@ namespace FontAnalyser
 		HeaderStruct header;
 		std::map<std::string, TableStruct> tables;
 		maxpTableStruct maxp;
+		nameTableStruct name;
 		postTableStruct post;
 		headTableStruct head;
 		cmapTableStruct cmap;

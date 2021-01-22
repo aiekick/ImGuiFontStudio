@@ -74,7 +74,7 @@ void MainFrame::Init()
 
 	LayoutManager::Instance()->Init();
 
-#ifdef _DEBUG
+#ifdef USE_RIBBONBAR
 	m_RibbonBar.Init();
 #endif
 
@@ -161,7 +161,7 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 	static ImGuiWindowFlags window_flags =
 		ImGuiWindowFlags_NoTitleBar |
-#ifndef _DEBUG
+#ifndef USE_RIBBONBAR
 		ImGuiWindowFlags_MenuBar |
 #endif
 		ImGuiWindowFlags_NoMove |
@@ -186,7 +186,7 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 	ImGui::SetWindowSize(vSize - ImVec2(0.0f, barH));
 	ImGui::SetWindowPos(vPos);
 
-#ifndef _DEBUG
+#ifndef USE_RIBBONBAR
 	if (ImGui::BeginMenuBar())
 	{
 		if (ImGui::BeginMenu(ICON_IGFS_PROJECT " Project"))
@@ -279,13 +279,6 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 			}
 		}
 
-		// ImGui Infos
-		/*ImGuiIO io = ImGui::GetIO();
-		std::string fps = ct::toStr("Dear ImGui %s - %.1f ms/frame (%.1f fps)", ImGui::GetVersion(), 1000.0f / io.Framerate, io.Framerate);
-		ImVec2 size = ImGui::CalcTextSize(fps.c_str());
-		ImGui::Spacing(ImGui::GetContentRegionAvail().x - size.x - ImGui::GetStyle().FramePadding.x * 2.0f);
-		ImGui::Text("%s", fps.c_str());*/
-
 		ImGui::EndMenuBar();
 	}
 #else
@@ -302,7 +295,7 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 
 		// ImGui Infos
 		ImGuiIO io = ImGui::GetIO();
-		std::string fps = ct::toStr("Dear ImGui %s - %.1f ms/frame (%.1f fps)", ImGui::GetVersion(), 1000.0f / io.Framerate, io.Framerate);
+		std::string fps = ct::toStr("Dear ImGui  %s (Docking Branch) - %.1f ms/frame (%.1f fps)", ImGui::GetVersion(), 1000.0f / io.Framerate, io.Framerate);
 		ImVec2 size = ImGui::CalcTextSize(fps.c_str());
 		ImGui::Spacing(ImGui::GetContentRegionAvail().x - size.x - ImGui::GetStyle().FramePadding.x * 2.0f);
 		ImGui::Text("%s", fps.c_str());

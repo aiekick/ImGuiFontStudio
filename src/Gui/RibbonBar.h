@@ -3,6 +3,8 @@
 #include <imgui/imgui.h>
 #include <cstdint>
 
+//#define USE_RIBBONBAR
+
 class ProjectFile;
 class RibbonBar
 {

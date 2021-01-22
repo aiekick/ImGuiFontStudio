@@ -120,7 +120,9 @@ private:
 	bool m_SaveDialogIfRequired = false;	// open save options dialog (save / save as / continue without saving / cancel)
 	bool m_SaveDialogActionWasDone = false;	// if action was done by save options dialog
 	FrameActionSystem m_ActionSystem;
+#ifdef USE_RIBBONBAR
 	RibbonBar m_RibbonBar;
+#endif
 
 public:
 	void Init();

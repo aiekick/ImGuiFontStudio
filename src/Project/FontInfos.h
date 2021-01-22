@@ -94,6 +94,7 @@ public: // callable
 	void DrawInfos(ProjectFile* vProjectFile);
 	void UpdateInfos();
 	void UpdateFiltering();
+	void UpdateSelectedGlyphs(ImFont* vFont);
 	void ClearTransforms(ProjectFile* vProjectFile);
 	void ClearScales(ProjectFile* vProjectFile);
 	void ClearTranslations(ProjectFile* vProjectFile);

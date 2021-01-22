@@ -171,7 +171,7 @@ private:
 	std::weak_ptr<FontInfos> fontInfos;
 
 public:
-	ImFontGlyph glyph{};
+	ImFontGlyph glyph = {};
 	int glyphIndex = 0;
 	std::string oldHeaderName;
 	std::string newHeaderName;
