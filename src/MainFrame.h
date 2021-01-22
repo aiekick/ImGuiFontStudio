@@ -109,12 +109,13 @@ public:
 	ImVec2 m_DisplayPos = ImVec2(0, 0); // viewport
 	ImVec2 m_DisplaySize = ImVec2(1280, 720);
 
-private:
-	ProjectFile m_ProjectFile;				// project file
-	bool m_ShowAboutDialog = false;			// show about dlg
 	bool m_ShowImGui = false;				// show ImGui win
 	bool m_ShowMetric = false;				// show metrics
 	bool m_ShowImGuiStyle = false;			// show custom ImGui Style
+
+private:
+	ProjectFile m_ProjectFile;				// project file
+	bool m_ShowAboutDialog = false;			// show about dlg
 	bool m_NeedToCloseApp = false;			// whenn app closing app is required
 	bool m_SaveDialogIfRequired = false;	// open save options dialog (save / save as / continue without saving / cancel)
 	bool m_SaveDialogActionWasDone = false;	// if action was done by save options dialog
@@ -136,6 +137,8 @@ public:
 	GLFWwindow* GetGLFWwindow() { return m_Window; }
 	FrameActionSystem* GetActionSystem() { return &m_ActionSystem; }
 
+	void OpenAboutDialog();
+
 public: // save : on quit or project loading
 	void IWantToCloseTheApp(); // user want close app, but we want to ensure its saved
 
@@ -153,7 +156,7 @@ private: // save : on quit or project loading
 	bool ShowUnSavedDialog(); // show a dilaog because the project file is not saved
 	void ReRouteFontToFile(const std::string& vFontNameToReRoute, const std::string& vGoodFilePathName);
 
-private: // actions
+public: // actions
 	// via menu
 	void Action_Menu_NewProject();
 	void Action_Menu_OpenProject();
@@ -161,6 +164,8 @@ private: // actions
 	void Action_Menu_SaveProject();
 	void Action_Menu_SaveAsProject();
 	void Action_Menu_CloseProject();
+
+private: // actions
 	// view the window
 	void Action_Window_CloseApp();
 	// via the unsaved dialog

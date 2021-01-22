@@ -88,6 +88,7 @@ void FontInfos::Clear()
 	freeTypeFlag = FreeType_Default;
 	fontMultiply = 1.0f;
 	fontPadding = 1;
+	textureFiltering = GL_NEAREST;
 }
 
 bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFilePathName)
@@ -137,11 +138,9 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 
 				for (int n = 0; n < m_ImFontAtlas.ConfigData.Size; n++)
 				{
-					freeTypeFlag = (rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE) ? freeTypeFlag : 0x00;
-
 					ImFontConfig* font_config = (ImFontConfig*)&m_ImFontAtlas.ConfigData[n];
 					font_config->RasterizerMultiply = fontMultiply;
-					font_config->RasterizerFlags = freeTypeFlag;
+					font_config->RasterizerFlags = (rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE) ? freeTypeFlag : 0x00;
 					font_config->OversampleH = m_Oversample;
 					font_config->OversampleV = m_Oversample;
 				}
@@ -474,16 +473,35 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 
 			ImGui::Text("Selected glyphs : %u", (uint32_t)m_SelectedGlyphs.size());
 
-			if (ImGui::Button("Clear Glyph Transforms (All Glyphs)", ImVec2(-1,0)))
+			ImGui::FramedGroupText("Clear for all Glyphs");
+
+			aw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x * 2.0f) * 0.3333f;
+
+			if (ImGui::Button("Translations", ImVec2(aw,0)))
+			{
+				ClearTranslations(vProjectFile);
+			}
+
+			ImGui::SameLine();
+
+			if (ImGui::Button("Scales", ImVec2(aw, 0)))
+			{
+				ClearScales(vProjectFile);
+			}
+
+			ImGui::SameLine();
+
+			if (ImGui::Button("Both", ImVec2(aw, 0)))
 			{
 				ClearTransforms(vProjectFile);
 			}
-			
+
 			ImGui::FramedGroupSeparator();
 
 			aw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
 
 			ImGui::PushItemWidth(aw);
+
 			if (ImGui::RadioButtonLabeled("FreeType (Default)", "Use FreeType Raterizer", FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE))
 			{
 				needFontReGen = true;
@@ -497,6 +515,21 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 				needFontReGen = true;
 				FontInfos::rasterizerMode = RasterizerEnum::RASTERIZER_STB;
 			}
+
+			if (ImGui::RadioButtonLabeled("Linear", "Use Linear Texture Filtering", textureFiltering == GL_LINEAR))
+			{
+				needFontReGen = true;
+				textureFiltering = GL_LINEAR;
+			}
+
+			ImGui::SameLine();
+
+			if (ImGui::RadioButtonLabeled("Nearest", "Use Nearest Texture Filtering", textureFiltering == GL_NEAREST))
+			{
+				needFontReGen = true;
+				textureFiltering = GL_NEAREST;
+			}
+
 			ImGui::PopItemWidth();
 			
 			ImGui::FramedGroupSeparator();
@@ -650,6 +683,29 @@ void FontInfos::UpdateFiltering()
 
 void FontInfos::ClearTransforms(ProjectFile* vProjectFile)
 {
+	ClearTranslations(vProjectFile);
+	ClearScales(vProjectFile);
+}
+
+void FontInfos::ClearScales(ProjectFile* vProjectFile)
+{
+	if (vProjectFile)
+	{
+		for (auto glyph : m_SelectedGlyphs)
+		{
+			if (glyph.second)
+			{
+				glyph.second->m_Scale = 1.0f;
+				glyph.second->simpleGlyph.ClearScale();
+			}
+		}
+
+		vProjectFile->SetProjectChange();
+	}
+}
+
+void FontInfos::ClearTranslations(ProjectFile* vProjectFile)
+{
 	if (vProjectFile)
 	{
 		for (auto glyph : m_SelectedGlyphs)
@@ -657,8 +713,7 @@ void FontInfos::ClearTransforms(ProjectFile* vProjectFile)
 			if (glyph.second)
 			{
 				glyph.second->m_Translation = 0.0f;
-				glyph.second->m_Scale = 1.0f;
-				glyph.second->simpleGlyph.ClearTransform();
+				glyph.second->simpleGlyph.ClearTranslation();
 			}
 		}
 
@@ -693,8 +748,8 @@ void FontInfos::CreateFontTexture()
 		GLuint id = 0;
 		glGenTextures(1, &id);
 		glBindTexture(GL_TEXTURE_2D, id);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, textureFiltering);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, textureFiltering);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
@@ -762,6 +817,7 @@ std::string FontInfos::getXml(const std::string& vOffset, const std::string& vUs
 	res += vOffset + "\t<freetypeflag>" + ct::toStr(freeTypeFlag) + "</freetypeflag>\n";
 	res += vOffset + "\t<freetypemultiply>" + ct::toStr(fontMultiply) + "</freetypemultiply>\n";
 	res += vOffset + "\t<padding>" + ct::toStr(fontPadding) + "</padding>\n";
+	res += vOffset + "\t<filtering>" + ct::toStr(textureFiltering) + "</filtering>\n";
 
 	if (!m_Filters.empty())
 	{
@@ -824,6 +880,8 @@ bool FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 			fontMultiply = ct::fvariant(strValue).GetF();
 		else if (strName == "padding")
 			fontPadding = ct::ivariant(strValue).GetI();
+		else if (strName == "textureFiletring")
+			textureFiltering = (GLenum)ct::ivariant(strValue).GetI();
 		else if (strName == "glyphs" || strName == "filters")
 		{
 			for (tinyxml2::XMLElement* child = vElem->FirstChildElement(); child != nullptr; child = child->NextSiblingElement())

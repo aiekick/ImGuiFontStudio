@@ -183,9 +183,20 @@ ct::ivec2 SimpleGlyph_Solo::Scale(ct::ivec2 p, double scale) const
 
 void SimpleGlyph_Solo::ClearTransform()
 {
+	ClearTranslation();
+	ClearScale();
+}
+
+void SimpleGlyph_Solo::ClearTranslation()
+{
 	m_Translation = 0.0f;
+}
+
+void SimpleGlyph_Solo::ClearScale()
+{
 	m_Scale = 1.0f;
 }
+
 
 ImVec2 SimpleGlyph_Solo::getScreenToLocal(ImVec2 vScreenPos, ImVec2 vZoneStart, ImVec2 vWorldBBoxOrigin, ImVec2 vWorlBBoxSize, float vWorldScale, ImVec2 vLocalBBoxOrigin)
 {
@@ -548,7 +559,17 @@ ct::ivec2 CompositeGlyph_Solo::Scale(ct::ivec2 p, double scale) const
 
 void CompositeGlyph_Solo::ClearTransform()
 {
+	ClearTranslation();
+	ClearScale();
+}
+
+void CompositeGlyph_Solo::ClearTranslation()
+{
 	m_Translation = 0.0f;
+}
+
+void CompositeGlyph_Solo::ClearScale()
+{
 	m_Scale = 1.0f;
 }
 

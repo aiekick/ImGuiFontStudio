@@ -94,6 +94,8 @@ public:
 	ct::ivec2 Scale(ct::ivec2 p, double scale) const;
 	//ct::ivec2 GetCoords(int32_t vContour, int32_t vPoint, double scale);
 	void ClearTransform();
+	void ClearTranslation();
+	void ClearScale();
 
 public: // ImGui
 	void DrawCurves(
@@ -129,6 +131,8 @@ public:
 	ct::ivec2 Scale(ct::ivec2 p, double scale) const;
 	//ct::ivec2 GetCoords(int32_t vContour, int32_t vPoint, double scale);
 	void ClearTransform();
+	void ClearTranslation();
+	void ClearScale();
 
 public: // ImGui
 	void DrawCurves(

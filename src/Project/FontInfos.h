@@ -20,6 +20,7 @@
 
 #include <Project/GlyphInfos.h>
 #include <ImguiImpl/freetype/imgui_freetype.h>
+#include <glad/glad.h>
 
 #include <imgui/imgui.h>
 #include <string>
@@ -84,6 +85,7 @@ public: // to save
 	uint32_t freeTypeFlag = ImGuiFreeType::FreeType_Default;
 	float fontMultiply = 1.0f;
 	int32_t fontPadding = 1;
+	GLenum textureFiltering = GL_NEAREST;
 
 public: // callable
 	bool LoadFont(ProjectFile *vProjectFile, const std::string& vFontFilePathName);
@@ -93,6 +95,8 @@ public: // callable
 	void UpdateInfos();
 	void UpdateFiltering();
 	void ClearTransforms(ProjectFile* vProjectFile);
+	void ClearScales(ProjectFile* vProjectFile);
+	void ClearTranslations(ProjectFile* vProjectFile);
 	ImFont* GetImFont();
 
 private: // Glyph Names Extraction / DB
