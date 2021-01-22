@@ -876,27 +876,27 @@ bool FontGenerator::Assemble_Head_Table()
 		int UnitsPerEM = m_FontBoundingBox.upperBound.x - m_FontBoundingBox.lowerBound.x;
 		if (UnitsPerEM >= 16 && UnitsPerEM  <= 16384) // freetype will refused font if not ok
 		{
-			offset += head->WriteUShort(offset, hea->UnitsPerEm()); // unitsPerEm
+			offset += head->WriteUShort(offset, m_FontBoundingBox.upperBound.x - m_FontBoundingBox.lowerBound.x); // unitsPerEm
 		}
 		else
 		{
-			offset += head->WriteUShort(offset, m_FontBoundingBox.upperBound.x - m_FontBoundingBox.lowerBound.x); // unitsPerEm
+			offset += head->WriteUShort(offset, hea->UnitsPerEm()); // unitsPerEm
 		}
 		offset += head->WriteDateTime(offset, hea->Created()); // created
 		offset += head->WriteDateTime(offset, hea->Modified()); // modified
 		if (UnitsPerEM >= 16 && UnitsPerEM <= 16384) // freetype will refused font if not ok
 		{
-			offset += head->WriteShort(offset, hea->XMin()); // xMin
-			offset += head->WriteShort(offset, hea->YMin()); // yMin
-			offset += head->WriteShort(offset, hea->XMax()); // xMax
-			offset += head->WriteShort(offset, hea->YMax()); // yMax
-		}
-		else
-		{
 			offset += head->WriteShort(offset, m_FontBoundingBox.lowerBound.x); // xMin
 			offset += head->WriteShort(offset, m_FontBoundingBox.lowerBound.y); // yMin
 			offset += head->WriteShort(offset, m_FontBoundingBox.upperBound.x); // xMax
 			offset += head->WriteShort(offset, m_FontBoundingBox.upperBound.y); // yMax
+		}
+		else
+		{
+			offset += head->WriteShort(offset, hea->XMin()); // xMin
+			offset += head->WriteShort(offset, hea->YMin()); // yMin
+			offset += head->WriteShort(offset, hea->XMax()); // xMax
+			offset += head->WriteShort(offset, hea->YMax()); // yMax
 		}
 		offset += head->WriteUShort(offset, hea->MacStyleAsInt()); // macStyle
 		offset += head->WriteUShort(offset, hea->LowestRecPPEM()); // lowestRecPPEM

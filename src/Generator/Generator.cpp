@@ -51,7 +51,9 @@
 #include <stb/stb_image_write.h>
 #include <imgui/imstb_truetype.h>
 
+#ifdef _DEBUG
 #define AUTO_OPEN_FONT_IN_APP_AFTER_GENERATION_FOR_DEBUG_PURPOSE
+#endif
 
 Generator::Generator() = default;
 Generator::~Generator() = default;
