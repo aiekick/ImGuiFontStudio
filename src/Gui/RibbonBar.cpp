@@ -369,6 +369,8 @@ bool RibbonBar::RibbonToggleButton(const char* icon, const char* label, float he
 // like ImGui::BeginMenu
 bool RibbonBar::BeginRibbonButtonMenu(const char* icon, const char* label, float height, bool enabled)
 {
+	UNUSED(enabled);
+
 	using namespace ImGui;
 
 	ImGuiWindow* window = GetCurrentWindow();
@@ -378,7 +380,7 @@ bool RibbonBar::BeginRibbonButtonMenu(const char* icon, const char* label, float
 	ImVec2 popup_pos = window->DC.CursorPos;
 	bool pressed = RibbonButton(icon, label, height);
 	popup_pos.y += GetItemRectSize().y;
-	if (IsMouseReleased(0) && IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup))
+	if (pressed && IsMouseReleased(0) && IsItemHovered(ImGuiHoveredFlags_AllowWhenBlockedByPopup))
 	{
 		OpenPopupEx(window->GetID(label), 0);
 		ImGui::SetNextWindowPos(popup_pos);

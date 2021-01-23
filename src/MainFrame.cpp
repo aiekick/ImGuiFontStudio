@@ -859,7 +859,7 @@ void MainFrame::JustDropFiles(int count, const char** paths)
 		// lower case
 		auto f_opt = f;
 		for (auto& c : f_opt)
-			c = std::tolower(c);
+			c = (char)std::tolower((int)c);
 
 		// well known extention
 		if (	f_opt.find(".ttf") != std::string::npos			// truetype (.ttf)

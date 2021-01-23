@@ -187,6 +187,8 @@ int FontAnalyser::NameRecord::draw(int vWidgetId)
 
 void FontAnalyser::NameRecord::parse(MemoryStream* vMem, size_t vOffset, size_t vLength)
 {
+	UNUSED(vLength);
+
 	if (vMem)
 	{
 		vMem->SetPos(vOffset);
@@ -234,6 +236,8 @@ int FontAnalyser::nameTableV0Struct::draw(int vWidgetId)
 
 void FontAnalyser::nameTableV0Struct::parse(MemoryStream* vMem, size_t vOffset, size_t vLength)
 {
+	UNUSED(vLength);
+
 	if (vMem)
 	{
 		vMem->SetPos(vOffset);
@@ -285,6 +289,8 @@ int FontAnalyser::LangTagRecordStruct::draw(int vWidgetId)
 
 void FontAnalyser::LangTagRecordStruct::parse(MemoryStream* vMem, size_t vOffset, size_t vLength)
 {
+	UNUSED(vLength);
+
 	if (vMem)
 	{
 		vMem->SetPos(vOffset);
@@ -313,6 +319,8 @@ int FontAnalyser::nameTableV1Struct::draw(int vWidgetId)
 
 void FontAnalyser::nameTableV1Struct::parse(MemoryStream* vMem, size_t vOffset, size_t vLength)
 {
+	UNUSED(vLength);
+
 	if (vMem)
 	{
 		vMem->SetPos(vOffset);
@@ -721,6 +729,7 @@ int paletteStruct::draw(int vWidgetId)
 
 void paletteStruct::parse(MemoryStream* vMem, size_t vOffset, size_t vLength)
 {
+	UNUSED(vOffset);
 	UNUSED(vLength);
 
 	if (vMem)
@@ -1149,7 +1158,7 @@ void FontAnalyser::glyfStruct::parse(MemoryStream *vMem, size_t vOffset, size_t 
 	{
 		vMem->SetPos(vOffset);
 
-		numberOfContours = (uint16_t)vMem->ReadUShort();
+		numberOfContours = (int16_t)vMem->ReadShort();
 		xMin = vMem->ReadFWord();
 		yMin = vMem->ReadFWord();
 		xMax = vMem->ReadFWord();

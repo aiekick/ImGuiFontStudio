@@ -485,7 +485,7 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 
 			ImGui::PushItemWidth(aw);
 
-			if (ImGui::RadioButtonLabeled("FreeType (Default)", "Use FreeType Raterizer", FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE))
+			if (ImGui::RadioButtonLabeled("FreeType", "Use FreeType Raterizer", FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE))
 			{
 				needFontReGen = true;
 				FontInfos::rasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
@@ -499,6 +499,7 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 				FontInfos::rasterizerMode = RasterizerEnum::RASTERIZER_STB;
 			}
 
+#ifdef _DEBUG
 			if (ImGui::RadioButtonLabeled("Linear", "Use Linear Texture Filtering", textureFiltering == GL_LINEAR))
 			{
 				needFontReGen = true;
@@ -512,7 +513,7 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 				needFontReGen = true;
 				textureFiltering = GL_NEAREST;
 			}
-
+#endif
 			ImGui::PopItemWidth();
 			
 			ImGui::FramedGroupSeparator();

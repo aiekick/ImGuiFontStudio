@@ -85,7 +85,7 @@ public: // to save
 	uint32_t freeTypeFlag = ImGuiFreeType::FreeType_Default;
 	float fontMultiply = 1.0f;
 	int32_t fontPadding = 1;
-	GLenum textureFiltering = GL_NEAREST;
+	GLenum textureFiltering = GL_LINEAR;
 
 public: // callable
 	bool LoadFont(ProjectFile *vProjectFile, const std::string& vFontFilePathName);
