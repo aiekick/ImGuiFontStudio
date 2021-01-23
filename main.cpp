@@ -26,6 +26,7 @@
 
 static void glfw_window_drop_callback(GLFWwindow* window, int count, const char** paths)
 {
+    UNUSED(window);
     MainFrame::Instance()->JustDropFiles(count, paths);
 }
 

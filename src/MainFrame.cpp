@@ -74,6 +74,10 @@ void MainFrame::Init()
 
 	LayoutManager::Instance()->Init();
 
+#ifdef USE_RIBBONBAR
+	m_RibbonBar.Init();
+#endif
+
 #ifdef USE_SHADOW
 	AssetManager::Instance()->LoadTexture2D("btn", "src/res/btn.png");
 #endif
@@ -147,12 +151,19 @@ void MainFrame::Display(ImVec2 vPos, ImVec2 vSize)
 	LayoutManager::Instance()->InitAfterFirstDisplay(m_DisplaySize);
 }
 
+void MainFrame::OpenAboutDialog()
+{
+	m_ShowAboutDialog = true;
+}
+
 void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 {
 	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 	static ImGuiWindowFlags window_flags =
 		ImGuiWindowFlags_NoTitleBar |
+#ifndef USE_RIBBONBAR
 		ImGuiWindowFlags_MenuBar |
+#endif
 		ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_NoCollapse |
 		ImGuiWindowFlags_NoResize |
@@ -175,6 +186,7 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 	ImGui::SetWindowSize(vSize - ImVec2(0.0f, barH));
 	ImGui::SetWindowPos(vPos);
 
+#ifndef USE_RIBBONBAR
 	if (ImGui::BeginMenuBar())
 	{
 		if (ImGui::BeginMenu(ICON_IGFS_PROJECT " Project"))
@@ -236,10 +248,10 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 		
 		if (ImGui::BeginMenu(ICON_IGFS_SETTINGS " Settings"))
 		{
-			/*if (ImGui::MenuItem("Settings"))
+			if (ImGui::MenuItem("Settings"))
 			{
 				SettingsDlg::Instance()->OpenDialog();
-			}*/
+			}
 
 			if (ImGui::BeginMenu(ICON_IGFS_EDIT " Styles"))
 			{
@@ -267,23 +279,26 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 			}
 		}
 
-		// ImGui Infos
-		ImGuiIO io = ImGui::GetIO();
-		std::string fps = ct::toStr("Dear ImGui %s - %.1f ms/frame (%.1f fps)", ImGui::GetVersion(), 1000.0f / io.Framerate, io.Framerate);
-		ImVec2 size = ImGui::CalcTextSize(fps.c_str());
-		ImGui::Spacing(ImGui::GetContentRegionAvail().x - size.x - ImGui::GetStyle().FramePadding.x * 2.0f);
-		ImGui::Text("%s", fps.c_str());
-
 		ImGui::EndMenuBar();
 	}
+#else
+	m_RibbonBar.Draw(&m_ProjectFile);
+#endif
 
-	LayoutManager::Instance()->StartDockPane(dockspace_flags);
+	LayoutManager::Instance()->StartDockPane(dockspace_flags, vSize);
 
 	ImGui::End();
 
 	if (ImGui::BeginMainStatusBar())
 	{
 		Messaging::Instance()->Draw(&m_ProjectFile);
+
+		// ImGui Infos
+		ImGuiIO io = ImGui::GetIO();
+		std::string fps = ct::toStr("Dear ImGui  %s (Docking Branch) - %.1f ms/frame (%.1f fps)", ImGui::GetVersion(), 1000.0f / io.Framerate, io.Framerate);
+		ImVec2 size = ImGui::CalcTextSize(fps.c_str());
+		ImGui::Spacing(ImGui::GetContentRegionAvail().x - size.x - ImGui::GetStyle().FramePadding.x * 2.0f);
+		ImGui::Text("%s", fps.c_str());
 
 		ImGui::EndMainStatusBar();
 	}

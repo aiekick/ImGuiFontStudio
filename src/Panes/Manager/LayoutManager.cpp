@@ -96,14 +96,25 @@ void LayoutManager::InitAfterFirstDisplay(ImVec2 vSize)
 	}
 }
 
-void LayoutManager::StartDockPane(ImGuiDockNodeFlags vFlags)
+void LayoutManager::StartDockPane(ImGuiDockNodeFlags vFlags, ImVec2 vSize)
 {
+	m_LastSize = vSize;
 	m_DockSpaceID = ImGui::GetID("MyDockSpace");
 	ImGui::DockSpace(m_DockSpaceID, ImVec2(0, 0), vFlags);
 }
 
 void LayoutManager::ApplyInitialDockingLayout(ImVec2 vSize)
 {
+	if (IS_FLOAT_EQUAL(vSize.x, 0.0) || IS_FLOAT_EQUAL(vSize.y, 0.0))
+	{
+		vSize = m_LastSize;
+
+		if (IS_FLOAT_EQUAL(m_LastSize.x, 0.0) || IS_FLOAT_EQUAL(m_LastSize.y, 0.0))
+		{
+			return;
+		}
+	}
+
 	ImGui::DockBuilderRemoveNode(m_DockSpaceID); // Clear out existing layout
 	ImGui::DockBuilderAddNode(m_DockSpaceID, ImGuiDockNodeFlags_DockSpace); // Add empty node
 	ImGui::DockBuilderSetNodeSize(m_DockSpaceID, vSize);

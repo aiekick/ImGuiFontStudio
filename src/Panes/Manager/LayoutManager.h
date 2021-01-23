@@ -64,13 +64,14 @@ public:
 	static PaneFlags m_Pane_Focused;
 	PaneFlags m_Pane_Hovered = PaneFlags::PANE_NONE;
 	PaneFlags m_Pane_LastHovered = PaneFlags::PANE_NONE;
+	ImVec2 m_LastSize;
 
 public:
 	void Init();
 	void Unit();
 	void InitAfterFirstDisplay(ImVec2 vSize);
-	void StartDockPane(ImGuiDockNodeFlags vFlags);
-	void ApplyInitialDockingLayout(ImVec2 vSize);
+	void StartDockPane(ImGuiDockNodeFlags vFlags, ImVec2 vSize);
+	void ApplyInitialDockingLayout(ImVec2 vSize = ImVec2(0, 0));
 	void DisplayMenu(ImVec2 vSize);
 	int DisplayPanes(ProjectFile *vProjectFile, int vWidgetId);
 	void DrawDialogsAndPopups(ProjectFile* vProjectFile);
