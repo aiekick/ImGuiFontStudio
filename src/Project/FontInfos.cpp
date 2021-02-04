@@ -905,7 +905,7 @@ bool FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 		std::string oldName;
 		std::string newName;
 		ImVec2 translation;
-		ImVec2 scale;
+		ImVec2 scale = ImVec2(1.0f, 1.0f);
 
 		for (const tinyxml2::XMLAttribute* attr = vElem->FirstAttribute(); attr != nullptr; attr = attr->Next())
 		{
