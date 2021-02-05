@@ -984,7 +984,7 @@ bool Generator::GenerateSource_One(
 							if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C) ||
 								vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
 							{
-								sourceFile = "#include \"" + ps.name + headerExt + "\"\n\n";
+								sourceFile = "#include \"" + ps.name + "." + headerExt + "\"\n\n";
 							}
 
 							m_HeaderGenerator.GenerateHeader_One(
@@ -1125,7 +1125,7 @@ bool Generator::GenerateSource_Merged(
 							if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C) ||
 								vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
 							{
-								sourceFile = "#include \"" + ps.name + headerExt + "\"\n\n";
+								sourceFile = "#include \"" + ps.name + "." + headerExt + "\"\n\n";
 								std::string prefix = "";
 								prefix = "FONT_ICON_BUFFER_NAME_" + vProjectFile->m_MergedFontPrefix;
 								ct::replaceString(buffer, vProjectFile->m_MergedFontPrefix + "_compressed_data_base85", prefix);
