@@ -51,6 +51,8 @@ public: // to save
 	std::string m_LastGeneratedPath = ".";
 	std::string m_LastGeneratedFileName = "Generated_Font";
 	std::string m_MergedFontPrefix;
+	uint32_t m_MergedCardGlyphHeightInPixel = 40U; // glyph item height in card
+	uint32_t m_MergedCardCountRowsMax = 20U; // after this max, new columns
 	GenModeFlags m_GenModeFlags =
 		GENERATOR_MODE_CURRENT_HEADER |					// current font + header
 		GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES |	// tables exported in font
@@ -67,8 +69,6 @@ public: // to save
 		GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT;
 	SourceFontPaneFlags m_SourceFontPaneFlags = 
 		SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH;
-	uint32_t m_CardGlyphHeightInPixel = 40U; // glyph item height in card
-	uint32_t m_CardCountRowsMax = 20U; // after this max, new columns
 	bool m_ZoomGlyphs = false; // keep the glyph aligned to font glyph bounding box
 	bool m_ShowBaseLine = false; // show the base line of the glyph only when m_ZoomGlyphs is false
 	bool m_ShowAdvanceX = false; // show the advance x of the glyph only when m_ZoomGlyphs is false

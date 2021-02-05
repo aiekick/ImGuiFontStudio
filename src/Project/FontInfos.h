@@ -81,11 +81,14 @@ public: // to save
 	int m_Oversample = 1;
 	int m_FontSize = 17;
 	std::set<std::string> m_Filters; // use map just for have binary tree search
-	RasterizerEnum rasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
-	uint32_t freeTypeFlag = ImGuiFreeType::FreeType_Default;
-	float fontMultiply = 1.0f;
-	int32_t fontPadding = 1;
-	GLenum textureFiltering = GL_LINEAR;
+	RasterizerEnum m_RasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
+	uint32_t m_FreeTypeFlag = ImGuiFreeType::FreeType_Default;
+	float m_FontMultiply = 1.0f;
+	int32_t m_FontPadding = 1;
+	GLenum m_TextureFiltering = GL_LINEAR;
+	std::string m_GeneratedFileName;
+	uint32_t m_CardGlyphHeightInPixel = 40U; // glyph item height in card
+	uint32_t m_CardCountRowsMax = 20U; // after this max, new columns
 
 public: // callable
 	bool LoadFont(ProjectFile *vProjectFile, const std::string& vFontFilePathName);

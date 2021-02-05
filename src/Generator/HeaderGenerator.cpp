@@ -244,17 +244,17 @@ void HeaderGenerator::GenerateHeader_One(
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C))
 			{
 				lang = "c";
-				headerExt = ".h";
+				headerExt = "h";
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
 			{
 				lang = "cpp";
-				headerExt = ".h";
+				headerExt = "h";
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
 			{
 				lang = "c#";
-				headerExt = ".cs";
+				headerExt = "cs";
 			}
 			if (!lang.empty())
 			{
@@ -301,7 +301,7 @@ void HeaderGenerator::GenerateHeader_Merged(
 		{
 			std::string name = ps.name;
 			ct::replaceString(name, "-", "_");
-			filePathName = ps.GetFPNE_WithNameExt(name, ".h");
+			filePathName = ps.GetFPNE_WithNameExt(name, "h");
 			
 			// we take only selected glyphs of all fonts
 			std::map<std::string, uint32_t> glyphNames;
@@ -323,17 +323,17 @@ void HeaderGenerator::GenerateHeader_Merged(
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C))
 			{
 				lang = "c";
-				headerExt = ".h";
+				headerExt = "h";
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
 			{
 				lang = "cpp";
-				headerExt = ".h";
+				headerExt = "h";
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
 			{
 				lang = "c#";
-				headerExt = ".cs";
+				headerExt = "cs";
 			}
 			if (!lang.empty())
 			{

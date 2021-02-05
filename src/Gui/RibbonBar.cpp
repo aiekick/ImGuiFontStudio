@@ -41,14 +41,14 @@ bool RibbonBar::LoadFont(float vFontSize)
 	m_Font = m_ImFontAtlas.AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_IGFS, vFontSize, &m_FontConfig, ranges);
 	if (m_Font)
 	{
-		m_ImFontAtlas.TexGlyphPadding = fontPadding;
+		m_ImFontAtlas.TexGlyphPadding = m_FontPadding;
 
 		uint32_t freeTypeFlags = ImGuiFreeType::FreeType_Default;
 
 		for (int n = 0; n < m_ImFontAtlas.ConfigData.Size; n++)
 		{
 			ImFontConfig* font_config = (ImFontConfig*)&m_ImFontAtlas.ConfigData[n];
-			font_config->RasterizerMultiply = fontMultiply;
+			font_config->RasterizerMultiply = m_FontMultiply;
 			font_config->RasterizerFlags = freeTypeFlags;
 			font_config->OversampleH = m_Oversample;
 			font_config->OversampleV = m_Oversample;

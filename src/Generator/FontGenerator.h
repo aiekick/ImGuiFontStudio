@@ -110,12 +110,12 @@ private: // post table - version / count / size / offsets
 	int32_t MergeCharacterMaps();
 
 public:
-	static sfntly::Font* LoadFontFile(const char* font_path);
+	static sfntly::Font* LoadFontFile(const std::string& font_path);
 
 private: // imported/based or/modified from sfntly
-	static void LoadFontFiles(const char* font_path, sfntly::FontFactory* factory, sfntly::FontArray* fonts);
-	static bool SerializeFont(const char* font_path, sfntly::Font* font);
-	static bool SerializeFont(const char* font_path, sfntly::FontFactory* factory, sfntly::Font* font);
+	static void LoadFontFiles(const std::string& font_path, sfntly::FontFactory* factory, sfntly::FontArray* fonts);
+	static bool SerializeFont(const std::string& font_path, sfntly::Font* font);
+	static bool SerializeFont(const std::string& font_path, sfntly::FontFactory* factory, sfntly::Font* font);
 	sfntly::Font* AssembleFont(bool vUsePostTable);
 
 private:

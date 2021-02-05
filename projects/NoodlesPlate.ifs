@@ -898,9 +898,12 @@
 				<glyph orgId="65533" newId="65533" orgName="Symbol_65533" newName="Symbol_65533" trans="0;0" scale="1;1"/>
 			</glyphs>
 			<prefix>RM</prefix>
-			<pathfilename>..\..\..\samples_Fonts\imgui_fonts\Roboto-Medium.ttf</pathfilename>
+			<pathfilename>..\samples_Fonts\imgui_fonts\Roboto-Medium.ttf</pathfilename>
 			<oversample>1</oversample>
-			<fontsize>17</fontsize>
+			<fontsize>50</fontsize>
+			<generatedfilename>Roboto_Medium</generatedfilename>
+			<cardglyhpheight>40</cardglyhpheight>
+			<cardcountrowsmax>60</cardcountrowsmax>
 			<rasterizer>1</rasterizer>
 			<freetypeflag>259</freetypeflag>
 			<freetypemultiply>1</freetypemultiply>
@@ -1026,6 +1029,9 @@
 			<pathfilename>..\samples_Fonts\forkawesome-webfont.ttf</pathfilename>
 			<oversample>2</oversample>
 			<fontsize>50</fontsize>
+			<generatedfilename>CustomFont</generatedfilename>
+			<cardglyhpheight>40</cardglyhpheight>
+			<cardcountrowsmax>20</cardcountrowsmax>
 			<rasterizer>1</rasterizer>
 			<freetypeflag>259</freetypeflag>
 			<freetypemultiply>1</freetypemultiply>
@@ -1340,6 +1346,9 @@
 			<pathfilename>..\samples_Fonts\materialdesignicons-webfont.ttf</pathfilename>
 			<oversample>2</oversample>
 			<fontsize>50</fontsize>
+			<generatedfilename>CustomFont2</generatedfilename>
+			<cardglyhpheight>40</cardglyhpheight>
+			<cardcountrowsmax>40</cardcountrowsmax>
 			<rasterizer>1</rasterizer>
 			<freetypeflag>259</freetypeflag>
 			<freetypemultiply>1</freetypemultiply>
@@ -1350,6 +1359,8 @@
 		<previewglyphcount>29</previewglyphcount>
 		<previewglyphwidth>57.671</previewglyphwidth>
 		<mergedfontprefix>NDP</mergedfontprefix>
+		<mergedcardglyhpheight>40</mergedcardglyhpheight>
+		<mergedcardcountrowsmax>20</mergedcardcountrowsmax>
 		<curglyphtooltip>false</curglyphtooltip>
 		<srcglyphtooltip>true</srcglyphtooltip>
 		<dstglyphtooltip>true</dstglyphtooltip>
@@ -1357,14 +1368,12 @@
 		<glyphdrawingflags>1535</glyphdrawingflags>
 		<glyphpreviewquadbeziercounsegment>0</glyphpreviewquadbeziercounsegment>
 		<glyphpreviewzoomprecision>20</glyphpreviewzoomprecision>
-		<genmodeflags>1048</genmodeflags>
+		<genmodeflags>1067</genmodeflags>
 		<fonttomergein>Roboto-Medium.ttf</fonttomergein>
 		<glyphdisplaytuningmode>2</glyphdisplaytuningmode>
 		<sourcefontpaneflags>1</sourcefontpaneflags>
-		<cardglyhpheight>40</cardglyhpheight>
-		<cardcountrowsmax>30</cardcountrowsmax>
 		<lastgeneratedpath>C:\gamedev\win32\fxsofts\opengl_noodlesplate\3rdparty\SoGLSL\src\Res</lastgeneratedpath>
-		<lastgeneratedfilename>Roboto_Medium.cpp</lastgeneratedfilename>
+		<lastgeneratedfilename></lastgeneratedfilename>
 		<zoomglyphs>false</zoomglyphs>
 		<showbaseline>false</showbaseline>
 		<showadvancex>false</showadvancex>

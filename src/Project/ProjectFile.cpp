@@ -43,13 +43,13 @@ void ProjectFile::Clear()
 	m_ProjectFilePathName.clear();
 	m_ProjectFilePath.clear();
 	m_MergedFontPrefix.clear();
+	m_MergedCardGlyphHeightInPixel = 40U;
+	m_MergedCardCountRowsMax = 20U;
 	m_Fonts.clear();
 	m_ShowRangeColoring = false;
 	m_RangeColoringHash = ImVec4(10, 15, 35, 0.5f);
 	m_Preview_Glyph_CountX = 20;
 	m_Preview_Glyph_Width = 50;
-	m_CardGlyphHeightInPixel = 40U; // ine item height in card
-	m_CardCountRowsMax = 20U; // after this max, new columns
 	m_SelectedFont = nullptr;
 	m_CountSelectedGlyphs = 0; // for all fonts
 	m_IsLoaded = false;
@@ -94,29 +94,38 @@ bool ProjectFile::Load()
 bool ProjectFile::LoadAs(const std::string vFilePathName)  
 {
 	Clear();
-	std::string filePathName = FileHelper::Instance()->SimplifyFilePath(vFilePathName);
-	if (LoadConfigFile(filePathName))
-	{
-		m_ProjectFilePathName = filePathName;
-		auto ps = FileHelper::Instance()->ParsePathFileName(m_ProjectFilePathName);
-		if (ps.isOk)
-		{
-			m_ProjectFilePath = ps.path;
-		}
-		if (m_SelectedFont)
-		{
-			m_LastGeneratedFileName = m_SelectedFont->m_FontFileName;
-		}
-		m_IsLoaded = true;
-		SetProjectChange(false);
 
-		// we do that after m_IsLoaded
-		SelectionHelper::Instance()->Load(this); // first
-		m_FontTestInfos.Load(this); // then because use final selection from SelectionHelper
-	}
-	else
+	if (!vFilePathName.empty())
 	{
-		Clear();
+		std::string filePathName = FileHelper::Instance()->SimplifyFilePath(vFilePathName);
+		tinyxml2::XMLError xmlError = LoadConfigFile(filePathName);
+		if (xmlError == tinyxml2::XMLError::XML_SUCCESS)
+		{
+			m_ProjectFilePathName = filePathName;
+			auto ps = FileHelper::Instance()->ParsePathFileName(m_ProjectFilePathName);
+			if (ps.isOk)
+			{
+				m_ProjectFilePath = ps.path;
+			}
+			if (m_SelectedFont)
+			{
+				m_LastGeneratedFileName = m_SelectedFont->m_FontFileName;
+			}
+			m_IsLoaded = true;
+			SetProjectChange(false);
+
+			// we do that after m_IsLoaded
+			SelectionHelper::Instance()->Load(this); // first
+			m_FontTestInfos.Load(this); // then because use final selection from SelectionHelper
+		}
+		else
+		{
+			Clear();
+
+			auto errMsg = getTinyXml2ErrorMessage(xmlError);
+			Messaging::Instance()->AddError(true, nullptr, nullptr,
+				"The project file %s cant be loaded, Error : %s", filePathName.c_str(), errMsg.c_str());
+		}
 	}
 
 	return m_IsLoaded;
@@ -254,6 +263,8 @@ std::string ProjectFile::getXml(const std::string& vOffset, const std::string& /
 	str += vOffset + "\t<previewglyphcount>" + ct::toStr(m_Preview_Glyph_CountX) + "</previewglyphcount>\n";
 	str += vOffset + "\t<previewglyphwidth>" + ct::toStr(m_Preview_Glyph_Width) + "</previewglyphwidth>\n";
 	str += vOffset + "\t<mergedfontprefix>" + m_MergedFontPrefix + "</mergedfontprefix>\n";
+	str += vOffset + "\t<mergedcardglyhpheight>" + ct::toStr(m_MergedCardGlyphHeightInPixel) + "</mergedcardglyhpheight>\n";
+	str += vOffset + "\t<mergedcardcountrowsmax>" + ct::toStr(m_MergedCardCountRowsMax) + "</mergedcardcountrowsmax>\n";
 	str += vOffset + "\t<curglyphtooltip>" + (m_CurrentPane_ShowGlyphTooltip ? "true" : "false") + "</curglyphtooltip>\n";
 	str += vOffset + "\t<srcglyphtooltip>" + (m_SourcePane_ShowGlyphTooltip ? "true" : "false") +"</srcglyphtooltip>\n";
 	str += vOffset + "\t<dstglyphtooltip>" + (m_FinalPane_ShowGlyphTooltip ? "true" : "false") +"</dstglyphtooltip>\n";
@@ -265,8 +276,6 @@ std::string ProjectFile::getXml(const std::string& vOffset, const std::string& /
 	str += vOffset + "\t<fonttomergein>" + m_FontToMergeIn + "</fonttomergein>\n";
 	str += vOffset + "\t<glyphdisplaytuningmode>" + ct::toStr(m_GlyphDisplayTuningMode) + "</glyphdisplaytuningmode>\n";
 	str += vOffset + "\t<sourcefontpaneflags>" + ct::toStr(m_SourceFontPaneFlags) + "</sourcefontpaneflags>\n";
-	str += vOffset + "\t<cardglyhpheight>" + ct::toStr(m_CardGlyphHeightInPixel) + "</cardglyhpheight>\n";
-	str += vOffset + "\t<cardcountrowsmax>" + ct::toStr(m_CardCountRowsMax) + "</cardcountrowsmax>\n";
 	str += vOffset + "\t<lastgeneratedpath>" + m_LastGeneratedPath + "</lastgeneratedpath>\n";
 	str += vOffset + "\t<lastgeneratedfilename>" + m_LastGeneratedFileName + "</lastgeneratedfilename>\n";
 	str += vOffset + "\t<zoomglyphs>" + (m_ZoomGlyphs ? "true" : "false") +"</zoomglyphs>\n";
@@ -334,6 +343,10 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 			m_Preview_Glyph_Width = ct::fvariant(strValue).GetF();
 		else if (strName == "mergedfontprefix")
 			m_MergedFontPrefix = strValue;
+		else if (strName == "mergedcardglyhpheight")
+			m_MergedCardGlyphHeightInPixel = ct::uvariant(strValue).GetU();
+		else if (strName == "mergedcardcountrowsmax")
+			m_MergedCardCountRowsMax = ct::uvariant(strValue).GetU();
 		else if (strName == "genmodeflags")
 			m_GenModeFlags = (GenModeFlags)ct::ivariant(strValue).GetI();
 		else if (strName == "fonttomergein")
@@ -356,10 +369,6 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 			m_GlyphDisplayTuningMode = (GlyphDisplayTuningModeFlags)ct::ivariant(strValue).GetI();
 		else if (strName == "sourcefontpaneflags")
 			m_SourceFontPaneFlags = (SourceFontPaneFlags)ct::ivariant(strValue).GetI();
-		else if (strName == "cardglyhpheight")
-			m_CardGlyphHeightInPixel = ct::uvariant(strValue).GetU();
-		else if (strName == "cardcountrowsmax")
-			m_CardCountRowsMax = ct::uvariant(strValue).GetU();
 		else if (strName == "lastgeneratedpath")
 			m_LastGeneratedPath = strValue;
 		else if (strName == "lastgeneratedfilename")

@@ -142,10 +142,7 @@ bool FontGenerator::GenerateFontFile(
 				auto ps = FileHelper::Instance()->ParsePathFileName(vFontFilePathName);
 				if (ps.isOk)
 				{
-					std::string filePathName = ps.name + ".ttf";
-					if (!ps.path.empty())
-						filePathName = ps.path + FileHelper::Instance()->m_SlashType + filePathName;
-					res = SerializeFont(filePathName.c_str(), newFont);
+					res = SerializeFont(ps.GetFPNE_WithExt("ttf"), newFont);
 				}
 			}
 		}
@@ -947,7 +944,7 @@ std::unordered_map<std::string, int32_t> FontGenerator::InvertNameMap()
 }
 
 /* based on https://github.com/rillig/sfntly/blob/master/cpp/src/sample/subtly/utils.cc*/
-sfntly::Font* FontGenerator::LoadFontFile(const char* font_path)
+sfntly::Font* FontGenerator::LoadFontFile(const std::string& font_path)
 {
 	sfntly::Ptr<sfntly::FontFactory> font_factory;
 	font_factory.Attach(sfntly::FontFactory::GetInstance());
@@ -957,18 +954,18 @@ sfntly::Font* FontGenerator::LoadFontFile(const char* font_path)
 }
 
 /* based on https://github.com/rillig/sfntly/blob/master/cpp/src/sample/subtly/utils.cc*/
-void FontGenerator::LoadFontFiles(const char* font_path, sfntly::FontFactory* factory, sfntly::FontArray* fonts)
+void FontGenerator::LoadFontFiles(const std::string& font_path, sfntly::FontFactory* factory, sfntly::FontArray* fonts)
 {
 	sfntly::FileInputStream input_stream;
-	input_stream.Open(font_path);
+	input_stream.Open(font_path.c_str());
 	factory->LoadFonts(&input_stream, fonts);
 	input_stream.Close();
 }
 
 /* based on https://github.com/rillig/sfntly/blob/master/cpp/src/sample/subtly/utils.cc*/
-bool FontGenerator::SerializeFont(const char* font_path, sfntly::Font* font)
+bool FontGenerator::SerializeFont(const std::string& font_path, sfntly::Font* font)
 {
-	if (!font_path)
+	if (font_path.empty())
 		return false;
 	sfntly::FontFactoryPtr font_factory;
 	font_factory.Attach(sfntly::FontFactory::GetInstance());
@@ -976,11 +973,11 @@ bool FontGenerator::SerializeFont(const char* font_path, sfntly::Font* font)
 }
 
 /* based on https://github.com/rillig/sfntly/blob/master/cpp/src/sample/subtly/utils.cc*/
-bool FontGenerator::SerializeFont(const char* font_path, sfntly::FontFactory* factory, sfntly::Font* font)
+bool FontGenerator::SerializeFont(const std::string& font_path, sfntly::FontFactory* factory, sfntly::Font* font)
 {
     bool res = false;
 
-	if (!font_path || !factory || !font)
+	if (font_path.empty() || !factory || !font)
 		return res;
 
 	// Serializing the font to a stream.
@@ -992,9 +989,9 @@ bool FontGenerator::SerializeFont(const char* font_path, sfntly::FontFactory* fa
 	{
 		FILE* output_file = nullptr;
 #if defined(MSVC)
-		fopen_s(&output_file, font_path, "wb");
+		fopen_s(&output_file, font_path.c_str(), "wb");
 #else
-		output_file = fopen(font_path, "wb");
+		output_file = fopen(font_path.c_str(), "wb");
 #endif
 		if (output_file != reinterpret_cast<FILE*>(NULL))
 		{

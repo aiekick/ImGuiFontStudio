@@ -84,11 +84,13 @@ void FontInfos::Clear()
 	m_GlyphCodePointToName.clear();
 	m_SelectedGlyphs.clear();
 	m_Filters.clear();
-	rasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
-	freeTypeFlag = FreeType_Default;
-	fontMultiply = 1.0f;
-	fontPadding = 1;
-	textureFiltering = GL_NEAREST;
+	m_RasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
+	m_FreeTypeFlag = FreeType_Default;
+	m_FontMultiply = 1.0f;
+	m_FontPadding = 1;
+	m_TextureFiltering = GL_NEAREST;
+	m_CardGlyphHeightInPixel = 40U; // ine item height in card
+	m_CardCountRowsMax = 20U; // after this max, new columns
 }
 
 bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFilePathName)
@@ -134,23 +136,23 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 			{
 				bool success = false;
 
-				m_ImFontAtlas.TexGlyphPadding = fontPadding;
+				m_ImFontAtlas.TexGlyphPadding = m_FontPadding;
 
 				for (int n = 0; n < m_ImFontAtlas.ConfigData.Size; n++)
 				{
 					ImFontConfig* font_config = (ImFontConfig*)&m_ImFontAtlas.ConfigData[n];
-					font_config->RasterizerMultiply = fontMultiply;
-					font_config->RasterizerFlags = (rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE) ? freeTypeFlag : 0x00;
+					font_config->RasterizerMultiply = m_FontMultiply;
+					font_config->RasterizerFlags = (m_RasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE) ? m_FreeTypeFlag : 0x00;
 					font_config->OversampleH = m_Oversample;
 					font_config->OversampleV = m_Oversample;
 				}
 				
 				FT_Error freetypeError = 0;
-				if (rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
+				if (m_RasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
 				{
-					success = BuildFontAtlas(&m_ImFontAtlas, freeTypeFlag, &freetypeError);
+					success = BuildFontAtlas(&m_ImFontAtlas, m_FreeTypeFlag, &freetypeError);
 				}
-				else if (rasterizerMode == RasterizerEnum::RASTERIZER_STB)
+				else if (m_RasterizerMode == RasterizerEnum::RASTERIZER_STB)
 				{
 					success = m_ImFontAtlas.Build();
 				}
@@ -181,7 +183,7 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 				}
 				else
 				{
-					if (rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
+					if (m_RasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
 					{
 						Messaging::Instance()->AddError(true, nullptr, nullptr,
 							"Feetype fail to load font file %s.%s. Reason : %s", 
@@ -334,8 +336,8 @@ void FontInfos::FillGlyphColoreds()
 {
 	m_ColoredGlyphs.clear();
 
-	if (rasterizerMode != RasterizerEnum::RASTERIZER_FREETYPE) return;
-	if ((freeTypeFlag & FreeType_LoadColor) == 0) return;
+	if (m_RasterizerMode != RasterizerEnum::RASTERIZER_FREETYPE) return;
+	if ((m_FreeTypeFlag & FreeType_LoadColor) == 0) return;
 
 	if (!m_ImFontAtlas.ConfigData.empty())
 	{
@@ -485,33 +487,33 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 
 			ImGui::PushItemWidth(aw);
 
-			if (ImGui::RadioButtonLabeled("FreeType", "Use FreeType Raterizer", FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE))
+			if (ImGui::RadioButtonLabeled("FreeType", "Use FreeType Raterizer", FontInfos::m_RasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE))
 			{
 				needFontReGen = true;
-				FontInfos::rasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
+				FontInfos::m_RasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
 			}
 			
 			ImGui::SameLine();
 
-			if (ImGui::RadioButtonLabeled("Stb", "Use Stb Raterizer", FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_STB))
+			if (ImGui::RadioButtonLabeled("Stb", "Use Stb Raterizer", FontInfos::m_RasterizerMode == RasterizerEnum::RASTERIZER_STB))
 			{
 				needFontReGen = true;
-				FontInfos::rasterizerMode = RasterizerEnum::RASTERIZER_STB;
+				FontInfos::m_RasterizerMode = RasterizerEnum::RASTERIZER_STB;
 			}
 
 #ifdef _DEBUG
-			if (ImGui::RadioButtonLabeled("Linear", "Use Linear Texture Filtering", textureFiltering == GL_LINEAR))
+			if (ImGui::RadioButtonLabeled("Linear", "Use Linear Texture Filtering", m_TextureFiltering == GL_LINEAR))
 			{
 				needFontReGen = true;
-				textureFiltering = GL_LINEAR;
+				m_TextureFiltering = GL_LINEAR;
 			}
 
 			ImGui::SameLine();
 
-			if (ImGui::RadioButtonLabeled("Nearest", "Use Nearest Texture Filtering", textureFiltering == GL_NEAREST))
+			if (ImGui::RadioButtonLabeled("Nearest", "Use Nearest Texture Filtering", m_TextureFiltering == GL_NEAREST))
 			{
 				needFontReGen = true;
-				textureFiltering = GL_NEAREST;
+				m_TextureFiltering = GL_NEAREST;
 			}
 #endif
 			ImGui::PopItemWidth();
@@ -520,30 +522,30 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 
 			needFontReGen |= ImGui::SliderIntDefaultCompact(-1.0f, "Font Size", &vProjectFile->m_SelectedFont->m_FontSize, 7, 50, defaultFontInfosValues.m_FontSize);
 			
-			if (FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_STB)
+			if (FontInfos::m_RasterizerMode == RasterizerEnum::RASTERIZER_STB)
 			{
 				needFontReGen |= ImGui::SliderIntDefaultCompact(-1.0f, "Font Anti-aliasing", &vProjectFile->m_SelectedFont->m_Oversample, 1, 5, defaultFontInfosValues.m_Oversample);
 			}
-			else if (FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
+			else if (FontInfos::m_RasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
 			{
-				needFontReGen |= ImGui::SliderFloatDefaultCompact(-1.0f, "Multiply", &fontMultiply, 0.0f, 2.0f, 1.0f);
+				needFontReGen |= ImGui::SliderFloatDefaultCompact(-1.0f, "Multiply", &m_FontMultiply, 0.0f, 2.0f, 1.0f);
 			}
 
-			needFontReGen |= ImGui::SliderIntDefaultCompact(-1.0f, "Padding", &fontPadding, 0, 16, 1);
+			needFontReGen |= ImGui::SliderIntDefaultCompact(-1.0f, "Padding", &m_FontPadding, 0, 16, 1);
 
-			if (FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
+			if (FontInfos::m_RasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
 			{
 				if (ImGui::CollapsingHeader("Freetype Settings", ImGuiTreeNodeFlags_Bullet))
 				{
-					needFontReGen |= ImGui::CheckboxFlags("NoHinting", &freeTypeFlag, FreeType_NoHinting);
-					needFontReGen |= ImGui::CheckboxFlags("NoAutoHint", &freeTypeFlag, FreeType_NoAutoHint);
-					needFontReGen |= ImGui::CheckboxFlags("ForceAutoHint", &freeTypeFlag, FreeType_ForceAutoHint);
-					needFontReGen |= ImGui::CheckboxFlags("LightHinting", &freeTypeFlag, FreeType_LightHinting);
-					needFontReGen |= ImGui::CheckboxFlags("MonoHinting", &freeTypeFlag, FreeType_MonoHinting);
-					needFontReGen |= ImGui::CheckboxFlags("Bold", &freeTypeFlag, FreeType_Bold);
-					needFontReGen |= ImGui::CheckboxFlags("Oblique", &freeTypeFlag, FreeType_Oblique);
-					needFontReGen |= ImGui::CheckboxFlags("Monochrome", &freeTypeFlag, FreeType_Monochrome);
-					needFontReGen |= ImGui::CheckboxFlags("LoadColor", &freeTypeFlag, FreeType_LoadColor);
+					needFontReGen |= ImGui::CheckboxFlags("NoHinting", &m_FreeTypeFlag, FreeType_NoHinting);
+					needFontReGen |= ImGui::CheckboxFlags("NoAutoHint", &m_FreeTypeFlag, FreeType_NoAutoHint);
+					needFontReGen |= ImGui::CheckboxFlags("ForceAutoHint", &m_FreeTypeFlag, FreeType_ForceAutoHint);
+					needFontReGen |= ImGui::CheckboxFlags("LightHinting", &m_FreeTypeFlag, FreeType_LightHinting);
+					needFontReGen |= ImGui::CheckboxFlags("MonoHinting", &m_FreeTypeFlag, FreeType_MonoHinting);
+					needFontReGen |= ImGui::CheckboxFlags("Bold", &m_FreeTypeFlag, FreeType_Bold);
+					needFontReGen |= ImGui::CheckboxFlags("Oblique", &m_FreeTypeFlag, FreeType_Oblique);
+					needFontReGen |= ImGui::CheckboxFlags("Monochrome", &m_FreeTypeFlag, FreeType_Monochrome);
+					needFontReGen |= ImGui::CheckboxFlags("LoadColor", &m_FreeTypeFlag, FreeType_LoadColor);
 				}
 			}
 
@@ -756,8 +758,8 @@ void FontInfos::CreateFontTexture()
 		GLuint id = 0;
 		glGenTextures(1, &id);
 		glBindTexture(GL_TEXTURE_2D, id);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, textureFiltering);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, textureFiltering);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_TextureFiltering);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_TextureFiltering);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
@@ -820,12 +822,14 @@ std::string FontInfos::getXml(const std::string& vOffset, const std::string& vUs
 	res += vOffset + "\t<pathfilename>" + m_FontFilePathName + "</pathfilename>\n";
 	res += vOffset + "\t<oversample>" + ct::toStr(m_Oversample) + "</oversample>\n";
 	res += vOffset + "\t<fontsize>" + ct::toStr(m_FontSize) + "</fontsize>\n";
-
-	res += vOffset + "\t<rasterizer>" + ct::toStr(rasterizerMode) + "</rasterizer>\n";
-	res += vOffset + "\t<freetypeflag>" + ct::toStr(freeTypeFlag) + "</freetypeflag>\n";
-	res += vOffset + "\t<freetypemultiply>" + ct::toStr(fontMultiply) + "</freetypemultiply>\n";
-	res += vOffset + "\t<padding>" + ct::toStr(fontPadding) + "</padding>\n";
-	res += vOffset + "\t<filtering>" + ct::toStr(textureFiltering) + "</filtering>\n";
+	res += vOffset + "\t<generatedfilename>" + m_GeneratedFileName + "</generatedfilename>\n";
+	res += vOffset + "\t<cardglyhpheight>" + ct::toStr(m_CardGlyphHeightInPixel) + "</cardglyhpheight>\n";
+	res += vOffset + "\t<cardcountrowsmax>" + ct::toStr(m_CardCountRowsMax) + "</cardcountrowsmax>\n";
+	res += vOffset + "\t<rasterizer>" + ct::toStr(m_RasterizerMode) + "</rasterizer>\n";
+	res += vOffset + "\t<freetypeflag>" + ct::toStr(m_FreeTypeFlag) + "</freetypeflag>\n";
+	res += vOffset + "\t<freetypemultiply>" + ct::toStr(m_FontMultiply) + "</freetypemultiply>\n";
+	res += vOffset + "\t<padding>" + ct::toStr(m_FontPadding) + "</padding>\n";
+	res += vOffset + "\t<filtering>" + ct::toStr(m_TextureFiltering) + "</filtering>\n";
 
 	if (!m_Filters.empty())
 	{
@@ -878,18 +882,24 @@ bool FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 			m_FontFilePathName = strValue;
 		else if (strName == "oversample")
 			m_Oversample = ct::ivariant(strValue).GetI();
+		else if (strName == "generatedfilename")
+			m_GeneratedFileName = strValue;
+		else if (strName == "cardglyhpheight")
+			m_CardGlyphHeightInPixel = ct::uvariant(strValue).GetU();
+		else if (strName == "cardcountrowsmax")
+			m_CardCountRowsMax = ct::uvariant(strValue).GetU();
 		else if (strName == "fontsize")
 			m_FontSize = ct::ivariant(strValue).GetI();
 		else if (strName == "rasterizer")
-			rasterizerMode = (RasterizerEnum)ct::ivariant(strValue).GetI();
+			m_RasterizerMode = (RasterizerEnum)ct::ivariant(strValue).GetI();
 		else if (strName == "freetypeflag")
-			freeTypeFlag = ct::ivariant(strValue).GetI();
+			m_FreeTypeFlag = ct::ivariant(strValue).GetI();
 		else if (strName == "freetypemultiply")
-			fontMultiply = ct::fvariant(strValue).GetF();
+			m_FontMultiply = ct::fvariant(strValue).GetF();
 		else if (strName == "padding")
-			fontPadding = ct::ivariant(strValue).GetI();
+			m_FontPadding = ct::ivariant(strValue).GetI();
 		else if (strName == "textureFiletring")
-			textureFiltering = (GLenum)ct::ivariant(strValue).GetI();
+			m_TextureFiltering = (GLenum)ct::ivariant(strValue).GetI();
 		else if (strName == "glyphs" || strName == "filters")
 		{
 			for (tinyxml2::XMLElement* child = vElem->FirstChildElement(); child != nullptr; child = child->NextSiblingElement())
