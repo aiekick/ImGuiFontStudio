@@ -37,3 +37,15 @@
 	path = 3rdparty/freetype2
 	url = https://github.com/freetype/freetype2.git
 	branch = master
+[submodule "3rdparty/ttfrrw"]
+	path = 3rdparty/ttfrrw
+	url = https://github.com/aiekick/TTFRRW
+	branch = main
+[submodule "3rdparty/polypartition"]
+	path = 3rdparty/polypartition
+	url = https://github.com/ivanfratric/polypartition
+	branch = master
+[submodule "3rdparty/tracy"]
+	path = 3rdparty/tracy
+	url = https://github.com/wolfpld/tracy
+	branch = master

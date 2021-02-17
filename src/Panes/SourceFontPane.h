@@ -19,6 +19,7 @@
 #include <ctools/ConfigAbstract.h>
 #include <ctools/cTools.h>
 #include <Gui/ImGuiWidgets.h>
+#include <Project/BaseGlyph.h>
 
 #include <string>
 #include <map>
@@ -29,15 +30,8 @@ class ProjectFile;
 struct ImGuiWindow;
 class SourceFontPane : public AbstractPane
 {
-private: // per pane settings to save
-	//int m_GlyphSize_Policy_Count = 20;
-	//float m_GlyphSize_Policy_Width = 40.0f;
-
 private: // private vars
 	ImGuiListClipper m_VirtualClipper;
-
-private: // private enum
-	bool m_Show_ConfirmToCloseFont_Dialog = false;  // show confirm to close font dialog
 
 public:
 	void Init() override;
@@ -49,10 +43,6 @@ public:
 private: 
 	void DrawFilterBar(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos);
 	void DrawFontTexture(std::shared_ptr<FontInfos> vFontInfos);
-	bool DrawGlyphButton(
-		ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos, 
-		std::string vName, bool* vSelected, ImVec2 vGlyphSize, ImFontGlyph vGlyph, ImVec2 vHostTextureSize,
-		int frame_padding, float vRectThickNess, ImVec4 vRectColor);
 	void DrawFontAtlas_Virtual(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos);
 	
 	// panes

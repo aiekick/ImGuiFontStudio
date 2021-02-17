@@ -28,15 +28,15 @@ class FontTestInfos : public conf::ConfigAbstract
 {
 public: // not to save
 	std::weak_ptr<FontInfos> m_TestFont;
-	typedef std::pair<uint32_t, std::string> FontInfosCodePoint_ToLoad;
-	std::map<uint32_t, FontInfosCodePoint_ToLoad> m_GlyphToInsert_ToLoad; // pos in word, glyph
+	typedef std::pair<uint32_t, std::string> FontInfosGlyphIndex_ToLoad;
+	std::map<uint32_t, FontInfosGlyphIndex_ToLoad> m_GlyphToInsert_ToLoad; // pos in word, glyph
 	char m_InputBuffer[500] = "ImGuiFontStudio\0";
 
 public: // to save
 	float m_PreviewFontSize = 100.0f;
 	bool m_ShowBaseLine = true;
 	std::string m_TestFontName;
-	std::map<uint32_t, FontInfosCodePoint> m_GlyphToInsert; // pos in word, glyph
+	std::map<uint32_t, FontInfosGlyphIndex> m_GlyphToInsert; // pos in word, glyph
 	std::string m_TestString = "ImGuiFontStudio";
 	
 public: // callable

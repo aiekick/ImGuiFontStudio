@@ -1,0 +1,178 @@
+<config>
+	<project>
+		<font name="Roboto-Medium.ttf">
+			<prefix>RM</prefix>
+			<pathfilename>..\samples_Fonts\fonts\Roboto-Medium.ttf</pathfilename>
+			<oversample>1</oversample>
+			<fontsize>50</fontsize>
+			<rasterizer>0</rasterizer>
+			<freetypeflag>259</freetypeflag>
+			<freetypemultiply>1</freetypemultiply>
+			<padding>1</padding>
+			<texturefiltering>9729</texturefiltering>
+			<glyphfiltering>
+			<flags>127</flags>
+			<op>true</op>
+			<use_color>false</use_color>
+			<simple_color>3425907660</simple_color>
+			<composite_color>3430953932</composite_color>
+			<mapped_color>3430953856</mapped_color>
+			<unmapped_color>3429289088</unmapped_color>
+			<colored_color>3425927219</colored_color>
+			<layer_color>3429289037</layer_color>
+			<named_color>3435954227</named_color>
+			</glyphfiltering>
+		</font>
+		<font name="fontawesome-webfont.ttf">
+			<glyphs>
+				<glyph orgId="17" newId="17" orgName="heart" newName="heart" trans="0;0" scale="1;1"/>
+				<glyph orgId="18" newId="18" orgName="star" newName="star" trans="0;0" scale="1;1"/>
+				<glyph orgId="25" newId="25" orgName="ok" newName="ok" trans="0;0" scale="1;1"/>
+				<glyph orgId="48" newId="48" orgName="volume_off" newName="volume_off" trans="0;0" scale="1;1"/>
+				<glyph orgId="56" newId="56" orgName="bookmark" newName="bookmark" trans="0;0" scale="1;1"/>
+				<glyph orgId="80" newId="80" orgName="move" newName="move" trans="0;0" scale="1;1"/>
+				<glyph orgId="81" newId="81" orgName="step_backward" newName="step_backward" trans="0;0" scale="1;1"/>
+				<glyph orgId="82" newId="82" orgName="fast_backward" newName="fast_backward" trans="0;0" scale="1;1"/>
+				<glyph orgId="83" newId="83" orgName="backward" newName="backward" trans="0;0" scale="1;1"/>
+				<glyph orgId="87" newId="87" orgName="forward" newName="forward" trans="0;0" scale="1;1"/>
+				<glyph orgId="88" newId="88" orgName="fast_forward" newName="fast_forward" trans="0;0" scale="1;1"/>
+				<glyph orgId="89" newId="89" orgName="step_forward" newName="step_forward" trans="0;0" scale="1;1"/>
+				<glyph orgId="104" newId="104" orgName="arrow_right" newName="arrow_right" trans="0;0" scale="1;1"/>
+				<glyph orgId="105" newId="105" orgName="arrow_up" newName="arrow_up" trans="0;0" scale="1;1"/>
+				<glyph orgId="106" newId="106" orgName="arrow_down" newName="arrow_down" trans="0;0" scale="1;1"/>
+				<glyph orgId="107" newId="107" orgName="share_alt" newName="share_alt" trans="0;0" scale="1;1"/>
+				<glyph orgId="110" newId="110" orgName="plus" newName="plus" trans="0;0" scale="1;1"/>
+				<glyph orgId="120" newId="120" orgName="plane" newName="plane" trans="0;0" scale="1;1"/>
+				<glyph orgId="123" newId="123" orgName="comment" newName="comment" trans="0;0" scale="1;1"/>
+				<glyph orgId="129" newId="129" orgName="folder_close" newName="folder_close" trans="0;0" scale="1;1"/>
+				<glyph orgId="152" newId="152" orgName="lemon" newName="lemon" trans="0;0" scale="1;1"/>
+				<glyph orgId="157" newId="157" orgName="twitter" newName="twitter" trans="0;0" scale="1;1"/>
+				<glyph orgId="229" newId="229" orgName="bell_alt" newName="bell_alt" trans="0;0" scale="1;1"/>
+				<glyph orgId="237" newId="237" orgName="fighter_jet" newName="fighter_jet" trans="0;0" scale="1;1"/>
+				<glyph orgId="257" newId="257" orgName="circle" newName="circle" trans="0;0" scale="1;1"/>
+				<glyph orgId="258" newId="258" orgName="reply" newName="reply" trans="0;0" scale="1;1"/>
+				<glyph orgId="291" newId="291" orgName="rocket" newName="rocket" trans="0;0" scale="1;1"/>
+				<glyph orgId="300" newId="300" orgName="unlock_alt" newName="unlock_alt" trans="0;0" scale="1;1"/>
+				<glyph orgId="309" newId="309" orgName="level_up" newName="level_up" trans="0;0" scale="1;1"/>
+				<glyph orgId="310" newId="310" orgName="level_down" newName="level_down" trans="0;0" scale="1;1"/>
+				<glyph orgId="355" newId="355" orgName="apple" newName="apple" trans="0;0" scale="1;1"/>
+				<glyph orgId="363" newId="363" orgName="female" newName="female" trans="0;0" scale="1;1"/>
+				<glyph orgId="364" newId="364" orgName="male" newName="male" trans="0;0" scale="1;1"/>
+				<glyph orgId="383" newId="383" orgName="_382" newName="_382" trans="0;0" scale="1;1"/>
+				<glyph orgId="386" newId="386" orgName="_385" newName="_385" trans="0;0" scale="1;1"/>
+				<glyph orgId="401" newId="401" orgName="_400" newName="_400" trans="0;0" scale="1;1"/>
+				<glyph orgId="402" newId="402" orgName="f1ab" newName="f1ab" trans="0;0" scale="1;1"/>
+				<glyph orgId="403" newId="403" orgName="_402" newName="_402" trans="0;0" scale="1;1"/>
+				<glyph orgId="404" newId="404" orgName="_403" newName="_403" trans="0;0" scale="1;1"/>
+				<glyph orgId="412" newId="412" orgName="_411" newName="_411" trans="0;0" scale="1;1"/>
+				<glyph orgId="413" newId="413" orgName="_412" newName="_412" trans="0;0" scale="1;1"/>
+				<glyph orgId="454" newId="454" orgName="_453" newName="_453" trans="0;0" scale="1;1"/>
+				<glyph orgId="455" newId="455" orgName="_454" newName="_454" trans="0;0" scale="1;1"/>
+				<glyph orgId="495" newId="495" orgName="_494" newName="_494" trans="0;0" scale="1;1"/>
+				<glyph orgId="497" newId="497" orgName="_496" newName="_496" trans="0;0" scale="1;1"/>
+				<glyph orgId="548" newId="548" orgName="_547" newName="_547" trans="0;0" scale="1;1"/>
+				<glyph orgId="549" newId="549" orgName="_548" newName="_548" trans="0;0" scale="1;1"/>
+				<glyph orgId="573" newId="573" orgName="_572" newName="_572" trans="0;0" scale="1;1"/>
+				<glyph orgId="624" newId="624" orgName="_623" newName="_623" trans="0;0" scale="1;1"/>
+				<glyph orgId="680" newId="680" orgName="uniF2D4" newName="uniF2D4" trans="0;0" scale="1;1"/>
+				<glyph orgId="685" newId="685" orgName="uniF2D9" newName="uniF2D9" trans="0;0" scale="1;1"/>
+				<glyph orgId="686" newId="686" orgName="uniF2DA" newName="uniF2DA" trans="0;0" scale="1;1"/>
+				<glyph orgId="688" newId="688" orgName="uniF2DC" newName="uniF2DC" trans="0;0" scale="1;1"/>
+				<glyph orgId="689" newId="689" orgName="uniF2DD" newName="uniF2DD" trans="0;0" scale="1;1"/>
+				<glyph orgId="690" newId="690" orgName="uniF2DE" newName="uniF2DE" trans="0;0" scale="1;1"/>
+				<glyph orgId="691" newId="691" orgName="uniF2E0" newName="uniF2E0" trans="0;0" scale="1;1"/>
+			</glyphs>
+			<prefix></prefix>
+			<pathfilename>..\samples_Fonts\fontawesome-webfont.ttf</pathfilename>
+			<oversample>1</oversample>
+			<fontsize>50</fontsize>
+			<rasterizer>0</rasterizer>
+			<freetypeflag>259</freetypeflag>
+			<freetypemultiply>1</freetypemultiply>
+			<padding>1</padding>
+			<texturefiltering>9729</texturefiltering>
+			<glyphfiltering>
+			<flags>127</flags>
+			<op>true</op>
+			<use_color>false</use_color>
+			<simple_color>3425907660</simple_color>
+			<composite_color>3430953932</composite_color>
+			<mapped_color>3430953856</mapped_color>
+			<unmapped_color>3429289088</unmapped_color>
+			<colored_color>3425927219</colored_color>
+			<layer_color>3429289037</layer_color>
+			<named_color>3435954227</named_color>
+			</glyphfiltering>
+		</font>
+		<font name="seguiemj.ttf">
+			<glyphs>
+				<glyph orgId="1366" newId="1366" orgName="" newName="Symbol_1366" trans="0;0" scale="1;1"/>
+				<glyph orgId="1367" newId="1367" orgName="" newName="Symbol_1367" trans="0;0" scale="1;1"/>
+				<glyph orgId="1368" newId="1368" orgName="" newName="Symbol_1368" trans="0;0" scale="1;1"/>
+				<glyph orgId="1369" newId="1369" orgName="" newName="Symbol_1369" trans="0;0" scale="1;1"/>
+				<glyph orgId="1370" newId="1370" orgName="" newName="Symbol_1370" trans="0;0" scale="1;1"/>
+			</glyphs>
+			<prefix></prefix>
+			<pathfilename>..\samples_Fonts\seguiemj.ttf</pathfilename>
+			<oversample>1</oversample>
+			<fontsize>50</fontsize>
+			<rasterizer>0</rasterizer>
+			<freetypeflag>259</freetypeflag>
+			<freetypemultiply>1</freetypemultiply>
+			<padding>1</padding>
+			<texturefiltering>9729</texturefiltering>
+			<glyphfiltering>
+			<flags>16</flags>
+			<op>true</op>
+			<use_color>false</use_color>
+			<simple_color>3425907660</simple_color>
+			<composite_color>3430953932</composite_color>
+			<mapped_color>3430953856</mapped_color>
+			<unmapped_color>3429289088</unmapped_color>
+			<colored_color>3425927219</colored_color>
+			<layer_color>3429289037</layer_color>
+			<named_color>3435954227</named_color>
+			</glyphfiltering>
+		</font>
+		<rangecoloring show="false" hash="10;15;35;0.5"/>
+		<previewglyphcount>18</previewglyphcount>
+		<previewglyphwidth>86.1667</previewglyphwidth>
+		<mergedfontprefix></mergedfontprefix>
+		<curglyphtooltip>true</curglyphtooltip>
+		<srcglyphtooltip>true</srcglyphtooltip>
+		<dstglyphtooltip>true</dstglyphtooltip>
+		<glyphpreviewscale>0.649998</glyphpreviewscale>
+		<glyphdrawingflags>1406</glyphdrawingflags>
+		<glyphpreviewquadbeziercounsegment>4</glyphpreviewquadbeziercounsegment>
+		<glyphpreviewzoomprecision>20</glyphpreviewzoomprecision>
+		<genmodeflags>275</genmodeflags>
+		<fonttomergein>seguiemj.ttf</fonttomergein>
+		<glyphdisplaytuningmode>1</glyphdisplaytuningmode>
+		<sourcefontpaneflags>1</sourcefontpaneflags>
+		<cardglyhpheight>40</cardglyhpheight>
+		<cardcountrowsmax>20</cardcountrowsmax>
+		<lastgeneratedpath>.</lastgeneratedpath>
+		<lastgeneratedfilename>Generated_Font</lastgeneratedfilename>
+		<zoomglyphs>false</zoomglyphs>
+		<showbaseline>false</showbaseline>
+		<showadvancex>false</showadvancex>
+		<glyphdrawingflags>1406</glyphdrawingflags>
+		<finalselection>
+			<selection orgId="17" font="fontawesome-webfont.ttf"/>
+			<selection orgId="18" font="fontawesome-webfont.ttf"/>
+			<selection orgId="25" font="fontawesome-webfont.ttf"/>
+			<selection orgId="48" font="fontawesome-webfont.ttf"/>
+			<selection orgId="56" font="fontawesome-webfont.ttf"/>
+			<selection orgId="1366" font="seguiemj.ttf"/>
+		</finalselection>
+		<fonttest>
+			<fontsize>84.973</fontsize>
+			<showbaseline>true</showbaseline>
+			<fontname>Roboto-Medium.ttf</fontname>
+			<teststring>ImGuiFontStudio</teststring>
+			<insertedglyphs>
+				<insert pos="0" orgId="1366" font="seguiemj.ttf"/>
+			</insertedglyphs>
+		</fonttest>
+	</project>
+</config>

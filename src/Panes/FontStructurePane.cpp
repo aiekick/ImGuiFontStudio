@@ -29,7 +29,7 @@
 
 #include <ctools/cTools.h>
 #include <ctools/FileHelper.h>
-
+#include <Helper/Profiler.h>
 #include <cinttypes> // printf zu
 
 FontStructurePane::FontStructurePane() = default;
@@ -41,16 +41,18 @@ FontStructurePane::~FontStructurePane() = default;
 
 void FontStructurePane::Init()
 {
-    
+    ZoneScoped;
 }
 
 void FontStructurePane::Unit()
 {
-
+    ZoneScoped;
 }
 
 int FontStructurePane::DrawPanes(ProjectFile * vProjectFile, int vWidgetId)
 {
+    ZoneScoped;
+
     paneWidgetId = vWidgetId;
 
     DrawFontStructurePane(vProjectFile);
@@ -60,11 +62,13 @@ int FontStructurePane::DrawPanes(ProjectFile * vProjectFile, int vWidgetId)
 
 void FontStructurePane::DrawDialogsAndPopups(ProjectFile* /*vProjectFile*/)
 {
-
+    ZoneScoped;
 }
 
 int FontStructurePane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas)
 {
+    ZoneScoped;
+
     UNUSED(vProjectFile);
     UNUSED(vUserDatas);
 
@@ -77,6 +81,8 @@ int FontStructurePane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std
 
 void FontStructurePane::DrawFontStructurePane(ProjectFile *vProjectFile)
 {
+    ZoneScoped;
+
     if (LayoutManager::m_Pane_Shown & PaneFlags::PANE_FONT_STRUCTURE)
     {
         if (ImGui::Begin<PaneFlags>(FONT_STRUCTURE_PANE,
@@ -116,5 +122,7 @@ void FontStructurePane::DrawFontStructurePane(ProjectFile *vProjectFile)
 
 void FontStructurePane::DisplayAnalyze()
 {
+    ZoneScoped;
+
     paneWidgetId = m_FontParser.draw(paneWidgetId);
 }

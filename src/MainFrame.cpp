@@ -107,6 +107,11 @@ void MainFrame::LoadProject(const std::string& vFilePathName)
 		m_ProjectFile.UpdateCountSelectedGlyphs();
 		m_ProjectFile.SetProjectChange(false);
 	}
+	else
+	{
+		Messaging::Instance()->AddError(true, nullptr, nullptr,
+			"Failed to load project %s", vFilePathName.c_str());
+	}
 }
 
 bool MainFrame::SaveProject()
@@ -849,7 +854,8 @@ void MainFrame::IWantToCloseTheApp()
 
 void MainFrame::JustDropFiles(int count, const char** paths)
 {
-	std::map<std::string, std::string> dico;
+	std::map<std::string, std::string> dicoFont;
+	std::string prj;
 
 	for (int i = 0; i < count; i++)
 	{
@@ -867,19 +873,28 @@ void MainFrame::JustDropFiles(int count, const char** paths)
 			//||	f_opt.find(".ttc") != std::string::npos		// ttf/otf collection for futur (.ttc)
 			)
 		{
-			dico[f] = f;
+			dicoFont[f] = f;
+		}
+		if (f_opt.find(".ifs") != std::string::npos)
+		{
+			prj = f;
 		}
 	}
 
-	// some file are ok for opening
-	if (!dico.empty())
+	// priority to project file
+	if (!prj.empty())
+	{
+		LoadProject(prj);
+	}
+	// then font files
+	else if (!dicoFont.empty()) // some file are ok for opening
 	{
 		// if no project is available, we will create it
 		if (!m_ProjectFile.IsLoaded())
 			NewProject(""); // with empty path, will have to ne saved later
 
 		// try to open fonts
-		ParamsPane::Instance()->OpenFonts(&m_ProjectFile, dico);
+		ParamsPane::Instance()->OpenFonts(&m_ProjectFile, dicoFont);
 	}
 }
 

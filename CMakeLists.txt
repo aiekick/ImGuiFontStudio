@@ -6,6 +6,13 @@ enable_language(C CXX)
 
 project(${PROJECT} CXX)
 
+option(USE_PROFILER_TRACY "Enale Tracy Profiler" OFF)
+
+include(cmake/tracy.cmake)
+if (USE_PROFILER_TRACY)
+	add_definitions(-DTRACY_ENABLE)
+endif()
+
 ## some defines for debug mode (before 3rdparty.cmake)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 
@@ -39,6 +46,7 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /IGNORE:4055")
     add_definitions(-D_USE_MATH_DEFINES)
     add_definitions(-DMSVC)
+	add_definitions(-DNOMINMAX) ## for avoid issue regarding std::max and std::min
 else ()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -std=c++11 -Wdeprecated-declarations -Wunused-parameter")
 endif ()
@@ -114,6 +122,9 @@ include_directories(
 	${TINYXML2_INCLUDE_DIR}
 	${IMGUIFILEDIALOG_INCLUDE_DIR}
 	${FREETYPE_INCLUDE_DIR}
+	${TTFRRW_INCLUDE_DIR}
+	${TRACY_INCLUDE_DIR}
+	${POLYPARTITION_INCLUDE_DIR}
 )
 
 target_link_libraries(${PROJECT} PRIVATE
@@ -126,4 +137,7 @@ target_link_libraries(${PROJECT} PRIVATE
 	${TINYXML2_LIBRARIES}
 	${IMGUIFILEDIALOG_LIBRARIES}
 	${FREETYPE_LIBRARIES}
+	${TTFRRW_LIBRARIES}
+	${TRACY_LIBRARIES}
+	${POLYPARTITION_LIBRARIES}
 )

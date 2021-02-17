@@ -17,6 +17,8 @@
 
 #include <ctools/cTools.h>
 #include <ctools/ConfigAbstract.h>
+#include <Project/BaseGlyph.h>
+
 #include <string>
 #include <set>
 #include <memory>
@@ -43,57 +45,57 @@ enum SelectionContainerEnum
 	SELECTION_CONTAINER_Count
 };
 
-struct ReRangeLimitStruct
+struct ReRangeCodePointLimitStruct
 {
 	bool valid = true; // for imgui color
-    uint32_t codePoint = 0;
+	CodePoint codePoint = 0;
 };
 
-struct ReRangeStruct
+struct ReRangeCodePointStruct
 {
-	ReRangeLimitStruct startCodePoint;
-	ReRangeLimitStruct endCodePoint;
+	ReRangeCodePointLimitStruct startCodePoint;
+	ReRangeCodePointLimitStruct endCodePoint;
 	const uint32_t MinCodePoint = 0;
 	const uint32_t MaxCodePoint = 65535;
 };
 
 class FontInfos;
 struct ImGuiWindow;
-typedef std::pair<uint32_t, std::shared_ptr<FontInfos>> FontInfosCodePoint;
+typedef std::pair<GlyphIndex, std::shared_ptr<FontInfos>> FontInfosGlyphIndex;
 struct TemporarySelectionStruct
 {
 	// for avoid selection apply if seletion ended outside of start window
 	ImGuiWindow *startSelWindow = 0;
 
-	std::set<FontInfosCodePoint> tmpSel;
-	std::set<FontInfosCodePoint> tmpUnSel;
+	std::set<FontInfosGlyphIndex> tmpSel;
+	std::set<FontInfosGlyphIndex> tmpUnSel;
 
-	bool isSelected(uint32_t c, std::shared_ptr<FontInfos> f)
+	bool isSelected(GlyphIndex c, std::shared_ptr<FontInfos> f)
 	{
-		auto p = FontInfosCodePoint(c, f);
+		auto p = FontInfosGlyphIndex(c, f);
 		return (tmpSel.find(p) != tmpSel.end()); // found
 	}
 	
-	bool isUnSelected(uint32_t c, std::shared_ptr<FontInfos> f)
+	bool isUnSelected(GlyphIndex c, std::shared_ptr<FontInfos> f)
 	{
-		auto p = FontInfosCodePoint(c, f);
+		auto p = FontInfosGlyphIndex(c, f);
 		return (tmpUnSel.find(p) != tmpUnSel.end()); // found
 	}
-	void Select(uint32_t c, std::shared_ptr<FontInfos> f)
+	void Select(GlyphIndex c, std::shared_ptr<FontInfos> f)
 	{
-		auto p = FontInfosCodePoint(c, f);
+		auto p = FontInfosGlyphIndex(c, f);
 		tmpSel.emplace(p);
 		tmpUnSel.erase(p);
 	}
-	void UnSelect(uint32_t c, std::shared_ptr<FontInfos> f)
+	void UnSelect(GlyphIndex c, std::shared_ptr<FontInfos> f)
 	{
-		auto p = FontInfosCodePoint(c, f);
+		auto p = FontInfosGlyphIndex(c, f);
 		tmpSel.erase(p);
 		tmpUnSel.emplace(p);
 	}
-	void Clear(uint32_t c, std::shared_ptr<FontInfos> f)
+	void Clear(GlyphIndex c, std::shared_ptr<FontInfos> f)
 	{
-		auto p = FontInfosCodePoint(c, f);
+		auto p = FontInfosGlyphIndex(c, f);
 		tmpSel.erase(p);
 		tmpUnSel.erase(p);
 	}
@@ -104,6 +106,7 @@ struct TemporarySelectionStruct
 	}
 };
 
+struct BaseGlyph;
 class ProjectFile;
 class SelectionHelper : public conf::ConfigAbstract
 {
@@ -115,27 +118,27 @@ private: // Vars
 	// pos x,y, radius z, default radius // if not active x,y == 0,0
 	ct::fvec4 m_Zone = ct::fvec4(0.0f, 0.0f, 0.5f, 0.5f);
 	// selection for operations in final pane
-	std::set<FontInfosCodePoint> m_SelectionForOperation;
+	std::set<FontInfosGlyphIndex> m_SelectionForOperation;
 	// first glyph state when clicked
 	// if not selected will apply unseletion
 	// if selected will apply selection
 	int m_GlyphSelectedStateFirstClick = -1;
 
 private: // structs / classes
-	ReRangeStruct m_ReRangeStruct; // re range : change range of selection
+	ReRangeCodePointStruct m_ReRangeCodePoint; // re range : change range of selection
 	TemporarySelectionStruct m_TmpSelectionSrc; // for selection of glyphs from sources
 	TemporarySelectionStruct m_TmpSelectionDst; // for operations on final seletected glyphs // like re range by glyph group
 
 public:
-	typedef std::pair<uint32_t, std::string> FontInfosCodePoint_ToLoad;
-	std::set<FontInfosCodePoint_ToLoad> m_SelectionForOperation_ToLoad;
+	typedef std::pair<GlyphIndex, std::string> FontInfosGlyphIndex_ToLoad;
+	std::set<FontInfosGlyphIndex_ToLoad> m_SelectionForOperation_ToLoad;
 
 private:
 	TemporarySelectionStruct* getSelStruct(SelectionContainerEnum vSelectionContainerEnum);
 	bool IsGlyphSelected(
 		std::shared_ptr<FontInfos> vFontInfos,
 		SelectionContainerEnum vSelectionContainerEnum,
-		uint32_t vCodePoint);
+		GlyphIndex vGlyphIndex);
 	void StartSelection(SelectionContainerEnum vSelectionContainerEnum);
 	bool CanWeApplySelection(SelectionContainerEnum vSelectionContainerEnum);
 	
@@ -151,7 +154,7 @@ public:
 	void Load(ProjectFile* vProjectFile);
 
 public:
-	std::set<FontInfosCodePoint>* GetSelection();
+	std::set<FontInfosGlyphIndex>* GetSelection();
 public:
 	void SelectWithToolOrApply(
 		ProjectFile *vProjectFile, 
@@ -159,15 +162,15 @@ public:
 	void SelectWithToolOrApplyOnGlyph(
 		ProjectFile *vProjectFile, 
 		std::shared_ptr<FontInfos> vFontInfos, 
-		ImFontGlyph vGlyph,
-        uint32_t vGlyphIdx,
+		BaseGlyph* vGlyph,
+		GlyphIndex vGlyphIndex,
 		bool vGlypSelected,
 		bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 	bool IsGlyphIntersectedAndSelected(
 		std::shared_ptr<FontInfos> vFontInfos,
 		ImVec2 vCellSize, 
-		uint32_t vCodePoint,
+		GlyphIndex vGlyphIndex,
 		bool *vSelected,
 		SelectionContainerEnum vSelectionContainerEnum);
 	bool IsSelectionMode(GlyphSelectionModeFlags vGlyphSelectionModeFlags);
@@ -177,26 +180,26 @@ public:
 private:
 	void SelectAllGlyphs(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
 		SelectionContainerEnum vSelectionContainerEnum);
-	void SelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, ImFontGlyph vGlyph, bool vUpdateMaps,
+	void SelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, BaseGlyph* vGlyph, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
-	void SelectGlyph(ProjectFile *vProjectFile, FontInfosCodePoint vFontInfosCodePoint, bool vUpdateMaps,
+	void SelectGlyph(ProjectFile *vProjectFile, FontInfosGlyphIndex vFontInfosGlyphIndex, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
-	void SelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, uint32_t vCodePoint, bool vUpdateMaps,
+	void SelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, GlyphIndex vGlyphIndex, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 	
 	void UnSelectAllGlyphs(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
 		SelectionContainerEnum vSelectionContainerEnum);
-	void UnSelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, ImFontGlyph vGlyph, bool vUpdateMaps,
+	void UnSelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, BaseGlyph* vGlyph, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
-	void UnSelectGlyph(ProjectFile *vProjectFile, FontInfosCodePoint vFontInfosCodePoint, bool vUpdateMaps,
+	void UnSelectGlyph(ProjectFile *vProjectFile, FontInfosGlyphIndex vFontInfosGlyphIndex, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
-	void UnSelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, uint32_t vCodePoint, bool vUpdateMaps,
+	void UnSelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, GlyphIndex vGlyphIndex, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 
 private:
 	void RemoveSelectionFromFinal(ProjectFile *vProjectFile);
-	void ReRange_Offset_After_Start(ProjectFile *vProjectFile, uint32_t vOffsetCodePoint);
-	void ReRange_Offset_Before_End(ProjectFile *vProjectFile, uint32_t vOffsetCodePoint);
+	void ReRange_CodePoints_Offset_After_Start(ProjectFile *vProjectFile, GlyphIndex vOffsetGlyphIndex);
+	void ReRange_CodePoints_Offset_Before_End(ProjectFile *vProjectFile, GlyphIndex vOffsetGlyphIndex);
 	
 private: // selection for view modes
 	void PrepareSelection(ProjectFile *vProjectFile,
@@ -208,7 +211,7 @@ private: // ReRange
 private: // selections mode common
 	void GlyphSelectionIfIntersected(
 		std::shared_ptr<FontInfos> vFontInfos,
-		ImVec2 vCaseSize, uint32_t vCodePoint,
+		ImVec2 vCaseSize, GlyphIndex vGlyphIndex,
 		bool *vSelected,
 		SelectionContainerEnum vSelectionContainerEnum);
 	void ApplySelection(ProjectFile *vProjectFile,
@@ -219,7 +222,7 @@ private: // selection by line
 		SelectionContainerEnum vSelectionContainerEnum);
 	bool DrawGlyphSelectionByLine(
 		std::shared_ptr<FontInfos> vFontInfos,
-		ImVec2 vCaseSize, uint32_t vCodePoint,
+		ImVec2 vCaseSize, GlyphIndex vGlyphIndex,
 		bool *vSelected,
 		SelectionContainerEnum vSelectionContainerEnum);
 	
@@ -228,7 +231,7 @@ private: // selection by zone
 		SelectionContainerEnum vSelectionContainerEnum);
 	bool DrawGlyphSelectionByZone(
 		std::shared_ptr<FontInfos> vFontInfos,
-		ImVec2 vCaseSize, uint32_t vCodePoint,
+		ImVec2 vCaseSize, GlyphIndex vGlyphIndex,
 		bool *vSelected,
 		SelectionContainerEnum vSelectionContainerEnum);
 	
@@ -236,21 +239,21 @@ private: // selection by range
 	void SelectGlyphByRangeFromStartCodePoint(
 		ProjectFile *vProjectFile,
 		std::shared_ptr<FontInfos> vFontInfos, 
-		ImFontGlyph vGlyph,
-        uint32_t vFontGlyphIndex,
+		BaseGlyph* vGlyph,
+		CodePoint vCodePoint,
 		bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 	void UnSelectGlyphByRangeFromStartCodePoint(
 		ProjectFile *vProjectFile,
 		std::shared_ptr<FontInfos> vFontInfos, 
-		ImFontGlyph vGlyph,
-        uint32_t vFontGlyphIndex,
+		BaseGlyph* vGlyph,
+		CodePoint vCodePoint,
 		bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 	void UnSelectGlyphByRangeFromStartCodePoint(
 		ProjectFile *vProjectFile,
 		std::shared_ptr<FontInfos> vFontInfos, 
-		ImFontGlyph vGlyph, 
+		BaseGlyph* vGlyph, 
 		bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 

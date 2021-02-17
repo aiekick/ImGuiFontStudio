@@ -40,9 +40,9 @@ namespace ImGui
 	IMGUI_API void FramedGroupText(const char* vFmt, ...);
 	IMGUI_API void FramedGroupText(ImVec4 vTextColor, const char* vFmt, ...);
 	IMGUI_API bool CollapsingHeader_SmallHeight(const char *vName, float vHeightRatio, float vWidth, bool vDefaulExpanded, bool *vIsOpen = 0);
-	IMGUI_API bool RadioButtonLabeled(const char* label, bool active, bool disabled);
-	IMGUI_API bool RadioButtonLabeled(const char* label, const char* help, bool active, bool disabled = false);
-	IMGUI_API bool RadioButtonLabeled(const char* label, const char* help, bool *active, bool disabled = false);
+	IMGUI_API bool RadioButtonLabeled(float vWidth, const char* label, bool active, bool disabled);
+	IMGUI_API bool RadioButtonLabeled(float vWidth, const char* label, const char* help, bool active, bool disabled = false);
+	IMGUI_API bool RadioButtonLabeled(float vWidth, const char* label, const char* help, bool *active, bool disabled = false);
 	/*template<typename T>
 	IMGUI_API bool RadioButtonLabeled_BitWize(
 		const char *vLabel, const char *vHelp, T *vContainer, T vFlag,
@@ -59,8 +59,8 @@ namespace ImGui
 	}*/
 	template<typename T> 
 	IMGUI_API bool RadioButtonLabeled_BitWize(
+		float vWidth,
 		const char *vLabel, const char *vHelp, T *vContainer, T vFlag,
-		float vWidth = 0.0f,
 		bool vOneOrZeroAtTime = false, //only one selcted at a time
 		bool vAlwaysOne = true, // radio behavior, always one selected
 		T vFlagsToTakeIntoAccount = (T)0,
@@ -68,9 +68,7 @@ namespace ImGui
 	{
 		bool selected = *vContainer & vFlag;
 		//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
-		ImGui::PushItemWidth(vWidth);
-		bool res = RadioButtonLabeled(vLabel, vHelp, &selected, vDisableSelection);
-		ImGui::PopItemWidth();
+		bool res = RadioButtonLabeled(vWidth, vLabel, vHelp, &selected, vDisableSelection);
 		//ImGui::PopStyleVar();
 		if (res)
 		{
@@ -114,8 +112,8 @@ namespace ImGui
 	}
 	template<typename T>
 	IMGUI_API bool RadioButtonLabeled_BitWize(
+		float vWidth,
 		const char* vLabelOK, const char* vLabelNOK, const char* vHelp, T* vContainer, T vFlag,
-		float vWidth = 0.0f,
 		bool vOneOrZeroAtTime = false, //only one selcted at a time
 		bool vAlwaysOne = true, // radio behavior, always one selected
 		T vFlagsToTakeIntoAccount = (T)0,
@@ -124,9 +122,7 @@ namespace ImGui
 		bool selected = *vContainer & vFlag;
 		const char* label = (selected ? vLabelOK : vLabelNOK);
 		//ImGui::PushStyleVar(ImGuiStyleVar_FramePadding, ImVec2(0.0f, 0.0f));
-		ImGui::PushItemWidth(vWidth);
-		bool res = RadioButtonLabeled(label, vHelp, &selected, vDisableSelection);
-		ImGui::PopItemWidth();
+		bool res = RadioButtonLabeled(vWidth, label, vHelp, &selected, vDisableSelection);
 		//ImGui::PopStyleVar();
 		if (res)
 		{

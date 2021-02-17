@@ -24,6 +24,7 @@
 #include <Res/CustomFont.h>
 #include <Gui/ImGuiWidgets.h>
 #include <Project/ProjectFile.h>
+#include <Helper/Profiler.h>
 
 #ifdef _DEBUG
 #include <Panes/DebugPane.h>
@@ -49,6 +50,8 @@ LayoutManager::~LayoutManager() = default;
 
 void LayoutManager::Init()
 {
+	ZoneScoped;
+
 	if (!FileHelper::Instance()->IsFileExist("imgui.ini"))
 	{
 		m_FirstLayout = true; // need default layout
@@ -68,6 +71,8 @@ void LayoutManager::Init()
 
 void LayoutManager::Unit()
 {
+	ZoneScoped;
+
 #ifdef _DEBUG
 	DebugPane::Instance()->Unit();
 #endif
@@ -82,6 +87,8 @@ void LayoutManager::Unit()
 
 void LayoutManager::InitAfterFirstDisplay(ImVec2 vSize)
 {
+	ZoneScoped;
+
 	if (m_FirstLayout)
 	{
 		ApplyInitialDockingLayout(vSize);
@@ -98,6 +105,8 @@ void LayoutManager::InitAfterFirstDisplay(ImVec2 vSize)
 
 void LayoutManager::StartDockPane(ImGuiDockNodeFlags vFlags, ImVec2 vSize)
 {
+	ZoneScoped;
+
 	m_LastSize = vSize;
 	m_DockSpaceID = ImGui::GetID("MyDockSpace");
 	ImGui::DockSpace(m_DockSpaceID, ImVec2(0, 0), vFlags);
@@ -105,6 +114,8 @@ void LayoutManager::StartDockPane(ImGuiDockNodeFlags vFlags, ImVec2 vSize)
 
 void LayoutManager::ApplyInitialDockingLayout(ImVec2 vSize)
 {
+	ZoneScoped;
+
 	if (IS_FLOAT_EQUAL(vSize.x, 0.0) || IS_FLOAT_EQUAL(vSize.y, 0.0))
 	{
 		vSize = m_LastSize;
@@ -151,6 +162,8 @@ void LayoutManager::ApplyInitialDockingLayout(ImVec2 vSize)
 
 void LayoutManager::DisplayMenu(ImVec2 vSize)
 {
+	ZoneScoped;
+
 	if (ImGui::BeginMenu(ICON_IGFS_LAYOUT " Layout"))
 	{
 		if (ImGui::MenuItem("Default Layout"))
@@ -178,6 +191,8 @@ void LayoutManager::DisplayMenu(ImVec2 vSize)
 
 int LayoutManager::DisplayPanes(ProjectFile *vProjectFile, int vWidgetId)
 {
+	ZoneScoped;
+
 	vWidgetId = ParamsPane::Instance()->DrawPanes(vProjectFile, vWidgetId);
 	vWidgetId = SourceFontPane::Instance()->DrawPanes(vProjectFile, vWidgetId);
 	vWidgetId = FinalFontPane::Instance()->DrawPanes(vProjectFile, vWidgetId);
@@ -194,6 +209,8 @@ int LayoutManager::DisplayPanes(ProjectFile *vProjectFile, int vWidgetId)
 
 void LayoutManager::DrawDialogsAndPopups(ProjectFile* vProjectFile)
 {
+	ZoneScoped;
+
 	ParamsPane::Instance()->DrawDialogsAndPopups(vProjectFile);
 	SourceFontPane::Instance()->DrawDialogsAndPopups(vProjectFile);
 	FinalFontPane::Instance()->DrawDialogsAndPopups(vProjectFile);
@@ -208,6 +225,8 @@ void LayoutManager::DrawDialogsAndPopups(ProjectFile* vProjectFile)
 
 int LayoutManager::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas)
 {
+	ZoneScoped;
+
 	vWidgetId = ParamsPane::Instance()->DrawWidgets(vProjectFile, vWidgetId, vUserDatas);
 	vWidgetId = SourceFontPane::Instance()->DrawWidgets(vProjectFile, vWidgetId, vUserDatas);
 	vWidgetId = FinalFontPane::Instance()->DrawWidgets(vProjectFile, vWidgetId, vUserDatas);
@@ -224,11 +243,15 @@ int LayoutManager::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::st
 
 void LayoutManager::ShowSpecificPane(PaneFlags vPane)
 {
+	ZoneScoped;
+
 	m_Pane_Shown = (PaneFlags)((int32_t)m_Pane_Shown | (int32_t)vPane);
 }
 
 void LayoutManager::FocusSpecificPane(PaneFlags vPane)
 {
+	ZoneScoped;
+
 	m_Pane_Shown = (PaneFlags)((int32_t)m_Pane_Shown | (int32_t)vPane);
 
 	if (vPane == PaneFlags::PANE_FINAL)					FocusSpecificPane(FINAL_PANE);
@@ -246,12 +269,16 @@ void LayoutManager::FocusSpecificPane(PaneFlags vPane)
 
 void LayoutManager::ShowAndFocusSpecificPane(PaneFlags vPane)
 {
+	ZoneScoped;
+
 	ShowSpecificPane(vPane);
 	FocusSpecificPane(vPane);
 }
 
 bool LayoutManager::IsSpecificPaneFocused(PaneFlags vPane)
 {
+	ZoneScoped;
+
 	if (vPane == PaneFlags::PANE_FINAL)					return IsSpecificPaneFocused(FINAL_PANE);
 	else if (vPane == PaneFlags::PANE_SELECTED_FONT)	return IsSpecificPaneFocused(SELECTED_FONT_PANE);
 	else if (vPane == PaneFlags::PANE_SOURCE)			return IsSpecificPaneFocused(SOURCE_PANE);
@@ -268,6 +295,8 @@ bool LayoutManager::IsSpecificPaneFocused(PaneFlags vPane)
 
 void LayoutManager::AddSpecificPaneToExisting(const char* vNewPane, const char* vExistingPane)
 {
+	ZoneScoped;
+
 	ImGuiWindow* window = ImGui::FindWindowByName(vExistingPane);
 	if (window)
 	{
@@ -282,6 +311,8 @@ void LayoutManager::AddSpecificPaneToExisting(const char* vNewPane, const char* 
 
 bool LayoutManager::IsSpecificPaneFocused(const char *vlabel)
 {
+	ZoneScoped;
+
 	ImGuiWindow* window = ImGui::FindWindowByName(vlabel);
 	if (window)
 	{
@@ -294,6 +325,8 @@ bool LayoutManager::IsSpecificPaneFocused(const char *vlabel)
 
 void LayoutManager::FocusSpecificPane(const char *vlabel)
 {
+	ZoneScoped;
+
 	ImGuiWindow* window = ImGui::FindWindowByName(vlabel);
 	if (window)
 	{
@@ -308,6 +341,8 @@ void LayoutManager::FocusSpecificPane(const char *vlabel)
 
 PaneFlags LayoutManager::GetFocusedPanes()
 {
+	ZoneScoped;
+
 	PaneFlags flag = PaneFlags::PANE_NONE;
 
 	if (IsSpecificPaneFocused(FINAL_PANE))			flag = (PaneFlags)((int32_t)flag | (int32_t)PaneFlags::PANE_FINAL);
@@ -327,6 +362,8 @@ PaneFlags LayoutManager::GetFocusedPanes()
 
 void LayoutManager::SetFocusedPanes(PaneFlags vActivePanes)
 {
+	ZoneScoped;
+
 	if (vActivePanes & PaneFlags::PANE_FINAL)			FocusSpecificPane(FINAL_PANE);
 	if (vActivePanes & PaneFlags::PANE_SELECTED_FONT)	FocusSpecificPane(SELECTED_FONT_PANE);
 	if (vActivePanes & PaneFlags::PANE_SOURCE)			FocusSpecificPane(SOURCE_PANE);
@@ -346,6 +383,8 @@ void LayoutManager::SetFocusedPanes(PaneFlags vActivePanes)
 
 std::string LayoutManager::getXml(const std::string& vOffset, const std::string& vUserDatas)
 {
+	ZoneScoped;
+
 	std::string str;
 
 	if (vUserDatas == "app")
@@ -368,6 +407,8 @@ std::string LayoutManager::getXml(const std::string& vOffset, const std::string&
 
 bool LayoutManager::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas)
 {
+	ZoneScoped;
+
 	// The value of this child identifies the name of this element
 	std::string strName = "";
 	std::string strValue = "";

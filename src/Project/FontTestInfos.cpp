@@ -51,7 +51,7 @@ void FontTestInfos::Load(ProjectFile* vProjectFile)
 				auto font = vProjectFile->GetFontWithFontName(ficdp_toload.second.second);
 				if (font)
 				{
-					FontInfosCodePoint ficdp;
+					FontInfosGlyphIndex ficdp;
 					ficdp.first = ficdp_toload.second.first;
 					ficdp.second = font;
 					m_GlyphToInsert[ficdp_toload.first] = ficdp;
@@ -67,7 +67,7 @@ void FontTestInfos::Load(ProjectFile* vProjectFile)
 
 void FontTestInfos::ResizeInsertedGlyphs(uint32_t vPos, bool vExpandOrReduce)
 {
-	std::map<uint32_t, FontInfosCodePoint> res;
+	std::map<uint32_t, FontInfosGlyphIndex> res;
 
 	for (auto fi : m_GlyphToInsert)
 	{
@@ -163,7 +163,7 @@ bool FontTestInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement
 		if (strName == "insert")
 		{
 			uint32_t pos = 0;
-			FontInfosCodePoint_ToLoad fi;
+			FontInfosGlyphIndex_ToLoad fi;
 
 			for (const tinyxml2::XMLAttribute* attr = vElem->FirstAttribute(); attr != nullptr; attr = attr->Next())
 			{

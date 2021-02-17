@@ -34,16 +34,16 @@
 #include <sfntly/table/truetype/loca_table.h>
 
 typedef int32_t FontId;
-typedef int32_t CodePoint;
+typedef int32_t CodePt;
 typedef int32_t GlyphId;
 typedef std::pair<FontId, GlyphId> FontGlyphId;
 struct Glyph
 {
-	CodePoint codepoint = 0;
+	CodePt codepoint = 0;
 	GlyphId glyphid = 0;
 	FontId fontId = 0;
 
-	Glyph(CodePoint vCdp, GlyphId vGid, FontId vFid)
+	Glyph(CodePt vCdp, GlyphId vGid, FontId vFid)
 	{
 		codepoint = vCdp;
 		glyphid = vGid;
@@ -62,12 +62,12 @@ public:
 	sfntly::Ptr<sfntly::CMapTable::CMap> m_CMapTable;
 	sfntly::Ptr<sfntly::LocaTable> m_LocaTable;
 	sfntly::Ptr<sfntly::GlyphTable> m_GlyfTable;
-	std::map<CodePoint, int32_t> m_CharMap; // codepoint to glyph id
-	std::map<int32_t, CodePoint> m_ReversedCharMap; // glyph id to codepoint
+	std::map<CodePt, int32_t> m_CharMap; // codepoint to glyph id
+	std::map<int32_t, CodePt> m_ReversedCharMap; // glyph id to codepoint
 	std::set<int32_t> m_ResolvedSet;
 	std::map<int32_t, std::string> m_NewGlyphNames;
-	std::map<CodePoint, CodePoint> m_NewGlyphCodePoints;
-	std::map<CodePoint, std::shared_ptr<GlyphInfos>> m_NewGlyphInfos;
+	std::map<CodePt, CodePt> m_NewGlyphCodePoints;
+	std::map<CodePt, std::shared_ptr<GlyphInfos>> m_NewGlyphInfos;
 };
 
 class FontGenerator
@@ -79,9 +79,9 @@ public:
 public:
 	bool OpenFontFile(
 		const std::string& vFontFilePathName,
-		std::map<CodePoint, std::string> vNewNames,
-		std::map<CodePoint, CodePoint> vNewCodePoints,
-		std::map<CodePoint, std::shared_ptr<GlyphInfos>> vNewGlyphInfos,
+		std::map<CodePt, std::string> vNewNames,
+		std::map<CodePt, CodePt> vNewCodePoints,
+		std::map<CodePt, std::shared_ptr<GlyphInfos>> vNewGlyphInfos,
 		bool vBaseFontFileToMergeIn);
 	bool GenerateFontFile(const std::string& vFontFilePathName, bool vUsePostTable);
 
@@ -94,9 +94,9 @@ private:
 	std::vector<FontInstance> m_Fonts;
 	sfntly::Ptr<sfntly::FontFactory> m_FontFactory;
 	sfntly::Ptr<sfntly::Font::Builder> m_FontBuilder;
-	std::map<CodePoint, FontGlyphId> m_CharMap; // codepoint to glyph id
-	std::map<FontGlyphId, CodePoint> m_ReversedCharMap; // glyph id to codepoint
-	std::map<CodePoint, std::string> m_GlyphNames;
+	std::map<CodePt, FontGlyphId> m_CharMap; // codepoint to glyph id
+	std::map<FontGlyphId, CodePt> m_ReversedCharMap; // glyph id to codepoint
+	std::map<CodePt, std::string> m_GlyphNames;
 	std::set<FontGlyphId> m_ResolvedSet; // set of font id / glyph id
 	std::map<FontGlyphId, GlyphId> m_OldToNewGlyfId;
 	std::map<GlyphId, std::vector<GlyphId>> m_NewToOldGlyfId;
@@ -110,28 +110,28 @@ private: // post table - version / count / size / offsets
 	int32_t MergeCharacterMaps();
 
 public:
-	static sfntly::Font* LoadFontFile(const std::string& font_path);
+	static sfntly::Font* LoadFontFile(const char* font_path);
 
 private: // imported/based or/modified from sfntly
-	static void LoadFontFiles(const std::string& font_path, sfntly::FontFactory* factory, sfntly::FontArray* fonts);
-	static bool SerializeFont(const std::string& font_path, sfntly::Font* font);
-	static bool SerializeFont(const std::string& font_path, sfntly::FontFactory* factory, sfntly::Font* font);
+	static void LoadFontFiles(const char* font_path, sfntly::FontFactory* factory, sfntly::FontArray* fonts);
+	static bool SerializeFont(const char* font_path, sfntly::Font* font);
+	static bool SerializeFont(const char* font_path, sfntly::FontFactory* factory, sfntly::Font* font);
 	sfntly::Font* AssembleFont(bool vUsePostTable);
 
 private:
 	bool Assemble_Glyf_Loca_Maxp_Tables();
 	sfntly::Ptr<sfntly::WritableFontData> ReScale_Glyph(const int32_t& vFontId, const int32_t& vGlyphId, const sfntly::Ptr<sfntly::ReadableFontData>& vReadableFontData);
-	static void FillResolvedCompositeGlyphs(FontInstance *vFontInstance, const std::map<CodePoint, int32_t>& chars_to_glyph_ids);
+	static void FillResolvedCompositeGlyphs(FontInstance *vFontInstance, const std::map<CodePt, int32_t>& chars_to_glyph_ids);
 
 private:
 	bool Assemble_CMap_Table();
-	static void FillCharacterMap(FontInstance *vFontInstance, std::map<CodePoint, std::string> vSelection);
+	static void FillCharacterMap(FontInstance *vFontInstance, std::map<CodePt, std::string> vSelection);
 
 private:
 	bool Assemble_Hmtx_Hhea_Tables();
 
 private:
-	bool Assemble_Post_Table(std::map<CodePoint, std::string> vSelection);
+	bool Assemble_Post_Table(std::map<CodePt, std::string> vSelection);
 
 private:
 	bool Assemble_Name_Table(); // Copyright

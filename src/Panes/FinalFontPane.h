@@ -27,10 +27,10 @@
 enum FinalFontPaneModeFlags
 {
 	FINAL_FONT_PANE_NONE = 0,
-	FINAL_FONT_PANE_BY_FONT_NO_ORDER = (1 << 0),
+	FINAL_FONT_PANE_BY_FONT_ORDERED_BY_GLYPHINDEX = (1 << 0),
 	FINAL_FONT_PANE_BY_FONT_ORDERED_BY_CODEPOINT = (1 << 1),
 	FINAL_FONT_PANE_BY_FONT_ORDERED_BY_NAMES = (1 << 2),
-	FINAL_FONT_PANE_MERGED_NO_ORDER = (1 << 3),
+	FINAL_FONT_PANE_MERGED_ORDERED_BY_GLYPHINDEX = (1 << 3),
 	FINAL_FONT_PANE_MERGED_ORDERED_BY_CODEPOINT = (1 << 4),
 	FINAL_FONT_PANE_MERGED_ORDERED_BY_NAMES = (1 << 5)
 };
@@ -38,8 +38,9 @@ enum FinalFontPaneModeFlags
 enum SelectedFontPaneModeFlags
 {
 	SELECTED_FONT_PANE_NONE = 0,
-	SELECTED_FONT_PANE_ORDERED_BY_CODEPOINT = (1 << 0),
-	SELECTED_FONT_PANE_ORDERED_BY_NAMES = (1 << 1),
+	SELECTED_FONT_PANE_ORDERED_BY_GLYPHINDEX = (1 << 0), 
+	SELECTED_FONT_PANE_ORDERED_BY_CODEPOINT = (1 << 1),
+	SELECTED_FONT_PANE_ORDERED_BY_NAMES = (1 << 2),
 };
 
 class GlyphInfos;
@@ -54,15 +55,15 @@ private: // per pane settings to save
 	//float m_Selected_GlyphSize_Policy_Width = 40.0f;
 
 private:
-	std::vector<std::shared_ptr<GlyphInfos>> m_GlyphsMergedNoOrder;
-	std::map<uint32_t, std::vector<std::shared_ptr<GlyphInfos>>> m_GlyphsMergedOrderedByCodePoints;
+	std::vector<std::shared_ptr<GlyphInfos>> m_GlyphsMergedOrderedByGlyphIndex;
+	std::map<uint32_t, std::vector<std::shared_ptr<GlyphInfos>>> m_GlyphsMergedOrderedByCodePoint;
 	std::map<std::string, std::vector<std::shared_ptr<GlyphInfos>>> m_GlyphsMergedOrderedByGlyphName;
 
 private:
 	FinalFontPaneModeFlags m_FinalFontPaneModeFlags = 
-		FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_NO_ORDER;
+		FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_GLYPHINDEX;
 	SelectedFontPaneModeFlags m_SelectedFontPaneModeFlags =
-		SelectedFontPaneModeFlags::SELECTED_FONT_PANE_ORDERED_BY_NAMES;
+		SelectedFontPaneModeFlags::SELECTED_FONT_PANE_ORDERED_BY_GLYPHINDEX;
 
 	bool m_GlyphEdition = false;
 	bool m_AutoUpdateCodepoint_WhenEditWithButtons = false;
@@ -87,12 +88,12 @@ private:
 	bool DrawGlyph(ProjectFile *vProjectFile, 
 		std::shared_ptr<FontInfos> vFontInfos, const ImVec2& vSize,
 		std::shared_ptr<GlyphInfos> vGlyph, bool vShowRect,
-		bool *vNameupdated, bool *vCodePointUpdated,
+		bool *vNameupdated, bool *vGlyphIndexUpdated,
 		bool vForceEditMode = false);
 	
-	void DrawSelectionsByFontNoOrder(ProjectFile *vProjectFile,
+	void DrawSelectionsByFontOrderedByGlyphIndex(ProjectFile *vProjectFile,
 		bool vShowTooltipInfos = false);
-	void DrawSelectionsByFontNoOrder_OneFontOnly(
+	void DrawSelectionsByFontOrderedByGlyphIndex_OneFontOnly(
 		ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
 		bool vWithFramedGroup = true, 
 		bool vForceEditMode = false, 
@@ -108,7 +109,7 @@ private:
 		bool vForceEditMode = false, 
 		bool vForceEditModeOneColumn = false,
 		bool vShowTooltipInfos = false);
-
+	
 	static void PrepareSelectionByFontOrderedByGlyphNames(ProjectFile *vProjectFile);
 	void DrawSelectionsByFontOrderedByGlyphNames(ProjectFile *vProjectFile,
 		bool vShowTooltipInfos = false);
@@ -119,8 +120,8 @@ private:
 		bool vForceEditModeOneColumn = false,
 		bool vShowTooltipInfos = false);
 
-	void PrepareSelectionMergedNoOrder(ProjectFile *vProjectFile);
-	void DrawSelectionMergedNoOrder(ProjectFile *vProjectFile);
+	void PrepareSelectionMergedOrderedByGlyphIndex(ProjectFile *vProjectFile);
+	void DrawSelectionMergedOrderedByGlyphIndex(ProjectFile *vProjectFile);
 
 	void PrepareSelectionMergedOrderedByCodePoint(ProjectFile *vProjectFile);
 	void DrawSelectionMergedOrderedByCodePoint(ProjectFile *vProjectFile);

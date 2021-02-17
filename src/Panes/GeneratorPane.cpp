@@ -36,12 +36,10 @@
 #include <Panes/SourceFontPane.h>
 #include <Project/ProjectFile.h>
 #include <Generator/Generator.h>
-#include <Project/FontInfos.h>
 
 #include <cinttypes> // printf zu
 
 static ProjectFile defaultProjectFile;
-static FontInfos defaultFontInfos;
 
 GeneratorPane::GeneratorPane() = default;
 GeneratorPane::~GeneratorPane() = default;
@@ -96,7 +94,7 @@ void GeneratorPane::DrawDialogsAndPopups(ProjectFile* vProjectFile)
 			{
 				vProjectFile->m_LastGeneratedPath = ImGuiFileDialog::Instance()->GetCurrentPath();
 				vProjectFile->m_LastGeneratedFileName = ImGuiFileDialog::Instance()->GetCurrentFileName();
-				Generator::Instance()->Generate(vProjectFile);
+				Generator::Instance()->Generate( vProjectFile);
 			}
 
 			ImGuiFileDialog::Instance()->Close();
@@ -232,16 +230,16 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 			}
 
 			float mrw = maxWidth / 3.0f - ImGui::GetStyle().FramePadding.x;
-			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Current", "Current Font",
-				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_CURRENT, mrw, true, true,
+			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw, "Current", "Current Font",
+				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_CURRENT, true, true,
 				GENERATOR_MODE_RADIO_CUR_BAT_MER);
 			ImGui::SameLine();
-			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Batch", "Font by Font",
-				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_BATCH, mrw, true, true,
+			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw, "Batch", "Font by Font",
+				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_BATCH, true, true,
 				GENERATOR_MODE_RADIO_CUR_BAT_MER, batchModeDisabled);
 			ImGui::SameLine();
-			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Merged", "Fonts Merged in one",
-				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_MERGED, mrw, true, true,
+			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw, "Merged", "Fonts Merged in one",
+				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_MERGED, true, true,
 				GENERATOR_MODE_RADIO_CUR_BAT_MER, mergeModeDisabled);
 
 			ImGui::FramedGroupText("Features");
@@ -257,22 +255,22 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 			}
 
 			mrw = maxWidth / 2.0f - ImGui::GetStyle().FramePadding.x;
-			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Header", "Header File",
-				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_HEADER, mrw,
+			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw, "Header", "Header File",
+				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_HEADER, 
 				false, false, GENERATOR_MODE_NONE, headerModeDisabled);
 			ImGui::SameLine();
-			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Card", "Card Picture",
-				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_CARD, mrw,
+			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw, "Card", "Card Picture",
+				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_CARD, 
 				false, false, GENERATOR_MODE_NONE, headerModeDisabled);
 
 			// un header est lié a un TTF ou un CPP ne petu aps etre les deux
 			// donc on fait soit l'un soit l'autre
-			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Font", "Font File",
-				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_FONT, mrw,
+			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw, "Font", "Font File",
+				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_FONT, 
 				true, false, GENERATOR_MODE_RADIO_FONT_SRC);
 			ImGui::SameLine();
-			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Src", "Source File for C++/C#\n\twith font as a bytes array",
-				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_SRC, mrw,
+			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw, "Src", "Source File for C++/C#\n\twith font as a bytes array",
+				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_SRC, 
 				true, false, GENERATOR_MODE_RADIO_FONT_SRC);
 
 			ImGui::FramedGroupText("Settings");
@@ -281,19 +279,19 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 			{
 				mrw = maxWidth / 3.0f - ImGui::GetStyle().FramePadding.x;
 				ImGui::Text("Header / Src Languages : ");
-				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw,
 					"C", "Embedded font as a Byte Array for C",
-					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_LANG_C, mrw,
+					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_LANG_C, 
 					false, false, GENERATOR_MODE_RADIO_LANG);
 				ImGui::SameLine();
-				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw,
 					"C++", "Embedded font as a Byte Array for C++",
-					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_LANG_CPP, mrw,
+					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_LANG_CPP, 
 					false, false, GENERATOR_MODE_RADIO_LANG);
 				ImGui::SameLine();
-				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw,
 					"C#", "Embedded font as a Byte Array for C#",
-					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_LANG_CSHARP, mrw,
+					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_LANG_CSHARP, 
 					false, false, GENERATOR_MODE_RADIO_LANG);
 
 #ifdef _DEBUG
@@ -307,9 +305,9 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_LANG_PYTHON, mrw,
 					false, false, GENERATOR_MODE_RADIO_LANG);
 				ImGui::SameLine();*/
-				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw,
 					"Rust", "Embedded font as a Byte Array for Rust",
-					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_LANG_RUST, mrw,
+					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_LANG_RUST, 
 					false, false, GENERATOR_MODE_RADIO_LANG);
 #endif
 			}
@@ -317,18 +315,17 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED))
 			{
 				ImGui::FramedGroupText("Merged Mode");
-				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(maxWidth - ImGui::GetStyle().FramePadding.x,
 					"Disable Glyph Re Write", "if your fonts have same size,\nit can be more safe for the moment (bad generated font is some case)\nto disable glyph re write.\nonly needed if we must change glyph scale",
-					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE, 
-					maxWidth - ImGui::GetStyle().FramePadding.x);
+					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE);
 			}
 
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_FONT))
 			{
 				ImGui::FramedGroupText("Font");
-				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>("Export Names", "export glyph names in font file (increase size)",
-					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES, 
-					maxWidth - ImGui::GetStyle().FramePadding.x);
+				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(maxWidth - ImGui::GetStyle().FramePadding.x,
+					"Export Names", "export glyph names in font file (increase size)",
+					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
 			}
 
 			ImGui::FramedGroupSeparator();
@@ -370,47 +367,23 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 #else
 				strncpy(extTypes, exts.c_str(), exts.size());
 #endif
-				if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER_CARD_SRC))
+				if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER_CARD))
 				{
-					if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
-					{
-						ImGuiFileDialog::Instance()->OpenModal(
-							"GenerateFileDlg",
-							"Location where create the files", 0, vProjectFile->m_LastGeneratedPath.c_str(),
-							vProjectFile->m_LastGeneratedFileName.c_str(),
-							std::bind(&GeneratorPane::GeneratorFileDialogPane, this,
-								std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
-							200, 1, vProjectFile, ImGuiFileDialogFlags_ConfirmOverwrite);
-					}
-					else
-					{
-						ImGuiFileDialog::Instance()->OpenModal(
-							"GenerateFileDlg",
-							"Location and name where create the file", extTypes, vProjectFile->m_LastGeneratedPath.c_str(),
-							vProjectFile->m_SelectedFont->m_GeneratedFileName.c_str(),
-							std::bind(&GeneratorPane::GeneratorFileDialogPane, this,
-								std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
-							200, 1, vProjectFile, ImGuiFileDialogFlags_ConfirmOverwrite);
-					}
+					ImGuiFileDialog::Instance()->OpenModal(
+						"GenerateFileDlg",
+						"Location and name where create the file", extTypes, vProjectFile->m_LastGeneratedPath.c_str(),
+						vProjectFile->m_LastGeneratedFileName.c_str(),
+						std::bind(&GeneratorPane::GeneratorFileDialogPane, this,
+							std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
+						200, 1, vProjectFile, ImGuiFileDialogFlags_ConfirmOverwrite);
 				}
 				else
 				{
-					if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
-					{
-						ImGuiFileDialog::Instance()->OpenModal(
-							"GenerateFileDlg",
-							"Location where create the files", 0, vProjectFile->m_LastGeneratedPath.c_str(),
-							vProjectFile->m_LastGeneratedFileName.c_str(),
-							1, vProjectFile, ImGuiFileDialogFlags_ConfirmOverwrite);
-					}
-					else
-					{
-						ImGuiFileDialog::Instance()->OpenModal(
-							"GenerateFileDlg",
-							"Location and name where create the file", extTypes, vProjectFile->m_LastGeneratedPath.c_str(),
-							vProjectFile->m_SelectedFont->m_GeneratedFileName.c_str(),
-							1, vProjectFile, ImGuiFileDialogFlags_ConfirmOverwrite);
-					}
+					ImGuiFileDialog::Instance()->OpenModal(
+						"GenerateFileDlg",
+						"Location and name where create the file", extTypes, vProjectFile->m_LastGeneratedPath.c_str(),
+						vProjectFile->m_LastGeneratedFileName.c_str(),
+						1, vProjectFile, ImGuiFileDialogFlags_ConfirmOverwrite);
 				}
 			}
 		}
@@ -568,49 +541,29 @@ void GeneratorPane::GeneratorFileDialogPane(const char* vFilter, IGFDUserDatas v
 	auto prj = (ProjectFile*)vUserDatas;
 	if (prj)
 	{
-		if (prj->IsGenMode(GENERATOR_MODE_HEADER_CARD_SRC))
+		if (prj->IsGenMode(GENERATOR_MODE_HEADER_CARD))
 		{
 			#define PREFIX_MAX_SIZE 49
 			static char prefixBuffer[PREFIX_MAX_SIZE + 1] = "\0";
-			
+
 			if (prj->IsGenMode(GENERATOR_MODE_CURRENT))
 			{
 				if (prj->m_SelectedFont)
 				{
-					if (ImGui::BeginFramedGroup(prj->m_SelectedFont->m_FontFileName.c_str()))
+					if (ImGui::CollapsingHeader("Prefix", 0, ImGuiTreeNodeFlags_DefaultOpen))
 					{
-						const float aw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x;
-						
-						const bool cond = !prj->m_SelectedFont->m_FontPrefix.empty();
+						bool cond = !prj->m_SelectedFont->m_FontPrefix.empty();
 						snprintf(prefixBuffer, PREFIX_MAX_SIZE, "%s", prj->m_SelectedFont->m_FontPrefix.c_str());
-						ImGui::FramedGroupText("Prefix :");
-						ImGui::PushItemWidth(aw);
+						ImGui::FramedGroupText("Header Prefix for\n%s", prj->m_SelectedFont->m_FontFileName.c_str());
 						if (ImGui::InputText_Validation("##FontPrefix", prefixBuffer, PREFIX_MAX_SIZE,
 							&cond, "You must Define a\nfont prefix for continue"))
 						{
 							prj->m_SelectedFont->m_FontPrefix = std::string(prefixBuffer);
 							prj->SetProjectChange();
 						}
-						ImGui::PopItemWidth();
-
-						canContinue = !prj->m_SelectedFont->m_FontPrefix.empty();
-
-						if (prj->IsGenMode(GENERATOR_MODE_CARD))
-						{
-							ImGui::FramedGroupSeparator();
-
-							ImGui::FramedGroupText("Card");
-
-							bool ch = ImGui::SliderUIntDefaultCompact(aw, "Glyph Height", &prj->m_SelectedFont->m_CardGlyphHeightInPixel, 1U, 200U, defaultFontInfos.m_CardGlyphHeightInPixel);
-							ch |= ImGui::SliderUIntDefaultCompact(aw, "Max Rows", &prj->m_SelectedFont->m_CardCountRowsMax, 10U, 1000U, defaultFontInfos.m_CardCountRowsMax);
-							if (ch) prj->SetProjectChange();
-
-
-							canContinue &= (prj->m_SelectedFont->m_CardGlyphHeightInPixel > 0) && (prj->m_SelectedFont->m_CardCountRowsMax > 0);
-						}
-
-						ImGui::EndFramedGroup();
 					}
+
+					canContinue = !prj->m_SelectedFont->m_FontPrefix.empty();
 				}
 				else
 				{
@@ -623,129 +576,71 @@ void GeneratorPane::GeneratorFileDialogPane(const char* vFilter, IGFDUserDatas v
 			{
 				canContinue = true;
 				
-				#define FILENAME_MAX_SIZE 1024
-				static char fileNameBuffer[FILENAME_MAX_SIZE + 1] = "\0";
-				
-				std::map<std::string, int> filenames;
-				std::map<std::string, int> prefixs;
-				for (auto& font : prj->m_Fonts)
+				if (ImGui::CollapsingHeader("Prefix", 0, ImGuiTreeNodeFlags_DefaultOpen))
 				{
-					if (font.second)
+					std::map<std::string, int> prefixs;
+					for (auto& font : prj->m_Fonts)
 					{
-						if (ImGui::BeginFramedGroup(font.second->m_FontFileName.c_str()))
+						if (font.second)
 						{
-							const float aw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x;
-
-							ImGui::FramedGroupText("File Name :");
-
-							snprintf(fileNameBuffer, FILENAME_MAX_SIZE, "%s", font.second->m_GeneratedFileName.c_str());
-							bool filenameCond = !font.second->m_GeneratedFileName.empty(); // not empty
-							if (filenames.find(font.second->m_GeneratedFileName) == filenames.end())
-							{
-								filenames[font.second->m_GeneratedFileName] = 1;
-							}
-							else
-							{
-								filenameCond &= (filenames[font.second->m_GeneratedFileName] == 0); // must be unique
-							}
-							ImGui::PushID(&font);
-							ImGui::PushItemWidth(aw);
-							const bool resFN = ImGui::InputText_Validation("##FontFileName", fileNameBuffer, FILENAME_MAX_SIZE,
-								&filenameCond, "You must Define a\nfont file name unique for continue");
-							ImGui::PopItemWidth();
-							ImGui::PopID();
-							if (resFN)
-							{
-								font.second->m_GeneratedFileName = std::string(fileNameBuffer);
-								prj->SetProjectChange();
-							}
-							filenames[font.second->m_GeneratedFileName]++;
-							canContinue &= filenameCond;
-
-							ImGui::FramedGroupText("Prefix :");
-
 							snprintf(prefixBuffer, PREFIX_MAX_SIZE, "%s", font.second->m_FontPrefix.c_str());
-							bool prefixCond = !font.second->m_FontPrefix.empty(); // not empty
+
+							bool cond = !font.second->m_FontPrefix.empty(); // not empty
 							if (prefixs.find(font.second->m_FontPrefix) == prefixs.end())
 							{
 								prefixs[font.second->m_FontPrefix] = 1;
 							}
 							else
 							{
-								prefixCond &= (prefixs[font.second->m_FontPrefix] == 0); // must be unique
+								cond &= (prefixs[font.second->m_FontPrefix] == 0); // must be unique
 							}
+							ImGui::TextWrapped("Header Prefix for\n\t%s :", font.second->m_FontFileName.c_str());
 
 							ImGui::PushID(&font);
-							ImGui::PushItemWidth(aw);
-							const bool resPF = ImGui::InputText_Validation("##FontPrefix", prefixBuffer, PREFIX_MAX_SIZE,
-								&prefixCond, "You must Define a\nfont prefix and unique for continue");
-							ImGui::PopItemWidth();
+							bool res = ImGui::InputText_Validation("##FontPrefix", prefixBuffer, PREFIX_MAX_SIZE,
+								&cond, "You must Define a\nfont prefix and unique for continue");
 							ImGui::PopID();
-							if (resPF)
+							if (res)
 							{
 								font.second->m_FontPrefix = std::string(prefixBuffer);
 								prj->SetProjectChange();
 							}
 							prefixs[font.second->m_FontPrefix]++;
-							canContinue &= prefixCond;
-
-							if (prj->IsGenMode(GENERATOR_MODE_CARD))
-							{
-								ImGui::FramedGroupSeparator();
-
-								ImGui::FramedGroupText("Card");
-
-								ImGui::PushID(&font);
-								bool ch = ImGui::SliderUIntDefaultCompact(aw, "Glyph Height", &font.second->m_CardGlyphHeightInPixel, 1U, 200U, defaultFontInfos.m_CardGlyphHeightInPixel);
-								ch |= ImGui::SliderUIntDefaultCompact(aw, "Max Rows", &font.second->m_CardCountRowsMax, 10U, 1000U, defaultFontInfos.m_CardCountRowsMax);
-								if (ch) prj->SetProjectChange();
-								ImGui::PopID();
-								canContinue &= (font.second->m_CardGlyphHeightInPixel > 0) && (font.second->m_CardCountRowsMax > 0);
-							}
-
-							ImGui::EndFramedGroup();
+							canContinue &= cond;
 						}
 					}
 				}
 			}
 			else if (prj->IsGenMode(GENERATOR_MODE_MERGED))
 			{
-				if (ImGui::BeginFramedGroup(0))
+				bool cond = !prj->m_MergedFontPrefix.empty();
+				
+				if (ImGui::CollapsingHeader("Prefix", 0, ImGuiTreeNodeFlags_DefaultOpen))
 				{
-					ImGui::FramedGroupSeparator();
-					
-					const float aw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x;
-					
-					const bool cond = !prj->m_MergedFontPrefix.empty();
-
 					snprintf(prefixBuffer, PREFIX_MAX_SIZE, "%s", prj->m_MergedFontPrefix.c_str());
-					ImGui::FramedGroupText("Prefix :");
-					ImGui::PushItemWidth(aw);
+					ImGui::FramedGroupText("Header Font Prefix :");
 					if (ImGui::InputText_Validation("##FontPrefix", prefixBuffer, PREFIX_MAX_SIZE,
 						&cond, "You must Define a\nfont prefix for continue"))
 					{
 						prj->m_MergedFontPrefix = prefixBuffer;
 						prj->SetProjectChange();
 					}
-					ImGui::PopItemWidth();
-
-					canContinue = !prj->m_MergedFontPrefix.empty();
-					
-					if (prj->IsGenMode(GENERATOR_MODE_CARD))
-					{
-						ImGui::FramedGroupSeparator();
-
-						ImGui::FramedGroupText("Card :");
-
-						bool ch = ImGui::SliderUIntDefaultCompact(aw, "Glyph Height", &prj->m_MergedCardGlyphHeightInPixel, 1U, 200U, defaultProjectFile.m_MergedCardGlyphHeightInPixel);
-						ch |= ImGui::SliderUIntDefaultCompact(aw, "Max Rows", &prj->m_MergedCardCountRowsMax, 10U, 1000U, defaultProjectFile.m_MergedCardCountRowsMax);
-						if (ch) prj->SetProjectChange();
-
-						canContinue &= (prj->m_MergedCardGlyphHeightInPixel > 0) && (prj->m_MergedCardCountRowsMax > 0);
-					}
-
-					ImGui::EndFramedGroup();
 				}
+
+				canContinue = !prj->m_MergedFontPrefix.empty();
+			}
+
+			if (prj->IsGenMode(GENERATOR_MODE_CARD))
+			{
+				if (ImGui::CollapsingHeader("Card", 0, ImGuiTreeNodeFlags_DefaultOpen))
+				{
+					float aw = ImGui::GetContentRegionAvail().x;
+					bool ch = ImGui::SliderUIntDefaultCompact(aw, "Glyph Height", &prj->m_CardGlyphHeightInPixel, 1U, 200U, defaultProjectFile.m_CardGlyphHeightInPixel);
+					ch |= ImGui::SliderUIntDefaultCompact(aw, "Max Rows", &prj->m_CardCountRowsMax, 10U, 1000U, defaultProjectFile.m_CardCountRowsMax);
+					if (ch) prj->SetProjectChange();
+				}
+
+				canContinue &= (prj->m_CardGlyphHeightInPixel > 0) && (prj->m_CardCountRowsMax > 0);
 			}
 		}
 

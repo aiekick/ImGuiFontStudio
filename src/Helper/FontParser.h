@@ -391,7 +391,7 @@ namespace FontAnalyser
 
 		size_t GetSizeof() // cant use sizeof due to heritage of TableDisplay
 		{
-			return 8U; // (u16+u16+u16+u16 = > 2+2+2+2)
+			return 8U; // (u8+u8+u8+u8 = > 1+1+1+1)
 		}
 
 	private:

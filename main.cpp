@@ -11,9 +11,32 @@
 #include <Res/CustomFont.cpp>
 #include <Res/Roboto_Medium.cpp>
 #include <ImguiImpl/freetype/imgui_freetype.h>
-
 #include <glad/glad.h> 
 #include <GLFW/glfw3.h>
+
+#include <Helper/Profiler.h>
+void* operator new(std::size_t count)
+{
+    auto ptr = malloc(count);
+    TracyAlloc(ptr, count);
+    return ptr;
+}
+void* operator new[](std::size_t count)
+{
+    auto ptr = malloc(count);
+    TracyAlloc(ptr, count);
+    return ptr;
+}
+void operator delete(void* ptr) noexcept
+{
+    TracyFree(ptr);
+    free(ptr);
+}
+void operator delete[](void* ptr) noexcept
+{
+    TracyFree(ptr);
+    free(ptr);
+}
 
 #define SHOW_CONSOLE
 
@@ -71,6 +94,8 @@ int main(int, char**argv)
     //glfwWindowHint(GLFW_OPENGL_FORWARD_COMPAT, GL_TRUE);            // 3.0+ only
 #endif
 
+    glfwWindowHint(GLFW_SAMPLES, 4);
+    
     // Create window with graphics context
     GLFWwindow* mainWindow = glfwCreateWindow(1280, 720, "ImGuiFontStudio", nullptr, nullptr);
     if (mainWindow == 0)
@@ -79,12 +104,15 @@ int main(int, char**argv)
     glfwSwapInterval(1); // Enable vsync
 	glfwSetWindowCloseCallback(mainWindow, glfw_window_close_callback);
     glfwSetDropCallback(mainWindow, glfw_window_drop_callback);
-
+    
     if (gladLoadGL() == 0)
     {
         fprintf(stderr, "Failed to initialize OpenGL loader!\n");
         return 1;
     }
+
+    TracyGpuContext;
+    tracy::SetThreadName("main");
 
 #ifdef MSVC
 	#if defined(_DEBUG) && defined(SHOW_CONSOLE)
@@ -120,8 +148,8 @@ int main(int, char**argv)
 	ImGui::GetIO().Fonts->AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_IGFS, 15.0f, &icons_config, icons_ranges);
 
     ImGuiFreeType::FT_Error freetypeError;
-    uint32_t m_FreeTypeFlag = ImGuiFreeType::FreeType_Default;
-    if (!ImGuiFreeType::BuildFontAtlas(ImGui::GetIO().Fonts, m_FreeTypeFlag, &freetypeError))
+    uint32_t freeTypeFlag = ImGuiFreeType::FreeType_Default;
+    if (!ImGuiFreeType::BuildFontAtlas(ImGui::GetIO().Fonts, freeTypeFlag, &freetypeError))
     {
         printf("Faila to load font, reason : %s \n", ImGuiFreeType::GetErrorMessage(freetypeError));
         return 1;
@@ -134,6 +162,9 @@ int main(int, char**argv)
     ImVec2 pos, size;
 	while (!glfwWindowShouldClose(mainWindow))
     {
+        ZoneScoped
+        FrameMark
+
         // maintain active, prevent user change via imgui dialog
         io.ConfigFlags |= ImGuiConfigFlags_DockingEnable;           // Enable Docking
        
@@ -162,7 +193,6 @@ int main(int, char**argv)
 
         ImGui::Render();
 
-        glViewport(0, 0, display_w, display_h);
         ImGui_ImplOpenGL3_RenderDrawData(ImGui::GetDrawData());
 
         // Update and Render additional Platform Windows

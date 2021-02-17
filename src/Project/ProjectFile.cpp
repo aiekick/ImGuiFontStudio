@@ -21,6 +21,7 @@
 #include <Helper/Messaging.h>
 #include <Helper/SelectionHelper.h>
 #include <ctools/FileHelper.h>
+#include <Helper/Profiler.h>
 
 #include <Panes/Manager/LayoutManager.h>
 
@@ -28,6 +29,8 @@ ProjectFile::ProjectFile() = default;
 
 ProjectFile::ProjectFile(const std::string& vFilePathName)
 {
+	ZoneScoped;
+
 	m_ProjectFilePathName = FileHelper::Instance()->SimplifyFilePath(vFilePathName);
 	auto ps = FileHelper::Instance()->ParsePathFileName(m_ProjectFilePathName);
 	if (ps.isOk)
@@ -40,19 +43,22 @@ ProjectFile::~ProjectFile() = default;
 
 void ProjectFile::Clear()
 {
+	ZoneScoped;
+
 	m_ProjectFilePathName.clear();
 	m_ProjectFilePath.clear();
 	m_MergedFontPrefix.clear();
-	m_MergedCardGlyphHeightInPixel = 40U;
-	m_MergedCardCountRowsMax = 20U;
 	m_Fonts.clear();
 	m_ShowRangeColoring = false;
 	m_RangeColoringHash = ImVec4(10, 15, 35, 0.5f);
 	m_Preview_Glyph_CountX = 20;
 	m_Preview_Glyph_Width = 50;
+	m_CardGlyphHeightInPixel = 40U; // ine item height in card
+	m_CardCountRowsMax = 20U; // after this max, new columns
 	m_SelectedFont = nullptr;
 	m_CountSelectedGlyphs = 0; // for all fonts
 	m_IsLoaded = false;
+	m_NeverSaved = true;
 	m_IsThereAnyNotSavedChanged = false;
 	m_GenModeFlags = GENERATOR_MODE_CURRENT_HEADER_CARD |
 		GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES;
@@ -66,13 +72,16 @@ void ProjectFile::Clear()
 
 void ProjectFile::New()
 {
+	ZoneScoped;
+
 	Clear();
 	m_IsLoaded = true;
-	m_NeverSaved = true;
 }
 
 void ProjectFile::New(const std::string& vFilePathName)
 {
+	ZoneScoped;
+
 	Clear();
 	m_ProjectFilePathName = FileHelper::Instance()->SimplifyFilePath(vFilePathName);
 	auto ps = FileHelper::Instance()->ParsePathFileName(m_ProjectFilePathName);
@@ -81,51 +90,51 @@ void ProjectFile::New(const std::string& vFilePathName)
 		m_ProjectFilePath = ps.path;
 	}
 	m_IsLoaded = true;
-	SetProjectChange(false);
+	if (!vFilePathName.empty())
+	{
+		m_NeverSaved = false;
+		SetProjectChange(false);
+	}
 }
 
 bool ProjectFile::Load()
 {
+	ZoneScoped;
+
 	return LoadAs(m_ProjectFilePathName);
 }
 
 // ils wanted to not pass the adress for re open case
-// elwse, the clear will set vFilePathName to empty because with re open, target m_ProjectFilePathName
+// else, the clear will set vFilePathName to empty because with re open, target m_ProjectFilePathName
 bool ProjectFile::LoadAs(const std::string vFilePathName)  
 {
+	ZoneScoped;
+
 	Clear();
-
-	if (!vFilePathName.empty())
+	std::string filePathName = FileHelper::Instance()->SimplifyFilePath(vFilePathName);
+	if (LoadConfigFile(filePathName))
 	{
-		std::string filePathName = FileHelper::Instance()->SimplifyFilePath(vFilePathName);
-		tinyxml2::XMLError xmlError = LoadConfigFile(filePathName);
-		if (xmlError == tinyxml2::XMLError::XML_SUCCESS)
+		m_ProjectFilePathName = filePathName;
+		auto ps = FileHelper::Instance()->ParsePathFileName(m_ProjectFilePathName);
+		if (ps.isOk)
 		{
-			m_ProjectFilePathName = filePathName;
-			auto ps = FileHelper::Instance()->ParsePathFileName(m_ProjectFilePathName);
-			if (ps.isOk)
-			{
-				m_ProjectFilePath = ps.path;
-			}
-			if (m_SelectedFont)
-			{
-				m_LastGeneratedFileName = m_SelectedFont->m_FontFileName;
-			}
-			m_IsLoaded = true;
-			SetProjectChange(false);
-
-			// we do that after m_IsLoaded
-			SelectionHelper::Instance()->Load(this); // first
-			m_FontTestInfos.Load(this); // then because use final selection from SelectionHelper
+			m_ProjectFilePath = ps.path;
 		}
-		else
+		if (m_SelectedFont)
 		{
-			Clear();
-
-			auto errMsg = getTinyXml2ErrorMessage(xmlError);
-			Messaging::Instance()->AddError(true, nullptr, nullptr,
-				"The project file %s cant be loaded, Error : %s", filePathName.c_str(), errMsg.c_str());
+			m_LastGeneratedFileName = m_SelectedFont->m_FontFileName;
 		}
+		m_IsLoaded = true;
+		m_NeverSaved = false;
+		SetProjectChange(false);
+
+		// we do that after m_IsLoaded
+		SelectionHelper::Instance()->Load(this); // first
+		m_FontTestInfos.Load(this); // then because use final selection from SelectionHelper
+	}
+	else
+	{
+		Clear();
 	}
 
 	return m_IsLoaded;
@@ -133,6 +142,8 @@ bool ProjectFile::LoadAs(const std::string vFilePathName)
 
 bool ProjectFile::Save()
 {
+	ZoneScoped;
+
 	if (m_NeverSaved) 
 		return false;
 
@@ -147,6 +158,8 @@ bool ProjectFile::Save()
 
 bool ProjectFile::SaveAs(const std::string& vFilePathName)
 {
+	ZoneScoped;
+
 	std::string filePathName = FileHelper::Instance()->SimplifyFilePath(vFilePathName);
 	auto ps = FileHelper::Instance()->ParsePathFileName(filePathName);
 	if (ps.isOk)
@@ -161,26 +174,36 @@ bool ProjectFile::SaveAs(const std::string& vFilePathName)
 
 bool ProjectFile::IsLoaded() const
 {
+	ZoneScoped;
+
 	return m_IsLoaded;
 }
 
 bool ProjectFile::IsNeverSaved() const
 {
+	ZoneScoped;
+
 	return m_NeverSaved;
 }
 
 bool ProjectFile::IsThereAnyNotSavedChanged() const
 {
+	ZoneScoped;
+
 	return m_IsThereAnyNotSavedChanged;
 }
 
 void ProjectFile::SetProjectChange(bool vChange)
 {
+	ZoneScoped;
+
 	m_IsThereAnyNotSavedChanged = vChange;
 }
 
 void ProjectFile::UpdateCountSelectedGlyphs()
 {
+	ZoneScoped;
+
 	m_CountSelectedGlyphs = 0;
 	m_CountFontWithSelectedGlyphs = 0;
 
@@ -201,11 +224,15 @@ void ProjectFile::UpdateCountSelectedGlyphs()
 
 bool ProjectFile::IsRangeColoringShown() const
 {
+	ZoneScoped;
+
 	return m_ShowRangeColoring || SelectionHelper::Instance()->IsSelectionType(GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_RANGE);
 }
 
 std::string ProjectFile::GetAbsolutePath(const std::string& vFilePathName) const
 {
+	ZoneScoped;
+
 	std::string res = vFilePathName;
 
 	if (!vFilePathName.empty())
@@ -222,6 +249,8 @@ std::string ProjectFile::GetAbsolutePath(const std::string& vFilePathName) const
 
 std::string ProjectFile::GetRelativePath(const std::string& vFilePathName) const
 {
+	ZoneScoped;
+
 	std::string res = vFilePathName;
 
 	if (!vFilePathName.empty())
@@ -234,6 +263,8 @@ std::string ProjectFile::GetRelativePath(const std::string& vFilePathName) const
 
 std::shared_ptr<FontInfos> ProjectFile::GetFontWithFontName(const std::string& vFontName)
 {
+	ZoneScoped;
+
 	if (m_Fonts.find(vFontName) != m_Fonts.end())
 	{
 		return m_Fonts[vFontName];
@@ -244,6 +275,8 @@ std::shared_ptr<FontInfos> ProjectFile::GetFontWithFontName(const std::string& v
 
 std::string ProjectFile::getXml(const std::string& vOffset, const std::string& /*vUserDatas*/)
 {
+	ZoneScoped;
+
 	std::string str;
 
 	str += vOffset + "<project>\n";
@@ -263,8 +296,6 @@ std::string ProjectFile::getXml(const std::string& vOffset, const std::string& /
 	str += vOffset + "\t<previewglyphcount>" + ct::toStr(m_Preview_Glyph_CountX) + "</previewglyphcount>\n";
 	str += vOffset + "\t<previewglyphwidth>" + ct::toStr(m_Preview_Glyph_Width) + "</previewglyphwidth>\n";
 	str += vOffset + "\t<mergedfontprefix>" + m_MergedFontPrefix + "</mergedfontprefix>\n";
-	str += vOffset + "\t<mergedcardglyhpheight>" + ct::toStr(m_MergedCardGlyphHeightInPixel) + "</mergedcardglyhpheight>\n";
-	str += vOffset + "\t<mergedcardcountrowsmax>" + ct::toStr(m_MergedCardCountRowsMax) + "</mergedcardcountrowsmax>\n";
 	str += vOffset + "\t<curglyphtooltip>" + (m_CurrentPane_ShowGlyphTooltip ? "true" : "false") + "</curglyphtooltip>\n";
 	str += vOffset + "\t<srcglyphtooltip>" + (m_SourcePane_ShowGlyphTooltip ? "true" : "false") +"</srcglyphtooltip>\n";
 	str += vOffset + "\t<dstglyphtooltip>" + (m_FinalPane_ShowGlyphTooltip ? "true" : "false") +"</dstglyphtooltip>\n";
@@ -276,6 +307,8 @@ std::string ProjectFile::getXml(const std::string& vOffset, const std::string& /
 	str += vOffset + "\t<fonttomergein>" + m_FontToMergeIn + "</fonttomergein>\n";
 	str += vOffset + "\t<glyphdisplaytuningmode>" + ct::toStr(m_GlyphDisplayTuningMode) + "</glyphdisplaytuningmode>\n";
 	str += vOffset + "\t<sourcefontpaneflags>" + ct::toStr(m_SourceFontPaneFlags) + "</sourcefontpaneflags>\n";
+	str += vOffset + "\t<cardglyhpheight>" + ct::toStr(m_CardGlyphHeightInPixel) + "</cardglyhpheight>\n";
+	str += vOffset + "\t<cardcountrowsmax>" + ct::toStr(m_CardCountRowsMax) + "</cardcountrowsmax>\n";
 	str += vOffset + "\t<lastgeneratedpath>" + m_LastGeneratedPath + "</lastgeneratedpath>\n";
 	str += vOffset + "\t<lastgeneratedfilename>" + m_LastGeneratedFileName + "</lastgeneratedfilename>\n";
 	str += vOffset + "\t<zoomglyphs>" + (m_ZoomGlyphs ? "true" : "false") +"</zoomglyphs>\n";
@@ -291,6 +324,8 @@ std::string ProjectFile::getXml(const std::string& vOffset, const std::string& /
 
 bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& /*vUserDatas*/)
 {
+	ZoneScoped;
+
 	// The value of this child identifies the name of this element
 	std::string strName;
 	std::string strValue;
@@ -343,10 +378,6 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 			m_Preview_Glyph_Width = ct::fvariant(strValue).GetF();
 		else if (strName == "mergedfontprefix")
 			m_MergedFontPrefix = strValue;
-		else if (strName == "mergedcardglyhpheight")
-			m_MergedCardGlyphHeightInPixel = ct::uvariant(strValue).GetU();
-		else if (strName == "mergedcardcountrowsmax")
-			m_MergedCardCountRowsMax = ct::uvariant(strValue).GetU();
 		else if (strName == "genmodeflags")
 			m_GenModeFlags = (GenModeFlags)ct::ivariant(strValue).GetI();
 		else if (strName == "fonttomergein")
@@ -369,6 +400,10 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 			m_GlyphDisplayTuningMode = (GlyphDisplayTuningModeFlags)ct::ivariant(strValue).GetI();
 		else if (strName == "sourcefontpaneflags")
 			m_SourceFontPaneFlags = (SourceFontPaneFlags)ct::ivariant(strValue).GetI();
+		else if (strName == "cardglyhpheight")
+			m_CardGlyphHeightInPixel = ct::uvariant(strValue).GetU();
+		else if (strName == "cardcountrowsmax")
+			m_CardCountRowsMax = ct::uvariant(strValue).GetU();
 		else if (strName == "lastgeneratedpath")
 			m_LastGeneratedPath = strValue;
 		else if (strName == "lastgeneratedfilename")
@@ -390,6 +425,8 @@ bool ProjectFile::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 
 ImVec4 ProjectFile::GetColorFromInteger(uint32_t vInteger) const
 {
+	ZoneScoped;
+
 	ImVec4 res;
 
 	if (IsLoaded())
@@ -405,21 +442,29 @@ ImVec4 ProjectFile::GetColorFromInteger(uint32_t vInteger) const
 
 void ProjectFile::AddGenMode(GenModeFlags vFlags)
 {
+	ZoneScoped;
+
 	m_GenModeFlags |= vFlags;
 }
 
 void ProjectFile::RemoveGenMode(GenModeFlags vFlags)
 {
+	ZoneScoped;
+
 	m_GenModeFlags &= ~vFlags;
 }
 
 GenModeFlags ProjectFile::GetGenMode() const
 {
+	ZoneScoped;
+
 	return m_GenModeFlags;
 }
 
  bool ProjectFile::IsGenMode(GenModeFlags vFlags) const
 {
+	 ZoneScoped;
+
 	return (m_GenModeFlags & vFlags);
 }
 

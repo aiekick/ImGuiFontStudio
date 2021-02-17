@@ -77,12 +77,13 @@ std::string Compress::GetCompressedBase85BytesArray(
 
 	// Output as Base85 encoded
 	
-	uint32_t bufferSize = (uint32_t)((compressed_sz + 3) / 4) * 5;
+	size_t bufferSize = (int)((compressed_sz + 3) / 4) * 5;
 	bool generateByteArray = (bufferSize >= 65536); // not sure if needed for C#
 	if (vBufferSize) *vBufferSize = bufferSize; // export buffer size
-	std::string bufferName = vPrefix + "_compressed_data_base85";
+	std::string bufferName;
 	if (vLang == "c#")
 	{
+		bufferName = "compressed_data_base85";
 		if (generateByteArray)
 		{
 			res += ct::toStr("\t\tpublic static readonly IReadOnlyList<byte> %s = new byte[] {", bufferName.c_str());
@@ -99,7 +100,8 @@ std::string Compress::GetCompressedBase85BytesArray(
 		vLang == "cpp" || 
 		vLang == "c")
 	{
-		res += ct::toStr("static const char %s[%u+1] = ", bufferName.c_str(), bufferSize);
+		bufferName = "compressed_data_base85";
+		res += "static const char " + bufferName + "[" + ct::toStr(bufferSize) + "+1] =";
 		if (generateByteArray)
 		{
 			res += "{\n";
@@ -432,8 +434,9 @@ static int stb_compress_inner(stb_uchar *input, stb_uint length)
 
 	stb__running_adler = 1;
 
-	stb_uint len = (stb_uint)stb_compress_chunk(input, input, input + length, length, &literals, chash, stb__hashsize - 1);
-	
+    stb_uint len = stb_compress_chunk(input, input, input + length, length, &literals, chash, stb__hashsize - 1);
+    assert(len == length);
+
 	outliterals(input + length - literals, literals);
 
 	free(chash);
@@ -442,7 +445,7 @@ static int stb_compress_inner(stb_uchar *input, stb_uint length)
 
 	stb_out4(stb__running_adler);
 
-	return (len == length ? 1 : 0); // success
+	return 1; // success
 }
 
 stb_uint stb_compress(stb_uchar *out, stb_uchar *input, stb_uint length)

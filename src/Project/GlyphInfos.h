@@ -21,7 +21,9 @@
 #include <string>
 #include <memory>
 #include <ctools/cTools.h>
-#include <sfntly/table/truetype/glyph_table.h>
+#include <ttfrrw/ttfrrw.h>
+#include <Project/BaseGlyph.h>
+#include <Helper/MeshDecomposer.h>
 
 #define GLYPH_EDIT_CONTROL_WIDTH 180.0f
 
@@ -75,71 +77,47 @@ public:
 	bool isValid = false;
 
 public:
-	std::vector<std::vector<ct::ivec2>> coords;
-	std::vector<std::vector<bool>> onCurve;
-	ct::ivec4 rc;
+	BaseGlyph m_Glyph;
+	std::vector<std::pair<BaseGlyph, bool>> m_Layers;
 	ct::fvec2 m_Translation; // translation in first
 	ct::fvec2 m_Scale = 1.0f; // scale in second
 
 private:
+	GlyphContour ComputeAbsolutePointsFromContour(TTFRRW::Contour vContour, int vQuadBezierCountSegments);
+	GlyphMesh ComputeGlyphMesh(BaseGlyph vGlyph, int vQuadBezierCountSegments, PartitionAlgoFlags vPartitionAlgoFlags);
+
+public:
 	ImVec2 getScreenToLocal(ImVec2 vScreenPos, ImVec2 vZoneStart, ImVec2 vWorldBBoxOrigin, ImVec2 vWorlBBoxSize, float vWorldScale, ImVec2 vLocalBBoxOrigin);
 	ImVec2 getLocalToScreen(ImVec2 vLocalPos, ImVec2 vZoneStart, ImVec2 vWorldBBoxOrigin, ImVec2 vWorlBBoxSize, float vWorldScale, ImVec2 vLocalBBoxOrigin);
+	ct::ivec2 TransformCoords(ct::ivec2 vPoint);
 
 public:
 	void Clear();
-	void LoadSimpleGlyph(sfntly::GlyphTable::SimpleGlyph *vGlyph);
-	int GetCountContours() const;
-	ct::ivec2 GetCoords(int32_t vContour, int32_t vPoint);
-	bool IsOnCurve(int32_t vContour, int32_t vPoint);
-	ct::ivec2 Scale(ct::ivec2 p, double scale) const;
+	void LoadGlyph(BaseGlyph *vGlyph, ProjectFile* vProjectFile);
+	int GetCountContours(BaseGlyph* vGlyph);
+	int GetCountPoints(BaseGlyph* vGlyph);
+	int GetMaxContours(); // will explore all glyph, main + layers
+	int GetMaxPoints();
+	ct::ivec2 GetCoords(BaseGlyph* vGlyph, int32_t vContour, int32_t vPoint);
+	bool IsOnCurve(BaseGlyph* vGlyph, int32_t vContour, int32_t vPoint);
+	ct::ivec2 Scale(BaseGlyph* vGlyph, ct::ivec2 p, double scale) const;
 	//ct::ivec2 GetCoords(int32_t vContour, int32_t vPoint, double scale);
 	void ClearTransform();
 	void ClearTranslation();
 	void ClearScale();
+	void ComputeWholeGlyphMesh(int vQuadBezierCountSegments, PartitionAlgoFlags vPartitionAlgoFlags);
 
 public: // ImGui
 	void DrawCurves(
+		BaseGlyph* vGlyph,
+		ImVec2 vZoneStart, ImVec2 vWorldBBoxOrigin, ImVec2 vWorlBBoxSize, 
+		float vWorldScale, ImVec2 vLocalBBoxOrigin, ImDrawList* vImDrawList, 
+		int vMaxPoint, int vMaxContour, int vQuadBezierCountSegments, GlyphDrawingFlags vGlyphDrawingFlags);
+	void DrawGlyph(
 		float vGlobalScale,
 		std::shared_ptr<FontInfos> vFontInfos,
 		std::shared_ptr<GlyphInfos> vGlyphInfos,
-		int vMaxContour, int vQuadBezierCountSegments, 
-		GlyphDrawingFlags vGlyphDrawingFlags);
-};
-
-class CompositeGlyph_Solo
-{
-public:
-	bool isValid = false;
-
-public:
-	std::vector<std::vector<ct::ivec2>> coords;
-	std::vector<std::vector<bool>> onCurve;
-	ct::ivec4 rc;
-	ct::fvec2 m_Translation; // translation in first
-	ct::fvec2 m_Scale = 1.0f; // scale in second
-
-private:
-	ImVec2 getScreenToLocal(ImVec2 vScreenPos, ImVec2 vZoneStart, ImVec2 vWorldBBoxOrigin, ImVec2 vWorlBBoxSize, float vWorldScale, ImVec2 vLocalBBoxOrigin);
-	ImVec2 getLocalToScreen(ImVec2 vLocalPos, ImVec2 vZoneStart, ImVec2 vWorldBBoxOrigin, ImVec2 vWorlBBoxSize, float vWorldScale, ImVec2 vLocalBBoxOrigin);
-
-public:
-	void Clear();
-	void LoadCompositeGlyph(sfntly::GlyphTable::CompositeGlyph* vGlyph);
-	int GetCountContours() const;
-	ct::ivec2 GetCoords(int32_t vContour, int32_t vPoint);
-	bool IsOnCurve(int32_t vContour, int32_t vPoint);
-	ct::ivec2 Scale(ct::ivec2 p, double scale) const;
-	//ct::ivec2 GetCoords(int32_t vContour, int32_t vPoint, double scale);
-	void ClearTransform();
-	void ClearTranslation();
-	void ClearScale();
-
-public: // ImGui
-	void DrawCurves(
-		float vGlobalScale,
-		std::shared_ptr<FontInfos> vFontInfos,
-		std::shared_ptr<GlyphInfos> vGlyphInfos,
-		int vMaxContour, int vQuadBezierCountSegments,
+		int vMaxPoint, int vMaxContour, int vQuadBezierCountSegments,
 		GlyphDrawingFlags vGlyphDrawingFlags);
 };
 
@@ -148,22 +126,21 @@ class GlyphInfos
 public:
 	static std::shared_ptr<GlyphInfos> Create(
 		std::weak_ptr<FontInfos> vFontInfos,
-		ImFontGlyph vGlyph, std::string vOldName,
-		std::string vNewName, uint32_t vNewCodePoint = 0,
+		BaseGlyph vGlyph, std::string vOldName,
+		std::string vNewName, uint32_t vNewGlyphIndex = 0,
 		ImVec2 vTranslation = ImVec2(0, 0), ImVec2 vScale = ImVec2(1, 1));
 	// 0 => none, 1 => left pressed, 2 => right pressed
 	static int DrawGlyphButton(
 		int& vWidgetPushId, // by adress because we want modify it
-		ProjectFile* vProjectFile, ImFont* vFont,
-		bool* vSelected, ImVec2 vGlyphSize, const ImFontGlyph* vGlyph,
-		bool vColored = false,
+		ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
+		bool* vSelected, ImVec2 vGlyphSize, BaseGlyph* vGlyph, int vParentGlyphIndex = -1,
 		ImVec2 vTranslation = ImVec2(0, 0), ImVec2 vScale = ImVec2(1, 1),
 		int frame_padding = -1, float vRectThickNess = 0.0f, ImVec4 vRectColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
 	static void RenderGlyph(
 		ImFont* vFont, ImDrawList* vDrawList, 
 		float vGlyphHeight, ImVec2 vMin, ImVec2 vMax, ImVec2 vOffset,
 		ImU32 vCol, 
-		ImWchar vGlyphCodePoint, 
+		ImWchar vGlyphGlyphIndex, 
 		ImVec2 vTranslation, ImVec2 vScale, 
 		bool vZoomed);
 
@@ -171,16 +148,13 @@ private:
 	std::weak_ptr<FontInfos> fontInfos;
 
 public:
-	ImFontGlyph glyph = {};
-	int glyphIndex = 0;
-	std::string oldHeaderName;
+	BaseGlyph glyph = {};
 	std::string newHeaderName;
 	uint32_t newCodePoint = 0;
 	SimpleGlyph_Solo simpleGlyph;
-	CompositeGlyph_Solo compositeGlyph;
+	//CompositeGlyph_Solo compositeGlyph;
 	ct::fvec2 m_Translation = 0.0f;
 	ct::fvec2 m_Scale = 1.0f;
-	bool m_Colored = false; // is colored or not
 
 	// filled during generation only
 	// not to use outside of generation
@@ -190,16 +164,16 @@ public:
 	
 public: // for interaction only
 	bool m_editingName = false;
-	bool m_editingCodePoint = false;
-	int editCodePoint = 0;
+	bool m_editingGlyphIndex = false;
+	int editGlyphIndex = 0;
 	std::string editHeaderName;
 
 public:
 	GlyphInfos();
 	GlyphInfos(
 		std::weak_ptr<FontInfos> vFontInfos,
-		ImFontGlyph vGlyph, std::string vOldName,
-		std::string vNewName, uint32_t vNewCodePoint, 
+		BaseGlyph vGlyph, std::string vOldName,
+		std::string vNewName, uint32_t vNewGlyphIndex, 
 		ImVec2 vTranslation, ImVec2 vScale);
 	~GlyphInfos();
 

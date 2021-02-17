@@ -54,7 +54,6 @@ enum _GenModeFlags
 	
 	// header
 	GENERATOR_MODE_HEADER_CARD = GENERATOR_MODE_HEADER | GENERATOR_MODE_CARD,
-	GENERATOR_MODE_HEADER_CARD_SRC = GENERATOR_MODE_HEADER | GENERATOR_MODE_CARD | GENERATOR_MODE_SRC,
 
 	// font alone
 	GENERATOR_MODE_CURRENT_CARD = GENERATOR_MODE_CURRENT | GENERATOR_MODE_CARD,
@@ -106,8 +105,10 @@ public:
 		const std::string& vFileName = "");
 
 private:
-	bool GenerateCard_One(const std::string& vFilePathName, std::shared_ptr<FontInfos> vFontInfos);
-	bool GenerateCard_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile);
+	bool GenerateCard_One(const std::string& vFilePathName, std::shared_ptr<FontInfos> vFontInfos,
+		const uint32_t& vGlyphHeight, const uint32_t& vMaxRows);
+	bool GenerateCard_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
+		const uint32_t& vGlyphHeight, const uint32_t& vMaxRows);
 	
 	/*void GenerateHeader_One(const std::string& vFilePathName, std::shared_ptr<FontInfos> vFontInfos,
 		std::string vFontBufferName = "", size_t vFontBufferSize = 0);

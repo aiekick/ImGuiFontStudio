@@ -13,8 +13,8 @@ private:
 	ImFontAtlas m_ImFontAtlas;
 	ImFontConfig m_FontConfig;
 	int m_Oversample = 1;
-	int32_t m_FontPadding = 1;
-	float m_FontMultiply = 1.0f;
+	int32_t fontPadding = 1;
+	float fontMultiply = 1.0f;
 
 public:
 	bool Init();

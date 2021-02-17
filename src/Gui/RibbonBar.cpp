@@ -41,14 +41,14 @@ bool RibbonBar::LoadFont(float vFontSize)
 	m_Font = m_ImFontAtlas.AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_IGFS, vFontSize, &m_FontConfig, ranges);
 	if (m_Font)
 	{
-		m_ImFontAtlas.TexGlyphPadding = m_FontPadding;
+		m_ImFontAtlas.TexGlyphPadding = fontPadding;
 
 		uint32_t freeTypeFlags = ImGuiFreeType::FreeType_Default;
 
 		for (int n = 0; n < m_ImFontAtlas.ConfigData.Size; n++)
 		{
 			ImFontConfig* font_config = (ImFontConfig*)&m_ImFontAtlas.ConfigData[n];
-			font_config->RasterizerMultiply = m_FontMultiply;
+			font_config->RasterizerMultiply = fontMultiply;
 			font_config->RasterizerFlags = freeTypeFlags;
 			font_config->OversampleH = m_Oversample;
 			font_config->OversampleV = m_Oversample;
@@ -367,10 +367,8 @@ bool RibbonBar::RibbonToggleButton(const char* icon, const char* label, float he
 }
 
 // like ImGui::BeginMenu
-bool RibbonBar::BeginRibbonButtonMenu(const char* icon, const char* label, float height, bool enabled)
+bool RibbonBar::BeginRibbonButtonMenu(const char* icon, const char* label, float height, bool /*enabled*/)
 {
-	UNUSED(enabled);
-
 	using namespace ImGui;
 
 	ImGuiWindow* window = GetCurrentWindow();

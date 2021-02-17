@@ -524,7 +524,7 @@ void ImGui::FramedGroupText(ImVec4 vTextColor, const char* vFmt, ...)
 	va_end(args);
 }
 
-bool ImGui::RadioButtonLabeled(const char* label, bool active, bool disabled)
+bool ImGui::RadioButtonLabeled(float vWidth, const char* label, bool active, bool disabled)
 {
     using namespace ImGui;
 
@@ -534,20 +534,15 @@ bool ImGui::RadioButtonLabeled(const char* label, bool active, bool disabled)
 
     ImGuiContext& g = *GImGui;
     const ImGuiStyle& style = g.Style;
-    float w = CalcItemWidth();
-    if (w == window->ItemWidthDefault)	w = 0.0f; // no push item width
-    const ImGuiID id = window->GetID(label);
+    float w = vWidth;
+	const ImGuiID id = window->GetID(label);
     const ImVec2 label_size = CalcTextSize(label, nullptr, true);
-	ImVec2 bb_size = ImGui::CalcItemSize(ImVec2(0, 0), label_size.x + style.FramePadding.x * 2.0f, label_size.y + style.FramePadding.y * 2.0f);
-    //bb_size = ImVec2(style.FramePadding.x * 2 - 1, style.FramePadding.y * 2 - 1) + label_size;
-    bb_size.x = ImMax(w, bb_size.x);
+	if (w < 0.0f) w = ImGui::GetContentRegionMaxAbs().x - window->DC.CursorPos.x;
+	if (IS_FLOAT_EQUAL(w, 0.0f)) w = label_size.x + style.FramePadding.x * 2.0f;
+	const ImRect total_bb(window->DC.CursorPos, window->DC.CursorPos + ImVec2(w, label_size.y + style.FramePadding.y * 2.0f));
 
-    const ImRect check_bb(
-            window->DC.CursorPos,
-            window->DC.CursorPos + bb_size);
-    ItemSize(check_bb, style.FramePadding.y);
-
-    if (!ItemAdd(check_bb, id))
+    ItemSize(total_bb, style.FramePadding.y);
+    if (!ItemAdd(total_bb, id))
         return false;
 
     // check
@@ -555,43 +550,43 @@ bool ImGui::RadioButtonLabeled(const char* label, bool active, bool disabled)
 	if (!disabled)
 	{
 		bool hovered, held;
-		pressed = ButtonBehavior(check_bb, id, &hovered, &held);
+		pressed = ButtonBehavior(total_bb, id, &hovered, &held);
 
-		window->DrawList->AddRectFilled(check_bb.Min, check_bb.Max, GetColorU32((held && hovered) ? ImGuiCol_FrameBgActive : hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg), style.FrameRounding);
+		window->DrawList->AddRectFilled(total_bb.Min, total_bb.Max, GetColorU32((held && hovered) ? ImGuiCol_FrameBgActive : hovered ? ImGuiCol_FrameBgHovered : ImGuiCol_FrameBg), style.FrameRounding);
 		if (active)
 		{
 			const ImU32 col = GetColorU32((hovered && held) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
-			window->DrawList->AddRectFilled(check_bb.Min, check_bb.Max, col, style.FrameRounding);
+			window->DrawList->AddRectFilled(total_bb.Min, total_bb.Max, col, style.FrameRounding);
 		}
 	}
     
     // circle shadow + bg
     if (style.FrameBorderSize > 0.0f)
     {
-        window->DrawList->AddRect(check_bb.Min + ImVec2(1, 1), check_bb.Max, GetColorU32(ImGuiCol_BorderShadow), style.FrameRounding);
-        window->DrawList->AddRect(check_bb.Min, check_bb.Max, GetColorU32(ImGuiCol_Border), style.FrameRounding);
+        window->DrawList->AddRect(total_bb.Min + ImVec2(1, 1), total_bb.Max, GetColorU32(ImGuiCol_BorderShadow), style.FrameRounding);
+        window->DrawList->AddRect(total_bb.Min, total_bb.Max, GetColorU32(ImGuiCol_Border), style.FrameRounding);
     }
 
     if (label_size.x > 0.0f)
     {
-		RenderText(check_bb.GetCenter() - label_size * 0.5f, label);
+		RenderTextClipped(total_bb.Min, total_bb.Max, label, nullptr, &label_size, ImVec2(0.5f, 0.5f));
     }
 
     return pressed;
 }
 
-bool ImGui::RadioButtonLabeled(const char* label, const char* help, bool active, bool disabled)
+bool ImGui::RadioButtonLabeled(float vWidth, const char* label, const char* help, bool active, bool disabled)
 {
-    bool change = RadioButtonLabeled(label, active, disabled);
+    bool change = RadioButtonLabeled(vWidth, label, active, disabled);
     if (help)
         if (ImGui::IsItemHovered())
             ImGui::SetTooltip("%s", help);
     return change;
 }
 
-bool ImGui::RadioButtonLabeled(const char* label, const char* help, bool *active, bool disabled)
+bool ImGui::RadioButtonLabeled(float vWidth, const char* label, const char* help, bool *active, bool disabled)
 {
-    bool change = RadioButtonLabeled(label, *active, disabled);
+    bool change = RadioButtonLabeled(vWidth, label, *active, disabled);
     if (change)
         *active = !*active;
     if (help)

@@ -1,0 +1,149 @@
+<config>
+	<project>
+		<font name="Roboto-Medium.ttf">
+			<prefix>RM</prefix>
+			<pathfilename>..\bin\x64\samples_Fonts\fonts\Roboto-Medium.ttf</pathfilename>
+			<oversample>1</oversample>
+			<fontsize>40</fontsize>
+			<rasterizer>0</rasterizer>
+			<freetypeflag>259</freetypeflag>
+			<freetypemultiply>1</freetypemultiply>
+			<padding>1</padding>
+			<texturefiltering>9729</texturefiltering>
+			<glyphfiltering>
+			<flags>127</flags>
+			<op>true</op>
+			<use_color>false</use_color>
+			<simple_color>3425907660</simple_color>
+			<composite_color>3430953932</composite_color>
+			<mapped_color>3430953856</mapped_color>
+			<unmapped_color>3429289088</unmapped_color>
+			<colored_color>3425927219</colored_color>
+			<layer_color>3429289037</layer_color>
+			<named_color>3435954227</named_color>
+			</glyphfiltering>
+		</font>
+		<font name="TwemojiMozilla.ttf">
+			<glyphs>
+				<glyph orgId="620" newId="620" orgName="u1f47f" newName="u1f47f" trans="0;0" scale="1;1"/>
+				<glyph orgId="1110" newId="1110" orgName="u1f932" newName="u1f932" trans="0;0" scale="1;1"/>
+				<glyph orgId="1111" newId="1111" orgName="u1f933" newName="u1f933" trans="0;0" scale="1;1"/>
+				<glyph orgId="1136" newId="1136" orgName="u1f94e" newName="u1f94e" trans="0;0" scale="1;1"/>
+				<glyph orgId="1233" newId="1233" orgName="u1f9b8" newName="u1f9b8" trans="0;0" scale="1;1"/>
+				<glyph orgId="1234" newId="1234" orgName="u1f9b9" newName="u1f9b9" trans="0;0" scale="1;1"/>
+				<glyph orgId="1235" newId="1235" orgName="u1f9ba" newName="u1f9ba" trans="0;0" scale="1;1"/>
+				<glyph orgId="1737" newId="1737" orgName="u1f1e8_1f1f5" newName="FLAG_FR" trans="0;0" scale="1;1"/>
+			</glyphs>
+			<prefix>TM</prefix>
+			<pathfilename>..\bin\x64\samples_Fonts\TwemojiMozilla.ttf</pathfilename>
+			<oversample>1</oversample>
+			<fontsize>50</fontsize>
+			<rasterizer>0</rasterizer>
+			<freetypeflag>259</freetypeflag>
+			<freetypemultiply>1</freetypemultiply>
+			<padding>1</padding>
+			<texturefiltering>9729</texturefiltering>
+			<glyphfiltering>
+			<flags>48</flags>
+			<op>true</op>
+			<use_color>false</use_color>
+			<simple_color>3425907660</simple_color>
+			<composite_color>3430953932</composite_color>
+			<mapped_color>3430953856</mapped_color>
+			<unmapped_color>3429289088</unmapped_color>
+			<colored_color>3425927219</colored_color>
+			<layer_color>3429289037</layer_color>
+			<named_color>3435954227</named_color>
+			</glyphfiltering>
+		</font>
+		<font name="seguiemj.ttf">
+			<glyphs>
+				<glyph orgId="1366" newId="1366" orgName="" newName="Symbol_1366" trans="0;0" scale="1;1"/>
+				<glyph orgId="1367" newId="1367" orgName="" newName="Symbol_1367" trans="0;0" scale="1;1"/>
+				<glyph orgId="1368" newId="1368" orgName="" newName="Symbol_1368" trans="0;0" scale="1;1"/>
+				<glyph orgId="1369" newId="1369" orgName="" newName="Symbol_1369" trans="0;0" scale="1;1"/>
+				<glyph orgId="1370" newId="1370" orgName="" newName="Symbol_1370" trans="0;0" scale="1;1"/>
+			</glyphs>
+			<prefix></prefix>
+			<pathfilename>..\samples_Fonts\seguiemj.ttf</pathfilename>
+			<oversample>1</oversample>
+			<fontsize>50</fontsize>
+			<rasterizer>0</rasterizer>
+			<freetypeflag>259</freetypeflag>
+			<freetypemultiply>1</freetypemultiply>
+			<padding>1</padding>
+			<texturefiltering>9729</texturefiltering>
+			<glyphfiltering>
+			<flags>112</flags>
+			<op>true</op>
+			<use_color>false</use_color>
+			<simple_color>3425907660</simple_color>
+			<composite_color>3430953932</composite_color>
+			<mapped_color>3430953856</mapped_color>
+			<unmapped_color>3429289088</unmapped_color>
+			<colored_color>3425927219</colored_color>
+			<layer_color>3429289037</layer_color>
+			<named_color>3435954227</named_color>
+			</glyphfiltering>
+		</font>
+		<font name="simsunb.ttf">
+			<glyphs>
+				<glyph orgId="188" newId="188" orgName="Symbol_188" newName="Symbol_188" trans="0;0" scale="1;1"/>
+			</glyphs>
+			<prefix></prefix>
+			<pathfilename>..\..\..\..\Windows\Fonts\simsunb.ttf</pathfilename>
+			<oversample>1</oversample>
+			<fontsize>50</fontsize>
+			<rasterizer>0</rasterizer>
+			<freetypeflag>259</freetypeflag>
+			<freetypemultiply>1</freetypemultiply>
+			<padding>1</padding>
+			<texturefiltering>9729</texturefiltering>
+			<glyphfiltering>
+			<flags>127</flags>
+			<op>true</op>
+			<use_color>false</use_color>
+			<simple_color>3425907660</simple_color>
+			<composite_color>3430953932</composite_color>
+			<mapped_color>3430953856</mapped_color>
+			<unmapped_color>3429289088</unmapped_color>
+			<colored_color>3425927219</colored_color>
+			<layer_color>3429289037</layer_color>
+			<named_color>3435954227</named_color>
+			</glyphfiltering>
+		</font>
+		<rangecoloring show="false" hash="10;15;35;0.5"/>
+		<previewglyphcount>50</previewglyphcount>
+		<previewglyphwidth>5.8</previewglyphwidth>
+		<mergedfontprefix></mergedfontprefix>
+		<curglyphtooltip>true</curglyphtooltip>
+		<srcglyphtooltip>true</srcglyphtooltip>
+		<dstglyphtooltip>true</dstglyphtooltip>
+		<glyphpreviewscale>0.75</glyphpreviewscale>
+		<glyphdrawingflags>1391</glyphdrawingflags>
+		<glyphpreviewquadbeziercounsegment>4</glyphpreviewquadbeziercounsegment>
+		<glyphpreviewzoomprecision>20</glyphpreviewzoomprecision>
+		<genmodeflags>275</genmodeflags>
+		<fonttomergein>simsunb.ttf</fonttomergein>
+		<glyphdisplaytuningmode>1</glyphdisplaytuningmode>
+		<sourcefontpaneflags>1</sourcefontpaneflags>
+		<cardglyhpheight>40</cardglyhpheight>
+		<cardcountrowsmax>20</cardcountrowsmax>
+		<lastgeneratedpath>.</lastgeneratedpath>
+		<lastgeneratedfilename>Generated_Font</lastgeneratedfilename>
+		<zoomglyphs>false</zoomglyphs>
+		<showbaseline>true</showbaseline>
+		<showadvancex>true</showadvancex>
+		<glyphdrawingflags>1391</glyphdrawingflags>
+		<finalselection>
+		</finalselection>
+		<fonttest>
+			<fontsize>100</fontsize>
+			<showbaseline>true</showbaseline>
+			<fontname></fontname>
+			<teststring></teststring>
+			<insertedglyphs>
+			</insertedglyphs>
+		</fonttest>
+	</project>
+</config>

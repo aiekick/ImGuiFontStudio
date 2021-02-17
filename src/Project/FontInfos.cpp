@@ -24,8 +24,11 @@
 #include <Helper/Messaging.h>
 #include <ctools/Logger.h>
 #include <Panes/ParamsPane.h>
+#include <Res/CustomFont.h>
+#include <MainFrame.h>
 
-#include <ImguiImpl/freetype/imgui_freetype.h>
+#include <Helper/Profiler.h>
+#include <ImguiImpl/freetype/imgui_freetype_unleashed.h>
 
 #define STB_TRUETYPE_IMPLEMENTATION  
 #include <imgui/imstb_truetype.h>
@@ -34,11 +37,14 @@
 
 #include <array>
 
-using namespace ImGuiFreeType;
+#define USE_THREADED_FONT_LOADING
 
 ///////////////////////////////////////////////////////////////////////////////////
 static ProjectFile defaultProjectValues;
 static FontInfos defaultFontInfosValues;
+///////////////////////////////////////////////////////////////////////////////////
+uint32_t FontInfos::maxThreadInParallel = (std::thread::hardware_concurrency() / 2U);
+std::atomic<uint32_t> FontInfos::countThreadInParallel = 0U;
 ///////////////////////////////////////////////////////////////////////////////////
 
 // Extract the UpperCase char's of a string and return as a Prefix
@@ -46,6 +52,8 @@ static FontInfos defaultFontInfosValues;
 // if all the name is lowercase, retunr nothing..
 static std::string GetPrefixFromFontFileName(const std::string& vFileName)
 {
+	ZoneScoped;
+
     std::string res;
 
     if (!vFileName.empty())
@@ -64,6 +72,8 @@ static std::string GetPrefixFromFontFileName(const std::string& vFileName)
 
 std::shared_ptr<FontInfos> FontInfos::Create()
 {
+	ZoneScoped;
+
 	auto res = std::make_shared<FontInfos>();
 	res->m_This = res;
 	return res;
@@ -72,122 +82,131 @@ std::shared_ptr<FontInfos> FontInfos::Create()
 FontInfos::FontInfos() = default;
 FontInfos::~FontInfos()
 {
+	ZoneScoped;
+
 	m_ImFontAtlas.Clear();
 	Clear();
 }
 
 void FontInfos::Clear()
 {
+	ZoneScoped;
+
 	DestroyFontTexture();
 	m_ImFontAtlas.Clear();
 	m_GlyphNames.clear();
-	m_GlyphCodePointToName.clear();
+	m_Glyphs.clear();
 	m_SelectedGlyphs.clear();
 	m_Filters.clear();
-	m_RasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
-	m_FreeTypeFlag = FreeType_Default;
-	m_FontMultiply = 1.0f;
-	m_FontPadding = 1;
-	m_TextureFiltering = GL_NEAREST;
-	m_CardGlyphHeightInPixel = 40U; // ine item height in card
-	m_CardCountRowsMax = 20U; // after this max, new columns
+	rasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
+	freeTypeFlag = ImGuiFreeType_unleashed::FreeType_Default;
+	fontMultiply = 1.0f;
+	fontPadding = 1;
+	textureFiltering = GL_NEAREST;
 }
 
-bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFilePathName)
+bool FontInfos::LoadFont(
+	ProjectFile *vProjectFile, 
+	const std::string& vFontFilePathName,
+	std::function<void()> vLoadingThreadFinishFunc)
 {
-	bool res = false;
+	ZoneScoped;
+
+	m_LoadingThreadFinishFunc = vLoadingThreadFinishFunc;
+	m_FontFilePathNameToLoad = vFontFilePathName;
+	m_WaitingToBeLoaded = true;
+
+	return false;
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//// THREAD //////////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+bool FontInfos::LoadFontThreaded(
+	ProjectFile* vProjectFile,
+	const std::string& vFontFilePathName,
+	std::atomic<bool>& vWorking,
+	std::atomic<float>& vProgress,
+	std::atomic<uint32_t>& vObjectsCount)
+{
+	ZoneScoped;
+
+	tracy::SetThreadName("Load Font");
+
+	if (!vWorking) return false;
 
 	if (!vProjectFile || !vProjectFile->IsLoaded())
-		return res;
+		return false;
 
 	std::string fontFilePathName = FileHelper::Instance()->CorrectSlashTypeForFilePathName(vFontFilePathName);
-	
+
 	if (!FileHelper::Instance()->IsAbsolutePath(fontFilePathName))
 	{
 		fontFilePathName = vProjectFile->GetAbsolutePath(fontFilePathName);
 	}
-	
+
+	bool res = false;
+
 	if (FileHelper::Instance()->IsFileExist(fontFilePathName))
 	{
-		static const ImWchar ranges[] =
-		{
-			0x0020,
-			0xFFFF, // Full Range
-			0,
-		};
-		m_FontConfig.GlyphRanges = &ranges[0];
-		m_FontConfig.OversampleH = m_Oversample;
-		m_FontConfig.OversampleV = m_Oversample;
 		m_ImFontAtlas.Clear();
-		m_ImFontAtlas.Flags |= 
+		m_ImFontAtlas.Flags |=
 			ImFontAtlasFlags_NoMouseCursors | // hte mouse cursors
 			ImFontAtlasFlags_NoBakedLines; // the big triangle
-
 		auto ps = FileHelper::Instance()->ParsePathFileName(fontFilePathName);
 		if (ps.isOk)
 		{
 			m_FontFileName = ps.name + "." + ps.ext;
+			if (!vWorking) return false;
 
-			ImFont *font = m_ImFontAtlas.AddFontFromFileTTF(
-				fontFilePathName.c_str(),
-				(float)m_FontSize,
-				&m_FontConfig);
-			if (font)
 			{
-				bool success = false;
+				ZoneScopedN("AddFontFromFileTTF");
+				res = m_ImFontAtlas.AddFontFromFileTTF(fontFilePathName.c_str(), (float)m_FontSize);
+			}
 
-				m_ImFontAtlas.TexGlyphPadding = m_FontPadding;
-
-				for (int n = 0; n < m_ImFontAtlas.ConfigData.Size; n++)
-				{
-					ImFontConfig* font_config = (ImFontConfig*)&m_ImFontAtlas.ConfigData[n];
-					font_config->RasterizerMultiply = m_FontMultiply;
-					font_config->RasterizerFlags = (m_RasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE) ? m_FreeTypeFlag : 0x00;
-					font_config->OversampleH = m_Oversample;
-					font_config->OversampleV = m_Oversample;
-				}
-				
-				FT_Error freetypeError = 0;
-				if (m_RasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
-				{
-					success = BuildFontAtlas(&m_ImFontAtlas, m_FreeTypeFlag, &freetypeError);
-				}
-				else if (m_RasterizerMode == RasterizerEnum::RASTERIZER_STB)
-				{
-					success = m_ImFontAtlas.Build();
-				}
-
+			if (res)
+			{
+				if (!vWorking) return false;
 				m_FontFilePathName = vProjectFile->GetRelativePath(fontFilePathName);
-
-				if (success)
+				m_ImFontAtlas.TexGlyphPadding = fontPadding;
+				ImGuiFreeType_unleashed::FT_Error freetypeError = 0;
+				if (!vWorking) return false;
+				if (ImGuiFreeType_unleashed::BuildFontAtlas(&m_ImFontAtlas, freeTypeFlag, &freetypeError))
 				{
-					if (!m_ImFontAtlas.Fonts.empty())
+					if (m_ImFontAtlas.IsBuilt())
 					{
-						if (m_FontPrefix.empty())
-							m_FontPrefix = GetPrefixFromFontFileName(ps.name);
-
-						DestroyFontTexture();
-						CreateFontTexture();
-
-						FillGlyphNames();
-						GenerateCodePointToGlypNamesDB();
-						FillGlyphColoreds();
-						UpdateInfos();
-						UpdateFiltering();
-						UpdateSelectedGlyphs(font);
-
-						m_NeedFilePathResolve = false;
-
-						res = true;
+						if (!m_ImFontAtlas.Fonts.empty())
+						{
+							if (!vWorking) return false;
+							if (m_FontPrefix.empty())
+								m_FontPrefix = GetPrefixFromFontFileName(ps.name);
+							Build_Glyph_DataBase();
+							if (!vWorking) return false;
+							UpdateFiltering();
+							if (!vWorking) return false;
+							UpdateSelectedGlyphs();
+							if (!vWorking) return false;
+							UpdateInfos();
+							if (!vWorking) return false;
+							m_NeedFilePathResolve = false;
+							res = true;
+						}
+					}
+					else
+					{
+						res = false;
+						Messaging::Instance()->AddError(true, nullptr, nullptr, "Atlas not Built..");
 					}
 				}
 				else
 				{
-					if (m_RasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
+					res = false;
+					if (rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
 					{
 						Messaging::Instance()->AddError(true, nullptr, nullptr,
-							"Feetype fail to load font file %s.%s. Reason : %s", 
-							ps.name.c_str(), ps.ext.c_str(), ImGuiFreeType::GetErrorMessage(freetypeError));
+							"Feetype fail to load font file %s.%s. Reason : %s",
+							ps.name.c_str(), ps.ext.c_str(), ImGuiFreeType_unleashed::GetErrorMessage(freetypeError));
 					}
 					else
 					{
@@ -198,213 +217,321 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 			}
 			else
 			{
+				res = false;
 				Messaging::Instance()->AddError(true, nullptr, nullptr,
-				        "The  File %s.%s seem to be bad. Can't load", ps.name.c_str(), ps.ext.c_str());
+					"The  File %s.%s seem to be bad. Can't load", ps.name.c_str(), ps.ext.c_str());
 			}
 		}
 	}
 	else
 	{
+		res = false;
 		Messaging::Instance()->AddError(true, nullptr, nullptr, "font %s not found", fontFilePathName.c_str());
 		m_NeedFilePathResolve = true;
 	}
 
 	vProjectFile->SetProjectChange();
 
+	// stop the thread
+	vWorking = false;
+
 	return res;
 }
 
-static const char *standardMacNames[258] = 
-{ ".notdef", ".null", "nonmarkingreturn", "space", "exclam", "quotedbl", "numbersign", "dollar", "percent", 
-"ampersand", "quotesingle", "parenleft", "parenright", "asterisk", "plus", "comma", "hyphen", "period", 
-"slash", "zero", "one", "two", "three", "four", "five", "six", "seven", "eight", "nine", "colon", 
-"semicolon", "less", "equal", "greater", "question", "at", "A", "B", "C", "D", "E", "F", "G", "H", 
-"I", "J", "K", "L", "M", "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z", "bracketleft", 
-"backslash", "bracketright", "asciicircum", "underscore", "grave", "a", "b", "c", "d", "e", "f", "g", "h", 
-"i", "j", "k", "l", "m", "n", "o", "p", "q", "r", "s", "t", "u", "v", "w", "x", "y", "z", "braceleft", "bar", 
-"braceright", "asciitilde", "Adieresis", "Aring", "Ccedilla", "Eacute", "Ntilde", "Odieresis", "Udieresis", 
-"aacute", "agrave", "acircumflex", "adieresis", "atilde", "aring", "ccedilla", "eacute", "egrave", "ecircumflex", 
-"edieresis", "iacute", "igrave", "icircumflex", "idieresis", "ntilde", "oacute", "ograve", "ocircumflex", "odieresis", 
-"otilde", "uacute", "ugrave", "ucircumflex", "udieresis", "dagger", "degree", "cent", "sterling", "section", "bullet", 
-"paragraph", "germandbls", "registered", "copyright", "trademark", "acute", "dieresis", "notequal", "AE", "Oslash", 
-"infinity", "plusminus", "lessequal", "greaterequal", "yen", "mu", "partialdiff", "summation", "product", "pi", 
-"integral", "ordfeminine", "ordmasculine", "Omega", "ae", "oslash", "questiondown", "exclamdown", "logicalnot", 
-"radical", "florin", "approxequal", "Delta", "guillemotleft", "guillemotright", "ellipsis", "nonbreakingspace", 
-"Agrave", "Atilde", "Otilde", "OE", "oe", "endash", "emdash", "quotedblleft", "quotedblright", "quoteleft", 
-"quoteright", "divide", "lozenge", "ydieresis", "Ydieresis", "fraction", "currency", "guilsinglleft", "guilsinglright", 
-"fi", "fl", "daggerdbl", "periodcentered", "quotesinglbase", "quotedblbase", "perthousand", "Acircumflex", "Ecircumflex", 
-"Aacute", "Edieresis", "Egrave", "Iacute", "Icircumflex", "Idieresis", "Igrave", "Oacute", "Ocircumflex", "apple", "Ograve", 
-"Uacute", "Ucircumflex", "Ugrave", "dotlessi", "circumflex", "tilde", "macron", "breve", "dotaccent", "ring", "cedilla", 
-"hungarumlaut", "ogonek", "caron", "Lslash", "lslash", "Scaron", "scaron", "Zcaron", "zcaron", "brokenbar", "Eth", "eth", 
-"Yacute", "yacute", "Thorn", "thorn", "minus", "multiply", "onesuperior", "twosuperior", "threesuperior", "onehalf", 
-"onequarter", "threequarters", "franc", "Gbreve", "gbreve", "Idotaccent", "Scedilla", "scedilla", "Cacute", "cacute", 
-"Ccaron", "ccaron", "dcroat" };
-
-void FontInfos::FillGlyphNames()
+void FontInfos::StartLoadingThread(
+	ProjectFile* vProjectFile,
+	const std::string& vFontFilePathName,
+	std::function<void()> vLoadingThreadFinishFunc)
 {
-	if (!m_ImFontAtlas.ConfigData.empty())
+	ZoneScoped;
+
+	StopLoadingThread();
+
+	m_LoadingThreadFinishFunc = vLoadingThreadFinishFunc;
+	m_LoadingWorking = true;
+	m_LoadingProgress = 0.0f;
+	m_LoadingObjectsCount = 0U;
+	countThreadInParallel++;
+	m_LoadingThread = std::thread(
+		&FontInfos::LoadFontThreaded, this,
+		vProjectFile,
+		vFontFilePathName,
+		std::ref(m_LoadingWorking),
+		std::ref(m_LoadingProgress),
+		std::ref(m_LoadingObjectsCount));
+}
+
+void FontInfos::DrawLoadingProgressBar(ProjectFile* vProjectFile)
+{
+	ZoneScoped;
+
+	if (IsJoinable())
 	{
-		m_GlyphNames.clear();
-
-		stbtt_fontinfo fontInfo;
-		const int font_offset = stbtt_GetFontOffsetForIndex(
-			(unsigned char*)m_ImFontAtlas.ConfigData[0].FontData,
-			m_ImFontAtlas.ConfigData[0].FontNo);
-		if (!stbtt_InitFont(&fontInfo,
-			(unsigned char*)m_ImFontAtlas.ConfigData[0].FontData, font_offset))
-			return;
-
-		// get table offet and length
-		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html => Table Directory
-		stbtt_int32 num_tables = ttUSHORT(fontInfo.data + fontInfo.fontstart + 4);
-		stbtt_uint32 tabledir = fontInfo.fontstart + 12;
-		stbtt_uint32 tablePos = 0;
-		stbtt_uint32 tableLen = 0;
-		for (int i = 0; i < num_tables; ++i)
+		const float ratio = m_LoadingProgress;
+		const size_t count = m_LoadingObjectsCount;
+		
+		static char buffer[100] = "";
+		snprintf(buffer, 100, "[%s] Objects (%zu)", m_FontFileName.c_str(), count);
+		if (ImGui::Button(ICON_IGFS_ICON_VIEW))
 		{
-			stbtt_uint32 loc = tabledir + 16 * i;
-			if (stbtt_tag(fontInfo.data + loc + 0, "post"))
+			m_LoadingWorking = false;
+		}
+		ImGui::SameLine();
+		ImGui::ProgressBar(ratio, ImVec2(-1, 0), buffer);
+	}
+	PendingThreadAction(vProjectFile);
+}
+
+bool FontInfos::StopLoadingThread()
+{
+	ZoneScoped;
+
+	bool res = false;
+
+	res = m_LoadingThread.joinable();
+	if (res)
+	{
+		m_LoadingWorking = false;
+		Join();
+	}
+
+	return res;
+}
+
+bool FontInfos::IsJoinable()
+{
+	ZoneScoped;
+
+	return m_LoadingThread.joinable();
+}
+
+void FontInfos::Join()
+{
+	ZoneScoped;
+
+	m_LoadingThread.join();
+	countThreadInParallel--;
+}
+
+void FontInfos::PendingThreadAction(ProjectFile* vProjectFile)
+{
+	ZoneScoped;
+
+	if (m_LoadingThread.joinable()) // need terminate ?
+	{
+		if (!m_LoadingWorking)
+		{
+			Join();
+			m_WaitingToBeLoaded = false;
+
+			if (m_ImFontAtlas.IsBuilt())
 			{
-				tablePos = ttULONG(fontInfo.data + loc + 8);
-				tableLen = ttULONG(fontInfo.data + loc + 12);
-				break;
+				// we are outside of the thread
+				// we can now create the texture
+				CreateOrUpdateFontTexture();
+
+				if (m_LoadingThreadFinishFunc)
+				{
+					m_LoadingThreadFinishFunc();
+				}
+
+				m_IsLoaded = true;
+			}
+			else
+			{
+				m_IsLoaded = false;
 			}
 		}
-		if (!tablePos) return;
-
-		// fill map of names
-		stbtt_uint8 *data = fontInfo.data + tablePos;
-		stbtt_int32 version = ttUSHORT(data);
-
-		//stbtt_uint32 italicAngle = ttUSHORT(data + 4);
-		//uint16_t underlinePosition = ttUSHORT(data + 8);
-		//uint16_t underlineThickness = ttUSHORT(data + 10);
-		//uint32_t isFixedPitch = ttUSHORT(data + 12);
-		//uint32_t minMemType42 = ttUSHORT(data + 16);
-		//uint32_t maxMemType42 = ttUSHORT(data + 20);
-		//uint32_t minMemType1 = ttUSHORT(data + 24);
-		//uint32_t maxMemType1 = ttUSHORT(data + 28);
-		//uint16_t numGlyphs = ttUSHORT(data + 32);
-
-		if (version == 2)
+	}
+	else if (m_WaitingToBeLoaded) // need loading ?
+	{
+		if (countThreadInParallel < maxThreadInParallel)
 		{
-			std::vector<std::string> pendingNames;
-			stbtt_uint16 numberGlyphs = ttUSHORT(data + 32);
-			stbtt_uint32 offset = 34 + 2 * numberGlyphs;
-			while (offset < tableLen)
+			StartLoadingThread(vProjectFile, m_FontFilePathNameToLoad, m_LoadingThreadFinishFunc);
+		}
+	}
+}
+
+//////////////////////////////////////////////////////////////////////////////
+//// FONT TEXTURE ////////////////////////////////////////////////////////////
+//////////////////////////////////////////////////////////////////////////////
+
+void FontInfos::Build_Glyph_DataBase()
+{
+	ZoneScoped;
+
+	m_Glyphs.clear();
+	m_GlyphFilteringStats = GlyphFilteringStats();
+
+	if (!m_ImFontAtlas.Fonts.empty())
+	{
+		bool res = false;
+
+		{
+			ZoneScopedN("m_TTFRRW.OpenFontStream");
+
+			res = m_TTFRRW.OpenFontStream(
+				(uint8_t*)m_ImFontAtlas.ConfigData[0].FontData,
+				(size_t)m_ImFontAtlas.ConfigData[0].FontDataSize,
+				TTFRRW::TTFRRW_PROCESSING_FLAG_NONE
+				//| TTFRRW::TTFRRW_PROCESSING_FLAG_NO_GLYPH_PARSING
+				| TTFRRW::TTFRRW_PROCESSING_FLAG_VERBOSE_PROFILER
+				| TTFRRW::TTFRRW_PROCESSING_FLAG_VERBOSE_ONLY_ERRORS
+				//| TTFRRW::TTFRRW_PROCESSING_FLAG_NO_ERRORS
+				, m_FontFileName.c_str(),
+				&m_LoadingWorking,
+				&m_LoadingProgress,
+				&m_LoadingObjectsCount);
+		}
+
+		if (res)
+		{
+			ImFont* font = m_ImFontAtlas.Fonts[0];
+			if (font)
 			{
-				uint8_t len = data[offset];
-				std::string s;
-				if (len > 0)
+				for (const auto& imGlyph : font->Glyphs)
 				{
-					s = std::string((const char *)data + offset + 1, len);
-				}
-				offset += len + 1;
-				pendingNames.push_back(s);
-			}
-			for (stbtt_uint16 j = 0; j < numberGlyphs; j++)
-			{
-				stbtt_uint16 mapIdx = ttUSHORT(data + 34 + 2 * j);
-				if (mapIdx >= 258)
-				{
-					stbtt_uint16 idx = mapIdx - 258;
-					if (idx < pendingNames.size())
-						m_GlyphNames.push_back(pendingNames[idx]);
-				}
-				else
-				{
-					m_GlyphNames.emplace_back(standardMacNames[mapIdx]);
+					ZoneScopedN("Fill Glyphs");
+
+					BaseGlyph glyph;
+					glyph.glyphIndex = imGlyph.Codepoint;
+					glyph.codePoint = 0U;
+					glyph.AdvanceX = imGlyph.AdvanceX;
+
+					glyph.X0 = imGlyph.X0;
+					glyph.X1 = imGlyph.X1;
+					glyph.Y0 = imGlyph.Y0;
+					glyph.Y1 = imGlyph.Y1;
+
+					glyph.U0 = imGlyph.U0;
+					glyph.U1 = imGlyph.U1;
+					glyph.V0 = imGlyph.V0;
+					glyph.V1 = imGlyph.V1;
+
+					glyph.color;
+
+					GlyphCategoryFlags flags = 0;
+					auto g = m_TTFRRW.GetGlyphWithGlyphIndex(glyph.glyphIndex);
+					if (g)
+					{
+						//glyph.AdvanceX = g->m_AdvanceX;
+
+						if (g->m_IsSimple)
+							flags |= GLYPH_CATEGORY_FLAG_SIMPLE;
+						else
+							flags |= GLYPH_CATEGORY_FLAG_COMPOSITE;
+
+						if (!g->m_Name.empty())
+						{
+							glyph.name = g->m_Name;
+							flags |= GLYPH_CATEGORY_FLAG_NAMED;
+						}
+							
+						if (g->m_IsLayer)
+						{
+							flags |= GLYPH_CATEGORY_FLAG_LAYER;
+							for (const auto& gc : g->m_Color)
+							{
+								glyph.color[gc.first] = ImVec4(gc.second.x, gc.second.y, gc.second.z, gc.second.w);
+							}
+							for (const auto& gpi : g->m_PaletteIndex)
+							{
+								glyph.paletteIndex[gpi.first] = gpi.second;
+							}
+							for (const auto& gp : g->m_Parents)
+							{
+								glyph.parents.emplace(gp);
+							}
+						}
+
+						glyph.contours = g->m_Contours;
+						if (!g->m_Layers.empty())
+						{
+							flags |= GLYPH_CATEGORY_FLAG_COLORED;
+							for (auto layerID : g->m_Layers)
+							{
+								glyph.layers.push_back(layerID);
+							}
+						}
+
+						glyph.color[glyph.glyphIndex] = ImVec4(1, 1, 1, 1);
+
+						glyph.bbox.x = g->m_LocalBBox.lowerBound.x;
+						glyph.bbox.y = g->m_LocalBBox.lowerBound.y;
+						glyph.bbox.z = g->m_LocalBBox.upperBound.x;
+						glyph.bbox.w = g->m_LocalBBox.upperBound.y;
+					}
+
+					auto arr = m_TTFRRW.GetCodePointsFromGlyphIndex(glyph.glyphIndex);
+					if (arr && !arr->empty())
+					{
+						if (arr->size() == 1)
+						{
+							flags |= GLYPH_CATEGORY_FLAG_MAPPED;
+							glyph.codePoint = *arr->begin();
+							m_CodePointToGlyphIndex[glyph.codePoint] = glyph.glyphIndex;
+						}
+						else
+							flags |= GLYPH_CATEGORY_FLAG_UNMAPPED;
+					}
+					else
+						flags |= GLYPH_CATEGORY_FLAG_UNMAPPED;
+
+					m_GlyphFilteringStats.m_CountGlyphs++;
+					if (flags & GLYPH_CATEGORY_FLAG_SIMPLE)
+						m_GlyphFilteringStats.m_CountSimpleGlyphs++;
+					if (flags & GLYPH_CATEGORY_FLAG_COMPOSITE)
+						m_GlyphFilteringStats.m_CountCompositeGlyphs++;
+					if (flags & GLYPH_CATEGORY_FLAG_COLORED)
+						m_GlyphFilteringStats.m_CountColoredGlyphs++;
+					if (flags & GLYPH_CATEGORY_FLAG_LAYER)
+						m_GlyphFilteringStats.m_CountLayerGlyphs++;
+					if (flags & GLYPH_CATEGORY_FLAG_MAPPED)
+						m_GlyphFilteringStats.m_CountMappedGlyphs++;
+					if (flags & GLYPH_CATEGORY_FLAG_UNMAPPED)
+						m_GlyphFilteringStats.m_CountUnMappedGlyphs++;
+					if (flags & GLYPH_CATEGORY_FLAG_NAMED)
+						m_GlyphFilteringStats.m_CountMamedGlyphs++;
+
+					glyph.category = flags;
+
+					glyph.fontInfos = m_This;
+
+					m_Glyphs[glyph.glyphIndex] = glyph;
 				}
 			}
 		}
 	}
 }
 
-std::string FontInfos::GetGlyphName(uint32_t vCodePoint)
+std::string FontInfos::GetGlyphName(GlyphIndex vGlyphIndex)
 {
+	ZoneScoped;
+
 	std::string res;
-	if (m_GlyphCodePointToName.find(vCodePoint) != m_GlyphCodePointToName.end())
+	if (m_Glyphs.find(vGlyphIndex) != m_Glyphs.end())
 	{
-		res = m_GlyphCodePointToName[vCodePoint];
+		res = m_Glyphs[vGlyphIndex].name;
 	}
 	if (res.empty())
-		res = ct::toStr("Symbol_%u", vCodePoint);
+		res = ct::toStr("Symbol_%u", vGlyphIndex);
 	return res;
-}
-
-void FontInfos::FillGlyphColoreds()
-{
-	m_ColoredGlyphs.clear();
-
-	if (m_RasterizerMode != RasterizerEnum::RASTERIZER_FREETYPE) return;
-	if ((m_FreeTypeFlag & FreeType_LoadColor) == 0) return;
-
-	if (!m_ImFontAtlas.ConfigData.empty())
-	{
-		stbtt_fontinfo fontInfo;
-		const int font_offset = stbtt_GetFontOffsetForIndex(
-			(unsigned char*)m_ImFontAtlas.ConfigData[0].FontData,
-			m_ImFontAtlas.ConfigData[0].FontNo);
-		if (!stbtt_InitFont(&fontInfo,
-			(unsigned char*)m_ImFontAtlas.ConfigData[0].FontData, font_offset))
-			return;
-
-		// get table offet and length
-		// https://developer.apple.com/fonts/TrueType-Reference-Manual/RM06/Chap6.html => Table Directory
-		stbtt_int32 num_tables = ttUSHORT(fontInfo.data + fontInfo.fontstart + 4);
-		stbtt_uint32 tabledir = fontInfo.fontstart + 12;
-		stbtt_uint32 tablePos = 0;
-		stbtt_uint32 tableLen = 0;
-		for (int i = 0; i < num_tables; ++i)
-		{
-			stbtt_uint32 loc = tabledir + 16 * i;
-			if (stbtt_tag(fontInfo.data + loc + 0, "COLR"))
-			{
-				tablePos = ttULONG(fontInfo.data + loc + 8);
-				tableLen = ttULONG(fontInfo.data + loc + 12);
-				break;
-			}
-		}
-		if (!tablePos) return;
-
-		// fill map of names
-		stbtt_uint8* data = fontInfo.data + tablePos;
-		stbtt_int32 numBaseGlyphRecords = ttUSHORT(data + 2);
-		
-		if (numBaseGlyphRecords > 0)
-		{
-			stbtt_int32 baseGlyphRecordsOffset = ttULONG(data + 4);
-			if (baseGlyphRecordsOffset >= 14)
-			{
-				for (int i = 0; i < numBaseGlyphRecords; i++)
-				{
-					int offset = baseGlyphRecordsOffset + i * 6;
-
-					stbtt_int32 glyphID = ttUSHORT(data + offset);
-					stbtt_int32 numLayers = ttUSHORT(data + offset + 4);
-
-					if (m_GlyphGlyphIndexToCodePoint.find(glyphID) != m_GlyphGlyphIndexToCodePoint.end())
-					{
-						int cdp = m_GlyphGlyphIndexToCodePoint[glyphID];
-						m_ColoredGlyphs[cdp] = (numLayers > 1);
-					}
-				}
-			}
-		}
-	}
 }
 
 void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 {
+	ZoneScoped;
+
 	if (!m_ImFontAtlas.Fonts.empty())
 	{
 		bool needFontReGen = false;
-		
+		bool needTextureReGen = false;
+
 		float aw = 0.0f;
 
 		if (ImGui::BeginFramedGroup("Selected Font"))
 		{
-			aw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 2.0f;
+			aw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x;
 
 			if (!m_InfosToDisplay.empty())
 			{
@@ -415,7 +542,7 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 						ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable |
 						ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
 						ImGuiTableFlags_NoHostExtendY | ImGuiTableFlags_Borders;
-					if (ImGui::BeginTable("##fontinfosTable", 2, flags, ImVec2(aw, ImGui::GetTextLineHeightWithSpacing() * 7)))
+					if (ImGui::BeginTable("##fontinfosTable", 2, flags, ImVec2(ImGui::GetContentRegionAvail().x, ImGui::GetTextLineHeightWithSpacing() * 7)))
 					{
 						ImGui::TableSetupScrollFreeze(0, 1); // Make header always visible
 						ImGui::TableSetupColumn("Item", ImGuiTableColumnFlags_WidthFixed, -1, 0);
@@ -487,65 +614,57 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 
 			ImGui::PushItemWidth(aw);
 
-			if (ImGui::RadioButtonLabeled("FreeType", "Use FreeType Raterizer", FontInfos::m_RasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE))
+			/*if (ImGui::RadioButtonLabeled("FreeType", "Use FreeType Raterizer", FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE))
 			{
 				needFontReGen = true;
-				FontInfos::m_RasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
-			}
-			
-			ImGui::SameLine();
-
-			if (ImGui::RadioButtonLabeled("Stb", "Use Stb Raterizer", FontInfos::m_RasterizerMode == RasterizerEnum::RASTERIZER_STB))
-			{
-				needFontReGen = true;
-				FontInfos::m_RasterizerMode = RasterizerEnum::RASTERIZER_STB;
-			}
+				FontInfos::rasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
+			}*/
 
 #ifdef _DEBUG
-			if (ImGui::RadioButtonLabeled("Linear", "Use Linear Texture Filtering", m_TextureFiltering == GL_LINEAR))
+			if (ImGui::RadioButtonLabeled(0.0f, "Linear", "Use Linear Texture Filtering", textureFiltering == GL_LINEAR))
 			{
-				needFontReGen = true;
-				m_TextureFiltering = GL_LINEAR;
+				needTextureReGen = true;
+				textureFiltering = GL_LINEAR;
 			}
 
 			ImGui::SameLine();
 
-			if (ImGui::RadioButtonLabeled("Nearest", "Use Nearest Texture Filtering", m_TextureFiltering == GL_NEAREST))
+			if (ImGui::RadioButtonLabeled(0.0f, "Nearest", "Use Nearest Texture Filtering", textureFiltering == GL_NEAREST))
 			{
-				needFontReGen = true;
-				m_TextureFiltering = GL_NEAREST;
+				needTextureReGen = true;
+				textureFiltering = GL_NEAREST;
 			}
 #endif
 			ImGui::PopItemWidth();
 			
 			ImGui::FramedGroupSeparator();
 
-			needFontReGen |= ImGui::SliderIntDefaultCompact(-1.0f, "Font Size", &vProjectFile->m_SelectedFont->m_FontSize, 7, 50, defaultFontInfosValues.m_FontSize);
+			needFontReGen |= ImGui::SliderIntDefaultCompact(-1.0f, "Font Size", &m_FontSize, 7, 50, defaultFontInfosValues.m_FontSize);
 			
-			if (FontInfos::m_RasterizerMode == RasterizerEnum::RASTERIZER_STB)
+			if (FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
 			{
-				needFontReGen |= ImGui::SliderIntDefaultCompact(-1.0f, "Font Anti-aliasing", &vProjectFile->m_SelectedFont->m_Oversample, 1, 5, defaultFontInfosValues.m_Oversample);
+				needFontReGen |= ImGui::SliderFloatDefaultCompact(-1.0f, "Multiply", &fontMultiply, 0.0f, 2.0f, 1.0f);
 			}
-			else if (FontInfos::m_RasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
+			else if (FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_TTFRRW)
 			{
-				needFontReGen |= ImGui::SliderFloatDefaultCompact(-1.0f, "Multiply", &m_FontMultiply, 0.0f, 2.0f, 1.0f);
+				FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE; // pour les anciens fichiers
 			}
 
-			needFontReGen |= ImGui::SliderIntDefaultCompact(-1.0f, "Padding", &m_FontPadding, 0, 16, 1);
+			needFontReGen |= ImGui::SliderIntDefaultCompact(-1.0f, "Padding", &fontPadding, 0, 16, 1);
 
-			if (FontInfos::m_RasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
+			if (FontInfos::rasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
 			{
 				if (ImGui::CollapsingHeader("Freetype Settings", ImGuiTreeNodeFlags_Bullet))
 				{
-					needFontReGen |= ImGui::CheckboxFlags("NoHinting", &m_FreeTypeFlag, FreeType_NoHinting);
-					needFontReGen |= ImGui::CheckboxFlags("NoAutoHint", &m_FreeTypeFlag, FreeType_NoAutoHint);
-					needFontReGen |= ImGui::CheckboxFlags("ForceAutoHint", &m_FreeTypeFlag, FreeType_ForceAutoHint);
-					needFontReGen |= ImGui::CheckboxFlags("LightHinting", &m_FreeTypeFlag, FreeType_LightHinting);
-					needFontReGen |= ImGui::CheckboxFlags("MonoHinting", &m_FreeTypeFlag, FreeType_MonoHinting);
-					needFontReGen |= ImGui::CheckboxFlags("Bold", &m_FreeTypeFlag, FreeType_Bold);
-					needFontReGen |= ImGui::CheckboxFlags("Oblique", &m_FreeTypeFlag, FreeType_Oblique);
-					needFontReGen |= ImGui::CheckboxFlags("Monochrome", &m_FreeTypeFlag, FreeType_Monochrome);
-					needFontReGen |= ImGui::CheckboxFlags("LoadColor", &m_FreeTypeFlag, FreeType_LoadColor);
+					needFontReGen |= ImGui::CheckboxFlags("NoHinting", &freeTypeFlag, ImGuiFreeType_unleashed::FreeType_NoHinting);
+					needFontReGen |= ImGui::CheckboxFlags("NoAutoHint", &freeTypeFlag, ImGuiFreeType_unleashed::FreeType_NoAutoHint);
+					needFontReGen |= ImGui::CheckboxFlags("ForceAutoHint", &freeTypeFlag, ImGuiFreeType_unleashed::FreeType_ForceAutoHint);
+					needFontReGen |= ImGui::CheckboxFlags("LightHinting", &freeTypeFlag, ImGuiFreeType_unleashed::FreeType_LightHinting);
+					needFontReGen |= ImGui::CheckboxFlags("MonoHinting", &freeTypeFlag, ImGuiFreeType_unleashed::FreeType_MonoHinting);
+					needFontReGen |= ImGui::CheckboxFlags("Bold", &freeTypeFlag, ImGuiFreeType_unleashed::FreeType_Bold);
+					needFontReGen |= ImGui::CheckboxFlags("Oblique", &freeTypeFlag, ImGuiFreeType_unleashed::FreeType_Oblique);
+					needFontReGen |= ImGui::CheckboxFlags("Monochrome", &freeTypeFlag, ImGuiFreeType_unleashed::FreeType_Monochrome);
+					needFontReGen |= ImGui::CheckboxFlags("LoadColor", &freeTypeFlag, ImGuiFreeType_unleashed::FreeType_LoadColor);
 				}
 			}
 
@@ -554,103 +673,177 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 
 		if (needFontReGen)
 		{
-			vProjectFile->m_SelectedFont->m_FontSize = ct::clamp(vProjectFile->m_SelectedFont->m_FontSize, 7, 50);
-			vProjectFile->m_SelectedFont->m_Oversample = ct::clamp(vProjectFile->m_SelectedFont->m_Oversample, 1, 5);
-			ParamsPane::Instance()->OpenFont(vProjectFile, vProjectFile->m_SelectedFont->m_FontFilePathName, false);
+			m_FontSize = ct::clamp(m_FontSize, 7, 50);
+			m_Oversample = ct::clamp(m_Oversample, 1, 5);
+			ParamsPane::Instance()->OpenFont(vProjectFile, m_FontFilePathName, false);
+			vProjectFile->SetProjectChange();
+		}
+
+		if (needTextureReGen)
+		{
+			CreateOrUpdateFontTexture();
 			vProjectFile->SetProjectChange();
 		}
 	}
 }
 
-void FontInfos::UpdateInfos()
+void FontInfos::DrawFilteringWidgets(ProjectFile* vProjectFile)
 {
-	stbtt_fontinfo fontInfo;
-	const int font_offset = stbtt_GetFontOffsetForIndex(
-		(unsigned char*)m_ImFontAtlas.ConfigData[0].FontData,
-		m_ImFontAtlas.ConfigData[0].FontNo);
-	if (stbtt_InitFont(&fontInfo, (unsigned char*)m_ImFontAtlas.ConfigData[0].FontData, font_offset))
-	{
-		stbtt_GetFontVMetrics(&fontInfo, &m_Ascent, &m_Descent, &m_LineGap);
-		stbtt_GetFontBoundingBox(&fontInfo, &m_BoundingBox.x, &m_BoundingBox.y, &m_BoundingBox.z, &m_BoundingBox.w);
-		m_Point = stbtt_ScaleForPixelHeight(&fontInfo, (float)m_FontSize);
-	}
+	ZoneScoped;
 
-	//--------------------------------------------------------
-	m_InfosToDisplay.clear();
-	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Font", m_FontFilePathName));
-	if (GetImFont())
+	if (ImGui::BeginFramedGroup("Filtering"))
 	{
-		m_InfosToDisplay.push_back(std::pair<std::string, std::string>("N Glyphs :", ct::toStr(GetImFont()->Glyphs.size())));
-	}
-	//m_InfosToDisplay.push_back(std::pair<std::string, std::string>("N Sel Glyphs :", ct::toStr(m_SelectedGlyphs.size())));
-	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Texture Size :", ct::toStr("%i x %i", m_ImFontAtlas.TexWidth, m_ImFontAtlas.TexHeight)));
-	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Ascent / Descent :", ct::toStr("%i / %i", m_Ascent, m_Descent)));
-	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Glyph BBox :", ct::toStr("min : %i x %i/max : %i x %i",
-		m_BoundingBox.x, m_BoundingBox.y, m_BoundingBox.z, m_BoundingBox.w)));
-#ifdef _DEBUG
-	//m_InfosToDisplay.push_back(std::pair<std::string, std::string>("SizeInPixels :", ct::toStr("%.2f", m_FontConfig.SizePixels)));
-	//m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Line gap :", ct::toStr("%i", m_LineGap))); // dont know what is it haha
-	m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Scale pixel height :", ct::toStr("%.4f", m_Point))); // same.., its used internally by ImGui but dont know what is it
-#endif
-}
+		bool change = false;
 
-void FontInfos::UpdateSelectedGlyphs(ImFont *vFont)
-{
-	if (vFont)
-	{
-		// update glyph ptrs
-		for (auto& it : m_SelectedGlyphs)
+		float mrw2 = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x * 2.0f) * 0.5f;
+
+		ImGui::FramedGroupText("Filtereds (%u)", m_GlyphFilteringStats.m_CountFilteredGlyphs);
+
+		if (ImGui::RadioButtonLabeled(mrw2, "OR", "OR", m_GlyphFilteringOpOR == true))
 		{
-			uint32_t codePoint = it.first;
-
-			auto glyph = vFont->FindGlyphNoFallback((ImWchar)codePoint);
-			if (glyph)
+			change = true;
+			m_GlyphFilteringOpOR = !m_GlyphFilteringOpOR;
+		}
+		ImGui::SameLine();
+		if (ImGui::RadioButtonLabeled(mrw2, "AND", "AND", m_GlyphFilteringOpOR == false))
+		{
+			change = true;
+			m_GlyphFilteringOpOR = !m_GlyphFilteringOpOR;
+		}
+		
+		const bool useColorFiltering = true;// !((m_GlyphDisplayCategoryFlags & GLYPH_CATEGORY_FLAG_ALL) == GLYPH_CATEGORY_FLAG_ALL);
+		float mrw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x;
+		if (useColorFiltering)
+			mrw -= ImGui::GetStyle().ItemSpacing.x + ImGui::GetFrameHeight();
+		if (ImGui::RadioButtonLabeled(mrw, "All", "All", (m_GlyphDisplayCategoryFlags & GLYPH_CATEGORY_FLAG_ALL) == GLYPH_CATEGORY_FLAG_ALL))
+		{
+			change = true;
+			if (m_GlyphDisplayCategoryFlags & GLYPH_CATEGORY_FLAG_ALL)
+				m_GlyphDisplayCategoryFlags = GLYPH_CATEGORY_FLAG_NONE;
+			else
+				m_GlyphDisplayCategoryFlags = GLYPH_CATEGORY_FLAG_ALL;
+		}
+		if (useColorFiltering)
+		{
+			ImGui::SameLine();
+			ImGui::Checkbox("##UseColor", &m_GlyphFilteringStats.m_UseFilterColoring);
+			if (ImGui::IsItemHovered())
 			{
-				if (it.second)
-				{
-					it.second->glyph = *glyph;
-					it.second->oldHeaderName = GetGlyphName(codePoint);
-					it.second->glyphIndex = m_GlyphCodePointToGlyphIndex[codePoint];
-					it.second->m_Colored = m_ColoredGlyphs[codePoint];
-				}
+				ImGui::SetTooltip("Use Color for Filtering");
 			}
 		}
+
+		static ImGuiColorEditFlags colorFlags =
+			ImGuiColorEditFlags_Float |
+			ImGuiColorEditFlags_NoInputs |
+			ImGuiColorEditFlags_NoTooltip |
+			ImGuiColorEditFlags_NoLabel;
+
+		change |= ImGui::RadioButtonLabeled_BitWize<GlyphCategoryFlags>(mrw, ct::toCStr("Simple (%u)", m_GlyphFilteringStats.m_CountSimpleGlyphs),
+			"Simple", &m_GlyphDisplayCategoryFlags, GLYPH_CATEGORY_FLAG_SIMPLE);
+		if (useColorFiltering)
+		{
+			ImGui::SameLine();
+			ImGui::ColorEdit4("Simple", &m_GlyphFilteringStats.SimpleColor.x, colorFlags);
+		}
+		change |= ImGui::RadioButtonLabeled_BitWize<GlyphCategoryFlags>(mrw, ct::toCStr("Composite (%u)", m_GlyphFilteringStats.m_CountCompositeGlyphs),
+			"Composite", &m_GlyphDisplayCategoryFlags, GLYPH_CATEGORY_FLAG_COMPOSITE);
+		if (useColorFiltering)
+		{
+			ImGui::SameLine();
+			ImGui::ColorEdit4("Composite", &m_GlyphFilteringStats.CompositeColor.x, colorFlags);
+		}
+		change |= ImGui::RadioButtonLabeled_BitWize<GlyphCategoryFlags>(mrw, ct::toCStr("Mapped (%u)", m_GlyphFilteringStats.m_CountMappedGlyphs),
+			"Mapped", &m_GlyphDisplayCategoryFlags, GLYPH_CATEGORY_FLAG_MAPPED);
+		if (useColorFiltering)
+		{
+			ImGui::SameLine();
+			ImGui::ColorEdit4("Mapped", &m_GlyphFilteringStats.MappedColor.x, colorFlags);
+		}
+		change |= ImGui::RadioButtonLabeled_BitWize<GlyphCategoryFlags>(mrw, ct::toCStr("Un Mapped (%u)", m_GlyphFilteringStats.m_CountUnMappedGlyphs),
+			"Un Mapped", &m_GlyphDisplayCategoryFlags, GLYPH_CATEGORY_FLAG_UNMAPPED);
+		if (useColorFiltering)
+		{
+			ImGui::SameLine();
+			ImGui::ColorEdit4("Un Mapped", &m_GlyphFilteringStats.UnMappedColor.x, colorFlags);
+		}
+		change |= ImGui::RadioButtonLabeled_BitWize<GlyphCategoryFlags>(mrw, ct::toCStr("Colored (%u)", m_GlyphFilteringStats.m_CountColoredGlyphs),
+			"Colored", &m_GlyphDisplayCategoryFlags, GLYPH_CATEGORY_FLAG_COLORED);
+		if (useColorFiltering)
+		{
+			ImGui::SameLine();
+			ImGui::ColorEdit4("Colored", &m_GlyphFilteringStats.ColoredColor.x, colorFlags);
+		}
+		change |= ImGui::RadioButtonLabeled_BitWize<GlyphCategoryFlags>(mrw, ct::toCStr("Layer (%u)", m_GlyphFilteringStats.m_CountLayerGlyphs),
+			"Layer", &m_GlyphDisplayCategoryFlags, GLYPH_CATEGORY_FLAG_LAYER);
+		if (useColorFiltering)
+		{
+			ImGui::SameLine();
+			ImGui::ColorEdit4("Layer", &m_GlyphFilteringStats.LayerColor.x, colorFlags);
+		}
+		change |= ImGui::RadioButtonLabeled_BitWize<GlyphCategoryFlags>(mrw, ct::toCStr("Named (%u)", m_GlyphFilteringStats.m_CountMamedGlyphs),
+			"Named", &m_GlyphDisplayCategoryFlags, GLYPH_CATEGORY_FLAG_NAMED);
+		if (useColorFiltering)
+		{
+			ImGui::SameLine();
+			ImGui::ColorEdit4("Named", &m_GlyphFilteringStats.NamedColor.x, colorFlags);
+		}
+
+		if (change)
+		{
+			UpdateFiltering();
+			vProjectFile->SetProjectChange();
+		}
+
+		ImGui::EndFramedGroup(true);
 	}
 }
 
-void FontInfos::GenerateCodePointToGlypNamesDB()
+void FontInfos::UpdateInfos()
 {
-	if (!m_ImFontAtlas.ConfigData.empty())
-	{
-		m_GlyphCodePointToName.clear();
+	ZoneScoped;
 
-		stbtt_fontinfo fontInfo;
-		const int font_offset = stbtt_GetFontOffsetForIndex(
-			(unsigned char*)m_ImFontAtlas.ConfigData[0].FontData,
-			m_ImFontAtlas.ConfigData[0].FontNo);
-		if (stbtt_InitFont(&fontInfo, (unsigned char*)m_ImFontAtlas.ConfigData[0].FontData, font_offset))
+	if (m_TTFRRW.IsValidFotGlyppTreatment())
+	{
+		auto infos = m_TTFRRW.GetFontInfos();
+		m_Ascent = infos.m_Ascent;
+		m_Descent = infos.m_Descent;
+		m_LineGap = infos.m_LineGap;
+		m_BoundingBox.x = infos.m_GlobalBBox.lowerBound.x;
+		m_BoundingBox.y = infos.m_GlobalBBox.lowerBound.y;
+		m_BoundingBox.z = infos.m_GlobalBBox.upperBound.x;
+		m_BoundingBox.w = infos.m_GlobalBBox.upperBound.y;
+		//m_Point = (m_Ascent - m_Descent) / (float)m_FontSize;
+		m_Point = (m_BoundingBox.w - m_BoundingBox.y) / (float)m_FontSize;
+		m_FontDiffScale = (float)(m_BoundingBox.w - m_BoundingBox.y) / (float)(m_Ascent - m_Descent);
+		m_AscentDiffScale = (float)m_Ascent / (float)m_BoundingBox.w;
+
+		//--------------------------------------------------------
+
+		m_InfosToDisplay.clear();
+		m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Font", m_FontFilePathName));
+		m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Glyph Count", ct::toStr("%u", infos.m_GlyphCount)));
+		m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Ascent / Descent / Line gap :", ct::toStr("%i / %i / %i", m_Ascent, m_Descent, m_LineGap)));
+		m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Glyph BBox :", ct::toStr("min : %i x %i/max : %i x %i", m_BoundingBox.x, m_BoundingBox.y, m_BoundingBox.z, m_BoundingBox.w)));
+		m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Size (px) :", ct::toStr("%.2f", m_FontSize)));
+		m_InfosToDisplay.push_back(std::pair<std::string, std::string>("H Scale (px) :", ct::toStr("%.4f", m_Point))); // same.., its used internally by ImGui but dont know what is it
+		m_InfosToDisplay.push_back(std::pair<std::string, std::string>("Texture Size :", ct::toStr("%i x %i", m_ImFontAtlas.TexWidth, m_ImFontAtlas.TexHeight)));
+	}
+}
+
+void FontInfos::UpdateSelectedGlyphs()
+{
+	ZoneScoped;
+
+	// update glyph ptrs
+	for (const auto& selGlyph : m_SelectedGlyphs)
+	{
+		auto baseGlyph = GetGlyphByGlyphIndex(selGlyph.first);
+		if (baseGlyph)
 		{
-			if (m_ImFontAtlas.IsBuilt())
+			if (selGlyph.second)
 			{
-				ImFont* font = GetImFont();
-				if (font)
-				{
-					for (auto glyph : font->Glyphs)
-					{
-						int glyphIndex = stbtt_FindGlyphIndex(&fontInfo, (uint32_t)glyph.Codepoint);
-						m_GlyphCodePointToGlyphIndex[(uint32_t)glyph.Codepoint] = glyphIndex;
-						m_GlyphGlyphIndexToCodePoint[(uint32_t)glyphIndex] = glyph.Codepoint;
-						if (glyphIndex < (int)m_GlyphNames.size())
-						{
-							std::string name = m_GlyphNames[glyphIndex];
-							m_GlyphCodePointToName[glyph.Codepoint] = name;
-						}
-						else
-						{
-							m_GlyphCodePointToName[glyph.Codepoint] = "";
-						}
-					}
-				}
+				selGlyph.second->glyph = *baseGlyph;
 			}
 		}
 	}
@@ -658,47 +851,123 @@ void FontInfos::GenerateCodePointToGlypNamesDB()
 
 void FontInfos::UpdateFiltering()
 {
-	m_FilteredGlyphs.clear();
+	ZoneScoped;
 
-	ImFont* font = GetImFont();
-	if (font)
+	std::set<GlyphIndex> preFilter;
+
+	int countNeeded = 0;
+	if (m_GlyphFilteringOpOR == false)
 	{
-		uint32_t countGlyphs = (uint32_t)font->Glyphs.size();
-		for (uint32_t idx = 0; idx < countGlyphs; idx++)
+		if (m_GlyphDisplayCategoryFlags & GLYPH_CATEGORY_FLAG_SIMPLE)
+			countNeeded++;
+		if (m_GlyphDisplayCategoryFlags & GLYPH_CATEGORY_FLAG_COMPOSITE)
+			countNeeded++;
+		if (m_GlyphDisplayCategoryFlags & GLYPH_CATEGORY_FLAG_COLORED)
+			countNeeded++;
+		if (m_GlyphDisplayCategoryFlags & GLYPH_CATEGORY_FLAG_LAYER)
+			countNeeded++;
+		if (m_GlyphDisplayCategoryFlags & GLYPH_CATEGORY_FLAG_MAPPED)
+			countNeeded++;
+		if (m_GlyphDisplayCategoryFlags & GLYPH_CATEGORY_FLAG_UNMAPPED)
+			countNeeded++;
+		if (m_GlyphDisplayCategoryFlags & GLYPH_CATEGORY_FLAG_NAMED)
+			countNeeded++;
+	}
+	for (const auto& glyph : m_Glyphs)
+	{
+		int countFound = 0;
+		if (glyph.second.category & GLYPH_CATEGORY_FLAG_SIMPLE)
 		{
-			auto glyph = *(font->Glyphs.begin() + idx);
+			if (m_GlyphDisplayCategoryFlags & GLYPH_CATEGORY_FLAG_SIMPLE)
+				countFound++;
+		}
+		if (glyph.second.category & GLYPH_CATEGORY_FLAG_COMPOSITE)
+		{
+			if (m_GlyphDisplayCategoryFlags & GLYPH_CATEGORY_FLAG_COMPOSITE)
+				countFound++;
+		}
+		if (glyph.second.category & GLYPH_CATEGORY_FLAG_COLORED)
+		{
+			if (m_GlyphDisplayCategoryFlags & GLYPH_CATEGORY_FLAG_COLORED)
+				countFound++;
+		}
+		if (glyph.second.category & GLYPH_CATEGORY_FLAG_LAYER)
+		{
+			if (m_GlyphDisplayCategoryFlags & GLYPH_CATEGORY_FLAG_LAYER)
+				countFound++;
+		}
+		if (glyph.second.category & GLYPH_CATEGORY_FLAG_MAPPED)
+		{
+			if (m_GlyphDisplayCategoryFlags & GLYPH_CATEGORY_FLAG_MAPPED)
+				countFound++;
+		}
+		if (glyph.second.category & GLYPH_CATEGORY_FLAG_UNMAPPED)
+		{
+			if (m_GlyphDisplayCategoryFlags & GLYPH_CATEGORY_FLAG_UNMAPPED)
+				countFound++;
+		}
+		if (glyph.second.category & GLYPH_CATEGORY_FLAG_NAMED)
+		{
+			if (m_GlyphDisplayCategoryFlags & GLYPH_CATEGORY_FLAG_NAMED)
+				countFound++;
+		}
+		
+		bool found = false;
 
+		if (m_GlyphFilteringOpOR)
+		{
+			if (countFound)
+				found = true;
+		}
+		else // and
+		{
+			if (countFound == countNeeded)
+				found = true;
+		}
+
+		if (found)
+		{
 			if (!m_Filters.empty())
 			{
-				std::string name = m_GlyphCodePointToName[glyph.Codepoint];
-
-				if (!name.empty())
+				if (!glyph.second.name.empty())
 				{
 					for (const auto& it : m_Filters)
 					{
-						if (name.find(it) != std::string::npos) // found
+						if (glyph.second.name.find(it) != std::string::npos) // found
 						{
-							m_FilteredGlyphs.push_back(glyph);
+							preFilter.emplace(glyph.first);
 						}
 					}
 				}
 			}
 			else
 			{
-				m_FilteredGlyphs.push_back(glyph);
+				preFilter.emplace(glyph.first);
 			}
 		}
 	}
+
+	m_FilteredGlyphs.clear();
+	for (auto filter : preFilter)
+	{
+		m_FilteredGlyphs.push_back(filter);
+	}
+
+	m_GlyphFilteringStats.m_CountFilteredGlyphs = (uint32_t)m_FilteredGlyphs.size();
 }
 
 void FontInfos::ClearTransforms(ProjectFile* vProjectFile)
 {
+	ZoneScoped;
+
 	ClearTranslations(vProjectFile);
 	ClearScales(vProjectFile);
 }
 
 void FontInfos::ClearScales(ProjectFile* vProjectFile)
 {
+	ZoneScoped;
+
 	if (vProjectFile)
 	{
 		for (auto glyph : m_SelectedGlyphs)
@@ -716,6 +985,8 @@ void FontInfos::ClearScales(ProjectFile* vProjectFile)
 
 void FontInfos::ClearTranslations(ProjectFile* vProjectFile)
 {
+	ZoneScoped;
+
 	if (vProjectFile)
 	{
 		for (auto glyph : m_SelectedGlyphs)
@@ -731,8 +1002,35 @@ void FontInfos::ClearTranslations(ProjectFile* vProjectFile)
 	}
 }
 
-ImFont* FontInfos::GetImFont()
+BaseGlyph* FontInfos::GetGlyphByGlyphIndex(GlyphIndex vGlyphIndex)
 {
+	ZoneScoped;
+
+	if (m_Glyphs.find(vGlyphIndex) != m_Glyphs.end())
+	{
+		return &m_Glyphs[vGlyphIndex];
+	}
+
+	return nullptr;
+}
+
+BaseGlyph* FontInfos::GetFirstGlyphByCodePoint(CodePoint vCodePoint)
+{
+	ZoneScoped;
+
+	if (m_CodePointToGlyphIndex.find(vCodePoint) != m_CodePointToGlyphIndex.end()) // found
+	{
+		auto glyphIndex = m_CodePointToGlyphIndex[vCodePoint];
+		return GetGlyphByGlyphIndex(glyphIndex);
+	}
+
+	return nullptr;
+}
+
+ImFont* FontInfos::GetImFontPtr()
+{
+	ZoneScoped;
+
 	if (!m_ImFontAtlas.Fonts.empty())
 	{
 		return m_ImFontAtlas.Fonts[0];
@@ -740,14 +1038,24 @@ ImFont* FontInfos::GetImFont()
 	return nullptr;
 }
 
+bool FontInfos::IsUsable()
+{
+	return !(IsJoinable() || m_WaitingToBeLoaded);
+}
+
 //////////////////////////////////////////////////////////////////////////////
 //// FONT TEXTURE ////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-void FontInfos::CreateFontTexture()
+void FontInfos::CreateOrUpdateFontTexture()
 {
+	ZoneScoped;
+	TracyGpuZone("FontInfos CreateFontTexture");
+
 	if (!m_ImFontAtlas.Fonts.empty())
 	{
+		DestroyFontTexture();
+
 		unsigned char* pixels;
 		int width, height;
 		m_ImFontAtlas.GetTexDataAsRGBA32(&pixels, &width, &height);   // Load as RGBA 32-bit (75% of the memory is wasted, but default font is so small) because it is more likely to be compatible with user's existing shaders. If your ImTextureId represent a higher-level concept than just a GL texture id, consider calling GetTexDataAsAlpha8() instead to save on GPU memory.
@@ -758,8 +1066,8 @@ void FontInfos::CreateFontTexture()
 		GLuint id = 0;
 		glGenTextures(1, &id);
 		glBindTexture(GL_TEXTURE_2D, id);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_TextureFiltering);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_TextureFiltering);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, textureFiltering);
+		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, textureFiltering);
 		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
 		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
 
@@ -775,6 +1083,9 @@ void FontInfos::CreateFontTexture()
 
 void FontInfos::DestroyFontTexture()
 {
+	ZoneScoped;
+	TracyGpuZone("FontInfos DestroyFontTexture");
+
 	// size_t is 4 bytes sized for x32 and 8 bytes sizes for x64.
 	// TexID is ImTextureID is a void so same size as size_t
 	// id is a uint so 4 bytes on x32 and x64
@@ -793,6 +1104,8 @@ void FontInfos::DestroyFontTexture()
 
 std::string FontInfos::getXml(const std::string& vOffset, const std::string& vUserDatas)
 {
+	ZoneScoped;
+
 	UNUSED(vUserDatas);
 
 	std::string res;
@@ -806,9 +1119,9 @@ std::string FontInfos::getXml(const std::string& vOffset, const std::string& vUs
 		{
 			if (it.second)
 			{
-				res += vOffset + "\t\t<glyph orgId=\"" + ct::toStr(it.second->glyph.Codepoint) +
+				res += vOffset + "\t\t<glyph orgId=\"" + ct::toStr(it.second->glyph.glyphIndex) +
 					"\" newId=\"" + ct::toStr(it.second->newCodePoint) +
-					"\" orgName=\"" + it.second->oldHeaderName +
+					"\" orgName=\"" + it.second->glyph.name +
 					"\" newName=\"" + it.second->newHeaderName +
 					"\" trans=\"" + ct::fvec2(it.second->m_Translation).string() + 
 					"\" scale=\"" + ct::fvec2(it.second->m_Scale).string() +
@@ -822,14 +1135,25 @@ std::string FontInfos::getXml(const std::string& vOffset, const std::string& vUs
 	res += vOffset + "\t<pathfilename>" + m_FontFilePathName + "</pathfilename>\n";
 	res += vOffset + "\t<oversample>" + ct::toStr(m_Oversample) + "</oversample>\n";
 	res += vOffset + "\t<fontsize>" + ct::toStr(m_FontSize) + "</fontsize>\n";
-	res += vOffset + "\t<generatedfilename>" + m_GeneratedFileName + "</generatedfilename>\n";
-	res += vOffset + "\t<cardglyhpheight>" + ct::toStr(m_CardGlyphHeightInPixel) + "</cardglyhpheight>\n";
-	res += vOffset + "\t<cardcountrowsmax>" + ct::toStr(m_CardCountRowsMax) + "</cardcountrowsmax>\n";
-	res += vOffset + "\t<rasterizer>" + ct::toStr(m_RasterizerMode) + "</rasterizer>\n";
-	res += vOffset + "\t<freetypeflag>" + ct::toStr(m_FreeTypeFlag) + "</freetypeflag>\n";
-	res += vOffset + "\t<freetypemultiply>" + ct::toStr(m_FontMultiply) + "</freetypemultiply>\n";
-	res += vOffset + "\t<padding>" + ct::toStr(m_FontPadding) + "</padding>\n";
-	res += vOffset + "\t<filtering>" + ct::toStr(m_TextureFiltering) + "</filtering>\n";
+
+	res += vOffset + "\t<rasterizer>" + ct::toStr(rasterizerMode) + "</rasterizer>\n";
+	res += vOffset + "\t<freetypeflag>" + ct::toStr(freeTypeFlag) + "</freetypeflag>\n";
+	res += vOffset + "\t<freetypemultiply>" + ct::toStr(fontMultiply) + "</freetypemultiply>\n";
+	res += vOffset + "\t<padding>" + ct::toStr(fontPadding) + "</padding>\n";
+	res += vOffset + "\t<texturefiltering>" + ct::toStr(textureFiltering) + "</texturefiltering>\n";
+
+	res += vOffset + "\t<glyphfiltering>\n";
+	res += vOffset + "\t<flags>" + ct::toStr(m_GlyphDisplayCategoryFlags) + "</flags>\n";
+	res += vOffset + "\t<op>" + (m_GlyphFilteringOpOR ? "true" : "false") + "</op>\n";
+	res += vOffset + "\t<use_color>" + (m_GlyphFilteringStats.m_UseFilterColoring ? "true" : "false") + "</use_color>\n";
+	res += vOffset + "\t<simple_color>" + ct::toStr(ImGui::GetColorU32(m_GlyphFilteringStats.SimpleColor)) + "</simple_color>\n";
+	res += vOffset + "\t<composite_color>" + ct::toStr(ImGui::GetColorU32(m_GlyphFilteringStats.CompositeColor)) + "</composite_color>\n";
+	res += vOffset + "\t<mapped_color>" + ct::toStr(ImGui::GetColorU32(m_GlyphFilteringStats.MappedColor)) + "</mapped_color>\n";
+	res += vOffset + "\t<unmapped_color>" + ct::toStr(ImGui::GetColorU32(m_GlyphFilteringStats.UnMappedColor)) + "</unmapped_color>\n";
+	res += vOffset + "\t<colored_color>" + ct::toStr(ImGui::GetColorU32(m_GlyphFilteringStats.ColoredColor)) + "</colored_color>\n";
+	res += vOffset + "\t<layer_color>" + ct::toStr(ImGui::GetColorU32(m_GlyphFilteringStats.LayerColor)) + "</layer_color>\n";
+	res += vOffset + "\t<named_color>" + ct::toStr(ImGui::GetColorU32(m_GlyphFilteringStats.NamedColor)) + "</named_color>\n";
+	res += vOffset + "\t</glyphfiltering>\n";
 
 	if (!m_Filters.empty())
 	{
@@ -848,6 +1172,8 @@ std::string FontInfos::getXml(const std::string& vOffset, const std::string& vUs
 
 bool FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas)
 {
+	ZoneScoped;
+
 	UNUSED(vUserDatas);
 
 	// The value of this child identifies the name of this element
@@ -882,24 +1208,18 @@ bool FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 			m_FontFilePathName = strValue;
 		else if (strName == "oversample")
 			m_Oversample = ct::ivariant(strValue).GetI();
-		else if (strName == "generatedfilename")
-			m_GeneratedFileName = strValue;
-		else if (strName == "cardglyhpheight")
-			m_CardGlyphHeightInPixel = ct::uvariant(strValue).GetU();
-		else if (strName == "cardcountrowsmax")
-			m_CardCountRowsMax = ct::uvariant(strValue).GetU();
 		else if (strName == "fontsize")
 			m_FontSize = ct::ivariant(strValue).GetI();
 		else if (strName == "rasterizer")
-			m_RasterizerMode = (RasterizerEnum)ct::ivariant(strValue).GetI();
+			rasterizerMode = (RasterizerEnum)ct::ivariant(strValue).GetI();
 		else if (strName == "freetypeflag")
-			m_FreeTypeFlag = ct::ivariant(strValue).GetI();
+			freeTypeFlag = ct::ivariant(strValue).GetI();
 		else if (strName == "freetypemultiply")
-			m_FontMultiply = ct::fvariant(strValue).GetF();
+			fontMultiply = ct::fvariant(strValue).GetF();
 		else if (strName == "padding")
-			m_FontPadding = ct::ivariant(strValue).GetI();
-		else if (strName == "textureFiletring")
-			m_TextureFiltering = (GLenum)ct::ivariant(strValue).GetI();
+			fontPadding = ct::ivariant(strValue).GetI();
+		else if (strName == "texturefiltering")
+			textureFiltering = (GLenum)ct::ivariant(strValue).GetI();
 		else if (strName == "glyphs" || strName == "filters")
 		{
 			for (tinyxml2::XMLElement* child = vElem->FirstChildElement(); child != nullptr; child = child->NextSiblingElement())
@@ -908,14 +1228,37 @@ bool FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 			}
 		}
 	}
+	else if (strParentName == "glyphfiltering")
+	{
+		if (strName == "flags")
+			m_GlyphDisplayCategoryFlags = (GlyphCategoryFlags)ct::ivariant(strValue).GetI();
+		else if (strName == "op")
+			m_GlyphFilteringOpOR = ct::ivariant(strValue).GetB();
+		else if (strName == "use_color")
+			m_GlyphFilteringStats.m_UseFilterColoring = ct::ivariant(strValue).GetB();
+		else if (strName == "simple_color")
+			m_GlyphFilteringStats.SimpleColor = ImGui::ColorConvertU32ToFloat4((ImU32)ct::ivariant(strValue).GetI());
+		else if (strName == "composite_color")
+			m_GlyphFilteringStats.CompositeColor = ImGui::ColorConvertU32ToFloat4((ImU32)ct::ivariant(strValue).GetI());
+		else if (strName == "mapped_color")
+			m_GlyphFilteringStats.MappedColor = ImGui::ColorConvertU32ToFloat4((ImU32)ct::ivariant(strValue).GetI());
+		else if (strName == "unmapped_color")
+			m_GlyphFilteringStats.UnMappedColor = ImGui::ColorConvertU32ToFloat4((ImU32)ct::ivariant(strValue).GetI());
+		else if (strName == "colored_color")
+			m_GlyphFilteringStats.ColoredColor = ImGui::ColorConvertU32ToFloat4((ImU32)ct::ivariant(strValue).GetI());
+		else if (strName == "layer_color")
+			m_GlyphFilteringStats.LayerColor = ImGui::ColorConvertU32ToFloat4((ImU32)ct::ivariant(strValue).GetI());
+		else if (strName == "named_color")
+			m_GlyphFilteringStats.NamedColor = ImGui::ColorConvertU32ToFloat4((ImU32)ct::ivariant(strValue).GetI());
+	}
 	else if (strParentName == "glyphs" &&  strName == "glyph")
 	{
-		uint32_t oldcodepoint = 0;
+		uint32_t oldGlyphIndex = 0;
         uint32_t newcodepoint = 0;
 		std::string oldName;
 		std::string newName;
 		ImVec2 translation;
-		ImVec2 scale = ImVec2(1.0f, 1.0f);
+		ImVec2 scale;
 
 		for (const tinyxml2::XMLAttribute* attr = vElem->FirstAttribute(); attr != nullptr; attr = attr->Next())
 		{
@@ -924,7 +1267,7 @@ bool FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 
 			if (attName == "orgId" ||
 				attName == "id") // for compatibility with first format, will be removed in few versions
-				oldcodepoint = (uint32_t)ct::ivariant(attValue).GetI();
+				oldGlyphIndex = (uint32_t)ct::ivariant(attValue).GetI();
 			else if (attName == "newId" ||
 				attName == "nid")  // for compatibility with first format, will be removed in few versions
 				newcodepoint = (uint32_t)ct::ivariant(attValue).GetI();
@@ -938,9 +1281,9 @@ bool FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 				scale = ct::toImVec2(ct::fvariant(attValue).GetV2());
 		}
 
-		ImFontGlyph g = {};
-		g.Codepoint = oldcodepoint;
-		m_SelectedGlyphs[oldcodepoint] = GlyphInfos::Create(m_This, g, oldName, newName, newcodepoint, translation, scale);
+		BaseGlyph baseGlyph = {};
+		baseGlyph.glyphIndex = oldGlyphIndex;
+		m_SelectedGlyphs[oldGlyphIndex] = GlyphInfos::Create(m_This, baseGlyph, oldName, newName, newcodepoint, translation, scale);
 	}
 	else if (strParentName == "filters" &&  strName == "filter")
 	{

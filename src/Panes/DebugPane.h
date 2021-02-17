@@ -51,7 +51,7 @@ public:
 	void Clear();
 
 	ct::ivec2 GetGlyphCurrentPoint();
-	void DrawGlyphCurrentPoint(float vPreviewScale, ImVec2 vScreenPos, ImDrawList *vImDrawList);
+	void DrawGlyphCurrentPoint(ImVec2 vZoneStart, ImVec2 vWorldBBoxOrigin, ImVec2 vWorlBBoxSize, float vWorldScale, ImVec2 vLocalBBoxOrigin, ImDrawList *vImDrawList);
 
 public: // singleton
 	static DebugPane *Instance()

@@ -33,7 +33,6 @@ class GlyphInfos;
 class GlyphPane : public AbstractPane
 {
 private:
-	FontInstance m_fontInstance;
 	std::weak_ptr<GlyphInfos> m_GlyphToDisplay;
 	
 public:

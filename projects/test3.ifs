@@ -1,0 +1,136 @@
+<config>
+	<project>
+		<font name="TwemojiMozilla.ttf">
+			<glyphs>
+				<glyph orgId="110" newId="110" orgName="u269c" newName="Symbol_110" trans="0;0" scale="1;1"/>
+				<glyph orgId="12098" newId="12098" orgName="u269c_layer0" newName="u269c_layer0" trans="0;0" scale="1;1"/>
+				<glyph orgId="12099" newId="12099" orgName="u269c_layer1" newName="u269c_layer1" trans="0;0" scale="1;1"/>
+				<glyph orgId="12100" newId="12100" orgName="u269c_layer2" newName="u269c_layer2" trans="0;0" scale="1;1"/>
+				<glyph orgId="12101" newId="12101" orgName="u269c_layer3" newName="u269c_layer3" trans="0;0" scale="1;1"/>
+			</glyphs>
+			<prefix>TM</prefix>
+			<pathfilename>..\samples_Fonts\TwemojiMozilla.ttf</pathfilename>
+			<oversample>1</oversample>
+			<fontsize>50</fontsize>
+			<rasterizer>0</rasterizer>
+			<freetypeflag>259</freetypeflag>
+			<freetypemultiply>1</freetypemultiply>
+			<padding>1</padding>
+			<texturefiltering>9729</texturefiltering>
+			<glyphfiltering>
+			<flags>48</flags>
+			<op>true</op>
+			<use_color>false</use_color>
+			<simple_color>3425907660</simple_color>
+			<composite_color>3430953932</composite_color>
+			<mapped_color>3430953856</mapped_color>
+			<unmapped_color>3429289088</unmapped_color>
+			<colored_color>3425927219</colored_color>
+			<layer_color>3429289037</layer_color>
+			<named_color>3435954227</named_color>
+			</glyphfiltering>
+		</font>
+		<font name="fontawesome-webfont.ttf">
+			<glyphs>
+				<glyph orgId="17" newId="17" orgName="heart" newName="heart" trans="0;0" scale="1;1"/>
+				<glyph orgId="18" newId="18" orgName="star" newName="star" trans="0;0" scale="1;1"/>
+				<glyph orgId="56" newId="56" orgName="bookmark" newName="bookmark" trans="0;0" scale="1;1"/>
+				<glyph orgId="58" newId="58" orgName="camera" newName="camera" trans="0;0" scale="1;1"/>
+				<glyph orgId="104" newId="104" orgName="arrow_right" newName="arrow_right" trans="0;0" scale="1;1"/>
+				<glyph orgId="105" newId="105" orgName="arrow_up" newName="arrow_up" trans="0;0" scale="1;1"/>
+				<glyph orgId="106" newId="106" orgName="arrow_down" newName="arrow_down" trans="0;0" scale="1;1"/>
+				<glyph orgId="107" newId="107" orgName="share_alt" newName="share_alt" trans="0;0" scale="1;1"/>
+				<glyph orgId="110" newId="110" orgName="plus" newName="plus" trans="0;0" scale="1;1"/>
+				<glyph orgId="112" newId="112" orgName="asterisk" newName="asterisk" trans="0;0" scale="1;1"/>
+				<glyph orgId="115" newId="115" orgName="leaf" newName="leaf" trans="0;0" scale="1;1"/>
+				<glyph orgId="119" newId="119" orgName="warning_sign" newName="warning_sign" trans="0;0" scale="1;1"/>
+				<glyph orgId="120" newId="120" orgName="plane" newName="plane" trans="0;0" scale="1;1"/>
+			</glyphs>
+			<prefix></prefix>
+			<pathfilename>..\samples_Fonts\fontawesome-webfont.ttf</pathfilename>
+			<oversample>1</oversample>
+			<fontsize>17</fontsize>
+			<rasterizer>0</rasterizer>
+			<freetypeflag>259</freetypeflag>
+			<freetypemultiply>1</freetypemultiply>
+			<padding>1</padding>
+			<texturefiltering>9729</texturefiltering>
+			<glyphfiltering>
+			<flags>127</flags>
+			<op>true</op>
+			<use_color>false</use_color>
+			<simple_color>3425907660</simple_color>
+			<composite_color>3430953932</composite_color>
+			<mapped_color>3430953856</mapped_color>
+			<unmapped_color>3429289088</unmapped_color>
+			<colored_color>3425927219</colored_color>
+			<layer_color>3429289037</layer_color>
+			<named_color>3435954227</named_color>
+			</glyphfiltering>
+		</font>
+		<font name="seguiemj.ttf">
+			<glyphs>
+				<glyph orgId="1360" newId="1360" orgName="" newName="Symbol_1360" trans="0;0" scale="1;1"/>
+				<glyph orgId="1361" newId="1361" orgName="" newName="Symbol_1361" trans="0;0" scale="1;1"/>
+				<glyph orgId="1362" newId="1362" orgName="" newName="Symbol_1362" trans="0;0" scale="1;1"/>
+				<glyph orgId="1363" newId="1363" orgName="" newName="Symbol_1363" trans="0;0" scale="1;1"/>
+				<glyph orgId="1364" newId="1364" orgName="" newName="Symbol_1364" trans="0;0" scale="1;1"/>
+				<glyph orgId="1365" newId="1365" orgName="" newName="Symbol_1365" trans="0;0" scale="1;1"/>
+			</glyphs>
+			<prefix></prefix>
+			<pathfilename>..\samples_Fonts\seguiemj.ttf</pathfilename>
+			<oversample>1</oversample>
+			<fontsize>50</fontsize>
+			<rasterizer>0</rasterizer>
+			<freetypeflag>259</freetypeflag>
+			<freetypemultiply>1</freetypemultiply>
+			<padding>1</padding>
+			<texturefiltering>9729</texturefiltering>
+			<glyphfiltering>
+			<flags>16</flags>
+			<op>true</op>
+			<use_color>false</use_color>
+			<simple_color>3425907660</simple_color>
+			<composite_color>3430953932</composite_color>
+			<mapped_color>3430953856</mapped_color>
+			<unmapped_color>3429289088</unmapped_color>
+			<colored_color>3425927219</colored_color>
+			<layer_color>3429289037</layer_color>
+			<named_color>3435954227</named_color>
+			</glyphfiltering>
+		</font>
+		<rangecoloring show="false" hash="10;15;35;0.5"/>
+		<previewglyphcount>17</previewglyphcount>
+		<previewglyphwidth>80.889</previewglyphwidth>
+		<mergedfontprefix></mergedfontprefix>
+		<curglyphtooltip>true</curglyphtooltip>
+		<srcglyphtooltip>true</srcglyphtooltip>
+		<dstglyphtooltip>true</dstglyphtooltip>
+		<glyphpreviewscale>0.65</glyphpreviewscale>
+		<glyphdrawingflags>0</glyphdrawingflags>
+		<glyphpreviewquadbeziercounsegment>1</glyphpreviewquadbeziercounsegment>
+		<glyphpreviewzoomprecision>20</glyphpreviewzoomprecision>
+		<genmodeflags>1304</genmodeflags>
+		<fonttomergein>fontawesome-webfont.ttf</fonttomergein>
+		<glyphdisplaytuningmode>2</glyphdisplaytuningmode>
+		<sourcefontpaneflags>1</sourcefontpaneflags>
+		<cardglyhpheight>40</cardglyhpheight>
+		<cardcountrowsmax>20</cardcountrowsmax>
+		<lastgeneratedpath>.</lastgeneratedpath>
+		<lastgeneratedfilename>Generated_Font</lastgeneratedfilename>
+		<zoomglyphs>false</zoomglyphs>
+		<showbaseline>false</showbaseline>
+		<showadvancex>false</showadvancex>
+		<glyphdrawingflags>0</glyphdrawingflags>
+		<finalselection>
+		</finalselection>
+		<fonttest>
+			<fontsize>100</fontsize>
+			<showbaseline>true</showbaseline>
+			<fontname></fontname>
+			<teststring></teststring>
+			<insertedglyphs>
+			</insertedglyphs>
+		</fonttest>
+	</project>
+</config>

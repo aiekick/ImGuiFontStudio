@@ -52,6 +52,7 @@ public:
 
 private: 
 	void DrawParamsPane(ProjectFile *vProjectFile);
+	void DrawFontListWidget(ProjectFile* vProjectFile);
 
 private: // actions
 	// via menu

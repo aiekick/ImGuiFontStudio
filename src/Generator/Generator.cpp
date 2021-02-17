@@ -88,14 +88,11 @@ bool Generator::Generate(
 				{
 					if (font.second)
 					{
-						std::string fileName = font.second->m_FontFileName;
-						if (!font.second->m_GeneratedFileName.empty())
-							fileName = font.second->m_GeneratedFileName;
-						auto ps = FileHelper::Instance()->ParsePathFileName(fileName);
+						auto ps = FileHelper::Instance()->ParsePathFileName(font.second->m_FontFileName);
 						if (ps.isOk)
 						{
 							GenerateSource_One(
-								ps.GetFPNE_WithPath(mainPS.path),
+								ps.GetFPNE_WithPath(vFilePath),
 								vProjectFile,
 								font.second,
 								vProjectFile->m_GenModeFlags);
@@ -131,14 +128,11 @@ bool Generator::Generate(
 				{
 					if (font.second)
 					{
-						std::string fileName = font.second->m_FontFileName;
-						if (!font.second->m_GeneratedFileName.empty())
-							fileName = font.second->m_GeneratedFileName;
-						auto ps = FileHelper::Instance()->ParsePathFileName(fileName);
+						auto ps = FileHelper::Instance()->ParsePathFileName(font.second->m_FontFileName);
 						if (ps.isOk)
 						{
 							res = GenerateFontFile_One(
-								ps.GetFPNE_WithPath(mainPS.path),
+								ps.GetFPNE_WithPath(vFilePath),
 								vProjectFile,
 								font.second,
 								vProjectFile->m_GenModeFlags);
@@ -167,8 +161,10 @@ bool Generator::Generate(
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT))
 			{
 				res = GenerateCard_One(
-					mainPS.GetFPNE_WithExt("png"),
-					vProjectFile->m_SelectedFont);
+					mainPS.GetFPNE_WithExt(".png"),
+					vProjectFile->m_SelectedFont,
+					vProjectFile->m_CardGlyphHeightInPixel,
+					vProjectFile->m_CardCountRowsMax);
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
 			{
@@ -176,15 +172,14 @@ bool Generator::Generate(
 				{
 					if (font.second)
 					{
-						std::string fileName = font.second->m_FontFileName;
-						if (!font.second->m_GeneratedFileName.empty())
-							fileName = font.second->m_GeneratedFileName;
-						auto ps = FileHelper::Instance()->ParsePathFileName(fileName);
+						auto ps = FileHelper::Instance()->ParsePathFileName(font.second->m_FontFileName);
 						if (ps.isOk)
 						{
 							res = GenerateCard_One(
-								ps.GetFPNE_WithPathExt(mainPS.path, "png"),
-								font.second);
+								ps.GetFPNE_WithPathExt(vFilePath, ".png"),
+								font.second,
+								vProjectFile->m_CardGlyphHeightInPixel,
+								vProjectFile->m_CardCountRowsMax);
 						}
 					}
 				}
@@ -192,8 +187,10 @@ bool Generator::Generate(
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED))
 			{
 				res = GenerateCard_Merged(
-					mainPS.GetFPNE_WithExt("png"),
-					vProjectFile);
+					mainPS.GetFPNE_WithExt(".png"),
+					vProjectFile,
+					vProjectFile->m_CardGlyphHeightInPixel,
+					vProjectFile->m_CardCountRowsMax);
 			}
 		}
 	}
@@ -485,7 +482,9 @@ two modes :
 */
 bool Generator::GenerateCard_One(
 	const std::string& vFilePathName,
-	std::shared_ptr<FontInfos> vFontInfos)		// max row count
+	std::shared_ptr<FontInfos> vFontInfos,
+	const uint32_t& vGlyphHeight,	// max height of glyph
+	const uint32_t& vMaxRows)		// max row count
 {
 	bool res = false;
 
@@ -498,7 +497,7 @@ bool Generator::GenerateCard_One(
 			// file
 			std::string name = ps.name;
 			ct::replaceString(name, "-", "_");
-			filePathName = ps.GetFPNE_WithNameExt(name, "png");
+			filePathName = ps.GetFPNE_WithNameExt(name, ".png");
 			
 			// Prefix
 			std::string prefix = "";
@@ -511,9 +510,9 @@ bool Generator::GenerateCard_One(
 			std::map<std::string, std::pair<uint32_t, size_t>> glyphs;
 			if (vFontInfos->m_SelectedGlyphs.empty()) // no glyph selected so generate for whole font
 			{
-				for (auto& glyph : vFontInfos->m_GlyphCodePointToName)
+				for (auto& glyph : vFontInfos->m_Glyphs)
 				{
-					glyphs[GetNewHeaderName(prefix, glyph.second)] = std::pair<uint32_t, size_t>(glyph.first, (size_t)vFontInfos.get());
+					glyphs[GetNewHeaderName(prefix, glyph.second.name)] = std::pair<uint32_t, size_t>(glyph.first, (size_t)vFontInfos.get());
 				}
 			}
 			else
@@ -527,7 +526,7 @@ bool Generator::GenerateCard_One(
 				}
 			}
 
-			res = WriteGlyphCardToPicture(filePathName, glyphs, vFontInfos->m_CardGlyphHeightInPixel, vFontInfos->m_CardCountRowsMax);
+			res = WriteGlyphCardToPicture(filePathName, glyphs, vGlyphHeight, vMaxRows);
 		}
 		else
 		{
@@ -540,12 +539,16 @@ bool Generator::GenerateCard_One(
 
 bool Generator::GenerateCard_Merged(
 	const std::string& vFilePathName,
-	ProjectFile* vProjectFile)		// max row count
+	ProjectFile* vProjectFile,
+	const uint32_t& vGlyphHeight,	// max height of glyph
+	const uint32_t& vMaxRows)		// max row count
 {
 	bool res = false;
 
 	UNUSED(vFilePathName);
 	UNUSED(vProjectFile);
+	UNUSED(vGlyphHeight);
+	UNUSED(vMaxRows);
 
 	if (vProjectFile &&
 		!vFilePathName.empty() &&
@@ -558,7 +561,7 @@ bool Generator::GenerateCard_Merged(
 			// file
 			std::string name = ps.name;
 			ct::replaceString(name, "-", "_");
-			filePathName = ps.GetFPNE_WithNameExt(name, "png");
+			filePathName = ps.GetFPNE_WithNameExt(name, ".png");
 
 			// Prefix
 			std::string prefix = "";
@@ -583,7 +586,7 @@ bool Generator::GenerateCard_Merged(
 				}
 			}
 
-			res = WriteGlyphCardToPicture(filePathName, glyphs, vProjectFile->m_MergedCardGlyphHeightInPixel, vProjectFile->m_MergedCardCountRowsMax);
+			res = WriteGlyphCardToPicture(filePathName, glyphs, vGlyphHeight, vMaxRows);
 		}
 		else
 		{
@@ -618,7 +621,7 @@ bool Generator::GenerateFontFile_One(
 
 		std::map<int32_t, std::string> newHeaderNames;
 		std::map<int32_t, int32_t> newCodePoints;
-		std::map<CodePoint, std::shared_ptr<GlyphInfos>> newGlyphInfos;
+		std::map<CodePt, std::shared_ptr<GlyphInfos>> newGlyphInfos;
 		if (!vFontInfos->m_SelectedGlyphs.empty())
 		{
 			for (const auto& glyph : vFontInfos->m_SelectedGlyphs)
@@ -677,14 +680,9 @@ bool Generator::GenerateFontFile_One(
 		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
 		if (ps.isOk)
 		{
-			if (vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT))
-			{
-				vFontInfos->m_GeneratedFileName = ps.name;
-			}
-
 			std::string name = ps.name;
 			ct::replaceString(name, "-", "_");
-			filePathName = ps.GetFPNE_WithNameExt(name, "ttf");
+			filePathName = ps.GetFPNE_WithNameExt(name, ".ttf");
 
 			if (fontGenerator.GenerateFontFile(filePathName, vFlags & GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES))
 			{
@@ -701,7 +699,9 @@ bool Generator::GenerateFontFile_One(
 				{
 					GenerateCard_One(
 						filePathName,
-						vFontInfos);
+						vFontInfos,
+						vProjectFile->m_CardGlyphHeightInPixel,
+						vProjectFile->m_CardCountRowsMax);
 				}
 			}
 			else
@@ -777,7 +777,7 @@ bool Generator::GenerateFontFile_Merged(
 
 				std::map<int32_t, std::string> newHeaderNames;
 				std::map<int32_t, int32_t> newCodePoints;
-				std::map<CodePoint, std::shared_ptr<GlyphInfos>> newGlyphInfos;
+				std::map<CodePt, std::shared_ptr<GlyphInfos>> newGlyphInfos;
 				for (const auto& glyph : it.second->m_SelectedGlyphs)
 				{
 					if (glyph.second)
@@ -836,7 +836,7 @@ bool Generator::GenerateFontFile_Merged(
 			{
 				std::string name = ps.name;
 				ct::replaceString(name, "-", "_");
-				filePathName = ps.GetFPNE_WithNameExt(name, "ttf");
+				filePathName = ps.GetFPNE_WithNameExt(name, ".ttf");
 
 				if (fontGenerator.GenerateFontFile(vFilePathName, vFlags & GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES))
 				{
@@ -852,7 +852,9 @@ bool Generator::GenerateFontFile_Merged(
 					{
 						GenerateCard_Merged(
 							filePathName, 
-							vProjectFile);
+							vProjectFile,
+							vProjectFile->m_CardGlyphHeightInPixel, 
+							vProjectFile->m_CardCountRowsMax);
 					}
 				}
 				else
@@ -918,7 +920,7 @@ bool Generator::GenerateSource_One(
 				
 				std::string name = ps.name;
 				ct::replaceString(name, "-", "_");
-				filePathName = ps.GetFPNE_WithNameExt("temporary_" + name, "ttf");
+				filePathName = ps.GetFPNE_WithNameExt("temporary_" + name, ".ttf");
 
 				GenerateFontFile_One(filePathName, vProjectFile, vFontInfos,
 					(GenModeFlags)(vFlags & ~GENERATOR_MODE_HEADER_CARD)); // no header or card to generate
@@ -926,11 +928,6 @@ bool Generator::GenerateSource_One(
 
 			if (FileHelper::Instance()->IsFileExist(filePathName))
 			{
-				if (vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT))
-				{
-					vFontInfos->m_GeneratedFileName = ps.name;
-				}
-
 				std::string lang;
 				if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C)) lang = "c";
 				else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) lang = "cpp";
@@ -958,12 +955,12 @@ bool Generator::GenerateSource_One(
 						PathStruct psSource = ps;
 
 						std::string sourceExt;
-						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C)) sourceExt = "c";
-						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) sourceExt = "cpp";
+						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C)) sourceExt = ".c";
+						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) sourceExt = ".cpp";
 						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
 						{
 							psSource.name += "_Bytes";
-							sourceExt = "cs";
+							sourceExt = ".cs";
 						}
 						
 						std::string sourceFile;
@@ -974,17 +971,20 @@ bool Generator::GenerateSource_One(
 
 							std::string headerExt;
 							if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C) ||
-								vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) headerExt = "h";
+								vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) headerExt = ".h";
 							else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
 							{
 								psHeader.name += "_Labels";
-								headerExt = "cs";
+								headerExt = ".cs";
 							}
 
 							if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C) ||
 								vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
 							{
-								sourceFile = "#include \"" + ps.name + "." + headerExt + "\"\n\n";
+								sourceFile = "#include \"" + ps.name + headerExt + "\"\n\n";
+								std::string prefix = "";
+								prefix = "FONT_ICON_BUFFER_NAME_" + vFontInfos->m_FontPrefix;
+								ct::replaceString(buffer, vFontInfos->m_FontPrefix + "_compressed_data_base85", prefix);
 							}
 
 							m_HeaderGenerator.GenerateHeader_One(
@@ -998,8 +998,10 @@ bool Generator::GenerateSource_One(
 						if (vFlags & GENERATOR_MODE_CARD)
 						{
 							GenerateCard_One(
-								ps.GetFPNE_WithExt("png"),
-								vFontInfos);
+								filePathName,
+								vFontInfos,
+								vProjectFile->m_CardGlyphHeightInPixel,
+								vProjectFile->m_CardCountRowsMax);
 						}
 
 						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
@@ -1066,7 +1068,7 @@ bool Generator::GenerateSource_Merged(
 			std::string buffer;
 
 			ct::replaceString(ps.name, "-", "_");
-			filePathName = ps.GetFPNE_WithNameExt("temporary_" + ps.name, "ttf");
+			filePathName = ps.GetFPNE_WithNameExt("temporary_" + ps.name, ".ttf");
 
 			GenerateFontFile_Merged(
 				filePathName, 
@@ -1099,12 +1101,12 @@ bool Generator::GenerateSource_Merged(
 						PathStruct psSource = ps;
 						
 						std::string sourceExt;
-						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C)) sourceExt = "c";
-						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) sourceExt = "cpp";
+						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C)) sourceExt = ".c";
+						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) sourceExt = ".cpp";
 						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
 						{
 							psSource.name += "_Bytes";
-							sourceExt = "cs";
+							sourceExt = ".cs";
 						}
 						
 						std::string sourceFile;
@@ -1115,17 +1117,17 @@ bool Generator::GenerateSource_Merged(
 							
 							std::string headerExt;
 							if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C) ||
-								vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) headerExt = "h";
+								vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) headerExt = ".h";
 							else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
 							{
 								psHeader.name += "_Labels";
-								headerExt = "cs";
+								headerExt = ".cs";
 							}
 
 							if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C) ||
 								vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
 							{
-								sourceFile = "#include \"" + ps.name + "." + headerExt + "\"\n\n";
+								sourceFile = "#include \"" + ps.name + headerExt + "\"\n\n";
 								std::string prefix = "";
 								prefix = "FONT_ICON_BUFFER_NAME_" + vProjectFile->m_MergedFontPrefix;
 								ct::replaceString(buffer, vProjectFile->m_MergedFontPrefix + "_compressed_data_base85", prefix);
@@ -1141,8 +1143,10 @@ bool Generator::GenerateSource_Merged(
 						if (vFlags & GENERATOR_MODE_CARD)
 						{
 							GenerateCard_Merged(
-								ps.GetFPNE_WithExt("png"),
-								vProjectFile);
+								filePathName,
+								vProjectFile,
+								vProjectFile->m_CardGlyphHeightInPixel,
+								vProjectFile->m_CardCountRowsMax);
 						}
 
 						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
