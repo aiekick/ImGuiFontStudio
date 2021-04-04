@@ -596,8 +596,6 @@ void GeneratorPane::ShowGenerationStatus(ProjectFile* vProjectFile)
 
 			for (const auto& itFont : vProjectFile->m_Fonts)
 			{
-				bool sel = false;
-
 				if (itFont.second.use_count())
 				{
 					ImGui::TableNextRow();
