@@ -34,3 +34,7 @@
 	path = 3rdparty/freetype2
 	url = https://github.com/freetype/freetype2.git
 	branch = master
+[submodule "3rdparty/ctools"]
+	path = 3rdparty/ctools
+	url = https://github.com/aiekick/cTools.git
+	branch = master
