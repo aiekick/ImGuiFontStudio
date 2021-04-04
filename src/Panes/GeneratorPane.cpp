@@ -576,7 +576,76 @@ bool GeneratorPane::CheckAndDisplayGenerationConditions(ProjectFile *vProjectFil
 
 void GeneratorPane::ShowGenerationStatus(ProjectFile* vProjectFile)
 {
-	
+	if (ImGui::CollapsingHeader("Generation Status", ImGuiTreeNodeFlags_Bullet))
+	{
+		auto _countLines = vProjectFile->m_Fonts.size() + 1U;
+
+		static ImGuiTableFlags flags =
+			ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg |
+			ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
+			ImGuiTableFlags_NoHostExtendY | ImGuiTableFlags_Borders;
+		if (ImGui::BeginTable("##fileTable", 4, flags, ImVec2(-1.0f, _countLines * ImGui::GetFrameHeightWithSpacing())))
+		{
+			ImGui::TableSetupScrollFreeze(0, 1); // Make header always visible
+			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, -1, 1); // used or not for this generation
+			ImGui::TableSetupColumn("Font", ImGuiTableColumnFlags_WidthStretch, -1, 0);
+			ImGui::TableSetupColumn("Features", ImGuiTableColumnFlags_WidthFixed, -1, 2); // export names
+			ImGui::TableSetupColumn("Glyphs", ImGuiTableColumnFlags_WidthFixed, -1, 3); // export names
+
+			ImGui::TableHeadersRow();
+
+			for (const auto& itFont : vProjectFile->m_Fonts)
+			{
+				bool sel = false;
+
+				if (itFont.second.use_count())
+				{
+					ImGui::TableNextRow();
+
+					ImGui::PushID(itFont.second.get());
+					if (ImGui::TableSetColumnIndex(0))
+					{
+						static bool v = false;
+						ImGui::PushItemWidth(20.0f);
+						ImGui::RadioButtonLabeled("", "Enable/Disable", &v, false);
+						ImGui::PopItemWidth();
+					}
+					if (ImGui::TableSetColumnIndex(1))
+					{
+						ImGui::FramedGroupText("%s", itFont.second->m_FontFileName.c_str());
+					}
+					if (ImGui::TableSetColumnIndex(2))
+					{
+						static bool v[4] = { false, false, false, false };
+						v[0] = vProjectFile->IsGenMode(GENERATOR_MODE_HEADER);
+						v[1] = vProjectFile->IsGenMode(GENERATOR_MODE_CARD);
+						v[2] = vProjectFile->IsGenMode(GENERATOR_MODE_FONT);
+						v[3] = vProjectFile->IsGenMode(GENERATOR_MODE_SRC);
+						ImGui::BeginGroup();
+						ImGui::PushItemWidth(20.0f);
+						ImGui::RadioButtonLabeled("H", "Header Feature", v[0], false); ImGui::SameLine();
+						ImGui::PopItemWidth();
+						ImGui::PushItemWidth(20.0f);
+						ImGui::RadioButtonLabeled("C", "Card Feature", v[1], false); ImGui::SameLine();
+						ImGui::PopItemWidth();
+						ImGui::PushItemWidth(20.0f);
+						ImGui::RadioButtonLabeled("F", "Font Feature", v[2], false); ImGui::SameLine();
+						ImGui::PopItemWidth();
+						ImGui::PushItemWidth(20.0f);
+						ImGui::RadioButtonLabeled("S", "Src Feature", v[3], false);
+						ImGui::PopItemWidth();
+						ImGui::EndGroup();
+					}
+					if (ImGui::TableSetColumnIndex(3))
+					{
+						ImGui::FramedGroupTextHelp("Selecteds Glyphs Count", "%u", (uint32_t)itFont.second->m_SelectedGlyphs.size());
+					}
+					ImGui::PopID();
+				}
+			}
+			ImGui::EndTable();
+		}
+	}
 }
 
 /*
