@@ -111,7 +111,6 @@ public:
 
 	bool m_ShowImGui = false;				// show ImGui win
 	bool m_ShowMetric = false;				// show metrics
-	bool m_ShowImGuiStyle = false;			// show custom ImGui Style
 
 private:
 	ProjectFile m_ProjectFile;				// project file
@@ -151,6 +150,7 @@ private: // imgui pane / dialogs
 	void DrawDockPane(ImVec2 vPos, ImVec2 vSize);
 	void DisplayDialogsAndPopups();
 	void ShowAboutDialog(bool *vOpen);
+	void DrawMainMenuBar();
 
 private: // save : on quit or project loading
 	void OpenUnSavedDialog(); // show a dialog because the project file is not saved

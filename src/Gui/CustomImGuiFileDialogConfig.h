@@ -21,9 +21,9 @@
 // filter combobox width
 //#define FILTER_COMBO_WIDTH 120.0f
 // button widget use for compose path
-//#define IMGUI_PATH_BUTTON ImGui::Button
-// standar button
-//#define IMGUI_BUTTON ImGui::Button
+#define IMGUI_PATH_BUTTON ImGui::ContrastedButton
+// standard button
+#define IMGUI_BUTTON ImGui::ContrastedButton
 
 #include <Res/CustomFont.h>
 

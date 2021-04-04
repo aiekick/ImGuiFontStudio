@@ -10,7 +10,7 @@
 #include <MainFrame.h>
 #include <Panes/Manager/LayoutManager.h>
 #include <Helper/SettingsDlg.h>
-#include <Helper/ImGuiThemeHelper.h>
+#include <Helper/ThemeHelper.h>
 
 bool RibbonBar::Init()
 {
@@ -213,7 +213,7 @@ void RibbonBar::Draw(ProjectFile *vProjectFile)
 
 			if (BeginRibbonButtonMenu("", "Themes", h))
 			{
-				ImGuiThemeHelper::Instance()->DrawMenu();
+				ThemeHelper::Instance()->DrawMenu();
 
 				EndRibbonButtonMenu();
 			}
@@ -222,7 +222,6 @@ void RibbonBar::Draw(ProjectFile *vProjectFile)
 
 			// group 'styles'
 			RibbonToggleButton("", "Show\nImGui", h, MainFrame::Instance()->m_ShowImGui); ImGui::SameLine();
-			RibbonToggleButton("", "Show\nImGui\nStyle", h, MainFrame::Instance()->m_ShowImGuiStyle); ImGui::SameLine();
 			RibbonToggleButton("", "Show\nImGui\nMetric\nDebug", h, MainFrame::Instance()->m_ShowMetric);	
 			//////////////////
 

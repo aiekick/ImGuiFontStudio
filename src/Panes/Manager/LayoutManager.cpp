@@ -22,7 +22,7 @@
 #include <ctools/FileHelper.h>
 #include <MainFrame.h>
 #include <Res/CustomFont.h>
-#include <Gui/ImGuiWidgets.h>
+#include <Gui/ImWidgets.h>
 #include <Project/ProjectFile.h>
 
 #ifdef _DEBUG

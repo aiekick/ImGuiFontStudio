@@ -20,8 +20,8 @@
 #include "SettingsDlg.h"
 
 #include <MainFrame.h>
-#include <Gui/ImGuiWidgets.h>
-#include <Helper/ImGuiThemeHelper.h>
+#include <Gui/ImWidgets.h>
+#include <Helper/ThemeHelper.h>
 #include <Res/CustomFont.h>
 
 #include <imgui/imgui.h>
@@ -143,14 +143,14 @@ void SettingsDlg::DrawContentPane()
 
 void SettingsDlg::DrawButtonsPane()
 {
-	if (ImGui::Button("Cancel"))
+	if (ImGui::ContrastedButton("Cancel"))
 	{
 		CloseDialog();
 	}
 
 	ImGui::SameLine();
 	
-	if (ImGui::Button("Ok"))
+	if (ImGui::ContrastedButton("Ok"))
 	{
 		Save();
 		CloseDialog();
@@ -237,10 +237,10 @@ void SettingsDlg::DrawPane_Style(SettingsPaneModeEnum vMode)
 		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.50f);
 
 		// Save/Revert button
-		if (ImGui::Button("Save Ref"))
+		if (ImGui::ContrastedButton("Save Ref"))
 			*ref = ref_saved_style = style;
 		ImGui::SameLine();
-		if (ImGui::Button("Revert Ref"))
+		if (ImGui::ContrastedButton("Revert Ref"))
 			style = *ref;
 		ImGui::SameLine();
 		ImGui::HelpMarker("Save/Revert in local non-persistent storage. Default Colors definition are not affected. Use \"Export\" below to save them somewhere.");
@@ -312,8 +312,8 @@ void SettingsDlg::DrawPane_Style(SettingsPaneModeEnum vMode)
 					{
 						// Tips: in a real user application, you may want to merge and use an icon font into the main font, so instead of "Save"/"Revert" you'd use icons.
 						// Read the FAQ and docs/FONTS.txt about using icon fonts. It's really easy and super convenient!
-						ImGui::SameLine(0.0f, style.ItemInnerSpacing.x); if (ImGui::Button("Save")) ref->Colors[i] = style.Colors[i];
-						ImGui::SameLine(0.0f, style.ItemInnerSpacing.x); if (ImGui::Button("Revert")) style.Colors[i] = ref->Colors[i];
+						ImGui::SameLine(0.0f, style.ItemInnerSpacing.x); if (ImGui::ContrastedButton("Save")) ref->Colors[i] = style.Colors[i];
+						ImGui::SameLine(0.0f, style.ItemInnerSpacing.x); if (ImGui::ContrastedButton("Revert")) style.Colors[i] = ref->Colors[i];
 					}
 					ImGui::SameLine(0.0f, style.ItemInnerSpacing.x);
 					ImGui::TextUnformatted(name);

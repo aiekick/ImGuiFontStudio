@@ -39,6 +39,8 @@ if(MSVC)
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /IGNORE:4055")
     add_definitions(-D_USE_MATH_DEFINES)
     add_definitions(-DMSVC)
+	add_definitions(-DNOMINMAX) ## for avoid conflicts with std::min and std::max
+	add_definitions(-D_CRT_SECURE_NO_WARNINGS) ## fot disable crt secure warnings (du to no cross plafrom secure function for windows)
 else ()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -std=c++11 -Wdeprecated-declarations -Wunused-parameter")
 endif ()

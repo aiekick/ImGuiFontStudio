@@ -28,9 +28,9 @@
 
 #include <ImGuiFileDialog/ImGuiFileDialog.h>
 #include <Generator/Generator.h>
-#include <Gui/ImGuiWidgets.h>
+#include <Gui/ImWidgets.h>
 #include <Panes/Manager/LayoutManager.h>
-#include <Helper/ImGuiThemeHelper.h>
+#include <Helper/ThemeHelper.h>
 #include <Helper/Messaging.h>
 #include <Helper/SelectionHelper.h>
 #include <Helper/SettingsDlg.h>
@@ -68,8 +68,6 @@ void MainFrame::Init()
 	snprintf(buf, 255, "ImGuiFontStudio %s", IMGUIFONTSTUDIO_VERSION);
 	glfwSetWindowTitle(m_Window, buf);
 
-	ImGuiThemeHelper::Instance()->ApplyStyleColorsDefault();
-	
 	LoadConfigFile("config.xml");
 
 	LayoutManager::Instance()->Init();
@@ -148,7 +146,13 @@ void MainFrame::Display(ImVec2 vPos, ImVec2 vSize)
 	
 	DisplayDialogsAndPopups();
 
+	ThemeHelper::Instance()->Draw();
 	LayoutManager::Instance()->InitAfterFirstDisplay(m_DisplaySize);
+
+	if (m_ShowImGui)
+		ImGui::ShowDemoWindow();
+	if (m_ShowMetric)
+		ImGui::ShowMetricsWindow(&m_ShowMetric);
 }
 
 void MainFrame::OpenAboutDialog()
@@ -161,9 +165,6 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 	static ImGuiDockNodeFlags dockspace_flags = ImGuiDockNodeFlags_None;
 	static ImGuiWindowFlags window_flags =
 		ImGuiWindowFlags_NoTitleBar |
-#ifndef USE_RIBBONBAR
-		ImGuiWindowFlags_MenuBar |
-#endif
 		ImGuiWindowFlags_NoMove |
 		ImGuiWindowFlags_NoCollapse |
 		ImGuiWindowFlags_NoResize |
@@ -187,99 +188,18 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 	ImGui::SetWindowPos(vPos);
 
 #ifndef USE_RIBBONBAR
-	if (ImGui::BeginMenuBar())
+	if (ImGui::BeginMainMenuBar())
 	{
-		if (ImGui::BeginMenu(ICON_IGFS_PROJECT " Project"))
-		{
-			if (ImGui::MenuItem(ICON_IGFS_FILE " New"))
-			{
-				Action_Menu_NewProject();
-			}
+		DrawMainMenuBar();
 
-			if (ImGui::MenuItem(ICON_IGFS_FOLDER_OPEN " Open"))
-			{
-				Action_Menu_OpenProject();
-			}
+		// ImGui Infos
+		auto io = ImGui::GetIO();
+		const auto label = ct::toStr("Dear ImGui %s (Docking)", ImGui::GetVersion());
+		const auto size = ImGui::CalcTextSize(label.c_str());
+		ImGui::Spacing(ImGui::GetContentRegionAvail().x - size.x - ImGui::GetStyle().FramePadding.x * 2.0f);
+		ImGui::Text("%s", label.c_str());
 
-			if (m_ProjectFile.IsLoaded())
-			{
-				ImGui::Separator();
-
-				if (ImGui::MenuItem(ICON_IGFS_FOLDER_OPEN " Re Open"))
-				{
-					Action_Menu_ReOpenProject();
-				}
-				
-				ImGui::Separator();
-
-				if (ImGui::MenuItem(ICON_IGFS_SAVE " Save"))
-				{
-					Action_Menu_SaveProject();
-				}
-
-				if (ImGui::MenuItem(ICON_IGFS_SAVE " Save As"))
-				{
-					Action_Menu_SaveAsProject();
-				}
-
-				ImGui::Separator();
-
-				if (ImGui::MenuItem(ICON_IGFS_DESTROY " Close"))
-				{
-					Action_Menu_CloseProject();
-				}
-			}
-
-			ImGui::Separator();
-
-			if (ImGui::MenuItem(ICON_IGFS_ABOUT " About"))
-			{
-				m_ShowAboutDialog = true;
-			}
-			
-			ImGui::EndMenu();
-		}
-		
-		ImGui::Spacing();
-
-		LayoutManager::Instance()->DisplayMenu(vSize);
-
-		ImGui::Spacing();
-		
-		if (ImGui::BeginMenu(ICON_IGFS_SETTINGS " Settings"))
-		{
-			if (ImGui::MenuItem("Settings"))
-			{
-				SettingsDlg::Instance()->OpenDialog();
-			}
-
-			if (ImGui::BeginMenu(ICON_IGFS_EDIT " Styles"))
-			{
-				ImGuiThemeHelper::Instance()->DrawMenu();
-
-				ImGui::Separator();
-
-				ImGui::MenuItem("Show ImGui", "", &m_ShowImGui);
-				ImGui::MenuItem("Show ImGui Style", "", &m_ShowImGuiStyle);
-				ImGui::MenuItem("Show ImGui Metric/Debug", "", &m_ShowMetric);
-
-				ImGui::EndMenu();
-			}
-
-			ImGui::EndMenu();
-		}
-
-		if (m_ProjectFile.IsThereAnyNotSavedChanged())
-		{
-			ImGui::Spacing(200.0f);
-
-			if (ImGui::MenuItem(ICON_IGFS_SAVE " Save"))
-			{
-				Action_Menu_SaveProject();
-			}
-		}
-
-		ImGui::EndMenuBar();
+		ImGui::EndMainMenuBar();
 	}
 #else
 	m_RibbonBar.Draw(&m_ProjectFile);
@@ -301,6 +221,99 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 		ImGui::Text("%s", fps.c_str());
 
 		ImGui::EndMainStatusBar();
+	}
+}
+
+void MainFrame::DrawMainMenuBar()
+{
+	if (ImGui::BeginMenu(ICON_IGFS_PROJECT " Project"))
+	{
+		if (ImGui::MenuItem(ICON_IGFS_FILE " New"))
+		{
+			Action_Menu_NewProject();
+		}
+
+		if (ImGui::MenuItem(ICON_IGFS_FOLDER_OPEN " Open"))
+		{
+			Action_Menu_OpenProject();
+		}
+
+		if (m_ProjectFile.IsLoaded())
+		{
+			ImGui::Separator();
+
+			if (ImGui::MenuItem(ICON_IGFS_FOLDER_OPEN " Re Open"))
+			{
+				Action_Menu_ReOpenProject();
+			}
+
+			ImGui::Separator();
+
+			if (ImGui::MenuItem(ICON_IGFS_SAVE " Save"))
+			{
+				Action_Menu_SaveProject();
+			}
+
+			if (ImGui::MenuItem(ICON_IGFS_SAVE " Save As"))
+			{
+				Action_Menu_SaveAsProject();
+			}
+
+			ImGui::Separator();
+
+			if (ImGui::MenuItem(ICON_IGFS_DESTROY " Close"))
+			{
+				Action_Menu_CloseProject();
+			}
+		}
+
+		ImGui::Separator();
+
+		if (ImGui::MenuItem(ICON_IGFS_ABOUT " About"))
+		{
+			m_ShowAboutDialog = true;
+		}
+
+		ImGui::EndMenu();
+	}
+
+	ImGui::Spacing();
+
+	LayoutManager::Instance()->DisplayMenu(m_DisplaySize);
+
+	ImGui::Spacing();
+
+	if (ImGui::BeginMenu(ICON_IGFS_SETTINGS " Settings"))
+	{
+#ifdef _DEBUG
+		if (ImGui::MenuItem("Settings"))
+		{
+			SettingsDlg::Instance()->OpenDialog();
+		}
+#endif
+		if (ImGui::BeginMenu(ICON_IGFS_EDIT " Styles"))
+		{
+			ThemeHelper::Instance()->DrawMenu();
+
+			ImGui::Separator();
+
+			ImGui::MenuItem("Show ImGui", "", &m_ShowImGui);
+			ImGui::MenuItem("Show ImGui Metric/Debug", "", &m_ShowMetric);
+
+			ImGui::EndMenu();
+		}
+
+		ImGui::EndMenu();
+	}
+
+	if (m_ProjectFile.IsThereAnyNotSavedChanged())
+	{
+		ImGui::Spacing(200.0f);
+
+		if (ImGui::MenuItem(ICON_IGFS_SAVE " Save"))
+		{
+			Action_Menu_SaveProject();
+		}
 	}
 }
 
@@ -340,8 +353,6 @@ void MainFrame::DisplayDialogsAndPopups()
 		ShowAboutDialog(&m_ShowAboutDialog);
 	if (m_ShowImGui)
 		ImGui::ShowDemoWindow(&m_ShowImGui);
-	if (m_ShowImGuiStyle)
-		ImGuiThemeHelper::Instance()->ShowCustomStyleEditor(&m_ShowImGuiStyle);
 	if (m_ShowMetric)
 		ImGui::ShowMetricsWindow(&m_ShowMetric);
 
@@ -499,22 +510,22 @@ bool MainFrame::ShowUnSavedDialog()
 				if (ImGui::BeginPopupModal("Do you want to save before ?", (bool*)0,
 					ImGuiWindowFlags_NoResize | ImGuiWindowFlags_NoDocking))
 				{
-					if (ImGui::Button("Save"))
+					if (ImGui::ContrastedButton("Save"))
 					{
 						res = Action_UnSavedDialog_SaveProject();
 					}
 					ImGui::SameLine();
-					if (ImGui::Button("Save As"))
+					if (ImGui::ContrastedButton("Save As"))
 					{
 						Action_UnSavedDialog_SaveAsProject();
 					}
 
-					if (ImGui::Button("Continue without saving"))
+					if (ImGui::ContrastedButton("Continue without saving"))
 					{
 						res = true; // quit the action
 					}
 					ImGui::SameLine();
-					if (ImGui::Button("Cancel"))
+					if (ImGui::ContrastedButton("Cancel"))
 					{
 						Action_Cancel();
 					}
@@ -951,13 +962,12 @@ std::string MainFrame::getXml(const std::string& vOffset, const std::string& vUs
 
 	std::string str;
 
-	str += ImGuiThemeHelper::Instance()->getXml(vOffset);
+	str += ThemeHelper::Instance()->getXml(vOffset);
 	str += LayoutManager::Instance()->getXml(vOffset, "app");
 	str += vOffset + "<bookmarks>" + ImGuiFileDialog::Instance()->SerializeBookmarks() + "</bookmarks>\n";
 	str += vOffset + "<showaboutdialog>" + (m_ShowAboutDialog ? "true" : "false") + "</showaboutdialog>\n";
 	str += vOffset + "<showimgui>" + (m_ShowImGui ? "true" : "false") + "</showimgui>\n";
 	str += vOffset + "<showmetric>" + (m_ShowMetric ? "true" : "false") + "</showmetric>\n";
-	str += vOffset + "<showimguistyle>" + (m_ShowImGuiStyle ? "true" : "false") + "</showimguistyle>\n";
 	str += vOffset + "<project>" + m_ProjectFile.m_ProjectFilePathName + "</project>\n";
 	
 	return str;
@@ -978,7 +988,7 @@ bool MainFrame::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 	if (vParent != 0)
 		strParentName = vParent->Value();
 
-	ImGuiThemeHelper::Instance()->setFromXml(vElem, vParent);
+	ThemeHelper::Instance()->setFromXml(vElem, vParent);
 	LayoutManager::Instance()->setFromXml(vElem, vParent, "app");
 
 	if (strName == "bookmarks")
@@ -991,8 +1001,6 @@ bool MainFrame::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 		m_ShowImGui = ct::ivariant(strValue).GetB();
 	else if (strName == "showmetric")
 		m_ShowMetric = ct::ivariant(strValue).GetB();
-	else if (strName == "showimguistyle")
-		m_ShowImGuiStyle = ct::ivariant(strValue).GetB();
 
 	return true;
 }

@@ -22,7 +22,7 @@
 #include <MainFrame.h>
 
 #include <Panes/Manager/LayoutManager.h>
-#include <Gui/ImGuiWidgets.h>
+#include <Gui/ImWidgets.h>
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
@@ -90,7 +90,7 @@ void FontStructurePane::DrawFontStructurePane(ProjectFile *vProjectFile)
         {
             if (vProjectFile &&  vProjectFile->IsLoaded())
             {
-                if (ImGui::Button("Analyse Font"))
+                if (ImGui::ContrastedButton("Analyse Font"))
                 {
 					std::string fontFilePathName = FileHelper::Instance()->CorrectSlashTypeForFilePathName(vProjectFile->m_SelectedFont->m_FontFilePathName);
 

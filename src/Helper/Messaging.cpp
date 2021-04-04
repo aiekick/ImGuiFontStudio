@@ -20,7 +20,7 @@
 #include "Messaging.h"
 
 #include <Res/CustomFont.h>
-#include <Gui/ImGuiWidgets.h>
+#include <Gui/ImWidgets.h>
 #include <Helper/SelectionHelper.h>
 
 Messaging::Messaging() = default;

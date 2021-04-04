@@ -20,7 +20,7 @@
 
 #include <ctools/FileHelper.h>
 #include <Project/ProjectFile.h>
-#include <Gui/ImGuiWidgets.h>
+#include <Gui/ImWidgets.h>
 #include <Helper/Messaging.h>
 #include <ctools/Logger.h>
 #include <Panes/ParamsPane.h>
@@ -484,9 +484,7 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 
 			aw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
 
-			ImGui::PushItemWidth(aw);
-
-			if (ImGui::RadioButtonLabeled("FreeType", "Use FreeType Raterizer", FontInfos::m_RasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE))
+			if (ImGui::RadioButtonLabeled(aw, "FreeType", "Use FreeType Raterizer", FontInfos::m_RasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE))
 			{
 				needFontReGen = true;
 				FontInfos::m_RasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
@@ -494,14 +492,14 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 			
 			ImGui::SameLine();
 
-			if (ImGui::RadioButtonLabeled("Stb", "Use Stb Raterizer", FontInfos::m_RasterizerMode == RasterizerEnum::RASTERIZER_STB))
+			if (ImGui::RadioButtonLabeled(aw, "Stb", "Use Stb Raterizer", FontInfos::m_RasterizerMode == RasterizerEnum::RASTERIZER_STB))
 			{
 				needFontReGen = true;
 				FontInfos::m_RasterizerMode = RasterizerEnum::RASTERIZER_STB;
 			}
 
 #ifdef _DEBUG
-			if (ImGui::RadioButtonLabeled("Linear", "Use Linear Texture Filtering", m_TextureFiltering == GL_LINEAR))
+			if (ImGui::RadioButtonLabeled(aw, "Linear", "Use Linear Texture Filtering", m_TextureFiltering == GL_LINEAR))
 			{
 				needFontReGen = true;
 				m_TextureFiltering = GL_LINEAR;
@@ -509,13 +507,12 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 
 			ImGui::SameLine();
 
-			if (ImGui::RadioButtonLabeled("Nearest", "Use Nearest Texture Filtering", m_TextureFiltering == GL_NEAREST))
+			if (ImGui::RadioButtonLabeled(aw, "Nearest", "Use Nearest Texture Filtering", m_TextureFiltering == GL_NEAREST))
 			{
 				needFontReGen = true;
 				m_TextureFiltering = GL_NEAREST;
 			}
 #endif
-			ImGui::PopItemWidth();
 			
 			ImGui::FramedGroupSeparator();
 
@@ -548,7 +545,7 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 				}
 			}
 
-			ImGui::EndFramedGroup(true);
+			ImGui::EndFramedGroup();
 		}
 
 		if (needFontReGen)

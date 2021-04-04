@@ -242,7 +242,7 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 						}
 					}
 
-					ImGui::EndFramedGroup(true);
+					ImGui::EndFramedGroup();
 				}
 
 				if (vProjectFile->m_SelectedFont)
@@ -257,22 +257,20 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 
 						bool change = false;
 
-						ImGui::PushItemWidth(mrw);
-						change |= ImGui::RadioButtonLabeled("Zoom", "Zoom Each Glyphs for best fit", &vProjectFile->m_ZoomGlyphs);
+						change |= ImGui::RadioButtonLabeled(mrw, "Zoom", "Zoom Each Glyphs for best fit", &vProjectFile->m_ZoomGlyphs);
 						ImGui::SameLine();
-						change |= ImGui::RadioButtonLabeled("Base", "Show the base line of the font", &vProjectFile->m_ShowBaseLine, vProjectFile->m_ZoomGlyphs);
+						change |= ImGui::RadioButtonLabeled(mrw, "Base", "Show the base line of the font", &vProjectFile->m_ShowBaseLine, vProjectFile->m_ZoomGlyphs);
 						ImGui::SameLine();
-						change |= ImGui::RadioButtonLabeled("OrgX", "Show the Origin X of the glyph", &vProjectFile->m_ShowOriginX, vProjectFile->m_ZoomGlyphs);
+						change |= ImGui::RadioButtonLabeled(mrw, "OrgX", "Show the Origin X of the glyph", &vProjectFile->m_ShowOriginX, vProjectFile->m_ZoomGlyphs);
 						ImGui::SameLine();
-						change |= ImGui::RadioButtonLabeled("AdvX", "Show the Advance X of the glyph", &vProjectFile->m_ShowAdvanceX, vProjectFile->m_ZoomGlyphs);
-						ImGui::PopItemWidth();
+						change |= ImGui::RadioButtonLabeled(mrw, "AdvX", "Show the Advance X of the glyph", &vProjectFile->m_ShowAdvanceX, vProjectFile->m_ZoomGlyphs);
 						
 						if (change)
 						{
 							vProjectFile->SetProjectChange();
 						}
 
-						ImGui::EndFramedGroup(true);
+						ImGui::EndFramedGroup();
 					}
 
 					if (ImGui::BeginFramedGroup("Font Layout"))
@@ -292,11 +290,11 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 								vProjectFile->m_Preview_Glyph_CountX = ct::maxi(vProjectFile->m_Preview_Glyph_CountX, 1); // can prevent bugs (like div by zero) everywhere when user input value
 							}
 							ImGui::SameLine();
-							if (ImGui::RadioButtonLabeled_BitWize<GlyphDisplayTuningModeFlags>(
+							if (ImGui::RadioButtonLabeled_BitWize<GlyphDisplayTuningModeFlags>(radioButtonWidth,
 								ICON_IGFS_USED "##GlypCountIsMaster",
 								ICON_IGFS_NOT_USED "##GlypCountIsMaster",
 								"Apply Glyph Count Policy when Resized",
-								&vProjectFile->m_GlyphDisplayTuningMode, GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT, radioButtonWidth, true))
+								&vProjectFile->m_GlyphDisplayTuningMode, GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT, true))
 							{
 								vProjectFile->SetProjectChange();
 							}
@@ -312,11 +310,11 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 							}
 
 							ImGui::SameLine();
-							if (ImGui::RadioButtonLabeled_BitWize<GlyphDisplayTuningModeFlags>(
+							if (ImGui::RadioButtonLabeled_BitWize<GlyphDisplayTuningModeFlags>(radioButtonWidth,
 								ICON_IGFS_USED "##GlypSizeIsMaster",
 								ICON_IGFS_NOT_USED "##GlypSizeIsMaster",
 								"Policy to be applied When resized :\n1) Glyph Width Policy\n2) Glyph Count Policy",
-								&vProjectFile->m_GlyphDisplayTuningMode, GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_SIZE, radioButtonWidth, true))
+								&vProjectFile->m_GlyphDisplayTuningMode, GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_SIZE, true))
 							{
 								vProjectFile->SetProjectChange();
 							}
@@ -336,7 +334,7 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 								vProjectFile->SetProjectChange();
 						}
 
-						ImGui::EndFramedGroup(true);
+						ImGui::EndFramedGroup();
 					}
 				}
 			}

@@ -22,7 +22,7 @@
 #include <Generator/FontGenerator.h>
 #include <MainFrame.h>
 #include <Panes/Manager/LayoutManager.h>
-#include <Gui/ImGuiWidgets.h>
+#include <Gui/ImWidgets.h>
 #ifdef _DEBUG
 #include <Panes/DebugPane.h>
 #endif
@@ -36,7 +36,7 @@
 #include <ctools/cTools.h>
 #include <ctools/FileHelper.h>
 #include <sfntly/font_factory.h>
-#include <Gui/ImGuiWidgets.h>
+#include <Gui/ImWidgets.h>
 #include <Helper/SelectionHelper.h>
 #include <Project/GlyphInfos.h>
 
@@ -176,14 +176,14 @@ void FontPreviewPane::DrawFontPreviewPane(ProjectFile *vProjectFile)
 				ImGui::Separator();
 				
 				ImGui::Text("Test :");
-				if (ImGui::Button("Clear##testfont"))
+				if (ImGui::ContrastedButton("Clear##testfont"))
 				{
 					vProjectFile->m_FontTestInfos.m_TestFont.reset();
 					vProjectFile->m_FontTestInfos.m_TestFontName = "";
 					vProjectFile->SetProjectChange();
 				}
 				ImGui::SameLine();
-				if (ImGui::Button("Use the selected font"))
+				if (ImGui::ContrastedButton("Use the selected font"))
 				{
 					vProjectFile->m_FontTestInfos.m_TestFont = vProjectFile->m_SelectedFont;
 					vProjectFile->m_FontTestInfos.m_TestFontName = vProjectFile->m_SelectedFont->m_FontFileName;
@@ -232,7 +232,7 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 		return;
 	}
 
-	if (ImGui::Button("Clear Glyphs##glyphselection"))
+	if (ImGui::ContrastedButton("Clear Glyphs##glyphselection"))
 	{
 		vProjectFile->m_FontTestInfos.m_GlyphToInsert.clear();
 		vProjectFile->SetProjectChange();
@@ -371,7 +371,7 @@ void FontPreviewPane::DrawMixedFontResult(ProjectFile* vProjectFile)
 	if (font)
 	{
 		bool change = false;
-		change |= ImGui::RadioButtonLabeled("Base Line", "Show/Hide base line", &vProjectFile->m_FontTestInfos.m_ShowBaseLine);
+		change |= ImGui::RadioButtonLabeled(-1.0f, "Base Line", "Show/Hide base line", &vProjectFile->m_FontTestInfos.m_ShowBaseLine);
 		ImGui::SameLine();
 		change |= ImGui::SliderFloatDefaultCompact(ImGui::GetContentRegionAvail().x, "Preview Size", &vProjectFile->m_FontTestInfos.m_PreviewFontSize, 1, 300, font->FontSize);
 

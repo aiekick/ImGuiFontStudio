@@ -22,7 +22,7 @@
 #include <MainFrame.h>
 
 #include <Panes/Manager/LayoutManager.h>
-#include <Gui/ImGuiWidgets.h>
+#include <Gui/ImWidgets.h>
 #ifdef _DEBUG
 #include <Panes/DebugPane.h>
 #endif
@@ -295,18 +295,18 @@ bool GlyphPane::DrawSimpleGlyph(ProjectFile* vProjectFile)
 
 						ImGui::Separator();
 
-						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Grid", "Show/Hide Canvas Grid", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_CANVAS_GRID); ImGui::SameLine();
-						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Legends", "Show/Hide Legends", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_LEGENDS); ImGui::SameLine();
-						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Axis X", "Show/Hide Font Axis X", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_AXIS_X); ImGui::SameLine();
-						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Axis Y", "Show/Hide Font Axis Y", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_AXIS_Y); ImGui::SameLine();
-						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Origin Point", "Show/Hide Font Zero Point", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_ORIGIN_XY); ImGui::SameLine();
-						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Control Lines", "Show/Hide Glyph Control Lines X", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_GLYPH_CONTROL_LINES);
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>(aw, "Grid", "Show/Hide Canvas Grid", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_CANVAS_GRID); ImGui::SameLine();
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>(aw, "Legends", "Show/Hide Legends", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_LEGENDS); ImGui::SameLine();
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>(aw, "Axis X", "Show/Hide Font Axis X", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_AXIS_X); ImGui::SameLine();
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>(aw, "Axis Y", "Show/Hide Font Axis Y", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_AXIS_Y); ImGui::SameLine();
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>(aw, "Origin Point", "Show/Hide Font Zero Point", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_ORIGIN_XY); ImGui::SameLine();
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>(aw, "Control Lines", "Show/Hide Glyph Control Lines X", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_GLYPH_CONTROL_LINES);
 						
-						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Font BBox", "Show/Hide Font Bounding Box", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_BBOX); ImGui::SameLine();
-						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Glyph BBox", "Show/Hide Glyph Bounidng Box", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_GLYPH_BBOX); ImGui::SameLine();
-						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Ascent", "Show/Hide Font Ascent", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_ASCENT); ImGui::SameLine();
-						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Descent", "Show/Hide Font Descent", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_DESCENT); ImGui::SameLine();
-						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>("Advance X", "Show/Hide Glyph Advance X", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_GLYPH_ADVANCEX);
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>(aw, "Font BBox", "Show/Hide Font Bounding Box", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_BBOX); ImGui::SameLine();
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>(aw, "Glyph BBox", "Show/Hide Glyph Bounidng Box", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_GLYPH_BBOX); ImGui::SameLine();
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>(aw, "Ascent", "Show/Hide Font Ascent", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_ASCENT); ImGui::SameLine();
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>(aw, "Descent", "Show/Hide Font Descent", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_FONT_DESCENT); ImGui::SameLine();
+						change |= ImGui::RadioButtonLabeled_BitWize<GlyphDrawingFlags>(aw, "Advance X", "Show/Hide Glyph Advance X", &vProjectFile->m_GlyphDrawingFlags, GLYPH_DRAWING_GLYPH_ADVANCEX);
 						
 						ImGui::Separator();
 

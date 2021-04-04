@@ -20,7 +20,7 @@
 #include "SelectionHelper.h"
 
 #include <MainFrame.h>
-#include <Gui/ImGuiWidgets.h>
+#include <Gui/ImWidgets.h>
 #include <Helper/Messaging.h>
 #include <Panes/Manager/LayoutManager.h>
 #include <Panes/FinalFontPane.h>
@@ -158,7 +158,7 @@ void SelectionHelper::DrawMenu(ProjectFile * vProjectFile)
 		{
 			ImGui::FramedGroupText("Selection : %u Glyphs", m_SelectionForOperation.size());
 
-			if (ImGui::Button("Remove From Final", ImVec2(-1,0)))
+			if (ImGui::ContrastedButton("Remove From Final", ImVec2(-1,0)))
 			{
 				RemoveSelectionFromFinal(vProjectFile);
 			}
@@ -194,7 +194,7 @@ void SelectionHelper::DrawMenu(ProjectFile * vProjectFile)
 			if (m_ReRangeStruct.startCodePoint.codePoint + (int)m_SelectionForOperation.size() <=
 				m_ReRangeStruct.MaxCodePoint)
 			{
-				if (ImGui::Button("ReRange after start", ImVec2(-1, 0)))
+				if (ImGui::ContrastedButton("ReRange after start", ImVec2(-1, 0)))
 				{
 					ReRange_Offset_After_Start(vProjectFile, (uint32_t)m_ReRangeStruct.startCodePoint.codePoint);
 				}
@@ -203,13 +203,13 @@ void SelectionHelper::DrawMenu(ProjectFile * vProjectFile)
 			if (m_ReRangeStruct.endCodePoint.codePoint - (int)m_SelectionForOperation.size() >=
 				m_ReRangeStruct.MinCodePoint)
 			{
-				if (ImGui::Button("ReRange before end", ImVec2(-1, 0)))
+				if (ImGui::ContrastedButton("ReRange before end", ImVec2(-1, 0)))
 				{
 					ReRange_Offset_Before_End(vProjectFile, (uint32_t)m_ReRangeStruct.endCodePoint.codePoint);
 				}
 			}
 
-			ImGui::EndFramedGroup(true);
+			ImGui::EndFramedGroup();
 		}
 	}
 
@@ -227,14 +227,14 @@ void SelectionHelper::DrawMenu(ProjectFile * vProjectFile)
 
 		float mrw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.33333f;
 
-		ImGui::RadioButtonLabeled_BitWize<GlyphSelectionTypeFlags>("Zone", "by Zone",
-			&m_GlyphSelectionTypeFlags, GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_ZONE, mrw, true);
+		ImGui::RadioButtonLabeled_BitWize<GlyphSelectionTypeFlags>(mrw, "Zone", "by Zone",
+			&m_GlyphSelectionTypeFlags, GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_ZONE, true);
 		ImGui::SameLine();
-		ImGui::RadioButtonLabeled_BitWize<GlyphSelectionTypeFlags>("Range", "by Range",
-			&m_GlyphSelectionTypeFlags, GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_RANGE, mrw, true);
+		ImGui::RadioButtonLabeled_BitWize<GlyphSelectionTypeFlags>(mrw, "Range", "by Range",
+			&m_GlyphSelectionTypeFlags, GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_RANGE, true);
 		ImGui::SameLine();
-		ImGui::RadioButtonLabeled_BitWize<GlyphSelectionTypeFlags>("Line", "by Line",
-			&m_GlyphSelectionTypeFlags, GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_LINE, mrw, true);
+		ImGui::RadioButtonLabeled_BitWize<GlyphSelectionTypeFlags>(mrw, "Line", "by Line",
+			&m_GlyphSelectionTypeFlags, GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_LINE, true);
 
 		if (IsSelectionType(GlyphSelectionTypeFlags::GLYPH_SELECTION_TYPE_BY_ZONE))
 		{
@@ -248,16 +248,16 @@ void SelectionHelper::DrawMenu(ProjectFile * vProjectFile)
 
 			mrw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
 
-			ImGui::RadioButtonLabeled_BitWize<GlyphSelectionModeFlags>(
+			ImGui::RadioButtonLabeled_BitWize<GlyphSelectionModeFlags>(mrw,
 				"Add", "Select glyphs in additive mode",
-				&m_GlyphSelectionModeFlags, GlyphSelectionModeFlags::GLYPH_SELECTION_MODE_ADD, mrw, true);
+				&m_GlyphSelectionModeFlags, GlyphSelectionModeFlags::GLYPH_SELECTION_MODE_ADD, true);
 			ImGui::SameLine();
-			ImGui::RadioButtonLabeled_BitWize<GlyphSelectionModeFlags>(
+			ImGui::RadioButtonLabeled_BitWize<GlyphSelectionModeFlags>(mrw,
 				"Inv", "Select glyphs in inverse mode",
-				&m_GlyphSelectionModeFlags, GlyphSelectionModeFlags::GLYPH_SELECTION_MODE_INVERSE, mrw, true);
+				&m_GlyphSelectionModeFlags, GlyphSelectionModeFlags::GLYPH_SELECTION_MODE_INVERSE, true);
 		}
 
-		ImGui::EndFramedGroup(true);
+		ImGui::EndFramedGroup();
 	}
 }
 

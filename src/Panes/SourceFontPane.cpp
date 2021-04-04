@@ -84,22 +84,22 @@ int SourceFontPane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::s
 
 				bool change = false;
 
-				change |= ImGui::RadioButtonLabeled_BitWize<SourceFontPaneFlags>(
+				change |= ImGui::RadioButtonLabeled_BitWize<SourceFontPaneFlags>(mrw,
 					ICON_IGFS_GLYPHS " Glyphs", "Show Font Glyphs",
-					&vProjectFile->m_SourceFontPaneFlags, SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH, mrw, true);
+					&vProjectFile->m_SourceFontPaneFlags, SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH, true);
 
 				ImGui::SameLine();
 
-				change |= ImGui::RadioButtonLabeled_BitWize<SourceFontPaneFlags>(
+				change |= ImGui::RadioButtonLabeled_BitWize<SourceFontPaneFlags>(mrw,
 					ICON_IGFS_TEXTURE " Texture", "Show Font Texture",
-					&vProjectFile->m_SourceFontPaneFlags, SourceFontPaneFlags::SOURCE_FONT_PANE_TEXTURE, mrw, true);
+					&vProjectFile->m_SourceFontPaneFlags, SourceFontPaneFlags::SOURCE_FONT_PANE_TEXTURE, true);
 
 				if (change)
 				{
 					vProjectFile->SetProjectChange();
 				}
 
-				ImGui::EndFramedGroup(true);
+				ImGui::EndFramedGroup();
 			}
 		}
 	}

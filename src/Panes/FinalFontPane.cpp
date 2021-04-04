@@ -20,7 +20,7 @@
 
 #include <MainFrame.h>
 #include <Generator/Generator.h>
-#include <Gui/ImGuiWidgets.h>
+#include <Gui/ImWidgets.h>
 #include <Panes/Manager/LayoutManager.h>
 #include <Res/CustomFont.h>
 #include <Helper/SelectionHelper.h>
@@ -407,7 +407,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 			else
 			{
 				float x = ImGui::GetCursorScreenPos().x;
-				if (ImGui::Button(ICON_IGFS_OK "##okname"))
+				if (ImGui::ContrastedButton(ICON_IGFS_OK "##okname"))
 				{
 					if (vNameupdated)
 						*vNameupdated = true;
@@ -417,7 +417,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 					vGlyph->m_editingName = false;
 				}
 				ImGui::SameLine();
-				if (ImGui::Button(ICON_IGFS_CANCEL "##cancelname"))
+				if (ImGui::ContrastedButton(ICON_IGFS_CANCEL "##cancelname"))
 				{
 					vGlyph->m_editingName = false;
 				}
@@ -440,7 +440,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 			{
 				ImGui::SameLine();
 				ImGui::PushItemWidth(ImGui::GetFrameHeight());
-				if (ImGui::Button("R##resetname"))
+				if (ImGui::ContrastedButton("R##resetname"))
 				{
 					if (vNameupdated)
 						*vNameupdated = true;
@@ -465,7 +465,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 				float x = ImGui::GetCursorScreenPos().x;
 				bool btn = m_AutoUpdateCodepoint_WhenEditWithButtons;
 				if (!btn)
-					btn = ImGui::Button(ICON_IGFS_OK "##okcodepoint");
+					btn = ImGui::ContrastedButton(ICON_IGFS_OK "##okcodepoint");
 				if (btn)
 				{
 					if (vCodePointUpdated)
@@ -478,7 +478,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 				if (!m_AutoUpdateCodepoint_WhenEditWithButtons)
 				{
 					ImGui::SameLine();
-					if (ImGui::Button(ICON_IGFS_CANCEL "##cancelcodepoint"))
+					if (ImGui::ContrastedButton(ICON_IGFS_CANCEL "##cancelcodepoint"))
 					{
 						vGlyph->m_editingCodePoint = false;
 					}
@@ -509,7 +509,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 			{
 				ImGui::SameLine();
 				ImGui::PushItemWidth(ImGui::GetFrameHeight());
-				if (ImGui::Button("R##resetcodepoint"))
+				if (ImGui::ContrastedButton("R##resetcodepoint"))
 				{
 					if (vCodePointUpdated)
 						*vCodePointUpdated = true;
