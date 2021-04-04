@@ -58,8 +58,9 @@ private:
 	void DrawFontsGenerator(ProjectFile *vProjectFile);
 	void GeneratorFileDialogPane(const char *vFilter, IGFDUserDatas vUserDatas, bool* vCantContinue);
 
-	bool CheckGenerationConditions(ProjectFile *vProjectFile);
-	bool ModifyConfigurationAccordingToSelectedFeaturesAndErrors(ProjectFile* vProjectFile);
+	bool CheckAndDisplayGenerationConditions(ProjectFile *vProjectFile);
+	void ShowGenerationStatus(ProjectFile* vProjectFile);
+	void ModifyConfigurationAccordingToSelectedFeaturesAndErrors(ProjectFile* vProjectFile);
 
 public: // singleton
 	static GeneratorPane *Instance()

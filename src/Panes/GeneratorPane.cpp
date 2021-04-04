@@ -333,7 +333,7 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 
 			ImGui::FramedGroupSeparator();
 
-			if (CheckGenerationConditions(vProjectFile))
+			if (CheckAndDisplayGenerationConditions(vProjectFile))
 			{
 				ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
 					"Auto Opening", "Auto Opening of Generated Files in associated app after generation",
@@ -446,9 +446,11 @@ Card can be alone
 header need cpp or font
 Cpp and Font cant be generated both at same time
 */
-bool GeneratorPane::CheckGenerationConditions(ProjectFile *vProjectFile)
+bool GeneratorPane::CheckAndDisplayGenerationConditions(ProjectFile *vProjectFile)
 {
 	bool res = true;
+
+	ShowGenerationStatus(vProjectFile);
 
 	// always a feature must be selected
 	if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER) ||
@@ -572,44 +574,36 @@ bool GeneratorPane::CheckGenerationConditions(ProjectFile *vProjectFile)
 	return res;
 }
 
+void GeneratorPane::ShowGenerationStatus(ProjectFile* vProjectFile)
+{
+	
+}
+
 /*
 errors types :
  - if one font have codepoints in double : disable font generation until solved for this font only
  - if one font have name in double : disable header file generation and name export in font file for this font only
  - if fonts have codepoint in double between fonts but not per fonts : merge mode disables for all fonts
  - if font have name in double between fonts nut not per font : disable header file generation and name export in merge mode
+
+ it seem we need to have a gen mode per target
+ in batch mode if a font have issue with header we need to not gen them but we need to show that to the user
 */
-bool GeneratorPane::ModifyConfigurationAccordingToSelectedFeaturesAndErrors(ProjectFile* vProjectFile)
+void GeneratorPane::ModifyConfigurationAccordingToSelectedFeaturesAndErrors(ProjectFile* vProjectFile)
 {
 	if (vProjectFile)
 	{
 		// current font
-		/* (vProjectFile->m_SelectedFont.use_count())
+		if (vProjectFile->m_SelectedFont.use_count())
 		{
-			if ()
 
 		}
 
 		// if one font have codepoints in double : disable font generation until solved for this font only
-		if ()
 		if (vProjectFile->m_NameFoundInDouble || vProjectFile->m_CodePointFoundInDouble)
 		{
-			bool someFontHaveNamesInDouble = false;
-			bool someFontHaveCodePointsInDouble = false;
-			for (const auto& font : vProjectFile->m_Fonts)
-			{
-				if (font.second && font.second.use_count())
-				{
-					someFontHaveNamesInDouble &= font.second->m_NameInDoubleFound;
-					someFontHaveCodePointsInDouble &= font.second->m_CodePointInDoubleFound;
-				}
-			}
-			// no errors internally to fonts +> so just disable merged mode
-			if (someFontHaveNamesInDouble && someFontHaveCodePointsInDouble)
-			{
-
-			}
-		}*/
+			
+		}
 	}
 }
 
