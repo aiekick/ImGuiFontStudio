@@ -449,16 +449,14 @@ void ImGui::FramedGroupSeparator()
 	}
 }
 
-void ImGui::FramedGroupText(const char* vFmt, ...)
+void ImGui::FramedGroupText(ImVec4 *vTextColor, const char* vHelp, const char* vFmt, va_list vArgs)
 {
 	ImGuiWindow* window = GetCurrentWindow();
 	if (window->SkipItems)
 		return;
 
-	va_list args;
-	va_start(args, vFmt);
 	static char TempBuffer[2048] = "\0";
-	int w = vsnprintf(TempBuffer, 2046, vFmt, args);
+	int w = vsnprintf(TempBuffer, 2046, vFmt, vArgs);
 	if (w)
 	{
 		TempBuffer[w + 1] = '\0'; // 2046 + 1 = 2047 => ok (under array size of 2048 in any case)
@@ -476,51 +474,45 @@ void ImGui::FramedGroupText(const char* vFmt, ...)
 		bb.Max.x = window->WorkRect.Max.x;
 		bb.Max.y = window->DC.CursorPos.y + frame_height;
 
-		ImGui::ItemSize(bb, style.FramePadding.y);
+		ImGui::ItemSize(bb, 0.0f);
 		if (ImGui::ItemAdd(bb, id))
 		{
+			if (vTextColor)
+				ImGui::PushStyleColor(ImGuiCol_Text, *vTextColor);
 			ImGui::RenderTextClipped(bb.Min, bb.Max, TempBuffer, nullptr, &label_size, style.ButtonTextAlign, &bb);
+			if (vTextColor)
+				ImGui::PopStyleColor();
 		}
 	}
+
+	if (vHelp)
+		if (ImGui::IsItemHovered())
+			ImGui::SetTooltip("%s", vHelp);
+}
+
+void ImGui::FramedGroupText(const char* vFmt, ...)
+{
+	va_list args;
+	va_start(args, vFmt);
+	FramedGroupText(nullptr, 0, vFmt, args);
 	va_end(args);
 }
 
+// renamed because "FramedGroupTextHelp(const char* vHelp, const char* vFmt" 
+// can be choosed by the compiler for "FramedGroupText(const char* vFmt"
+void ImGui::FramedGroupTextHelp(const char* vHelp, const char* vFmt, ...)
+{
+	va_list args;
+	va_start(args, vFmt);
+	FramedGroupText(nullptr, vHelp, vFmt, args);
+	va_end(args);
+}
 
 void ImGui::FramedGroupText(ImVec4 vTextColor, const char* vFmt, ...)
 {
-	ImGuiWindow* window = GetCurrentWindow();
-	if (window->SkipItems)
-		return;
-
 	va_list args;
 	va_start(args, vFmt);
-	static char TempBuffer[2048] = "\0";
-	int w = vsnprintf(TempBuffer, 2046, vFmt, args);
-	if (w)
-	{
-		TempBuffer[w + 1] = '\0'; // 2046 + 1 = 2047 => ok (under array size of 2048 in any case)
-		ImGuiContext& g = *GImGui;
-		const ImGuiID id = window->GetID(TempBuffer);
-		const ImGuiStyle& style = g.Style;
-		const ImVec2 label_size = ImGui::CalcTextSize(TempBuffer, nullptr, true);
-
-		const float frame_height =
-			ImMax(ImMin(window->DC.CurrLineSize.y, g.FontSize + style.FramePadding.y),
-				label_size.y + style.FramePadding.y);
-		ImRect bb;
-		bb.Min.x = window->WorkRect.Min.x;
-		bb.Min.y = window->DC.CursorPos.y;
-		bb.Max.x = window->WorkRect.Max.x;
-		bb.Max.y = window->DC.CursorPos.y + frame_height;
-
-		ImGui::ItemSize(bb, style.FramePadding.y);
-		if (ImGui::ItemAdd(bb, id))
-		{
-			ImGui::PushStyleColor(ImGuiCol_Text, vTextColor);
-			ImGui::RenderTextClipped(bb.Min, bb.Max, TempBuffer, nullptr, &label_size, style.ButtonTextAlign, &bb);
-			ImGui::PopStyleColor();
-		}
-	}
+	FramedGroupText(&vTextColor, 0, vFmt, args);
 	va_end(args);
 }
 

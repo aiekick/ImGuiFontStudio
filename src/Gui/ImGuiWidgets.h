@@ -37,7 +37,9 @@ namespace ImGui
 	IMGUI_API bool BeginFramedGroup(const char *vLabel, bool vSpacing = false, ImVec4 vCol = ImVec4(0.0f, 0.0f, 0.0f, 0.5f), ImVec4 vHoveredCol = ImVec4(0.15f, 0.15f, 0.15f, 0.5f));
 	IMGUI_API void EndFramedGroup(bool vSpacing = true);
 	IMGUI_API void FramedGroupSeparator();
+	IMGUI_API void FramedGroupText(ImVec4* vTextColor, const char* vHelp, const char* vFmt, va_list vArgs);
 	IMGUI_API void FramedGroupText(const char* vFmt, ...);
+	IMGUI_API void FramedGroupTextHelp(const char* vHelp, const char* vFmt, ...);
 	IMGUI_API void FramedGroupText(ImVec4 vTextColor, const char* vFmt, ...);
 	IMGUI_API bool CollapsingHeader_SmallHeight(const char *vName, float vHeightRatio, float vWidth, bool vDefaulExpanded, bool *vIsOpen = 0);
 	IMGUI_API bool RadioButtonLabeled(const char* label, bool active, bool disabled);
