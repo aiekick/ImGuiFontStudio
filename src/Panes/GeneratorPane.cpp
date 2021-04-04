@@ -584,16 +584,16 @@ void GeneratorPane::ShowGenerationStatus(ProjectFile* vProjectFile)
 			ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg |
 			ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
 			ImGuiTableFlags_NoHostExtendY | ImGuiTableFlags_Borders;
-		if (ImGui::BeginTable("##fileTable", 4, flags, ImVec2(-1.0f, _countLines * ImGui::GetFrameHeightWithSpacing())))
+		if (ImGui::BeginTable("##fileTable", 3, flags, ImVec2(-1.0f, _countLines * ImGui::GetFrameHeightWithSpacing())))
 		{
 			ImGui::TableSetupScrollFreeze(0, 1); // Make header always visible
 			ImGui::TableSetupColumn("", ImGuiTableColumnFlags_WidthFixed, -1, 1); // used or not for this generation
 			ImGui::TableSetupColumn("Font", ImGuiTableColumnFlags_WidthStretch, -1, 0);
 			ImGui::TableSetupColumn("Features", ImGuiTableColumnFlags_WidthFixed, -1, 2); // export names
-			ImGui::TableSetupColumn("Glyphs", ImGuiTableColumnFlags_WidthFixed, -1, 3); // export names
-
+			
 			ImGui::TableHeadersRow();
 
+			uint32_t idx = 0;
 			for (const auto& itFont : vProjectFile->m_Fonts)
 			{
 				if (itFont.second.use_count())
@@ -605,12 +605,15 @@ void GeneratorPane::ShowGenerationStatus(ProjectFile* vProjectFile)
 					{
 						static bool v = false;
 						ImGui::PushItemWidth(20.0f);
-						ImGui::RadioButtonLabeled("", "Enable/Disable", &v, false);
+						static char buffer[10];
+						ImGui::RadioButtonLabeled(itoa(idx++, buffer, 10), "Enable/Disable", &v, false);
 						ImGui::PopItemWidth();
 					}
 					if (ImGui::TableSetColumnIndex(1))
 					{
-						ImGui::FramedGroupText("%s", itFont.second->m_FontFileName.c_str());
+						static char buffer[255];
+						snprintf(buffer, 254, "%u Selected Glyphs", (uint32_t)itFont.second->m_SelectedGlyphs.size());
+						ImGui::FramedGroupTextHelp(buffer, "%s", itFont.second->m_FontFileName.c_str());
 					}
 					if (ImGui::TableSetColumnIndex(2))
 					{
@@ -633,10 +636,6 @@ void GeneratorPane::ShowGenerationStatus(ProjectFile* vProjectFile)
 						ImGui::RadioButtonLabeled("S", "Src Feature", v[3], false);
 						ImGui::PopItemWidth();
 						ImGui::EndGroup();
-					}
-					if (ImGui::TableSetColumnIndex(3))
-					{
-						ImGui::FramedGroupTextHelp("Selecteds Glyphs Count", "%u", (uint32_t)itFont.second->m_SelectedGlyphs.size());
 					}
 					ImGui::PopID();
 				}
