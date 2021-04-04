@@ -43,19 +43,16 @@ bool RibbonBar::LoadFont(float vFontSize)
 	{
 		m_ImFontAtlas.TexGlyphPadding = m_FontPadding;
 
-		uint32_t freeTypeFlags = ImGuiFreeType::FreeType_Default;
-
 		for (int n = 0; n < m_ImFontAtlas.ConfigData.Size; n++)
 		{
 			ImFontConfig* font_config = (ImFontConfig*)&m_ImFontAtlas.ConfigData[n];
 			font_config->RasterizerMultiply = m_FontMultiply;
-			font_config->RasterizerFlags = freeTypeFlags;
 			font_config->OversampleH = m_Oversample;
 			font_config->OversampleV = m_Oversample;
 		}
 
 		ImGuiFreeType::FT_Error freetypeError = 0;
-		res = ImGuiFreeType::BuildFontAtlas(&m_ImFontAtlas, freeTypeFlags, &freetypeError);
+		res = ImGuiFreeType::BuildFontAtlas(&m_ImFontAtlas, ImGuiFreeType::FreeType_Default, &freetypeError);
 	}
 
 	if (!res)

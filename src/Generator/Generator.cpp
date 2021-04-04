@@ -168,7 +168,8 @@ bool Generator::Generate(
 			{
 				res = GenerateCard_One(
 					mainPS.GetFPNE_WithExt("png"),
-					vProjectFile->m_SelectedFont);
+					vProjectFile->m_SelectedFont,
+					vProjectFile);
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
 			{
@@ -184,7 +185,8 @@ bool Generator::Generate(
 						{
 							res = GenerateCard_One(
 								ps.GetFPNE_WithPathExt(mainPS.path, "png"),
-								font.second);
+								font.second,
+								vProjectFile);
 						}
 					}
 				}
@@ -438,7 +440,6 @@ bool Generator::WriteGlyphCardToPicture(
 
 					if (success)
 					{
-						FileHelper::Instance()->OpenFile(vFilePathName);
 						res = true;
 					}
 					else
@@ -485,11 +486,12 @@ two modes :
 */
 bool Generator::GenerateCard_One(
 	const std::string& vFilePathName,
-	std::shared_ptr<FontInfos> vFontInfos)		// max row count
+	std::shared_ptr<FontInfos> vFontInfos,
+	ProjectFile* vProjectFile)
 {
 	bool res = false;
 
-	if (!vFilePathName.empty() && vFontInfos.use_count())
+	if (vProjectFile && !vFilePathName.empty() && vFontInfos.use_count())
 	{
 		std::string filePathName = vFilePathName;
 		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
@@ -528,6 +530,8 @@ bool Generator::GenerateCard_One(
 			}
 
 			res = WriteGlyphCardToPicture(filePathName, glyphs, vFontInfos->m_CardGlyphHeightInPixel, vFontInfos->m_CardCountRowsMax);
+			if (res && vProjectFile->IsGenMode(GENERATOR_MODE_OPEN_GENERATED_FILES_AUTO))
+				FileHelper::Instance()->OpenFile(vFilePathName);
 		}
 		else
 		{
@@ -540,7 +544,7 @@ bool Generator::GenerateCard_One(
 
 bool Generator::GenerateCard_Merged(
 	const std::string& vFilePathName,
-	ProjectFile* vProjectFile)		// max row count
+	ProjectFile* vProjectFile)
 {
 	bool res = false;
 
@@ -584,6 +588,8 @@ bool Generator::GenerateCard_Merged(
 			}
 
 			res = WriteGlyphCardToPicture(filePathName, glyphs, vProjectFile->m_MergedCardGlyphHeightInPixel, vProjectFile->m_MergedCardCountRowsMax);
+			if (res && vProjectFile->IsGenMode(GENERATOR_MODE_OPEN_GENERATED_FILES_AUTO))
+				FileHelper::Instance()->OpenFile(vFilePathName);
 		}
 		else
 		{
@@ -701,7 +707,8 @@ bool Generator::GenerateFontFile_One(
 				{
 					GenerateCard_One(
 						filePathName,
-						vFontInfos);
+						vFontInfos,
+						vProjectFile);
 				}
 			}
 			else
@@ -999,7 +1006,8 @@ bool Generator::GenerateSource_One(
 						{
 							GenerateCard_One(
 								ps.GetFPNE_WithExt("png"),
-								vFontInfos);
+								vFontInfos,
+								vProjectFile);
 						}
 
 						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
@@ -1018,7 +1026,8 @@ bool Generator::GenerateSource_One(
 
 						filePathName = psSource.GetFPNE_WithExt(sourceExt);
 						FileHelper::Instance()->SaveStringToFile(sourceFile, filePathName);
-						FileHelper::Instance()->OpenFile(filePathName);
+						if (vFlags & GENERATOR_MODE_OPEN_GENERATED_FILES_AUTO)
+							FileHelper::Instance()->OpenFile(filePathName);
 
 						res = true;
 					}
@@ -1160,7 +1169,8 @@ bool Generator::GenerateSource_Merged(
 
 						filePathName = psSource.GetFPNE_WithExt(sourceExt);
 						FileHelper::Instance()->SaveStringToFile(sourceFile, filePathName);
-						FileHelper::Instance()->OpenFile(filePathName);
+						if (vFlags & GENERATOR_MODE_OPEN_GENERATED_FILES_AUTO)
+							FileHelper::Instance()->OpenFile(filePathName);
 						res = true;
 					}
 					else

@@ -149,8 +149,8 @@ int main(int, char**argv)
             ImGuiViewport* viewport = ImGui::GetMainViewport();
             if (viewport)
             {
-                pos = viewport->GetWorkPos();
-                size = viewport->GetWorkSize();
+                pos = viewport->WorkPos;
+                size = viewport->WorkSize;
             }
         }
         else

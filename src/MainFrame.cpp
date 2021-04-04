@@ -568,8 +568,11 @@ open project :
 	m_ActionSystem.Add([this]()
 		{
 			CloseUnSavedDialog();
+			std::string path = ".";
+			if (m_ProjectFile.IsLoaded())
+				path = m_ProjectFile.m_ProjectFilePath;
 			ImGuiFileDialog::Instance()->OpenModal(
-				"OpenProjectDlg", "Open Project File", "Project File{.ifs}", ".");
+				"OpenProjectDlg", "Open Project File", "Project File{.ifs}", path);
 			return true;
 		});
 	m_ActionSystem.Add([this]()
@@ -612,8 +615,11 @@ save project :
 			if (!SaveProject())
 			{
 				CloseUnSavedDialog();
+				std::string path = ".";
+				if (m_ProjectFile.IsLoaded())
+					path = m_ProjectFile.m_ProjectFilePath;
 				ImGuiFileDialog::Instance()->OpenModal(
-					"SaveProjectDlg", "Save Project File", "Project File{.ifs}", ".");
+					"SaveProjectDlg", "Save Project File", "Project File{.ifs}", path);
 			}
 			return true;
 		});
@@ -633,8 +639,11 @@ save as project :
 	m_ActionSystem.Add([this]()
 		{
 			CloseUnSavedDialog();
+			std::string path = ".";
+			if (m_ProjectFile.IsLoaded())
+				path = m_ProjectFile.m_ProjectFilePath;
 			ImGuiFileDialog::Instance()->OpenModal(
-				"SaveProjectDlg", "Save Project File", "Project File{.ifs}", ".",
+				"SaveProjectDlg", "Save Project File", "Project File{.ifs}", path,
 				1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
 			return true;
 		});
@@ -659,6 +668,37 @@ Close project :
 	m_ActionSystem.Add([this]()
 		{
 			m_ProjectFile.Clear();
+			return true;
+		});
+}
+
+void MainFrame::Action_LoadProjectFromFile(const std::string& vProjectFilePathName)
+{
+	m_ActionSystem.Clear();
+	Action_OpenUnSavedDialog_IfNeeded();
+	m_ActionSystem.Add([this]()
+		{
+			m_ProjectFile.Clear();
+			return true;
+		});
+	m_ActionSystem.Add([this, vProjectFilePathName]()
+		{
+			LoadProject(vProjectFilePathName);
+			return true;
+		});
+}
+
+void MainFrame::Action_LoadFontFiles(const std::map<std::string, std::string>& vFontFilePathNames)
+{
+	m_ActionSystem.Add([this, vFontFilePathNames]()
+		{
+			// if no project is available, we will create it
+			if (!m_ProjectFile.IsLoaded())
+				NewProject(""); // with empty path, will have to ne saved later
+
+			// try to open fonts
+			ParamsPane::Instance()->OpenFonts(&m_ProjectFile, vFontFilePathNames);
+
 			return true;
 		});
 }
@@ -721,9 +761,12 @@ bool MainFrame::Action_UnSavedDialog_SaveProject()
 		m_ActionSystem.Insert([this]()
 			{
 				CloseUnSavedDialog();
+				std::string path = ".";
+				if (m_ProjectFile.IsLoaded())
+					path = m_ProjectFile.m_ProjectFilePath;
 				ImGuiFileDialog::Instance()->OpenModal(
 					"SaveProjectDlg", "Save Project File", "Project File{.ifs}",
-					".", 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
+					path, 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
 				return true;
 			});
 	}
@@ -739,9 +782,12 @@ void MainFrame::Action_UnSavedDialog_SaveAsProject()
 	m_ActionSystem.Insert([this]()
 		{
 			CloseUnSavedDialog();
+			std::string path = ".";
+			if (m_ProjectFile.IsLoaded())
+				path = m_ProjectFile.m_ProjectFilePath;
 			ImGuiFileDialog::Instance()->OpenModal(
 				"SaveProjectDlg", "Save Project File", "Project File{.ifs}",
-				".", 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
+				path, 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
 			return true;
 		});
 }
@@ -850,6 +896,7 @@ void MainFrame::IWantToCloseTheApp()
 void MainFrame::JustDropFiles(int count, const char** paths)
 {
 	std::map<std::string, std::string> dico;
+	std::string projectFilePathName;
 
 	for (int i = 0; i < count; i++)
 	{
@@ -869,17 +916,28 @@ void MainFrame::JustDropFiles(int count, const char** paths)
 		{
 			dico[f] = f;
 		}
+
+		if (f_opt.find(".ifs") != std::string::npos)
+		{
+			projectFilePathName = f;
+		}
+	}
+
+	if (!projectFilePathName.empty())
+	{
+		Action_LoadProjectFromFile(projectFilePathName);
 	}
 
 	// some file are ok for opening
 	if (!dico.empty())
 	{
-		// if no project is available, we will create it
+		Action_LoadFontFiles(dico);
+		/*// if no project is available, we will create it
 		if (!m_ProjectFile.IsLoaded())
 			NewProject(""); // with empty path, will have to ne saved later
 
 		// try to open fonts
-		ParamsPane::Instance()->OpenFonts(&m_ProjectFile, dico);
+		ParamsPane::Instance()->OpenFonts(&m_ProjectFile, dico);*/
 	}
 }
 

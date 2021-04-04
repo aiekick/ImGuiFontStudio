@@ -142,7 +142,6 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 				{
 					ImFontConfig* font_config = (ImFontConfig*)&m_ImFontAtlas.ConfigData[n];
 					font_config->RasterizerMultiply = m_FontMultiply;
-					font_config->RasterizerFlags = (m_RasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE) ? m_FreeTypeFlag : 0x00;
 					font_config->OversampleH = m_Oversample;
 					font_config->OversampleV = m_Oversample;
 				}

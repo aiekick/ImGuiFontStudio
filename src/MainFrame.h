@@ -167,6 +167,10 @@ public: // actions
 	void Action_Menu_SaveAsProject();
 	void Action_Menu_CloseProject();
 
+public:
+	void Action_LoadProjectFromFile(const std::string& vProjectFilePathName);
+	void Action_LoadFontFiles(const std::map<std::string, std::string>& vFontFilePathNames);
+
 private: // actions
 	// view the window
 	void Action_Window_CloseApp();

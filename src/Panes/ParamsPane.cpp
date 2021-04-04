@@ -210,9 +210,12 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 										else
 											label = "Search an alternative font file " + itFont.first;
 
+										std::string path = ".";
+										if (MainFrame::Instance()->GetProject()->IsLoaded())
+											path = MainFrame::Instance()->GetProject()->m_ProjectFilePath;
 										ImGuiFileDialog::Instance()->OpenModal(
 											"SolveBadFilePathName",
-											label.c_str(), "Font File (*.ttf *.otf){.ttf,.otf}", ".",
+											label.c_str(), "Font File (*.ttf *.otf){.ttf,.otf}", path,
 											itFont.first.c_str(), 1, IGFDUserDatas(itFont.first.c_str()));
 									}
 									if (itFont.second->m_NeedFilePathResolve)
@@ -356,8 +359,11 @@ open font :
 	MainFrame::Instance()->GetActionSystem()->Clear();
 	MainFrame::Instance()->GetActionSystem()->Add([this]()
 		{
+			std::string path = ".";
+			if (MainFrame::Instance()->GetProject()->IsLoaded())
+				path = MainFrame::Instance()->GetProject()->m_ProjectFilePath;
 			ImGuiFileDialog::Instance()->OpenModal(
-				"OpenFontDlg", "Open Font File", "Font File (*.ttf *.otf){.ttf,.otf},All Files (*.*){.*}", ".", 0);
+				"OpenFontDlg", "Open Font File", "Font File (*.ttf *.otf){.ttf,.otf},All Files (*.*){.*}", path, 0);
 			return true;
 		});
 }

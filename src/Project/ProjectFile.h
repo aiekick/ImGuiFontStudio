@@ -75,13 +75,14 @@ public: // to save
 	bool m_ShowOriginX = false; // show the origin x of the glyph only when m_ZoomGlyphs is false
 	FontTestInfos m_FontTestInfos;
 	
-	
 public: // dont save
 	std::shared_ptr<FontInfos> m_SelectedFont = nullptr;
 	size_t m_CountSelectedGlyphs = 0; // for all fonts
 	size_t m_CountFontWithSelectedGlyphs = 0; // for all fonts
     bool m_NameFoundInDouble = false;
     bool m_CodePointFoundInDouble = false;
+	bool m_SomeFontHaveNamesInDouble = false;
+	bool m_SomeFontHaveCodePointsInDouble = false;
 	bool m_GlyphSizePolicyChangeFromWidgetUse = false; // say if the user is chnaging the size policy by the widget, for avoid change when via the resize on another pane
 
 private: // dont save

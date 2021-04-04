@@ -52,7 +52,7 @@ void LayoutManager::Init()
 	if (!FileHelper::Instance()->IsFileExist("imgui.ini"))
 	{
 		m_FirstLayout = true; // need default layout
-		LogStr("We will apply default layout :)");
+		LogVar("We will apply default layout :)");
 	}
 #ifdef _DEBUG
 	DebugPane::Instance()->Init();

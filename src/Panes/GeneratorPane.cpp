@@ -335,6 +335,10 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 
 			if (CheckGenerationConditions(vProjectFile))
 			{
+				ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(
+					"Auto Opening", "Auto Opening of Generated Files in associated app after generation",
+					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_OPEN_GENERATED_FILES_AUTO,
+					maxWidth - ImGui::GetStyle().FramePadding.x);
 				if (ImGui::Button(ICON_IGFS_GENERATE " Generate", ImVec2(maxWidth - ImGui::GetStyle().FramePadding.x, 0.0f)))
 				{
 					btnClick = true;
@@ -358,6 +362,11 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 			if (change)
 			{
 				vProjectFile->SetProjectChange();
+
+				// check messages for maybe case by case activate or deactivate features
+				// bascally, is there some issue with names or codepoint between font but not in fonts
+				// we msut deactivate merge mode, but enable current and batch mode
+				ModifyConfigurationAccordingToSelectedFeaturesAndErrors(vProjectFile);
 			}
 
 			if (btnClick)
@@ -374,20 +383,24 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 				{
 					if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
 					{
+						std::string path = vProjectFile->m_LastGeneratedPath;
+						if (path.empty() || path == ".")
+							path = vProjectFile->m_ProjectFilePath;
 						ImGuiFileDialog::Instance()->OpenModal(
 							"GenerateFileDlg",
-							"Location where create the files", 0, vProjectFile->m_LastGeneratedPath.c_str(),
-							vProjectFile->m_LastGeneratedFileName.c_str(),
+							"Location where create the files", 0, path, vProjectFile->m_LastGeneratedFileName,
 							std::bind(&GeneratorPane::GeneratorFileDialogPane, this,
 								std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
 							200, 1, vProjectFile, ImGuiFileDialogFlags_ConfirmOverwrite);
 					}
 					else
 					{
+						std::string path = vProjectFile->m_LastGeneratedPath;
+						if (path.empty() || path == ".")
+							path = vProjectFile->m_ProjectFilePath;
 						ImGuiFileDialog::Instance()->OpenModal(
 							"GenerateFileDlg",
-							"Location and name where create the file", extTypes, vProjectFile->m_LastGeneratedPath.c_str(),
-							vProjectFile->m_SelectedFont->m_GeneratedFileName.c_str(),
+							"Location and name where create the file", extTypes, path, vProjectFile->m_SelectedFont->m_GeneratedFileName,
 							std::bind(&GeneratorPane::GeneratorFileDialogPane, this,
 								std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
 							200, 1, vProjectFile, ImGuiFileDialogFlags_ConfirmOverwrite);
@@ -397,18 +410,22 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 				{
 					if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
 					{
+						std::string path = vProjectFile->m_LastGeneratedPath;
+						if (path.empty() || path == ".")
+							path = vProjectFile->m_ProjectFilePath;
 						ImGuiFileDialog::Instance()->OpenModal(
 							"GenerateFileDlg",
-							"Location where create the files", 0, vProjectFile->m_LastGeneratedPath.c_str(),
-							vProjectFile->m_LastGeneratedFileName.c_str(),
+							"Location where create the files", 0, path, vProjectFile->m_LastGeneratedFileName,
 							1, vProjectFile, ImGuiFileDialogFlags_ConfirmOverwrite);
 					}
 					else
 					{
+						std::string path = vProjectFile->m_LastGeneratedPath;
+						if (path.empty() || path == ".")
+							path = vProjectFile->m_ProjectFilePath;
 						ImGuiFileDialog::Instance()->OpenModal(
 							"GenerateFileDlg",
-							"Location and name where create the file", extTypes, vProjectFile->m_LastGeneratedPath.c_str(),
-							vProjectFile->m_SelectedFont->m_GeneratedFileName.c_str(),
+							"Location and name where create the file", extTypes, path, vProjectFile->m_SelectedFont->m_GeneratedFileName,
 							1, vProjectFile, ImGuiFileDialogFlags_ConfirmOverwrite);
 					}
 				}
@@ -433,7 +450,7 @@ bool GeneratorPane::CheckGenerationConditions(ProjectFile *vProjectFile)
 {
 	bool res = true;
 
-	// always on efatrue must be selected
+	// always a feature must be selected
 	if (vProjectFile->IsGenMode(GENERATOR_MODE_HEADER) ||
 		vProjectFile->IsGenMode(GENERATOR_MODE_CARD) ||
 		vProjectFile->IsGenMode(GENERATOR_MODE_FONT) ||
@@ -553,6 +570,47 @@ bool GeneratorPane::CheckGenerationConditions(ProjectFile *vProjectFile)
 	}
 
 	return res;
+}
+
+/*
+errors types :
+ - if one font have codepoints in double : disable font generation until solved for this font only
+ - if one font have name in double : disable header file generation and name export in font file for this font only
+ - if fonts have codepoint in double between fonts but not per fonts : merge mode disables for all fonts
+ - if font have name in double between fonts nut not per font : disable header file generation and name export in merge mode
+*/
+bool GeneratorPane::ModifyConfigurationAccordingToSelectedFeaturesAndErrors(ProjectFile* vProjectFile)
+{
+	if (vProjectFile)
+	{
+		// current font
+		/* (vProjectFile->m_SelectedFont.use_count())
+		{
+			if ()
+
+		}
+
+		// if one font have codepoints in double : disable font generation until solved for this font only
+		if ()
+		if (vProjectFile->m_NameFoundInDouble || vProjectFile->m_CodePointFoundInDouble)
+		{
+			bool someFontHaveNamesInDouble = false;
+			bool someFontHaveCodePointsInDouble = false;
+			for (const auto& font : vProjectFile->m_Fonts)
+			{
+				if (font.second && font.second.use_count())
+				{
+					someFontHaveNamesInDouble &= font.second->m_NameInDoubleFound;
+					someFontHaveCodePointsInDouble &= font.second->m_CodePointInDoubleFound;
+				}
+			}
+			// no errors internally to fonts +> so just disable merged mode
+			if (someFontHaveNamesInDouble && someFontHaveCodePointsInDouble)
+			{
+
+			}
+		}*/
+	}
 }
 
 // file dialog pane

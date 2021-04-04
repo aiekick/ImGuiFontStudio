@@ -1386,6 +1386,14 @@ void SelectionHelper::PrepareSelection(
 	AnalyseSourceSelection(vProjectFile);
 }
 
+/*
+Analyze final fonts with selected glyphs
+errors types :
+ - if one font have codepoints in double : disable font generation until solved for this font only
+ - if one font have name in double : disable header file generation and name export in font file for this font only
+ - if fonts have codepoint in double between fonts but not per fonts : merge mode disables for all fonts
+ - if font have name in double between fonts nut not per font : disable header file generation and name export in merge mode
+*/
 void SelectionHelper::AnalyseSourceSelection(ProjectFile * vProjectFile)
 {
 	if (vProjectFile && vProjectFile->IsLoaded())
@@ -1485,38 +1493,13 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile * vProjectFile)
 			}
 		}
 
-		if (vProjectFile->m_NameFoundInDouble)
-		{
-			Messaging::Instance()->AddError(true, nullptr, [this](MessageData)
-				{
-					ImGui::SetWindowFocus(FINAL_PANE);
-					FinalFontPane::Instance()->SetFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_ORDERED_BY_NAMES);
-					FinalFontPane::Instance()->PrepareSelection(MainFrame::Instance()->GetProject());
-				}, "Glyph names found in double ! Name export and header generation is prohibited until solved.");
-			GeneratorPane::Instance()->ProhibitStatus(GeneratorStatusFlags::GENERATOR_STATUS_FONT_HEADER_GENERATION_ALLOWED);
-		}
-		else
-		{
-			GeneratorPane::Instance()->AllowStatus(GeneratorStatusFlags::GENERATOR_STATUS_FONT_HEADER_GENERATION_ALLOWED);
-		}
-
-		if (vProjectFile->m_CodePointFoundInDouble)
-		{
-			Messaging::Instance()->AddError(true, nullptr, [this](MessageData)
-				{
-					ImGui::SetWindowFocus(FINAL_PANE);
-					FinalFontPane::Instance()->SetFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_ORDERED_BY_CODEPOINT);
-					FinalFontPane::Instance()->PrepareSelection(MainFrame::Instance()->GetProject());
-				}, "Glyph codePoint found in double ! Font merge is prohibited until solved.");
-			GeneratorPane::Instance()->ProhibitStatus(GeneratorStatusFlags::GENERATOR_STATUS_FONT_MERGE_ALLOWED);
-		}
-		else
-		{
-			GeneratorPane::Instance()->AllowStatus(GeneratorStatusFlags::GENERATOR_STATUS_FONT_MERGE_ALLOWED);
-		}
-
+		bool someFontHaveNamesInDouble = false;
+		bool someFontHaveCodePointsInDouble = false;
 		for (auto font : vProjectFile->m_Fonts)
 		{
+			vProjectFile->m_SomeFontHaveNamesInDouble &= font.second->m_NameInDoubleFound;
+			vProjectFile->m_SomeFontHaveCodePointsInDouble &= font.second->m_CodePointInDoubleFound;
+
 			if (font.second->m_CodePointInDoubleFound)
 			{
 				Messaging::Instance()->AddError(true, font.second, [this](MessageData vDatas)
@@ -1538,6 +1521,49 @@ void SelectionHelper::AnalyseSourceSelection(ProjectFile * vProjectFile)
 						FinalFontPane::Instance()->PrepareSelection(MainFrame::Instance()->GetProject());
 					}, "Glyph name found in double in font %s ! Font generation solo is prohibited until solved.", font.second->m_FontFileName.c_str());
 			}
+		}
+
+		if (vProjectFile->m_NameFoundInDouble)
+		{
+			if (!someFontHaveNamesInDouble && !someFontHaveCodePointsInDouble)
+			{
+				Messaging::Instance()->AddError(true, nullptr, [this](MessageData)
+					{
+						ImGui::SetWindowFocus(FINAL_PANE);
+						FinalFontPane::Instance()->SetFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_ORDERED_BY_NAMES);
+						FinalFontPane::Instance()->PrepareSelection(MainFrame::Instance()->GetProject());
+					}, "Glyph names found in double ! Name export and header generation in merge mode is prohibited until solved.");
+				GeneratorPane::Instance()->ProhibitStatus(GeneratorStatusFlags::GENERATOR_STATUS_FONT_HEADER_GENERATION_ALLOWED);
+			}
+			else
+			{
+				Messaging::Instance()->AddError(true, nullptr, [this](MessageData)
+					{
+						ImGui::SetWindowFocus(FINAL_PANE);
+						FinalFontPane::Instance()->SetFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_ORDERED_BY_NAMES);
+						FinalFontPane::Instance()->PrepareSelection(MainFrame::Instance()->GetProject());
+					}, "Glyph names found in double between fonts ! Name export and header generation in merge mode is prohibited until solved.");
+				GeneratorPane::Instance()->ProhibitStatus(GeneratorStatusFlags::GENERATOR_STATUS_FONT_HEADER_GENERATION_ALLOWED);
+			}
+		}
+		else
+		{
+			GeneratorPane::Instance()->AllowStatus(GeneratorStatusFlags::GENERATOR_STATUS_FONT_HEADER_GENERATION_ALLOWED);
+		}
+
+		if (vProjectFile->m_CodePointFoundInDouble)
+		{
+			Messaging::Instance()->AddError(true, nullptr, [this](MessageData)
+				{
+					ImGui::SetWindowFocus(FINAL_PANE);
+					FinalFontPane::Instance()->SetFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_ORDERED_BY_CODEPOINT);
+					FinalFontPane::Instance()->PrepareSelection(MainFrame::Instance()->GetProject());
+				}, "Glyph codePoint found in double ! Font merge is prohibited until solved.");
+			GeneratorPane::Instance()->ProhibitStatus(GeneratorStatusFlags::GENERATOR_STATUS_FONT_MERGE_ALLOWED);
+		}
+		else
+		{
+			GeneratorPane::Instance()->AllowStatus(GeneratorStatusFlags::GENERATOR_STATUS_FONT_MERGE_ALLOWED);
 		}
 	}
 }

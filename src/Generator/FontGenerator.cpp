@@ -562,7 +562,7 @@ sfntly::Ptr<sfntly::WritableFontData> FontGenerator::ReScale_Glyph(
 		}
 		else if (glyph->GlyphType() == sfntly::GlyphType::kComposite)
 		{
-			LogStr("No support of Compositie glyph for the moment");
+			LogVar("No support of Compositie glyph for the moment");
 		}
 	}
 		

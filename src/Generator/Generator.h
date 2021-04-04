@@ -42,6 +42,7 @@ enum _GenModeFlags
 	GENERATOR_MODE_LANG_LUA = (1 << 12),
 	GENERATOR_MODE_LANG_PYTHON = (1 << 13),
 	GENERATOR_MODE_LANG_RUST = (1 << 14),
+	GENERATOR_MODE_OPEN_GENERATED_FILES_AUTO = (1 << 15),
 
 	// Mix's
 
@@ -106,7 +107,7 @@ public:
 		const std::string& vFileName = "");
 
 private:
-	bool GenerateCard_One(const std::string& vFilePathName, std::shared_ptr<FontInfos> vFontInfos);
+	bool GenerateCard_One(const std::string& vFilePathName, std::shared_ptr<FontInfos> vFontInfos, ProjectFile* vProjectFile);
 	bool GenerateCard_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile);
 	
 	/*void GenerateHeader_One(const std::string& vFilePathName, std::shared_ptr<FontInfos> vFontInfos,

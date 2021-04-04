@@ -213,7 +213,7 @@ std::string ProjectFile::GetAbsolutePath(const std::string& vFilePathName) const
 		if (!FileHelper::Instance()->IsAbsolutePath(vFilePathName)) // relative
 		{
 			res = FileHelper::Instance()->SimplifyFilePath(
-				m_ProjectFilePath + FileHelper::Instance()->m_SlashType + vFilePathName);
+				m_ProjectFilePath + FileHelper::Instance()->puSlashType + vFilePathName);
 		}
 	}
 

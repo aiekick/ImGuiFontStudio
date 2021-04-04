@@ -59,7 +59,8 @@ private:
 	void GeneratorFileDialogPane(const char *vFilter, IGFDUserDatas vUserDatas, bool* vCantContinue);
 
 	bool CheckGenerationConditions(ProjectFile *vProjectFile);
-	
+	bool ModifyConfigurationAccordingToSelectedFeaturesAndErrors(ProjectFile* vProjectFile);
+
 public: // singleton
 	static GeneratorPane *Instance()
 	{

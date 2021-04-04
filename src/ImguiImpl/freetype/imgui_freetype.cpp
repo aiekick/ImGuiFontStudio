@@ -138,7 +138,7 @@ namespace
         SetPixelHeight((uint32_t)cfg.SizePixels);
 
         // Convert to FreeType flags (NB: Bold and Oblique are processed separately)
-        UserFlags = cfg.RasterizerFlags | extra_user_flags;
+        UserFlags = /*cfg.RasterizerFlags |*/ extra_user_flags;
         LoadFlags = FT_LOAD_NO_BITMAP;
         if (UserFlags & ImGuiFreeType::FreeType_NoHinting)
             LoadFlags |= FT_LOAD_NO_HINTING;
@@ -432,8 +432,8 @@ static void ImFreeTypeFontAtlasBuildRenderDefaultTexData(ImFontAtlas* atlas)
         const int x_for_black = r->X + FT_FONT_ATLAS_DEFAULT_TEX_DATA_W + 1;
         if (atlas->TexPixelsAlpha8 != NULL)
         {
-            ImFontAtlasBuildRender1bppRectFromString(atlas, x_for_white, r->Y, FT_FONT_ATLAS_DEFAULT_TEX_DATA_W, FT_FONT_ATLAS_DEFAULT_TEX_DATA_H, FT_FONT_ATLAS_DEFAULT_TEX_DATA_PIXELS, '.', 0xFF);
-            ImFontAtlasBuildRender1bppRectFromString(atlas, x_for_black, r->Y, FT_FONT_ATLAS_DEFAULT_TEX_DATA_W, FT_FONT_ATLAS_DEFAULT_TEX_DATA_H, FT_FONT_ATLAS_DEFAULT_TEX_DATA_PIXELS, 'X', 0xFF);
+            ImFontAtlasBuildRender8bppRectFromString(atlas, x_for_white, r->Y, FT_FONT_ATLAS_DEFAULT_TEX_DATA_W, FT_FONT_ATLAS_DEFAULT_TEX_DATA_H, FT_FONT_ATLAS_DEFAULT_TEX_DATA_PIXELS, '.', 0xFF);
+            ImFontAtlasBuildRender8bppRectFromString(atlas, x_for_black, r->Y, FT_FONT_ATLAS_DEFAULT_TEX_DATA_W, FT_FONT_ATLAS_DEFAULT_TEX_DATA_H, FT_FONT_ATLAS_DEFAULT_TEX_DATA_PIXELS, 'X', 0xFF);
         }
         else
         {
