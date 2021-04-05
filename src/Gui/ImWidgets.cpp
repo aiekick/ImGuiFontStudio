@@ -17,6 +17,9 @@
  * limitations under the License.
  */
 #include "ImWidgets.h"
+
+#include <imgui/imgui_widgets.cpp>
+
 #include <ctools/FileHelper.h>
 #include <Res/CustomFont.h>
 #include <GLFW/glfw3.h>
@@ -2339,7 +2342,6 @@ bool ImGui::TextureOverLay(float vWidth, ct::texture* vTex, ImVec4 vBorderColor,
 ///// SLIDERS //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
-extern template float ImGui::RoundScalarWithFormatT<float, float>(const char* format, ImGuiDataType data_type, float v);
 
 // FIXME: Move more of the code into SliderBehavior()
 template<typename TYPE, typename SIGNEDTYPE, typename FLOATTYPE>
@@ -3326,7 +3328,7 @@ IMGUI_API bool ImGui::InputIntDefault(float vWidth, const char* vName, int* vVar
 	ImGui::PopID();
 
 	if (ImGui::IsItemActive() || ImGui::IsItemHovered())
-		ImGui::SetTooltip("%.3f", *vVar);
+		ImGui::SetTooltip("%i", *vVar);
 
 	return change;
 }
