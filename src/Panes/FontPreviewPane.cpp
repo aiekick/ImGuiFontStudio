@@ -132,7 +132,10 @@ void FontPreviewPane::DrawFontPreviewPane(ProjectFile *vProjectFile)
 				ImGui::Text("Current Selection");
 
 				ImGui::Text("Left click for insert the font icon at the pos into the test string");
-				
+
+				GlyphInfos::GetGlyphButtonColorsForCodePoint(vProjectFile, false,
+					0, 0, m_GlyphButtonStateColor);
+
 				bool change = false;
 				ImVec2 cell_size, glyph_size;
 				uint32_t glyphCountX = GlyphDisplayHelper::CalcGlyphsCountAndSize(vProjectFile, &cell_size, &glyph_size);
@@ -157,7 +160,7 @@ void FontPreviewPane::DrawFontPreviewPane(ProjectFile *vProjectFile)
 										if (x) ImGui::SameLine();
 
 										auto glyphFont = glyph.second->GetImFont();
-										if (GlyphInfos::DrawGlyphButton(paneWidgetId, vProjectFile, glyphFont, 0, glyph_size, &glyphInfos->glyph) == 1) // left
+										if (GlyphInfos::DrawGlyphButton(paneWidgetId, vProjectFile, glyphFont, 0, glyph_size, &glyphInfos->glyph, m_GlyphButtonStateColor) == 1) // left
 										{
 											vProjectFile->m_FontTestInfos.m_GlyphToInsert[_TextCursorPos] = glyph;
 											vProjectFile->SetProjectChange();
@@ -269,6 +272,9 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 			auto defaultGlyph = font->FindGlyph(' '); // putain ! c'est un const
 			if (defaultGlyph)
 			{
+				GlyphInfos::GetGlyphButtonColorsForCodePoint(vProjectFile, false,
+					0, 0, m_GlyphButtonStateColor);
+
 				uint32_t count = (uint32_t)vProjectFile->m_FontTestInfos.m_TestString.size();
 				for (uint32_t idx = 0; idx <= count; idx++)
 				{
@@ -296,7 +302,7 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 								ct::fvec2 scale = glyphInfos->m_Scale;
 								check = GlyphInfos::DrawGlyphButton(paneWidgetId, vProjectFile,
 									glyphFont, &selected,
-									glyph_size, glyph, glyphInfos->m_Colored,
+									glyph_size, glyph, m_GlyphButtonStateColor, glyphInfos->m_Colored,
 									ImVec2(trans.x, trans.y), 
 									ImVec2(scale.x, scale.y));
 								found = true;
@@ -306,7 +312,7 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 					
 					if (!found)
 					{
-						check = GlyphInfos::DrawGlyphButton(paneWidgetId, vProjectFile, font, &selected, glyph_size, defaultGlyph);
+						check = GlyphInfos::DrawGlyphButton(paneWidgetId, vProjectFile, font, &selected, glyph_size, defaultGlyph, m_GlyphButtonStateColor);
 					}
 					
 					if (check)
@@ -346,7 +352,7 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 						}
 
 						bool selected = false;
-						GlyphInfos::DrawGlyphButton(paneWidgetId, vProjectFile, font, &selected, glyph_size, glyph);
+						GlyphInfos::DrawGlyphButton(paneWidgetId, vProjectFile, font, &selected, glyph_size, glyph, m_GlyphButtonStateColor);
 					}
 				}
 			}
@@ -371,7 +377,7 @@ void FontPreviewPane::DrawMixedFontResult(ProjectFile* vProjectFile)
 	if (font)
 	{
 		bool change = false;
-		change |= ImGui::RadioButtonLabeled(-1.0f, "Base Line", "Show/Hide base line", &vProjectFile->m_FontTestInfos.m_ShowBaseLine);
+		change |= ImGui::RadioButtonLabeled(0.0f, "Base Line", "Show/Hide base line", &vProjectFile->m_FontTestInfos.m_ShowBaseLine);
 		ImGui::SameLine();
 		change |= ImGui::SliderFloatDefaultCompact(ImGui::GetContentRegionAvail().x, "Preview Size", &vProjectFile->m_FontTestInfos.m_PreviewFontSize, 1, 300, font->FontSize);
 

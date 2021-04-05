@@ -930,11 +930,34 @@ void GlyphInfos::SetFontInfos(std::weak_ptr<FontInfos> vFontInfos)
 	}
 }
 
+void GlyphInfos::GetGlyphButtonColorsForCodePoint(ProjectFile* vProjectFile, bool vShowRangeColoring, CodePoint vCurCdp, CodePoint vLastCdp, ImVec4* vOut3StateColors)
+{
+	if (vProjectFile && vOut3StateColors)
+	{
+		if (vShowRangeColoring)
+		{
+			if (vCurCdp != vLastCdp + 1)
+			{
+				vOut3StateColors[0] = vProjectFile->GetColorFromInteger(vCurCdp);
+			}
+			vOut3StateColors[2] = vOut3StateColors[1] = vOut3StateColors[0];
+			vOut3StateColors[1].w = 0.75f;
+			vOut3StateColors[2].w = 1.0f;
+		}
+		else
+		{
+			vOut3StateColors[0] = ImGui::CustomStyle::GlyphButtonColor;
+			vOut3StateColors[1] = ImGui::CustomStyle::GlyphButtonColorActive;
+			vOut3StateColors[2] = ImGui::CustomStyle::GlyphButtonColorActive;
+		}
+	}
+}
+
 int GlyphInfos::DrawGlyphButton(
 	int &vWidgetPushId, // by adress because we want modify it
 	ProjectFile* vProjectFile, ImFont* vFont,
-	bool* vSelected, ImVec2 vGlyphSize, const ImFontGlyph *vGlyph, 
-	bool vColored,
+	bool* vSelected, ImVec2 vGlyphSize, const ImFontGlyph *vGlyph,
+	ImVec4 vGlyphButtonStateColor[3], bool vColored,
 	ImVec2 vTranslation, ImVec2 vScale,
 	int frame_padding, float vRectThickNess, ImVec4 vRectColor)
 {
@@ -977,7 +1000,9 @@ int GlyphInfos::DrawGlyphButton(
 		}
 
 		// Render
-		const ImU32 col = ImGui::GetColorU32(((held && hovered) || (vSelected && *vSelected)) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
+
+		const ImU32 colButton = ImGui::GetColorU32(((held && hovered) || (vSelected && *vSelected)) ? 
+			vGlyphButtonStateColor[2] : hovered ? vGlyphButtonStateColor[1] : vGlyphButtonStateColor[0]);
 		ImGui::RenderNavHighlight(bb, id);
 
 		const float rounding = ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding);
@@ -986,7 +1011,7 @@ int GlyphInfos::DrawGlyphButton(
 		{
 #endif
 			// normal
-			ImGui::RenderFrame(bb.Min, bb.Max, col, true, rounding);
+			ImGui::RenderFrame(bb.Min, bb.Max, colButton, true, rounding);
 #ifdef USE_SHADOW
 		}
 		else
@@ -1044,7 +1069,10 @@ int GlyphInfos::DrawGlyphButton(
 			}
 		}
 
+		const bool pushed = ImGui::PushStyleColorWithContrast(colButton, ImGuiCol_Text, ImGui::CustomStyle::puContrastedTextColor, ImGui::CustomStyle::puContrastRatio);
 		ImU32 textCol = ImGui::GetColorU32(ImGuiCol_Text);
+		if (pushed)
+			ImGui::PopStyleColor();
 		if (vColored)
 		{
 			textCol = ImGui::GetColorU32(ImVec4(1,1,1,1));

@@ -30,7 +30,8 @@ class FontPreviewPane : public AbstractPane
 {
 private:
 	std::function<int(ImGuiInputTextCallbackData*)> m_InputTextCallBack;
-	
+	ImVec4 m_GlyphButtonStateColor[3] = { ImVec4(), ImVec4(), ImVec4() };
+
 public:
 	void Init() override;
 	void Unit() override;

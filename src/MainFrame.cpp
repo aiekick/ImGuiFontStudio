@@ -68,7 +68,10 @@ void MainFrame::Init()
 	snprintf(buf, 255, "ImGuiFontStudio %s", IMGUIFONTSTUDIO_VERSION);
 	glfwSetWindowTitle(m_Window, buf);
 
+	ImGui::CustomStyle::Init();
+
 	LoadConfigFile("config.xml");
+	ThemeHelper::Instance();
 
 	LayoutManager::Instance()->Init();
 
@@ -136,6 +139,8 @@ ProjectFile* MainFrame::GetProject()
 void MainFrame::Display(ImVec2 vPos, ImVec2 vSize)
 {
 	widgetId = WIDGET_ID_MAGIC_NUMBER; // important for event catching on imgui widgets
+
+	ImGui::CustomStyle::ResetCustomId();
 
 	m_DisplayPos = vPos;
 	m_DisplaySize = vSize;
@@ -215,7 +220,7 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 
 		// ImGui Infos
 		ImGuiIO io = ImGui::GetIO();
-		std::string fps = ct::toStr("Dear ImGui  %s (Docking Branch) - %.1f ms/frame (%.1f fps)", ImGui::GetVersion(), 1000.0f / io.Framerate, io.Framerate);
+		std::string fps = ct::toStr("%.1f ms/frame (%.1f fps)", 1000.0f / io.Framerate, io.Framerate);
 		ImVec2 size = ImGui::CalcTextSize(fps.c_str());
 		ImGui::Spacing(ImGui::GetContentRegionAvail().x - size.x - ImGui::GetStyle().FramePadding.x * 2.0f);
 		ImGui::Text("%s", fps.c_str());

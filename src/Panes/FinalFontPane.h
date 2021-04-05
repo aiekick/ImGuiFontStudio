@@ -67,6 +67,8 @@ private:
 	bool m_GlyphEdition = false;
 	bool m_AutoUpdateCodepoint_WhenEditWithButtons = false;
 
+	ImVec4 m_GlyphButtonStateColor[3] = { ImVec4(), ImVec4(), ImVec4() };
+
 public:
 	void Init() override;
 	void Unit() override;
@@ -87,6 +89,7 @@ private:
 	bool DrawGlyph(ProjectFile *vProjectFile, 
 		std::shared_ptr<FontInfos> vFontInfos, const ImVec2& vSize,
 		std::shared_ptr<GlyphInfos> vGlyph, bool vShowRect,
+		ImVec4 vGlyphButtonStateColor[3],
 		bool *vNameupdated, bool *vCodePointUpdated,
 		bool vForceEditMode = false);
 	

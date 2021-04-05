@@ -461,21 +461,21 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 
 			aw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x * 2.0f) * 0.3333f;
 
-			if (ImGui::Button("Translations", ImVec2(aw,0)))
+			if (ImGui::ContrastedButton("Translations", nullptr, nullptr, 0.0f, ImVec2(aw,0)))
 			{
 				ClearTranslations(vProjectFile);
 			}
 
 			ImGui::SameLine();
 
-			if (ImGui::Button("Scales", ImVec2(aw, 0)))
+			if (ImGui::ContrastedButton("Scales", nullptr, nullptr, 0.0f, ImVec2(aw, 0)))
 			{
 				ClearScales(vProjectFile);
 			}
 
 			ImGui::SameLine();
 
-			if (ImGui::Button("Both", ImVec2(aw, 0)))
+			if (ImGui::ContrastedButton("Both", nullptr, nullptr, 0.0f, ImVec2(aw, 0)))
 			{
 				ClearTransforms(vProjectFile);
 			}

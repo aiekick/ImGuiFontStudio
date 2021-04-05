@@ -41,7 +41,9 @@ int ImGui::CustomStyle::majorNumber = 0;
 int ImGui::CustomStyle::buildNumber = 0;
 ImVec4 ImGui::CustomStyle::GoodColor = ImVec4(0.2f, 0.8f, 0.2f, 0.8f);
 ImVec4 ImGui::CustomStyle::BadColor = ImVec4(0.8f, 0.2f, 0.2f, 0.8f);
-ImVec4 ImGui::CustomStyle::ImGuiCol_Symbol = ImVec4(0, 0, 0, 1);
+ImVec4 ImGui::CustomStyle::GlyphButtonColor = ImVec4(0, 0, 0, 1);
+ImVec4 ImGui::CustomStyle::GlyphButtonColorActive = ImVec4(0, 0, 0, 1);
+
 void ImGui::CustomStyle::Init()
 {
 	puContrastedTextColor = ImGui::GetColorU32(ImVec4(0, 0, 0, 1));
@@ -171,7 +173,17 @@ bool ImGui::PushStyleColorWithContrast(const ImGuiCol& backGroundColor, const Im
 	if (contrastRatio < maxContrastRatio)
 	{
 		ImGui::PushStyleColor(foreGroundColor, invertedColor);
+		return true;
+	}
+	return false;
+}
 
+bool ImGui::PushStyleColorWithContrast(const ImU32& backGroundColor, const ImGuiCol& foreGroundColor, const ImU32& invertedColor, const float& maxContrastRatio)
+{
+	const float contrastRatio = CalcContrastRatio(backGroundColor, ImGui::GetColorU32(foreGroundColor));
+	if (contrastRatio < maxContrastRatio)
+	{
+		ImGui::PushStyleColor(foreGroundColor, invertedColor);
 		return true;
 	}
 	return false;
@@ -770,7 +782,7 @@ bool ImGui::RadioButtonLabeled(float vWidth, const char* label, bool active, boo
 
     // check
 	bool pressed = false;
-	ImGuiCol colUnderText = ImGuiCol_Button;
+	ImGuiCol colUnderText = ImGuiCol_FrameBg;
 	if (!disabled)
 	{
 		bool hovered, held;
@@ -784,7 +796,12 @@ bool ImGui::RadioButtonLabeled(float vWidth, const char* label, bool active, boo
 			window->DrawList->AddRectFilled(total_bb.Min, total_bb.Max, GetColorU32((hovered && held) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : colUnderText), style.FrameRounding);
 		}
 	}
-    
+#ifdef _DEBUG
+	else
+	{
+		//CTOOL_DEBUG_BREAK;
+	}
+#endif
     // circle shadow + bg
     if (style.FrameBorderSize > 0.0f)
     {
@@ -2220,7 +2237,7 @@ void ImGui::ImageRatio(ImTextureID vTexId, float vRatioX, float vWidth, ImVec4 v
 	if (ImGui::IsItemHovered())
 	{
 		char arr[3];
-		if (snprintf(arr, 3, "%i", (int)vTexId))
+		if (snprintf(arr, 3, "%i", (int)(size_t)vTexId))
 		{
 			ImGui::SetTooltip(arr);
 		}
@@ -2277,11 +2294,11 @@ bool ImGui::TextureOverLay(float vWidth, ct::texture* vTex, ImVec4 vBorderColor,
 	if (vBorderColor.w > 0.0f)
 	{
 		window->DrawList->AddRect(bb.Min, bb.Max, ImGui::GetColorU32(vBorderColor), 0.0f, 15, vBorderColor.w);
-		window->DrawList->AddImage((ImTextureID)vTex->glTex, bb.Min + ImVec2(1, 1), bb.Max - ImVec2(1, 1), uv0, uv1, ImGui::GetColorU32(ImVec4(1, 1, 1, 1)));
+		window->DrawList->AddImage((ImTextureID)(size_t)vTex->glTex, bb.Min + ImVec2(1, 1), bb.Max - ImVec2(1, 1), uv0, uv1, ImGui::GetColorU32(ImVec4(1, 1, 1, 1)));
 	}
 	else
 	{
-		window->DrawList->AddImage((ImTextureID)vTex->glTex, bb.Min, bb.Max, uv0, uv1, ImGui::GetColorU32(ImVec4(1, 1, 1, 1)));
+		window->DrawList->AddImage((ImTextureID)(size_t)vTex->glTex, bb.Min, bb.Max, uv0, uv1, ImGui::GetColorU32(ImVec4(1, 1, 1, 1)));
 	}
 
 	ImVec2 center = (bb.Max + bb.Min) * 0.5f;
@@ -3311,3 +3328,4 @@ IMGUI_API bool ImGui::InputIntDefault(float vWidth, const char* vName, int* vVar
 
 	return change;
 }
+

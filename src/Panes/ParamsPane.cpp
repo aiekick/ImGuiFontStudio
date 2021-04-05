@@ -136,7 +136,7 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 					float maxWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x;
 					float mrw = maxWidth / 2.0f;
 
-					if (ImGui::Button(ICON_IGFS_FOLDER_OPEN " Open Font", ImVec2(mrw, 0.0f)))
+					if (ImGui::ContrastedButton(ICON_IGFS_FOLDER_OPEN " Open Font", nullptr, nullptr, 0.0f, ImVec2(mrw, 0.0f)))
 					{
 						Action_Menu_OpenFont();
 					}
@@ -145,7 +145,7 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 					{
 						ImGui::SameLine();
 
-						if (ImGui::Button(ICON_IGFS_DESTROY " Close Font", ImVec2(mrw, 0.0f)))
+						if (ImGui::ContrastedButton(ICON_IGFS_DESTROY " Close Font", nullptr, nullptr, 0.0f, ImVec2(mrw, 0.0f)))
 						{
 							Action_Menu_CloseFont();
 						}
@@ -446,12 +446,12 @@ bool ParamsPane::Display_ConfirmToCloseFont_Dialog()
 			-	cancel :
 				-	clear actions
 			*/
-			if (ImGui::Button("Confirm"))
+			if (ImGui::ContrastedButton("Confirm"))
 			{
 				res = true; // quit the action
 			}
 			ImGui::SameLine();
-			if (ImGui::Button("Cancel"))
+			if (ImGui::ContrastedButton("Cancel"))
 			{
 				Action_Cancel();
 			}

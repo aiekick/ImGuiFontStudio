@@ -39,6 +39,8 @@ private: // private vars
 private: // private enum
 	bool m_Show_ConfirmToCloseFont_Dialog = false;  // show confirm to close font dialog
 
+	ImVec4 m_GlyphButtonStateColor[3] = { ImVec4(), ImVec4(), ImVec4() };
+
 public:
 	void Init() override;
 	void Unit() override;
@@ -49,10 +51,6 @@ public:
 private: 
 	void DrawFilterBar(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos);
 	void DrawFontTexture(std::shared_ptr<FontInfos> vFontInfos);
-	bool DrawGlyphButton(
-		ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos, 
-		std::string vName, bool* vSelected, ImVec2 vGlyphSize, ImFontGlyph vGlyph, ImVec2 vHostTextureSize,
-		int frame_padding, float vRectThickNess, ImVec4 vRectColor);
 	void DrawFontAtlas_Virtual(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos);
 	
 	// panes

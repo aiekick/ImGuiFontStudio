@@ -24,6 +24,9 @@
 #include <sfntly/table/truetype/glyph_table.h>
 
 #define GLYPH_EDIT_CONTROL_WIDTH 180.0f
+typedef int32_t FontId;
+typedef int32_t CodePoint;
+typedef int32_t GlyphId;
 
 class ProjectFile;
 class GlyphDisplayHelper
@@ -151,12 +154,15 @@ public:
 		ImFontGlyph vGlyph, std::string vOldName,
 		std::string vNewName, uint32_t vNewCodePoint = 0,
 		ImVec2 vTranslation = ImVec2(0, 0), ImVec2 vScale = ImVec2(1, 1));
+	static void GetGlyphButtonColorsForCodePoint(
+		ProjectFile* vProjectFile, bool vShowRangeColoring,
+		CodePoint vCurCdp, CodePoint vLastCdp, ImVec4* vOut3StateColors);
 	// 0 => none, 1 => left pressed, 2 => right pressed
 	static int DrawGlyphButton(
 		int& vWidgetPushId, // by adress because we want modify it
 		ProjectFile* vProjectFile, ImFont* vFont,
 		bool* vSelected, ImVec2 vGlyphSize, const ImFontGlyph* vGlyph,
-		bool vColored = false,
+		ImVec4 vGlyphButtonStateColor[3], bool vColored = false,
 		ImVec2 vTranslation = ImVec2(0, 0), ImVec2 vScale = ImVec2(1, 1),
 		int frame_padding = -1, float vRectThickNess = 0.0f, ImVec4 vRectColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
 	static void RenderGlyph(

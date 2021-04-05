@@ -209,113 +209,6 @@ void SourceFontPane::DrawFilterBar(ProjectFile *vProjectFile, std::shared_ptr<Fo
 	}
 }
 
-bool SourceFontPane::DrawGlyphButton(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
-	std::string vName, bool* vSelected, ImVec2 vGlyphSize, ImFontGlyph vGlyph, ImVec2 vHostTextureSize, 
-	int frame_padding, float vRectThickNess, ImVec4 vRectColor)
-{
-	UNUSED(frame_padding);
-
-	bool res = false;
-
-	if (vFontInfos.use_count())
-	{
-		ImGuiWindow* window = ImGui::GetCurrentWindow();
-		if (window->SkipItems)
-			return false;
-
-		ImGuiContext& g = *GImGui;
-		const ImGuiStyle& style = g.Style;
-
-		ImGui::PushID(NewWidgetId());
-		ImGui::PushID((void*)(intptr_t)vFontInfos->m_ImFontAtlas.TexID);
-		const ImGuiID id = window->GetID("#image");
-		ImGui::PopID();
-		ImGui::PopID();
-
-		const ImRect bb(window->DC.CursorPos, window->DC.CursorPos + vGlyphSize + style.FramePadding * 2);
-		ImGui::ItemSize(bb);
-		if (!ImGui::ItemAdd(bb, id))
-			return false;
-
-		bool hovered, held;
-		bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held);
-
-		if (pressed && vSelected)
-			*vSelected = !*vSelected;
-
-		// Render
-		const ImU32 col = ImGui::GetColorU32(((held && hovered) || (vSelected && *vSelected)) ? ImGuiCol_ButtonActive : hovered ? ImGuiCol_ButtonHovered : ImGuiCol_Button);
-		ImGui::RenderNavHighlight(bb, id);
-		ImGui::RenderFrame(bb.Min, bb.Max, col, true, ImClamp((float)ImMin(style.FramePadding.x, style.FramePadding.y), 0.0f, 12.0f));
-		if (vRectThickNess > 0.0f)
-		{
-			window->DrawList->AddRect(bb.Min, bb.Max, ImGui::GetColorU32(vRectColor), 0.0, 15, vRectThickNess);
-		}
-
-		ImVec2 startPos = bb.Min + style.FramePadding;
-		ImVec2 endPos = startPos + vGlyphSize;
-		
-		ImVec2 uv0 = ImVec2(vGlyph.U0, vGlyph.V0);
-		ImVec2 uv1 = ImVec2(vGlyph.U1, vGlyph.V1);
-		ImVec2 center = ImVec2(0, 0);
-		ImVec2 glyphSize = ImVec2(0, 0);
-
-		float hostRatioX = 1.0f;
-		if (vHostTextureSize.y > 0)
-			hostRatioX = vHostTextureSize.x / vHostTextureSize.y;
-		ImVec2 uvSize = uv1 - uv0;
-		float ratioX = uvSize.x * hostRatioX / uvSize.y;
-
-		ImGui::PushClipRect(bb.Min, bb.Max, true);
-
-		if (vProjectFile->m_ZoomGlyphs)
-		{
-			float newX = vGlyphSize.y * ratioX;
-			glyphSize = ImVec2(vGlyphSize.x, vGlyphSize.x / ratioX) * 0.5f;
-			if (newX < vGlyphSize.x) 
-				glyphSize = ImVec2(newX, vGlyphSize.y) * 0.5f;
-			center = bb.GetCenter();
-		}
-		else
-		{
-			ImVec2 pScale = vGlyphSize / (float)vFontInfos->m_FontSize;
-			
-			ImVec2 xy0 = ImVec2(vGlyph.X0, vGlyph.Y0) * pScale;
-			ImVec2 xy1 = ImVec2(vGlyph.X1, vGlyph.Y1) * pScale;
-			ImRect realGlyphRect = ImRect(startPos + xy0, startPos + xy1);
-			ImVec2 realGlyphSize = realGlyphRect.GetSize();
-
-			// redim with ratio
-			float newX = realGlyphSize.y * ratioX;
-			glyphSize = ImVec2(realGlyphSize.x, realGlyphSize.x / ratioX) * 0.5f;
-			if (newX < realGlyphSize.x)
-				glyphSize = ImVec2(newX, realGlyphSize.y) * 0.5f;
-			center = realGlyphRect.GetCenter();
-
-			float offsetX = vGlyphSize.x * 0.5f - realGlyphSize.x * 0.5f;
-			center.x += offsetX; // center the glyph
-
-			if (vProjectFile->m_ShowBaseLine)// draw base line
-			{
-				float asc = vFontInfos->m_Ascent * vFontInfos->m_Point * pScale.y;
-				window->DrawList->AddLine(ImVec2(bb.Min.x, startPos.y + asc), ImVec2(bb.Max.x, startPos.y + asc), ImGui::GetColorU32(ImGuiCol_PlotHistogram), 2.0f); // base line
-			}
-
-			if (vProjectFile->m_ShowAdvanceX) // draw advance X
-			{
-				float adv = vGlyph.AdvanceX * pScale.y + offsetX;
-				window->DrawList->AddLine(ImVec2(startPos.x + adv, bb.Min.y), ImVec2(startPos.x + adv, bb.Max.y), ImGui::GetColorU32(ImGuiCol_PlotLines), 2.0f); // base line
-			}
-		}
-
-		window->DrawList->AddImage(vFontInfos->m_ImFontAtlas.TexID, center - glyphSize, center + glyphSize, uv0, uv1, ImGui::GetColorU32(ImGuiCol_Text)); // glyph
-
-		ImGui::PopClipRect();
-	}
-	
-	return res;
-}
-
 void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos)
 {
 	auto win = ImGui::GetCurrentWindowRead();
@@ -342,7 +235,7 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 						if (glyphCountX)
 						{
 							uint32_t idx = 0, lastGlyphCodePoint = 0;
-							ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
+							m_GlyphButtonStateColor[0] = ImGui::GetStyleColorVec4(ImGuiCol_Button);
 							bool showRangeColoring = vProjectFile->IsRangeColoringShown();
 							
 							uint32_t countGlyphs = (uint32_t)vFontInfos->m_FilteredGlyphs.size();
@@ -369,19 +262,8 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 
 											if (x) ImGui::SameLine();
 
-											if (showRangeColoring)
-											{
-												if (glyph.Codepoint != lastGlyphCodePoint + 1)
-												{
-													glyphRangeColoring = vProjectFile->GetColorFromInteger(glyph.Codepoint);
-												}
-
-												ImGui::PushStyleColor(ImGuiCol_Button, glyphRangeColoring);
-												ImVec4 bh = glyphRangeColoring; bh.w = 0.8f;
-												ImGui::PushStyleColor(ImGuiCol_ButtonHovered, bh);
-												ImVec4 ba = glyphRangeColoring; ba.w = 1.0f;
-												ImGui::PushStyleColor(ImGuiCol_ButtonActive, ba);
-											}
+											GlyphInfos::GetGlyphButtonColorsForCodePoint(vProjectFile, showRangeColoring,
+												glyph.Codepoint, lastGlyphCodePoint, m_GlyphButtonStateColor);
 
 											win->DrawList->ChannelsSetCurrent(1);
 
@@ -395,7 +277,9 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 											win->DrawList->ChannelsSetCurrent(0);
 
 											// draw glyph in channel 0
-											int check = GlyphInfos::DrawGlyphButton(paneWidgetId, vProjectFile, vFontInfos->GetImFont(), &selected, glyph_size, &glyph, colored);
+											int check = GlyphInfos::DrawGlyphButton(
+												paneWidgetId, vProjectFile, vFontInfos->GetImFont(), 
+												&selected, glyph_size, &glyph, m_GlyphButtonStateColor, colored);
 											if (check)
 											{
 												// left button : check == 1
@@ -405,11 +289,6 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 													vProjectFile, vFontInfos,
 													glyph, idx, selected, true,
 													SelectionContainerEnum::SELECTION_CONTAINER_SOURCE);
-											}
-
-											if (showRangeColoring)
-											{
-												ImGui::PopStyleColor(3);
 											}
 
 											if (vProjectFile->m_SourcePane_ShowGlyphTooltip)

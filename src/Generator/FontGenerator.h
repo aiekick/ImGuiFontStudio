@@ -33,9 +33,6 @@
 #include <sfntly/table/truetype/glyph_table.h>
 #include <sfntly/table/truetype/loca_table.h>
 
-typedef int32_t FontId;
-typedef int32_t CodePoint;
-typedef int32_t GlyphId;
 typedef std::pair<FontId, GlyphId> FontGlyphId;
 struct Glyph
 {

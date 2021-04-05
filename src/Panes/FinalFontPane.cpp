@@ -34,7 +34,7 @@
 
 #include <cinttypes> // printf zu
 
-static char glyphNameBuffer[512] = "\0";
+static char sGlyphNameBuffer[512] = "\0";
 
 FinalFontPane::FinalFontPane() = default;
 FinalFontPane::~FinalFontPane() = default;
@@ -343,6 +343,7 @@ void FinalFontPane::PrepareSelection(ProjectFile *vProjectFile)
 bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile, 
 	std::shared_ptr<FontInfos> vFontInfos, const ImVec2& vSize,
 	std::shared_ptr<GlyphInfos> vGlyph, bool vShowRect,
+	ImVec4 vGlyphButtonStateColor[3],
 	bool *vNameupdated, bool *vCodePointUpdated, 
 	bool vForceEditMode)
 {
@@ -360,13 +361,14 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 
 		ct::fvec2 trans = vGlyph->m_Translation * vFontInfos->m_Point;
 		ct::fvec2 scale = vGlyph->m_Scale;
+
 		res = GlyphInfos::DrawGlyphButton(
 			paneWidgetId,
 			vProjectFile, vFontInfos->GetImFont(),
-			&selected, vSize, &vGlyph->glyph, vGlyph->m_Colored,
+			&selected, vSize, &vGlyph->glyph, vGlyphButtonStateColor, vGlyph->m_Colored,
 			ImVec2(trans.x, trans.y), ImVec2(scale.x, scale.y), 
 			-1, vShowRect ? 3.0f : 0.0f);
-		
+
 		if (res)
 		{
 			// left button : check == 1
@@ -396,18 +398,19 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 			ImGui::BeginGroup();
 
 			bool displayResetHeaderNameBtn = (vGlyph->newHeaderName != vGlyph->oldHeaderName);
+			float ResetHeaderNameBtnWidth = (displayResetHeaderNameBtn ?
+				ImGui::GetFrameHeight() + ImGui::GetStyle().ItemInnerSpacing.x : 0.0f);
 			if (!vGlyph->m_editingName)
 			{
 				vGlyph->editHeaderName = vGlyph->newHeaderName;
 				ImGui::PushItemWidth(
-					GLYPH_EDIT_CONTROL_WIDTH -
-					(displayResetHeaderNameBtn ? ImGui::GetFrameHeight() : 0.0f)
+					GLYPH_EDIT_CONTROL_WIDTH - ResetHeaderNameBtnWidth
 				);
 			}
 			else
 			{
 				float x = ImGui::GetCursorScreenPos().x;
-				if (ImGui::ContrastedButton(ICON_IGFS_OK "##okname"))
+				if (ImGui::ContrastedButton(ICON_IGFS_OK "##okname", nullptr, nullptr, ImGui::GetFrameHeight()))
 				{
 					if (vNameupdated)
 						*vNameupdated = true;
@@ -417,30 +420,30 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 					vGlyph->m_editingName = false;
 				}
 				ImGui::SameLine();
-				if (ImGui::ContrastedButton(ICON_IGFS_CANCEL "##cancelname"))
+				if (ImGui::ContrastedButton(ICON_IGFS_CANCEL "##cancelname", nullptr, nullptr, ImGui::GetFrameHeight()))
 				{
 					vGlyph->m_editingName = false;
 				}
 				ImGui::SameLine();
 				ImGui::PushItemWidth(
 					GLYPH_EDIT_CONTROL_WIDTH - 
-					ImGui::GetCursorScreenPos().x + x -
-					(displayResetHeaderNameBtn ? ImGui::GetFrameHeight() : 0.0f)
+					ImGui::GetCursorScreenPos().x + x - ImGui::GetStyle().ItemInnerSpacing.x - 
+					ResetHeaderNameBtnWidth
 				);
 			}
-			snprintf(glyphNameBuffer, 511, "%s", vGlyph->editHeaderName.c_str());
-			bool nameChanged = ImGui::InputText("##glyphname", glyphNameBuffer, 512);
+			snprintf(sGlyphNameBuffer, 511, "%s", vGlyph->editHeaderName.c_str());
+			bool nameChanged = ImGui::InputText("##glyphname", sGlyphNameBuffer, 512);
 			ImGui::PopItemWidth();
 			if (nameChanged)
 			{
-				vGlyph->editHeaderName = std::string(glyphNameBuffer);
+				vGlyph->editHeaderName = std::string(sGlyphNameBuffer);
 				vGlyph->m_editingName = true;
 			}
 			if (displayResetHeaderNameBtn)
 			{
 				ImGui::SameLine();
 				ImGui::PushItemWidth(ImGui::GetFrameHeight());
-				if (ImGui::ContrastedButton("R##resetname"))
+				if (ImGui::ContrastedButton("R##resetname", nullptr, nullptr, ImGui::GetFrameHeight()))
 				{
 					if (vNameupdated)
 						*vNameupdated = true;
@@ -452,12 +455,14 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 			}
 
 			bool displayResetCodePointBtn = ((uint32_t)vGlyph->newCodePoint != vGlyph->glyph.Codepoint);
+			float ResetCodePointBtnWidth = (displayResetCodePointBtn ? 
+				ImGui::GetFrameHeight() + ImGui::GetStyle().ItemInnerSpacing.x : 0.0f);
 			if (!vGlyph->m_editingCodePoint)
 			{
 				vGlyph->editCodePoint = vGlyph->newCodePoint;
 				ImGui::PushItemWidth(
-					GLYPH_EDIT_CONTROL_WIDTH -
-					(displayResetCodePointBtn ? ImGui::GetFrameHeight() : 0.0f)
+					GLYPH_EDIT_CONTROL_WIDTH - ImGui::GetFrameHeight() * 2.0f - 
+					ImGui::GetStyle().ItemInnerSpacing.x * 2.0f - ResetCodePointBtnWidth
 				);
 			}
 			else 
@@ -465,7 +470,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 				float x = ImGui::GetCursorScreenPos().x;
 				bool btn = m_AutoUpdateCodepoint_WhenEditWithButtons;
 				if (!btn)
-					btn = ImGui::ContrastedButton(ICON_IGFS_OK "##okcodepoint");
+					btn = ImGui::ContrastedButton(ICON_IGFS_OK "##okcodepoint", nullptr, nullptr, ImGui::GetFrameHeight());
 				if (btn)
 				{
 					if (vCodePointUpdated)
@@ -478,28 +483,40 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 				if (!m_AutoUpdateCodepoint_WhenEditWithButtons)
 				{
 					ImGui::SameLine();
-					if (ImGui::ContrastedButton(ICON_IGFS_CANCEL "##cancelcodepoint"))
+					if (ImGui::ContrastedButton(ICON_IGFS_CANCEL "##cancelcodepoint", nullptr, nullptr, ImGui::GetFrameHeight()))
 					{
 						vGlyph->m_editingCodePoint = false;
 					}
 					ImGui::SameLine();
 					ImGui::PushItemWidth(
 						GLYPH_EDIT_CONTROL_WIDTH - 
-						ImGui::GetCursorScreenPos().x + x -
-						(displayResetCodePointBtn ? ImGui::GetFrameHeight() : 0.0f)
+						ImGui::GetCursorScreenPos().x + x - ImGui::GetFrameHeight() * 2.0f - 
+						ImGui::GetStyle().ItemInnerSpacing.x * 2.0f - ResetCodePointBtnWidth
 					);
 				}
 				else
 				{
 					ImGui::PushItemWidth(
-						GLYPH_EDIT_CONTROL_WIDTH -
-						(displayResetCodePointBtn ? ImGui::GetFrameHeight() : 0.0f)
+						GLYPH_EDIT_CONTROL_WIDTH - ImGui::GetFrameHeight() * 2.0f - 
+						ImGui::GetStyle().ItemInnerSpacing.x * 2.0f - ResetCodePointBtnWidth
 					);
 				}
 			}
 
-			bool codePointChanged = ImGui::InputInt("##glyphnewcodepoint", &vGlyph->editCodePoint, 1, 10);
+			bool codePointChanged = ImGui::InputInt("##glyphnewcodepoint", &vGlyph->editCodePoint, 0, 0);
 			ImGui::PopItemWidth();
+			ImGui::SameLine();
+			if (ImGui::ContrastedButton(ICON_IGFS_REMOVE"##glyphdeccodepoint", nullptr, nullptr, ImGui::GetFrameHeight()))
+			{
+				codePointChanged = true;
+				vGlyph->editCodePoint--;
+			}
+			ImGui::SameLine();
+			if (ImGui::ContrastedButton(ICON_IGFS_ADD"##glyphinccodepoint", nullptr, nullptr, ImGui::GetFrameHeight()))
+			{
+				codePointChanged = true;
+				vGlyph->editCodePoint++;
+			}
 			if (codePointChanged)
 			{
 				vGlyph->editCodePoint = ct::clamp<int>(vGlyph->editCodePoint, 0, 65535);
@@ -509,7 +526,7 @@ bool FinalFontPane::DrawGlyph(ProjectFile *vProjectFile,
 			{
 				ImGui::SameLine();
 				ImGui::PushItemWidth(ImGui::GetFrameHeight());
-				if (ImGui::ContrastedButton("R##resetcodepoint"))
+				if (ImGui::ContrastedButton("R##resetcodepoint", nullptr, nullptr, ImGui::GetFrameHeight()))
 				{
 					if (vCodePointUpdated)
 						*vCodePointUpdated = true;
@@ -599,7 +616,7 @@ void FinalFontPane::DrawSelectionsByFontNoOrder_OneFontOnly(
 						{
 							uint32_t idx = 0;
 							uint32_t lastGlyphCodePoint = 0;
-							ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
+							m_GlyphButtonStateColor[0] = ImGui::GetStyleColorVec4(ImGuiCol_Button);
 							bool showRangeColoring = vProjectFile->IsRangeColoringShown();
 
 							bool nameUpdated = false;
@@ -614,28 +631,12 @@ void FinalFontPane::DrawSelectionsByFontNoOrder_OneFontOnly(
 
 								if (x) ImGui::SameLine();
 
-								if (showRangeColoring)
-								{
-									if (codePoint != lastGlyphCodePoint + 1)
-									{
-										glyphRangeColoring = vProjectFile->GetColorFromInteger(codePoint);
-									}
-
-									ImGui::PushStyleColor(ImGuiCol_Button, glyphRangeColoring);
-									ImVec4 bh = glyphRangeColoring; bh.w = 0.75f;
-									ImGui::PushStyleColor(ImGuiCol_ButtonHovered, bh);
-									ImVec4 ba = glyphRangeColoring; ba.w = 1.0f;
-									ImGui::PushStyleColor(ImGuiCol_ButtonActive, ba);
-								}
+								GlyphInfos::GetGlyphButtonColorsForCodePoint(vProjectFile, showRangeColoring, 
+									codePoint, lastGlyphCodePoint, m_GlyphButtonStateColor);
 
 								DrawGlyph(vProjectFile, vFontInfos,
-									glyph_size, glyphInfo, false,
+									glyph_size, glyphInfo, false, m_GlyphButtonStateColor,
 									&nameUpdated, &codepointUpdated, vForceEditMode);
-
-								if (showRangeColoring)
-								{
-									ImGui::PopStyleColor(3);
-								}
 
 								if (vShowTooltipInfos)
 								{
@@ -751,7 +752,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
 						{
                             uint32_t idx = 0;
                             uint32_t lastGlyphCodePoint = 0;
-							ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
+							m_GlyphButtonStateColor[0] = ImGui::GetStyleColorVec4(ImGuiCol_Button);
 							bool showRangeColoring = vProjectFile->IsRangeColoringShown();
 
 							bool nameUpdated = false;
@@ -771,28 +772,12 @@ void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
 
 									if (x) ImGui::SameLine();
 
-									if (showRangeColoring)
-									{
-										if (glyphInfo->newCodePoint != lastGlyphCodePoint + 1)
-										{
-											glyphRangeColoring = vProjectFile->GetColorFromInteger(glyphInfo->newCodePoint);
-										}
-
-										ImGui::PushStyleColor(ImGuiCol_Button, glyphRangeColoring);
-										ImVec4 bh = glyphRangeColoring; bh.w = 0.75f;
-										ImGui::PushStyleColor(ImGuiCol_ButtonHovered, bh);
-										ImVec4 ba = glyphRangeColoring; ba.w = 1.0f;
-										ImGui::PushStyleColor(ImGuiCol_ButtonActive, ba);
-									}
-
+									GlyphInfos::GetGlyphButtonColorsForCodePoint(vProjectFile, showRangeColoring,
+										codePoint, lastGlyphCodePoint, m_GlyphButtonStateColor);
+									
 									DrawGlyph(vProjectFile, vFontInfos,
-										glyph_size, glyphInfo, glyphVector.size() > 1,
+										glyph_size, glyphInfo, glyphVector.size() > 1, m_GlyphButtonStateColor,
 										&nameUpdated, &codepointUpdated, vForceEditMode);
-
-									if (showRangeColoring)
-									{
-										ImGui::PopStyleColor(3);
-									}
 
 									if (vShowTooltipInfos)
 									{
@@ -915,7 +900,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(
 						{
 							int idx = 0;
                             uint32_t lastGlyphCodePoint = 0;
-							ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
+							m_GlyphButtonStateColor[0] = ImGui::GetStyleColorVec4(ImGuiCol_Button);
 							bool showRangeColoring = vProjectFile->IsRangeColoringShown();
 
 							bool nameUpdated = false;
@@ -934,28 +919,12 @@ void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(
 
 									if (x) ImGui::SameLine();
 
-									if (showRangeColoring)
-									{
-										if (glyphInfo->newCodePoint != lastGlyphCodePoint + 1)
-										{
-											glyphRangeColoring = vProjectFile->GetColorFromInteger(glyphInfo->newCodePoint);
-										}
-
-										ImGui::PushStyleColor(ImGuiCol_Button, glyphRangeColoring);
-										ImVec4 bh = glyphRangeColoring; bh.w = 0.75f;
-										ImGui::PushStyleColor(ImGuiCol_ButtonHovered, bh);
-										ImVec4 ba = glyphRangeColoring; ba.w = 1.0f;
-										ImGui::PushStyleColor(ImGuiCol_ButtonActive, ba);
-									}
+									GlyphInfos::GetGlyphButtonColorsForCodePoint(vProjectFile, showRangeColoring,
+										glyphInfo->newCodePoint, lastGlyphCodePoint, m_GlyphButtonStateColor);
 
 									DrawGlyph(vProjectFile, vFontInfos,
-										glyph_size, glyphInfo, glyphVector.size() > 1,
+										glyph_size, glyphInfo, glyphVector.size() > 1, m_GlyphButtonStateColor,
 										&nameUpdated, &codepointUpdated, vForceEditMode);
-
-									if (showRangeColoring)
-									{
-										ImGui::PopStyleColor(3);
-									}
 
 									if (vShowTooltipInfos)
 									{
@@ -1031,7 +1000,7 @@ void FinalFontPane::DrawSelectionMergedNoOrder(ProjectFile *vProjectFile)
 		{
 			uint32_t idx = 0;
 			uint32_t lastGlyphCodePoint = 0;
-			ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
+			m_GlyphButtonStateColor[0] = ImGui::GetStyleColorVec4(ImGuiCol_Button);
 			bool showRangeColoring = vProjectFile->IsRangeColoringShown();
 
 			bool nameUpdated = false;
@@ -1053,28 +1022,12 @@ void FinalFontPane::DrawSelectionMergedNoOrder(ProjectFile *vProjectFile)
 
 								if (x) ImGui::SameLine();
 
-								if (showRangeColoring)
-								{
-									if (glyphInfo->newCodePoint != lastGlyphCodePoint + 1)
-									{
-										glyphRangeColoring = vProjectFile->GetColorFromInteger(glyphInfo->newCodePoint);
-									}
-
-									ImGui::PushStyleColor(ImGuiCol_Button, glyphRangeColoring);
-									ImVec4 bh = glyphRangeColoring; bh.w = 0.75f;
-									ImGui::PushStyleColor(ImGuiCol_ButtonHovered, bh);
-									ImVec4 ba = glyphRangeColoring; ba.w = 1.0f;
-									ImGui::PushStyleColor(ImGuiCol_ButtonActive, ba);
-								}
+								GlyphInfos::GetGlyphButtonColorsForCodePoint(vProjectFile, showRangeColoring,
+									glyphInfo->newCodePoint, lastGlyphCodePoint, m_GlyphButtonStateColor);
 
 								DrawGlyph(vProjectFile, fontInfosPtr,
-									glyph_size, glyphInfo, false,
+									glyph_size, glyphInfo, false, m_GlyphButtonStateColor,
 									&nameUpdated, &codepointUpdated);
-
-								if (showRangeColoring)
-								{
-									ImGui::PopStyleColor(3);
-								}
 
 								if (vProjectFile->m_FinalPane_ShowGlyphTooltip)
 								{
@@ -1149,7 +1102,7 @@ void FinalFontPane::DrawSelectionMergedOrderedByCodePoint(ProjectFile *vProjectF
 		{
 			uint32_t idx = 0;
 			uint32_t lastGlyphCodePoint = 0;
-			ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
+			m_GlyphButtonStateColor[0] = ImGui::GetStyleColorVec4(ImGuiCol_Button);
 			bool showRangeColoring = vProjectFile->IsRangeColoringShown();
 
 			bool nameUpdated = false;
@@ -1179,28 +1132,12 @@ void FinalFontPane::DrawSelectionMergedOrderedByCodePoint(ProjectFile *vProjectF
 
 									if (x) ImGui::SameLine();
 
-									if (showRangeColoring)
-									{
-										if (glyphInfo->newCodePoint != lastGlyphCodePoint + 1)
-										{
-											glyphRangeColoring = vProjectFile->GetColorFromInteger(glyphInfo->newCodePoint);
-										}
-
-										ImGui::PushStyleColor(ImGuiCol_Button, glyphRangeColoring);
-										ImVec4 bh = glyphRangeColoring; bh.w = 0.75f;
-										ImGui::PushStyleColor(ImGuiCol_ButtonHovered, bh);
-										ImVec4 ba = glyphRangeColoring; ba.w = 1.0f;
-										ImGui::PushStyleColor(ImGuiCol_ButtonActive, ba);
-									}
+									GlyphInfos::GetGlyphButtonColorsForCodePoint(vProjectFile, showRangeColoring,
+										codePoint, lastGlyphCodePoint, m_GlyphButtonStateColor);
 
 									DrawGlyph(vProjectFile, fontInfosPtr,
-										glyph_size, glyphInfo, glyphVector.size() > 1,
+										glyph_size, glyphInfo, glyphVector.size() > 1, m_GlyphButtonStateColor,
 										&nameUpdated, &codepointUpdated);
-
-									if (showRangeColoring)
-									{
-										ImGui::PopStyleColor(3);
-									}
 
 									if (vProjectFile->m_FinalPane_ShowGlyphTooltip)
 									{
@@ -1276,7 +1213,7 @@ void FinalFontPane::DrawSelectionMergedOrderedByGlyphNames(ProjectFile *vProject
 		{
 			uint32_t idx = 0;
 			uint32_t lastGlyphCodePoint = 0;
-			ImVec4 glyphRangeColoring = ImGui::GetStyleColorVec4(ImGuiCol_Button);
+			m_GlyphButtonStateColor[0] = ImGui::GetStyleColorVec4(ImGuiCol_Button);
 			bool showRangeColoring = vProjectFile->IsRangeColoringShown();
 
 			bool nameUpdated = false;
@@ -1305,28 +1242,12 @@ void FinalFontPane::DrawSelectionMergedOrderedByGlyphNames(ProjectFile *vProject
 
 									if (x) ImGui::SameLine();
 
-									if (showRangeColoring)
-									{
-										if (glyphInfo->newCodePoint != lastGlyphCodePoint + 1)
-										{
-											glyphRangeColoring = vProjectFile->GetColorFromInteger(glyphInfo->newCodePoint);
-										}
-
-										ImGui::PushStyleColor(ImGuiCol_Button, glyphRangeColoring);
-										ImVec4 bh = glyphRangeColoring; bh.w = 0.75f;
-										ImGui::PushStyleColor(ImGuiCol_ButtonHovered, bh);
-										ImVec4 ba = glyphRangeColoring; ba.w = 1.0f;
-										ImGui::PushStyleColor(ImGuiCol_ButtonActive, ba);
-									}
+									GlyphInfos::GetGlyphButtonColorsForCodePoint(vProjectFile, showRangeColoring,
+										glyphInfo->newCodePoint, lastGlyphCodePoint, m_GlyphButtonStateColor);
 
 									DrawGlyph(vProjectFile, fontInfosPtr,
-										glyph_size, glyphInfo, glyphVector.size() > 1,
+										glyph_size, glyphInfo, glyphVector.size() > 1, m_GlyphButtonStateColor,
 										&nameUpdated, &codepointUpdated);
-
-									if (showRangeColoring)
-									{
-										ImGui::PopStyleColor(3);
-									}
 
 									if (vProjectFile->m_FinalPane_ShowGlyphTooltip)
 									{
