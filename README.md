@@ -54,11 +54,11 @@ My soft do the same job and more but easier for user :)
 You need to use cMake.
 For the 3 Os (Win, Linux, MacOs), the cMake usage is exactly the same, 
 
-1) Choose a build directory. (called here my_build_directory for instance)
+1) Choose a build directory. (called here my_build_directory for instance) and
 2) Choose a Build Mode : "Release" / "MinSizeRel" / "RelWithDebInfo" / "Debug" (called here BuildMode for instance)
 3) Run cMake in console : (the first for generate cmake build files, the second for build the binary)
 ```cpp
-cmake my_build_directory -DCMAKE_BUILD_TYPE=BuildMode
+cmake -B my_build_directory -DCMAKE_BUILD_TYPE=BuildMode
 cmake --build my_build_directory --config BuildMode
 ```
 
