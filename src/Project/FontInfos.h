@@ -89,6 +89,7 @@ public: // to save
 	std::string m_GeneratedFileName;
 	uint32_t m_CardGlyphHeightInPixel = 40U; // glyph item height in card
 	uint32_t m_CardCountRowsMax = 20U; // after this max, new columns
+	bool m_EnabledForGeneration = true;
 
 public: // callable
 	bool LoadFont(ProjectFile *vProjectFile, const std::string& vFontFilePathName);

@@ -2339,6 +2339,8 @@ bool ImGui::TextureOverLay(float vWidth, ct::texture* vTex, ImVec4 vBorderColor,
 ///// SLIDERS //////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 ////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 
+extern template float ImGui::RoundScalarWithFormatT<float, float>(const char* format, ImGuiDataType data_type, float v);
+
 // FIXME: Move more of the code into SliderBehavior()
 template<typename TYPE, typename SIGNEDTYPE, typename FLOATTYPE>
 inline bool inSliderBehaviorStepperT(const ImRect& bb, ImGuiID id, ImGuiDataType data_type, TYPE* v, const TYPE v_min, const TYPE v_max, const TYPE v_step, const char* format, ImGuiSliderFlags flags, ImRect* out_grab_bb)

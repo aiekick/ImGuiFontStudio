@@ -826,7 +826,8 @@ std::string FontInfos::getXml(const std::string& vOffset, const std::string& vUs
 	res += vOffset + "\t<freetypemultiply>" + ct::toStr(m_FontMultiply) + "</freetypemultiply>\n";
 	res += vOffset + "\t<padding>" + ct::toStr(m_FontPadding) + "</padding>\n";
 	res += vOffset + "\t<filtering>" + ct::toStr(m_TextureFiltering) + "</filtering>\n";
-
+	res += vOffset + "\t<enabled>" + (m_EnabledForGeneration ? "true" : "false") + "</enabled>\n";
+	
 	if (!m_Filters.empty())
 	{
 		res += vOffset + "\t<filters>\n";
@@ -896,6 +897,8 @@ bool FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 			m_FontPadding = ct::ivariant(strValue).GetI();
 		else if (strName == "textureFiletring")
 			m_TextureFiltering = (GLenum)ct::ivariant(strValue).GetI();
+		else if (strName == "enabled")
+			m_EnabledForGeneration = ct::ivariant(strValue).GetB();
 		else if (strName == "glyphs" || strName == "filters")
 		{
 			for (tinyxml2::XMLElement* child = vElem->FirstChildElement(); child != nullptr; child = child->NextSiblingElement())

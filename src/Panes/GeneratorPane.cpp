@@ -603,10 +603,8 @@ void GeneratorPane::ShowGenerationStatus(ProjectFile* vProjectFile)
 					ImGui::PushID(itFont.second.get());
 					if (ImGui::TableSetColumnIndex(0))
 					{
-						static bool v = false;
 						ImGui::PushItemWidth(20.0f);
-						static char buffer[10];
-						ImGui::RadioButtonLabeled(0.0f, ct::toStr(idx++).c_str(), "Enable/Disable", &v, false);
+						ImGui::RadioButtonLabeled(0.0f, ct::toStr(idx++).c_str(), "Enable/Disable", &itFont.second->m_EnabledForGeneration, false);
 						ImGui::PopItemWidth();
 					}
 					if (ImGui::TableSetColumnIndex(1))
