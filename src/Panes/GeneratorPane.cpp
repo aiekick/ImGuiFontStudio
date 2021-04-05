@@ -604,7 +604,7 @@ void GeneratorPane::ShowGenerationStatus(ProjectFile* vProjectFile)
 						static bool v = false;
 						ImGui::PushItemWidth(20.0f);
 						static char buffer[10];
-						ImGui::RadioButtonLabeled(-1.0f, _itoa(idx++, buffer, 10), "Enable/Disable", &v, false);
+						ImGui::RadioButtonLabeled(-1.0f, itoa(idx++, buffer, 10), "Enable/Disable", &v, false);
 						ImGui::PopItemWidth();
 					}
 					if (ImGui::TableSetColumnIndex(1))
