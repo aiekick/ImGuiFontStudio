@@ -24,6 +24,8 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 
+#include <stdlib.h>
+
 #include <ctools/cTools.h>
 #include <ctools/Logger.h>
 #include <ctools/FileHelper.h>
@@ -265,7 +267,7 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_CARD,
 				false, false, GENERATOR_MODE_NONE, headerModeDisabled);
 
-			// un header est lié a un TTF ou un CPP ne petu aps etre les deux
+			// un header est liÃ© a un TTF ou un CPP ne petu aps etre les deux
 			// donc on fait soit l'un soit l'autre
 			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw, "Font", "Font File",
 				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_FONT,
