@@ -208,7 +208,7 @@ namespace ImGui
 	IMGUI_API bool CheckBoxBitWize(const char* vLabel, const char* vHelp, T* vContainer, T vFlag, bool vDef)
 	{
 		bool check = *vContainer & vFlag;
-		bool res = CheckBoxDefault(vLabel, &check, vDef, vHelp);
+		bool res = CheckBoxBoolDefault(vLabel, &check, vDef, vHelp);
 		if (res)
 		{
 			if (check)

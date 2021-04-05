@@ -227,9 +227,6 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 				{
 					if (!vFontInfos->m_FilteredGlyphs.empty())
 					{
-						ImVec2 hostTextureSize = ImVec2(
-							(float)vFontInfos->m_ImFontAtlas.TexWidth,
-							(float)vFontInfos->m_ImFontAtlas.TexHeight);
 						ImVec2 cell_size, glyph_size;
 						uint32_t glyphCountX = GlyphDisplayHelper::CalcGlyphsCountAndSize(vProjectFile, &cell_size, &glyph_size);
 						if (glyphCountX)

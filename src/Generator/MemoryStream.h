@@ -32,9 +32,9 @@ public:
 	{
 		int16_t value = 0;
 		F2DOT14() { value = 0; }
-		F2DOT14(int16_t v) { value = v; }
-		F2DOT14 operator = (int16_t v) { value = v; }
-		void SetFloat(float vValue) { value = (int16_t)roundf(vValue * 16384.f); }
+		F2DOT14(const int16_t& v) { value = v; }
+		void operator = (const int16_t& v) { value = v; }
+		void SetFloat(const float& vValue) { value = (int16_t)roundf(vValue * 16384.f); }
 		float GetFloat() { return (float)(value >> 14) + (float)(value & 0x3FFF) / 16384.0f; }
 	};
 	typedef uint16_t UFWord;

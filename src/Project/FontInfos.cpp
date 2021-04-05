@@ -353,14 +353,14 @@ void FontInfos::FillGlyphColoreds()
 		stbtt_int32 num_tables = ttUSHORT(fontInfo.data + fontInfo.fontstart + 4);
 		stbtt_uint32 tabledir = fontInfo.fontstart + 12;
 		stbtt_uint32 tablePos = 0;
-		stbtt_uint32 tableLen = 0;
+		//stbtt_uint32 tableLen = 0;
 		for (int i = 0; i < num_tables; ++i)
 		{
 			stbtt_uint32 loc = tabledir + 16 * i;
 			if (stbtt_tag(fontInfo.data + loc + 0, "COLR"))
 			{
 				tablePos = ttULONG(fontInfo.data + loc + 8);
-				tableLen = ttULONG(fontInfo.data + loc + 12);
+				//tableLen = ttULONG(fontInfo.data + loc + 12);
 				break;
 			}
 		}

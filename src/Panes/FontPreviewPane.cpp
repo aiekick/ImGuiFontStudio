@@ -258,7 +258,7 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 		ImVec2 cell_size, glyph_size;
 		GlyphDisplayHelper::CalcGlyphsCountAndSize(vProjectFile, &cell_size, &glyph_size);
 
-		ImVec2 basePos = ImGui::GetCursorPos();
+		//ImVec2 basePos = ImGui::GetCursorPos();
 
 		ImGuiWindow* window = ImGui::GetCurrentWindow();
 		if (window)
@@ -403,9 +403,9 @@ void FontPreviewPane::DrawMixedFontResult(ProjectFile* vProjectFile)
 
 		if (font->ContainerAtlas)
 		{
-			float baseFontRatioX = 1.0f;
+			/*float baseFontRatioX = 1.0f;
 			if (font->ContainerAtlas->TexHeight > 0)
-				baseFontRatioX = (float)font->ContainerAtlas->TexWidth / (float)font->ContainerAtlas->TexHeight;
+				baseFontRatioX = (float)font->ContainerAtlas->TexWidth / (float)font->ContainerAtlas->TexHeight;*/
 
 			ImVec2 pos = window->DC.CursorPos;
 			ImVec2 size = ImVec2(aw, vProjectFile->m_FontTestInfos.m_PreviewFontSize);

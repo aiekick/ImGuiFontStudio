@@ -157,7 +157,6 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 						static int _countLines = 7;
 						//ImGui::SliderIntDefaultCompact(ImGui::GetContentRegionAvail().x, "Count Lines", &_countLines, 0, 100, 7);
 
-						static int selection = 0;
 						static ImGuiTableFlags flags =
 							ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg |
 							ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
