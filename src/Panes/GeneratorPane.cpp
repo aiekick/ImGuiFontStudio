@@ -604,7 +604,7 @@ void GeneratorPane::ShowGenerationStatus(ProjectFile* vProjectFile)
 						static bool v = false;
 						ImGui::PushItemWidth(20.0f);
 						static char buffer[10];
-						ImGui::RadioButtonLabeled(-1.0f, itoa(idx++, buffer, 10), "Enable/Disable", &v, false);
+						ImGui::RadioButtonLabeled(0.0f, ct::toStr(idx++).c_str(), "Enable/Disable", &v, false);
 						ImGui::PopItemWidth();
 					}
 					if (ImGui::TableSetColumnIndex(1))
@@ -622,16 +622,16 @@ void GeneratorPane::ShowGenerationStatus(ProjectFile* vProjectFile)
 						v[3] = vProjectFile->IsGenMode(GENERATOR_MODE_SRC);
 						ImGui::BeginGroup();
 						ImGui::PushItemWidth(20.0f);
-						ImGui::RadioButtonLabeled(-1.0f, "H", "Header Feature", v[0], false); ImGui::SameLine();
+						ImGui::RadioButtonLabeled(0.0f, "H", "Header Feature", v[0], false); ImGui::SameLine();
 						ImGui::PopItemWidth();
 						ImGui::PushItemWidth(20.0f);
-						ImGui::RadioButtonLabeled(-1.0f, "C", "Card Feature", v[1], false); ImGui::SameLine();
+						ImGui::RadioButtonLabeled(0.0f, "C", "Card Feature", v[1], false); ImGui::SameLine();
 						ImGui::PopItemWidth();
 						ImGui::PushItemWidth(20.0f);
-						ImGui::RadioButtonLabeled(-1.0f, "F", "Font Feature", v[2], false); ImGui::SameLine();
+						ImGui::RadioButtonLabeled(0.0f, "F", "Font Feature", v[2], false); ImGui::SameLine();
 						ImGui::PopItemWidth();
 						ImGui::PushItemWidth(20.0f);
-						ImGui::RadioButtonLabeled(-1.0f, "S", "Src Feature", v[3], false);
+						ImGui::RadioButtonLabeled(0.0f, "S", "Src Feature", v[3], false);
 						ImGui::PopItemWidth();
 						ImGui::EndGroup();
 					}
