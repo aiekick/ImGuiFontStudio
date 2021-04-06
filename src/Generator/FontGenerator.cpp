@@ -776,9 +776,9 @@ bool FontGenerator::Assemble_Post_Table(std::map<CodePoint, std::string> vSelect
 						names.push_back(vSelection[codepoint]);
 					}
 				}
-				else
+				else if (id < sfntly::PostScriptTable::NUM_STANDARD_NAMES)
 				{
-					names.emplace_back(sfntly::PostScriptTable::STANDARD_NAMES[id]);
+					names.push_back(sfntly::PostScriptTable::STANDARD_NAMES[id]);
 				}
 			}
 		}
