@@ -398,70 +398,70 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 	if (!m_ImFontAtlas.Fonts.empty())
 	{
 		bool needFontReGen = false;
-		
+
 		float aw = 0.0f;
 
-		if (ImGui::BeginFramedGroup("Selected Font"))
+		aw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 2.0f;
+
+		if (!m_InfosToDisplay.empty())
 		{
-			aw = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x * 2.0f;
-
-			if (!m_InfosToDisplay.empty())
+			if (ImGui::BeginFramedGroup("Selected Font Infos"))
 			{
-				if (ImGui::CollapsingHeader("Infos"))
+				static ImGuiTableFlags flags =
+					ImGuiTableFlags_SizingFixedFit |
+					ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable |
+					ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
+					ImGuiTableFlags_NoHostExtendY | ImGuiTableFlags_Borders;
+				if (ImGui::BeginTable("##fontinfosTable", 2, flags, ImVec2(aw, ImGui::GetTextLineHeightWithSpacing() * 7)))
 				{
-					static ImGuiTableFlags flags =
-						ImGuiTableFlags_SizingFixedFit |
-						ImGuiTableFlags_RowBg | ImGuiTableFlags_Resizable |
-						ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
-						ImGuiTableFlags_NoHostExtendY | ImGuiTableFlags_Borders;
-					if (ImGui::BeginTable("##fontinfosTable", 2, flags, ImVec2(aw, ImGui::GetTextLineHeightWithSpacing() * 7)))
+					ImGui::TableSetupScrollFreeze(0, 1); // Make header always visible
+					ImGui::TableSetupColumn("Item", ImGuiTableColumnFlags_WidthFixed, -1, 0);
+					ImGui::TableSetupColumn("Infos", ImGuiTableColumnFlags_WidthStretch, -1, 1);
+					ImGui::TableHeadersRow(); // draw headers
+
+					m_InfosToDisplayClipper.Begin((int)m_InfosToDisplay.size(), ImGui::GetTextLineHeightWithSpacing());
+					while (m_InfosToDisplayClipper.Step())
 					{
-						ImGui::TableSetupScrollFreeze(0, 1); // Make header always visible
-						ImGui::TableSetupColumn("Item", ImGuiTableColumnFlags_WidthFixed, -1, 0);
-						ImGui::TableSetupColumn("Infos", ImGuiTableColumnFlags_WidthStretch, -1, 1);
-						ImGui::TableHeadersRow(); // draw headers
-
-						m_InfosToDisplayClipper.Begin((int)m_InfosToDisplay.size(), ImGui::GetTextLineHeightWithSpacing());
-						while (m_InfosToDisplayClipper.Step())
+						for (int i = m_InfosToDisplayClipper.DisplayStart; i < m_InfosToDisplayClipper.DisplayEnd; i++)
 						{
-							for (int i = m_InfosToDisplayClipper.DisplayStart; i < m_InfosToDisplayClipper.DisplayEnd; i++)
+							if (i < 0) continue;
+
+							const auto& infos = m_InfosToDisplay[i];
+
+							ImGui::TableNextRow();
+
+							if (ImGui::TableSetColumnIndex(0)) // first column
 							{
-								if (i < 0) continue;
-
-								const auto& infos = m_InfosToDisplay[i];
-
-								ImGui::TableNextRow();
-
-								if (ImGui::TableSetColumnIndex(0)) // first column
+								ImGui::Selectable(infos.first.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap);
+							}
+							if (ImGui::TableSetColumnIndex(1)) // second column
+							{
+								float sw = ImGui::CalcTextSize(infos.second.c_str()).x;
+								ImGui::Text("%s", infos.second.c_str());
+								if (sw > aw - ImGui::GetCursorPosX())
 								{
-									ImGui::Selectable(infos.first.c_str(), false, ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap);
-								}
-								if (ImGui::TableSetColumnIndex(1)) // second column
-								{
-									float sw = ImGui::CalcTextSize(infos.second.c_str()).x;
-									ImGui::Text("%s", infos.second.c_str());
-									if (sw > aw - ImGui::GetCursorPosX())
-									{
-										if (ImGui::IsItemHovered())
-											ImGui::SetTooltip(infos.second.c_str());
-									}
+									if (ImGui::IsItemHovered())
+										ImGui::SetTooltip(infos.second.c_str());
 								}
 							}
 						}
-						ImGui::EndTable();
 					}
+					ImGui::EndTable();
 				}
+
+				ImGui::Text("Selected glyphs : %u", (uint32_t)m_SelectedGlyphs.size());
+
+				ImGui::EndFramedGroup();
 			}
+		}
 			
-			ImGui::FramedGroupSeparator();
-
-			ImGui::Text("Selected glyphs : %u", (uint32_t)m_SelectedGlyphs.size());
-
+		if (ImGui::BeginFramedGroup("Transforms"))
+		{
 			ImGui::FramedGroupText("Clear for all Glyphs");
 
 			aw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x * 2.0f) * 0.3333f;
 
-			if (ImGui::ContrastedButton("Translations", nullptr, nullptr, 0.0f, ImVec2(aw,0)))
+			if (ImGui::ContrastedButton("Translations", nullptr, nullptr, 0.0f, ImVec2(aw, 0)))
 			{
 				ClearTranslations(vProjectFile);
 			}
@@ -480,8 +480,11 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 				ClearTransforms(vProjectFile);
 			}
 
-			ImGui::FramedGroupSeparator();
+			ImGui::EndFramedGroup();
+		}
 
+		if (ImGui::BeginFramedGroup("Rasterizer"))
+		{
 			aw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x) * 0.5f;
 
 			if (ImGui::RadioButtonLabeled(aw, "FreeType", "Use FreeType Raterizer", FontInfos::m_RasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE))
@@ -489,7 +492,7 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 				needFontReGen = true;
 				FontInfos::m_RasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
 			}
-			
+
 			ImGui::SameLine();
 
 			if (ImGui::RadioButtonLabeled(aw, "Stb", "Use Stb Raterizer", FontInfos::m_RasterizerMode == RasterizerEnum::RASTERIZER_STB))
@@ -513,11 +516,11 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 				m_TextureFiltering = GL_NEAREST;
 			}
 #endif
-			
+
 			ImGui::FramedGroupSeparator();
 
 			needFontReGen |= ImGui::SliderIntDefaultCompact(-1.0f, "Font Size", &vProjectFile->m_SelectedFont->m_FontSize, 7, 50, defaultFontInfosValues.m_FontSize);
-			
+
 			if (FontInfos::m_RasterizerMode == RasterizerEnum::RASTERIZER_STB)
 			{
 				needFontReGen |= ImGui::SliderIntDefaultCompact(-1.0f, "Font Anti-aliasing", &vProjectFile->m_SelectedFont->m_Oversample, 1, 5, defaultFontInfosValues.m_Oversample);
