@@ -815,6 +815,7 @@ std::string FontInfos::getXml(const std::string& vOffset, const std::string& vUs
 	}
 
 	res += vOffset + "\t<prefix>" + m_FontPrefix + "</prefix>\n";
+	res += vOffset + "\t<genmodeflags>" + ct::toStr(m_GenModeFlags) + "</genmodeflags>\n";
 	res += vOffset + "\t<pathfilename>" + m_FontFilePathName + "</pathfilename>\n";
 	res += vOffset + "\t<oversample>" + ct::toStr(m_Oversample) + "</oversample>\n";
 	res += vOffset + "\t<fontsize>" + ct::toStr(m_FontSize) + "</fontsize>\n";
@@ -899,6 +900,8 @@ bool FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 			m_TextureFiltering = (GLenum)ct::ivariant(strValue).GetI();
 		else if (strName == "enabled")
 			m_EnabledForGeneration = ct::ivariant(strValue).GetB();
+		else if (strName == "genmodeflags")
+			m_GenModeFlags = (GenModeFlags)ct::ivariant(strValue).GetI();
 		else if (strName == "glyphs" || strName == "filters")
 		{
 			for (tinyxml2::XMLElement* child = vElem->FirstChildElement(); child != nullptr; child = child->NextSiblingElement())

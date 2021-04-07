@@ -259,22 +259,22 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 			}
 
 			mrw = maxWidth / 2.0f - ImGui::GetStyle().FramePadding.x;
-			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw, "Header", "Header File",
-				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_HEADER,
+			change |= GenMode::RadioButtonLabeled_BitWize_GenMode(mrw, "Header", "Header File",
+				vProjectFile, GENERATOR_MODE_HEADER,
 				false, false, GENERATOR_MODE_NONE, headerModeDisabled);
 			ImGui::SameLine();
-			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw, "Card", "Card Picture",
-				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_CARD,
+			change |= GenMode::RadioButtonLabeled_BitWize_GenMode(mrw, "Card", "Card Picture",
+				vProjectFile, GENERATOR_MODE_CARD,
 				false, false, GENERATOR_MODE_NONE, headerModeDisabled);
 
 			// un header est lié a un TTF ou un CPP ne petu aps etre les deux
 			// donc on fait soit l'un soit l'autre
-			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw, "Font", "Font File",
-				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_FONT,
+			change |= GenMode::RadioButtonLabeled_BitWize_GenMode(mrw, "Font", "Font File",
+				vProjectFile, GENERATOR_MODE_FONT,
 				true, false, GENERATOR_MODE_RADIO_FONT_SRC);
 			ImGui::SameLine();
-			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw, "Src", "Source File for C++/C#\n\twith font as a bytes array",
-				&vProjectFile->m_GenModeFlags, GENERATOR_MODE_SRC,
+			change |= GenMode::RadioButtonLabeled_BitWize_GenMode(mrw, "Src", "Source File for C++/C#\n\twith font as a bytes array",
+				vProjectFile, GENERATOR_MODE_SRC,
 				true, false, GENERATOR_MODE_RADIO_FONT_SRC);
 
 			ImGui::FramedGroupText("Settings");
@@ -283,33 +283,33 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 			{
 				mrw = maxWidth / 3.0f - ImGui::GetStyle().FramePadding.x;
 				ImGui::Text("Header / Src Languages : ");
-				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw,
+				change |= GenMode::RadioButtonLabeled_BitWize_GenMode(mrw,
 					"C", "Embedded font as a Byte Array for C",
-					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_LANG_C,
+					vProjectFile, GENERATOR_MODE_LANG_C,
 					false, false, GENERATOR_MODE_RADIO_LANG);
 				ImGui::SameLine();
-				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw,
+				change |= GenMode::RadioButtonLabeled_BitWize_GenMode(mrw,
 					"C++", "Embedded font as a Byte Array for C++",
-					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_LANG_CPP,
+					vProjectFile, GENERATOR_MODE_LANG_CPP,
 					false, false, GENERATOR_MODE_RADIO_LANG);
 				ImGui::SameLine();
-				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw,
+				change |= GenMode::RadioButtonLabeled_BitWize_GenMode(mrw,
 					"C#", "Embedded font as a Byte Array for C#",
-					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_LANG_CSHARP,
+					vProjectFile, GENERATOR_MODE_LANG_CSHARP,
 					false, false, GENERATOR_MODE_RADIO_LANG);
 
 #ifdef _DEBUG
-/*				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw, 
+/*				change |= ImGui::GenMode::RadioButtonLabeled_BitWize_GenMode<GenModeFlags>(mrw, 
 					"Lua", "Embedded font as a Byte Array for LUA",
 					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_LANG_LUA,
 					false, false, GENERATOR_MODE_RADIO_LANG);
 				ImGui::SameLine();
-				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw, 
+				change |= ImGui::GenMode::RadioButtonLabeled_BitWize_GenMode<GenModeFlags>(mrw, 
 					"Python", "Embedded font as a Byte Array for Python",
 					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_LANG_PYTHON,
 					false, false, GENERATOR_MODE_RADIO_LANG);
 				ImGui::SameLine();*/
-				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw,
+				change |= ImGui::GenMode::RadioButtonLabeled_BitWize_GenMode<GenModeFlags>(mrw,
 					"Rust", "Embedded font as a Byte Array for Rust",
 					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_LANG_RUST,
 					false, false, GENERATOR_MODE_RADIO_LANG);
@@ -319,26 +319,26 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED))
 			{
 				ImGui::FramedGroupText("Merged Mode");
-				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(maxWidth - ImGui::GetStyle().FramePadding.x,
+				change |= GenMode::RadioButtonLabeled_BitWize_GenMode(maxWidth - ImGui::GetStyle().FramePadding.x,
 					"Disable Glyph Re Write", "if your fonts have same size,\nit can be more safe for the moment (bad generated font is some case)\nto disable glyph re write.\nonly needed if we must change glyph scale",
-					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE);
+					vProjectFile, GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE);
 			}
 
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_FONT))
 			{
 				ImGui::FramedGroupText("Font");
-				change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(maxWidth - ImGui::GetStyle().FramePadding.x, 
+				change |= GenMode::RadioButtonLabeled_BitWize_GenMode(maxWidth - ImGui::GetStyle().FramePadding.x,
 					"Export Names", "export glyph names in font file (increase size)",
-					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
+					vProjectFile, GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES);
 			}
 
 			ImGui::FramedGroupSeparator();
 
 			if (CheckAndDisplayGenerationConditions(vProjectFile))
 			{
-				ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(maxWidth - ImGui::GetStyle().FramePadding.x,
+				GenMode::RadioButtonLabeled_BitWize_GenMode(maxWidth - ImGui::GetStyle().FramePadding.x,
 					"Auto Opening", "Auto Opening of Generated Files in associated app after generation",
-					&vProjectFile->m_GenModeFlags, GENERATOR_MODE_OPEN_GENERATED_FILES_AUTO);
+					vProjectFile, GENERATOR_MODE_OPEN_GENERATED_FILES_AUTO);
 				if (ImGui::ContrastedButton(ICON_IGFS_GENERATE " Generate", nullptr, nullptr, 0.0f, ImVec2(maxWidth - ImGui::GetStyle().FramePadding.x, 0.0f)))
 				{
 					btnClick = true;
@@ -576,7 +576,7 @@ bool GeneratorPane::CheckAndDisplayGenerationConditions(ProjectFile *vProjectFil
 
 void GeneratorPane::ShowGenerationStatus(ProjectFile* vProjectFile)
 {
-	if (ImGui::CollapsingHeader("Generation Status", ImGuiTreeNodeFlags_Bullet))
+	if (ImGui::CollapsingHeader("Settings Per Font", ImGuiTreeNodeFlags_Bullet))
 	{
 		auto _countLines = vProjectFile->m_Fonts.size() + 1U;
 
@@ -615,24 +615,30 @@ void GeneratorPane::ShowGenerationStatus(ProjectFile* vProjectFile)
 					}
 					if (ImGui::TableSetColumnIndex(2))
 					{
-						static bool v[4] = { false, false, false, false };
-						v[0] = vProjectFile->IsGenMode(GENERATOR_MODE_HEADER);
-						v[1] = vProjectFile->IsGenMode(GENERATOR_MODE_CARD);
-						v[2] = vProjectFile->IsGenMode(GENERATOR_MODE_FONT);
-						v[3] = vProjectFile->IsGenMode(GENERATOR_MODE_SRC);
 						ImGui::BeginGroup();
-						ImGui::PushItemWidth(20.0f);
-						ImGui::RadioButtonLabeled(0.0f, "H", "Header Feature", v[0], false); ImGui::SameLine();
-						ImGui::PopItemWidth();
-						ImGui::PushItemWidth(20.0f);
-						ImGui::RadioButtonLabeled(0.0f, "C", "Card Feature", v[1], false); ImGui::SameLine();
-						ImGui::PopItemWidth();
-						ImGui::PushItemWidth(20.0f);
-						ImGui::RadioButtonLabeled(0.0f, "F", "Font Feature", v[2], false); ImGui::SameLine();
-						ImGui::PopItemWidth();
-						ImGui::PushItemWidth(20.0f);
-						ImGui::RadioButtonLabeled(0.0f, "S", "Src Feature", v[3], false);
-						ImGui::PopItemWidth();
+						ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(0.0f, "H##FEAT", "Header Feature", 
+							&itFont.second->m_GenModeFlags, GENERATOR_MODE_HEADER, false); ImGui::SameLine();
+						ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(0.0f, "C##FEAT", "Card Feature", 
+							&itFont.second->m_GenModeFlags, GENERATOR_MODE_CARD, false); ImGui::SameLine();
+						ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(0.0f, "F##FEAT", "Font Feature", 
+							&itFont.second->m_GenModeFlags, GENERATOR_MODE_FONT,
+							true, false, GENERATOR_MODE_RADIO_FONT_SRC); ImGui::SameLine();
+						ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(0.0f, "S##FEAT", "Src Feature", 
+							&itFont.second->m_GenModeFlags, GENERATOR_MODE_SRC,
+							true, false, GENERATOR_MODE_RADIO_FONT_SRC);
+						if (itFont.second->IsGenMode(GENERATOR_MODE_SRC))
+						{
+							ImGui::SameLine();
+							ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(0.0f, "C##LANG", "C Source", 
+								&itFont.second->m_GenModeFlags, GENERATOR_MODE_LANG_C,
+								false, false, GENERATOR_MODE_RADIO_LANG); ImGui::SameLine();
+							ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(0.0f, "C++##LANG", "C++ Source", 
+								&itFont.second->m_GenModeFlags, GENERATOR_MODE_LANG_CPP,
+								false, false, GENERATOR_MODE_RADIO_LANG); ImGui::SameLine();
+							ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(0.0f, "C###LANG", "C# Source", 
+								&itFont.second->m_GenModeFlags, GENERATOR_MODE_LANG_CSHARP,
+								false, false, GENERATOR_MODE_RADIO_LANG);
+						}
 						ImGui::EndGroup();
 					}
 					ImGui::PopID();

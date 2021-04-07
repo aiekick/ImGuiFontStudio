@@ -21,6 +21,7 @@
 #include <Project/GlyphInfos.h>
 #include <ImguiImpl/freetype/imgui_freetype.h>
 #include <glad/glad.h>
+#include <Generator/GenMode.h>
 
 #include <imgui/imgui.h>
 #include <string>
@@ -44,7 +45,7 @@ struct GlyphsRange
 };
 
 class ProjectFile;
-class FontInfos : public conf::ConfigAbstract
+class FontInfos : public conf::ConfigAbstract, public GenMode
 {
 public:
 	static std::shared_ptr<FontInfos> Create();

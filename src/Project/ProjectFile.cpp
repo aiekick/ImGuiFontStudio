@@ -402,24 +402,3 @@ ImVec4 ProjectFile::GetColorFromInteger(uint32_t vInteger) const
 
 	return res;
 }
-
-void ProjectFile::AddGenMode(GenModeFlags vFlags)
-{
-	m_GenModeFlags |= vFlags;
-}
-
-void ProjectFile::RemoveGenMode(GenModeFlags vFlags)
-{
-	m_GenModeFlags &= ~vFlags;
-}
-
-GenModeFlags ProjectFile::GetGenMode() const
-{
-	return m_GenModeFlags;
-}
-
- bool ProjectFile::IsGenMode(GenModeFlags vFlags) const
-{
-	return (m_GenModeFlags & vFlags);
-}
-

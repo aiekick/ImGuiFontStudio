@@ -166,8 +166,8 @@ namespace ImGui
 		}
 		return res;
 	}
-	template<typename T> 
 
+	template<typename T> 
 	IMGUI_API bool MenuItem(const char* label, const char *shortcut, T *vContainer, T vFlag, bool vOnlyOneSameTime = false)
 	{
 		bool selected = *vContainer & vFlag;

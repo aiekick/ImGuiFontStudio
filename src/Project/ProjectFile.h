@@ -23,6 +23,7 @@
 #include <Project/FontInfos.h>
 #include <Project/FontTestInfos.h>
 #include <Generator/Generator.h>
+#include <Generator/GenMode.h>
 
 enum SourceFontPaneFlags
 {
@@ -38,7 +39,7 @@ enum GlyphDisplayTuningModeFlags
 	GLYPH_DISPLAY_TUNING_MODE_GLYPH_SIZE = (1 << 1),
 };
 
-class ProjectFile : public conf::ConfigAbstract
+class ProjectFile : public conf::ConfigAbstract, public GenMode
 {
 public: // to save
 	std::map<std::string, std::shared_ptr<FontInfos>> m_Fonts;
@@ -53,10 +54,6 @@ public: // to save
 	std::string m_MergedFontPrefix;
 	uint32_t m_MergedCardGlyphHeightInPixel = 40U; // glyph item height in card
 	uint32_t m_MergedCardCountRowsMax = 20U; // after this max, new columns
-	GenModeFlags m_GenModeFlags =
-		GENERATOR_MODE_CURRENT_HEADER |					// current font + header
-		GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES |	// tables exported in font
-		GENERATOR_MODE_LANG_CPP;						// cpp style for header or source
 	bool m_CurrentPane_ShowGlyphTooltip = true;
 	bool m_SourcePane_ShowGlyphTooltip = true;
 	bool m_FinalPane_ShowGlyphTooltip = true;
@@ -116,12 +113,6 @@ public:
 	std::string GetRelativePath(const std::string& vFilePathName) const;
 
 	std::shared_ptr<FontInfos> GetFontWithFontName(const std::string& vFontName);
-
-public: // Generation Mode
-	void AddGenMode(GenModeFlags vFlags);
-	void RemoveGenMode(GenModeFlags vFlags);
-	GenModeFlags GetGenMode() const;
-	bool IsGenMode(GenModeFlags vFlags) const;
 
 public:
 	std::string getXml(const std::string& vOffset, const std::string& vUserDatas = "") override;

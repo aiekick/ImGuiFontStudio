@@ -2,13 +2,19 @@
 	<project>
 		<font name="Roboto-Medium.ttf">
 			<prefix>RM</prefix>
+			<genmodeflags>1032</genmodeflags>
 			<pathfilename>..\3rdparty\imgui\misc\fonts\Roboto-Medium.ttf</pathfilename>
 			<oversample>1</oversample>
 			<fontsize>50</fontsize>
+			<generatedfilename></generatedfilename>
+			<cardglyhpheight>40</cardglyhpheight>
+			<cardcountrowsmax>20</cardcountrowsmax>
 			<rasterizer>1</rasterizer>
 			<freetypeflag>259</freetypeflag>
 			<freetypemultiply>1</freetypemultiply>
 			<padding>1</padding>
+			<filtering>9729</filtering>
+			<enabled>true</enabled>
 		</font>
 		<font name="fontawesome-webfont.ttf">
 			<glyphs>
@@ -68,18 +74,26 @@
 				<glyph orgId="62060" newId="62060" orgName="_582" newName="layout" trans="0;-270.304" scale="1;1"/>
 			</glyphs>
 			<prefix>IGFS</prefix>
+			<genmodeflags>1307</genmodeflags>
 			<pathfilename>..\samples_Fonts\fontawesome-webfont.ttf</pathfilename>
 			<oversample>2</oversample>
 			<fontsize>50</fontsize>
+			<generatedfilename></generatedfilename>
+			<cardglyhpheight>40</cardglyhpheight>
+			<cardcountrowsmax>20</cardcountrowsmax>
 			<rasterizer>1</rasterizer>
 			<freetypeflag>259</freetypeflag>
 			<freetypemultiply>1</freetypemultiply>
 			<padding>1</padding>
+			<filtering>9729</filtering>
+			<enabled>true</enabled>
 		</font>
 		<rangecoloring show="false" hash="42.606;14.789;27.817;0.5"/>
 		<previewglyphcount>6</previewglyphcount>
 		<previewglyphwidth>76.488</previewglyphwidth>
 		<mergedfontprefix>IGFS</mergedfontprefix>
+		<mergedcardglyhpheight>40</mergedcardglyhpheight>
+		<mergedcardcountrowsmax>20</mergedcardcountrowsmax>
 		<curglyphtooltip>true</curglyphtooltip>
 		<srcglyphtooltip>true</srcglyphtooltip>
 		<dstglyphtooltip>true</dstglyphtooltip>
@@ -87,12 +101,10 @@
 		<glyphdrawingflags>2046</glyphdrawingflags>
 		<glyphpreviewquadbeziercounsegment>5</glyphpreviewquadbeziercounsegment>
 		<glyphpreviewzoomprecision>20</glyphpreviewzoomprecision>
-		<genmodeflags>272</genmodeflags>
+		<genmodeflags>1307</genmodeflags>
 		<fonttomergein>Roboto-Medium.ttf</fonttomergein>
 		<glyphdisplaytuningmode>2</glyphdisplaytuningmode>
 		<sourcefontpaneflags>1</sourcefontpaneflags>
-		<cardglyhpheight>40</cardglyhpheight>
-		<cardcountrowsmax>20</cardcountrowsmax>
 		<lastgeneratedpath>.</lastgeneratedpath>
 		<lastgeneratedfilename>Generated_Font</lastgeneratedfilename>
 		<zoomglyphs>false</zoomglyphs>
