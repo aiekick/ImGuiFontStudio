@@ -607,9 +607,18 @@ void FinalFontPane::DrawSelectionsByFontNoOrder_OneFontOnly(
 						(uint32_t)vFontInfos->m_SelectedGlyphs.size());
 					bool frm = true;
 					if (vWithFramedGroup)
-						frm = ImGui::CollapsingHeader_CheckBox(buffer, -1.0f, false, true, &vFontInfos->m_EnabledForGeneration);
+					{
+						ImGui::SetNextItemOpen(!vFontInfos->m_CollapseFontInFinalPane);
+						frm = ImGui::CollapsingHeader_CheckBox(buffer, -1.0f, true, &vFontInfos->m_EnabledForGeneration);
+						if (frm != !vFontInfos->m_CollapseFontInFinalPane)
+						{
+							vProjectFile->SetProjectChange();
+							vFontInfos->m_CollapseFontInFinalPane = !frm;
+						}
+					}
 					if (frm)
 					{
+						vFontInfos->m_CollapseFontInFinalPane = false;
 						ImVec2 cell_size, glyph_size;
 						uint32_t glyphCountX = GlyphDisplayHelper::CalcGlyphsCountAndSize(vProjectFile, &cell_size, &glyph_size, m_GlyphEdition, vForceEditMode, vForceEditModeOneColumn);
 						if (glyphCountX)
@@ -740,7 +749,15 @@ void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
 						(uint32_t)vFontInfos->m_GlyphsOrderedByCodePoints.size());
 					bool frm = true;
 					if (vWithFramedGroup)
-						frm = ImGui::CollapsingHeader_CheckBox(buffer, -1.0f, false, true, &vFontInfos->m_EnabledForGeneration);
+					{
+						ImGui::SetNextItemOpen(!vFontInfos->m_CollapseFontInFinalPane);
+						frm = ImGui::CollapsingHeader_CheckBox(buffer, -1.0f, true, &vFontInfos->m_EnabledForGeneration);
+						if (frm != !vFontInfos->m_CollapseFontInFinalPane)
+						{
+							vProjectFile->SetProjectChange();
+							vFontInfos->m_CollapseFontInFinalPane = !frm;
+						}
+					}
 					if (frm)
 					{
 						ImVec2 cell_size, glyph_size;
@@ -885,7 +902,15 @@ void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(
 						(uint32_t)vFontInfos->m_GlyphsOrderedByGlyphName.size());
 					bool frm = true;
 					if (vWithFramedGroup)
-						frm = ImGui::CollapsingHeader_CheckBox(buffer, -1.0f, false, true, &vFontInfos->m_EnabledForGeneration);
+					{
+						ImGui::SetNextItemOpen(!vFontInfos->m_CollapseFontInFinalPane);
+						frm = ImGui::CollapsingHeader_CheckBox(buffer, -1.0f, true, &vFontInfos->m_EnabledForGeneration);
+						if (frm != !vFontInfos->m_CollapseFontInFinalPane)
+						{
+							vProjectFile->SetProjectChange();
+							vFontInfos->m_CollapseFontInFinalPane = !frm;
+						}
+					}
 					if (frm)
 					{
 						ImVec2 cell_size2, glyph_size;

@@ -848,7 +848,7 @@ bool ImGui::RadioButtonLabeled(float vWidth, const char* label, const char* help
     return change;
 }
 
-bool ImGui::CollapsingHeader_SmallHeight(const char *vName, float vHeightRatio, float vWidth, bool vDefaulExpanded, bool *vIsOpen)
+bool ImGui::CollapsingHeader_SmallHeight(const char *vName, float vHeightRatio, float vWidth, bool *vIsOpen)
 {
     ImGuiWindow* window = ImGui::GetCurrentWindow();
     if (window->SkipItems)
@@ -869,14 +869,14 @@ bool ImGui::CollapsingHeader_SmallHeight(const char *vName, float vHeightRatio, 
             ImVec2(vWidth, label_size.y + padding.y * 2.0f),
             label_size.x + padding.x * 2.0f, label_size.y + padding.y * 2.0f);
     //nsize.y *= vHeightRatio;
+	bool is_open = TreeNodeBehaviorIsOpen(id, ImGuiNextItemDataFlags_HasOpen); // a faire avant le ItemAdd
 
     ImRect bb(pos, pos + nsize);
     const ImRect bbTrigger = bb;
     ImGui::ItemSize(bb, padding.y);
     ImGui::ItemAdd(bb, id);
 
-    bool is_open = vDefaulExpanded;
-    if (vIsOpen && !*vIsOpen) is_open = false;
+     if (vIsOpen && !*vIsOpen) is_open = false;
     is_open = window->DC.StateStorage->GetInt(id, is_open ? 1 : 0) != 0;
     bool hovered, held;
     const bool pressed = ImGui::ButtonBehavior(bbTrigger, id, &hovered, &held, 0);
@@ -903,7 +903,7 @@ bool ImGui::CollapsingHeader_SmallHeight(const char *vName, float vHeightRatio, 
     return is_open;
 }
 
-bool ImGui::CollapsingHeader_CheckBox(const char* vName, float vWidth, bool vDefaulExpanded, bool vShowCheckBox, bool* vCheckCatched)
+bool ImGui::CollapsingHeader_CheckBox(const char* vName, float vWidth, bool vShowCheckBox, bool* vCheckCatched)
 {
 	ImGuiWindow* window = ImGui::GetCurrentWindow();
 	if (window->SkipItems)
@@ -919,6 +919,7 @@ bool ImGui::CollapsingHeader_CheckBox(const char* vName, float vWidth, bool vDef
 
 	const ImVec2 pos = window->DC.CursorPos;
 	const ImVec2 nsize = ImGui::CalcItemSize(ImVec2(vWidth, label_size.y + style.FramePadding.y * 2.0f), label_size.x + style.FramePadding.x * 2.0f, label_size.y + style.FramePadding.y * 2.0f);
+	bool is_open = TreeNodeBehaviorIsOpen(id, ImGuiNextItemDataFlags_HasOpen); // a faire avant le ItemAdd
 
 	ImRect bb(pos, pos + nsize);
 	ImRect bbTrigger = bb;
@@ -927,7 +928,6 @@ bool ImGui::CollapsingHeader_CheckBox(const char* vName, float vWidth, bool vDef
 	ImGui::ItemSize(bb, style.FramePadding.y);
 	ImGui::ItemAdd(bb, id);
 
-	bool is_open = window->DC.StateStorage->GetInt(id, vDefaulExpanded ? 1 : 0) != 0;
 	bool hovered, held;
 	bool pressed = ImGui::ButtonBehavior(bbTrigger, id, &hovered, &held, 0);
 	//ImGui::SetItemAllowOverlap();
@@ -977,7 +977,7 @@ bool ImGui::CollapsingHeader_CheckBox(const char* vName, float vWidth, bool vDef
 	return is_open;
 }
 
-bool ImGui::CollapsingHeader_Button(const char* vName, float vWidth, bool vDefaulExpanded, const char* vLabelButton, bool vShowButton, bool* vButtonPressed, ImFont* vButtonFont)
+bool ImGui::CollapsingHeader_Button(const char* vName, float vWidth, const char* vLabelButton, bool vShowButton, bool* vButtonPressed, ImFont* vButtonFont)
 {
 	ImGuiWindow* window = ImGui::GetCurrentWindow();
 	if (window->SkipItems)
@@ -993,6 +993,7 @@ bool ImGui::CollapsingHeader_Button(const char* vName, float vWidth, bool vDefau
 
 	const ImVec2 pos = window->DC.CursorPos;
 	const ImVec2 nsize = ImGui::CalcItemSize(ImVec2(vWidth, label_size.y + style.FramePadding.y * 2.0f), label_size.x + style.FramePadding.x * 2.0f, label_size.y + style.FramePadding.y * 2.0f);
+	bool is_open = TreeNodeBehaviorIsOpen(id, ImGuiNextItemDataFlags_HasOpen); // a faire avant le ItemAdd
 
 	ImRect bb(pos, pos + nsize);
 	ImRect bbTrigger = bb;
@@ -1001,7 +1002,6 @@ bool ImGui::CollapsingHeader_Button(const char* vName, float vWidth, bool vDefau
 	ImGui::ItemSize(bb, style.FramePadding.y);
 	ImGui::ItemAdd(bb, id);
 
-	bool is_open = window->DC.StateStorage->GetInt(id, vDefaulExpanded ? 1 : 0) != 0;
 	bool hovered, held;
 	const bool pressed = ImGui::ButtonBehavior(bbTrigger, id, &hovered, &held, 0);
 	//ImGui::SetItemAllowOverlap();

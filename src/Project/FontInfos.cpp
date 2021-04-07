@@ -828,6 +828,7 @@ std::string FontInfos::getXml(const std::string& vOffset, const std::string& vUs
 	res += vOffset + "\t<padding>" + ct::toStr(m_FontPadding) + "</padding>\n";
 	res += vOffset + "\t<filtering>" + ct::toStr(m_TextureFiltering) + "</filtering>\n";
 	res += vOffset + "\t<enabled>" + (m_EnabledForGeneration ? "true" : "false") + "</enabled>\n";
+	res += vOffset + "\t<collapsed>" + (m_CollapseFontInFinalPane ? "true" : "false") + "</collapsed>\n";
 	
 	if (!m_Filters.empty())
 	{
@@ -900,6 +901,8 @@ bool FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 			m_TextureFiltering = (GLenum)ct::ivariant(strValue).GetI();
 		else if (strName == "enabled")
 			m_EnabledForGeneration = ct::ivariant(strValue).GetB();
+		else if (strName == "collapsed")
+			m_CollapseFontInFinalPane = ct::ivariant(strValue).GetB();
 		else if (strName == "genmodeflags")
 			m_GenModeFlags = (GenModeFlags)ct::ivariant(strValue).GetI();
 		else if (strName == "glyphs" || strName == "filters")

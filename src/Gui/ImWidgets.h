@@ -78,9 +78,9 @@ namespace ImGui
 	IMGUI_API void FramedGroupTextHelp(const char* vHelp, const char* vFmt, ...);
 	IMGUI_API void FramedGroupText(ImVec4 vTextColor, const char* vFmt, ...);
 
-	IMGUI_API bool CollapsingHeader_SmallHeight(const char *vName, float vHeightRatio, float vWidth, bool vDefaulExpanded, bool *vIsOpen = nullptr);
-	IMGUI_API bool CollapsingHeader_CheckBox(const char* vName, float vWidth = -1, bool vDefaulExpanded = false, bool vShowCheckBox = false, bool* vCheckCatched = 0);
-	IMGUI_API bool CollapsingHeader_Button(const char* vName, float vWidth = -1, bool vDefaulExpanded = false, const char* vLabelButton = 0, bool vShowButton = false, bool* vButtonPressed = 0, ImFont* vButtonFont = nullptr);
+	IMGUI_API bool CollapsingHeader_SmallHeight(const char *vName, float vHeightRatio, float vWidth, bool *vIsOpen = nullptr);
+	IMGUI_API bool CollapsingHeader_CheckBox(const char* vName, float vWidth = -1, bool vShowCheckBox = false, bool* vCheckCatched = 0);
+	IMGUI_API bool CollapsingHeader_Button(const char* vName, float vWidth = -1, const char* vLabelButton = 0, bool vShowButton = false, bool* vButtonPressed = 0, ImFont* vButtonFont = nullptr);
 
 	IMGUI_API bool CheckBoxBoolDefault(const char* vName, bool* vVar, bool vDefault, const char* vHelp = 0, ImFont* vLabelFont = nullptr);
 	IMGUI_API bool CheckBoxFloat(const char* vName, float* vVar);
