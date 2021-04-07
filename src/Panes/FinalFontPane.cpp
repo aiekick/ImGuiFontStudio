@@ -607,15 +607,7 @@ void FinalFontPane::DrawSelectionsByFontNoOrder_OneFontOnly(
 						(uint32_t)vFontInfos->m_SelectedGlyphs.size());
 					bool frm = true;
 					if (vWithFramedGroup)
-					{
-						ImGui::SetNextItemOpen(!vFontInfos->m_CollapseFontInFinalPane);
-						frm = ImGui::CollapsingHeader_CheckBox(buffer, -1.0f, true, &vFontInfos->m_EnabledForGeneration);
-						if (frm != !vFontInfos->m_CollapseFontInFinalPane)
-						{
-							vProjectFile->SetProjectChange();
-							vFontInfos->m_CollapseFontInFinalPane = !frm;
-						}
-					}
+						frm = vProjectFile->CollapsingHeader_Centered(buffer, -1.0f, vFontInfos->m_CollapseFontInFinalPane);
 					if (frm)
 					{
 						vFontInfos->m_CollapseFontInFinalPane = false;
@@ -749,15 +741,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
 						(uint32_t)vFontInfos->m_GlyphsOrderedByCodePoints.size());
 					bool frm = true;
 					if (vWithFramedGroup)
-					{
-						ImGui::SetNextItemOpen(!vFontInfos->m_CollapseFontInFinalPane);
-						frm = ImGui::CollapsingHeader_CheckBox(buffer, -1.0f, true, &vFontInfos->m_EnabledForGeneration);
-						if (frm != !vFontInfos->m_CollapseFontInFinalPane)
-						{
-							vProjectFile->SetProjectChange();
-							vFontInfos->m_CollapseFontInFinalPane = !frm;
-						}
-					}
+						frm = vProjectFile->CollapsingHeader_Centered(buffer, -1.0f, vFontInfos->m_CollapseFontInFinalPane);
 					if (frm)
 					{
 						ImVec2 cell_size, glyph_size;
@@ -902,15 +886,7 @@ void FinalFontPane::DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(
 						(uint32_t)vFontInfos->m_GlyphsOrderedByGlyphName.size());
 					bool frm = true;
 					if (vWithFramedGroup)
-					{
-						ImGui::SetNextItemOpen(!vFontInfos->m_CollapseFontInFinalPane);
-						frm = ImGui::CollapsingHeader_CheckBox(buffer, -1.0f, true, &vFontInfos->m_EnabledForGeneration);
-						if (frm != !vFontInfos->m_CollapseFontInFinalPane)
-						{
-							vProjectFile->SetProjectChange();
-							vFontInfos->m_CollapseFontInFinalPane = !frm;
-						}
-					}
+						frm = vProjectFile->CollapsingHeader_Centered(buffer, -1.0f, vFontInfos->m_CollapseFontInFinalPane);
 					if (frm)
 					{
 						ImVec2 cell_size2, glyph_size;

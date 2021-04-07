@@ -70,9 +70,10 @@ namespace ImGui
 	IMGUI_API bool SelectableWithBtn(const char* label, bool selected = false, const char* btnLabel = nullptr, bool *btnClicked = nullptr, bool *btnHovered = nullptr, ImVec4 vBtnColor = ImVec4(0.8f, 0.5f, 0.2f, 1.0f), ImVec4 vBtnHoveredColor = ImVec4(1.0f, 0.8f, 0.2f, 1.0f), ImGuiSelectableFlags flags = 0, const ImVec2& size_args = ImVec2(0.0f, 0.0f));
 	IMGUI_API bool ImageCheckButton(ImTextureID user_texture_id, bool *v, const ImVec2& size, const ImVec2& uv0 = ImVec2(0.0f, 0.0f), const ImVec2& uv1 = ImVec2(1.0f, 1.0f), const ImVec2& vHostTextureSize = ImVec2(0.0f, 0.0f), int frame_padding = -1, float vRectThickNess = 0.0f, ImVec4 vRectColor = ImVec4(1.0f, 0.0f, 0.0f, 1.0f));
 
-	IMGUI_API bool BeginFramedGroup(const char *vLabel);
-	IMGUI_API void EndFramedGroup(ImGuiCol vHoveredIdx = ImGuiCol_TableHeaderBg, ImGuiCol NormalIdx = ImGuiCol_TableHeaderBg);
+	IMGUI_API bool BeginFramedGroup(const char *vLabel, ImGuiCol vHoveredIdx = ImGuiCol_TableHeaderBg, ImGuiCol NormalIdx = ImGuiCol_TableHeaderBg);
+	IMGUI_API void EndFramedGroup();
 	IMGUI_API void FramedGroupSeparator();
+	IMGUI_API bool FramedGroupButtonText(const char* vFmt, ...);
 	IMGUI_API void FramedGroupText(ImVec4* vTextColor, const char* vHelp, const char* vFmt, va_list vArgs);
 	IMGUI_API void FramedGroupText(const char* vFmt, ...);
 	IMGUI_API void FramedGroupTextHelp(const char* vHelp, const char* vFmt, ...);

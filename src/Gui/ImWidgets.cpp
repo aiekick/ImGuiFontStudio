@@ -504,7 +504,7 @@ bool ImGui::ImageCheckButton(
     return pressed;
 }
 
-bool ImGui::BeginFramedGroup(const char *vLabel)
+bool ImGui::BeginFramedGroup(const char *vLabel, ImGuiCol vHoveredIdx, ImGuiCol NormalIdx)
 {
     ImGuiWindow* window = ImGui::GetCurrentWindow();
     if (window->SkipItems)
@@ -519,29 +519,44 @@ bool ImGui::BeginFramedGroup(const char *vLabel)
 	ImGuiContext& g = *GImGui;
 	const ImGuiStyle& style = g.Style;
 
+	ImGui::BeginGroup();
+	auto res = FramedGroupButtonText(vLabel);
+	
 	window->ContentRegionRect.Max.x -= style.FramePadding.x * 3.0f;
 	window->WorkRect.Max.x -= style.FramePadding.x * 3.0f;
 
 	const ImGuiID id = window->GetID(vLabel);
-	ImGui::BeginGroup();
+	window->DC.StateStorage->SetInt(id + 1, vHoveredIdx);
+	window->DC.StateStorage->SetInt(id + 2, NormalIdx);
+	window->DC.StateStorage->SetBool(id + 3, res);
+	window->IDStack.push_back(id);
+
 	ImGui::Indent();
 
-	FramedGroupText(vLabel);
+	if (!res)
+	{
+		EndFramedGroup();
+	}
 
-    return true;
+    return res;
 }
 
-void ImGui::EndFramedGroup(ImGuiCol vHoveredIdx, ImGuiCol NormalIdx)
+void ImGui::EndFramedGroup()
 {
+	ImDrawList* draw_list = ImGui::GetWindowDrawList();
+	ImGuiContext& g = *GImGui;
+	const ImGuiStyle& style = g.Style;
+	ImGuiWindow* window = ImGui::GetCurrentWindow();
+	auto id = window->IDStack.back();
+	window->IDStack.pop_back();
+	
+	bool expanded = window->DC.StateStorage->GetBool(id + 3);
+
 	ImGui::Unindent();
-	ImGui::Spacing();
+	if (expanded)
+		ImGui::Spacing();
 	ImGui::EndGroup();
 	
-    ImDrawList* draw_list = ImGui::GetWindowDrawList();
-    ImGuiContext& g = *GImGui;
-    const ImGuiStyle& style = g.Style;
-    ImGuiWindow* window = ImGui::GetCurrentWindow();
-
 	window->ContentRegionRect.Max.x += style.FramePadding.x * 3.0f;
 	window->WorkRect.Max.x += style.FramePadding.x * 3.0f;
 
@@ -553,7 +568,10 @@ void ImGui::EndFramedGroup(ImGuiCol vHoveredIdx, ImGuiCol NormalIdx)
 	ImVec2 p_max = ImGui::GetItemRectMax();
     p_max.x = window->WorkRect.Max.x;
 
-	const ImU32 frameCol = ImGui::GetColorU32(ImGui::IsItemHovered(ImGuiHoveredFlags_RectOnly) ? vHoveredIdx : NormalIdx);
+	ImGuiCol hoveredIdx = window->DC.StateStorage->GetInt(id + 1);
+	ImGuiCol normalIdx = window->DC.StateStorage->GetInt(id + 2);
+	
+	const ImU32 frameCol = ImGui::GetColorU32(ImGui::IsItemHovered(ImGuiHoveredFlags_RectOnly) ? hoveredIdx : normalIdx);
 	ImGui::RenderFrame(p_min, p_max, frameCol, true, style.FrameRounding);
 
 	draw_list->ChannelsMerge(); // merge layers
@@ -625,6 +643,64 @@ void ImGui::FramedGroupText(ImVec4* vTextColor, const char* vHelp, const char* v
 	if (vHelp)
 		if (ImGui::IsItemHovered())
 			ImGui::SetTooltip("%s", vHelp);
+}
+
+bool ImGui::FramedGroupButtonText(const char* vFmt, ...)
+{
+	bool res = false;
+
+	ImGuiWindow* window = GetCurrentWindow();
+	if (window->SkipItems)
+		return res;
+
+	static char TempBuffer[2048] = "\0";
+	va_list args;
+	va_start(args, vFmt); 
+	int w = vsnprintf(TempBuffer, 2046, vFmt, args);
+	va_end(args);
+	if (w)
+	{
+		TempBuffer[w + 1] = '\0'; // 2046 + 1 = 2047 => ok (under array size of 2048 in any case)
+		ImGuiContext& g = *GImGui;
+		const ImGuiID id = window->GetID(TempBuffer);
+		const ImGuiStyle& style = g.Style;
+		const ImVec2 label_size = ImGui::CalcTextSize(TempBuffer, nullptr, true);
+		const float frame_height =
+			ImMax(ImMin(window->DC.CurrLineSize.y, g.FontSize + style.FramePadding.y),
+				label_size.y + style.FramePadding.y * 2.0f);
+
+		ImRect bb;
+		bb.Min.x = window->WorkRect.Min.x;
+		bb.Min.y = window->DC.CursorPos.y;
+		bb.Max.x = window->WorkRect.Max.x;
+		bb.Max.y = window->DC.CursorPos.y + frame_height;
+
+		const float text_base_offset_y = ImMax(0.0f, window->DC.CurrLineTextBaseOffset - style.FramePadding.y); // Latch before ItemSize changes it
+		res = TreeNodeBehaviorIsOpen(id, ImGuiTreeNodeFlags_DefaultOpen); // a faire avant le ItemAdd
+
+		ImGui::ItemSize(bb, 0.0f);
+		if (!ImGui::ItemAdd(bb, id))
+			return res;
+
+		bool hovered, held;
+		bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, 0);
+		if (pressed)
+		{
+			res = !res;
+			window->DC.StateStorage->SetInt(id, res);
+		}
+
+		// Render
+		const ImU32 colArrow = ImGui::GetColorU32((held && hovered) ? ImGuiCol_HeaderActive : hovered ? ImGuiCol_HeaderHovered : ImGuiCol_Header);
+		ImGui::RenderFrame(bb.Min, bb.Max, colArrow, true, style.FrameRounding);
+		ImGui::RenderTextClipped(bb.Min, bb.Max, TempBuffer, nullptr, &label_size, style.ButtonTextAlign, &bb);
+		RenderArrow(window->DrawList, bb.Min + style.FramePadding + ImVec2(0.0f, text_base_offset_y), ImGui::GetColorU32(ImGuiCol_Text),
+			(res ? ImGuiDir_::ImGuiDir_Down : ImGuiDir_::ImGuiDir_Right), 1.0f);
+
+		ImGui::RenderTextClipped(bb.Min, bb.Max, TempBuffer, nullptr, &label_size, style.ButtonTextAlign, &bb);
+	}
+
+	return res;
 }
 
 void ImGui::FramedGroupText(const char* vFmt, ...)
@@ -987,7 +1063,6 @@ bool ImGui::CollapsingHeader_Button(const char* vName, float vWidth, const char*
 	const ImGuiStyle& style = g.Style;
 	const ImGuiID id = window->GetID(vName);
 	ImVec2 label_size = ImGui::CalcTextSize(vName, nullptr, true);
-	//label_size.x = ImMin(label_size.x, vWidth);
 	const ImVec2 padding = ImGui::GetStyle().FramePadding;
 	const float text_base_offset_y = ImMax(0.0f, window->DC.CurrLineTextBaseOffset - padding.y); // Latch before ItemSize changes it
 
@@ -1004,7 +1079,6 @@ bool ImGui::CollapsingHeader_Button(const char* vName, float vWidth, const char*
 
 	bool hovered, held;
 	const bool pressed = ImGui::ButtonBehavior(bbTrigger, id, &hovered, &held, 0);
-	//ImGui::SetItemAllowOverlap();
 	if (pressed)
 	{
 		is_open = !is_open;

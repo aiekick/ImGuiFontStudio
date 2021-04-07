@@ -214,8 +214,6 @@ void ThemeHelper::ApplyStyleColorsOrangeBlue()
 	prFileTypeInfos[".h"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.5f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
 	prFileTypeInfos[".ifs"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.5f, 0.1f, 1.0f), ICON_IGFS_FILE_TYPE_PROJECT);
 
-	memcpy(&ImGui::GetStyle(), &prImGuiStyle, sizeof(ImGuiStyle));
-
 	ApplyFileTypeColors();
 }
 
@@ -326,8 +324,6 @@ void ThemeHelper::ApplyStyleColorsGreenBlue()
 	prFileTypeInfos[".h"].color = ImVec4(0.25f, 0.9f, 0.1f, 1.0f); // yellow high
 	prFileTypeInfos[".ifs"].color = ImVec4(0.9f, 0.1f, 0.9f, 1.0f); // purple high
 
-	memcpy(&ImGui::GetStyle(), &prImGuiStyle, sizeof(ImGuiStyle));
-
 	ApplyFileTypeColors();
 }
 
@@ -436,8 +432,6 @@ void ThemeHelper::ApplyStyleColorsClassic()
 	prFileTypeInfos[".cpp"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.7f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
 	prFileTypeInfos[".h"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.5f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
 	prFileTypeInfos[".ifs"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.5f, 0.1f, 1.0f), ICON_IGFS_FILE_TYPE_PROJECT);
-
-	memcpy(&ImGui::GetStyle(), &prImGuiStyle, sizeof(ImGuiStyle));
 
 	ApplyFileTypeColors();
 }
@@ -548,8 +542,6 @@ void ThemeHelper::ApplyStyleColorsDark()
 	prFileTypeInfos[".h"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.5f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
 	prFileTypeInfos[".ifs"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.5f, 0.1f, 1.0f), ICON_IGFS_FILE_TYPE_PROJECT);
 
-	memcpy(&ImGui::GetStyle(), &prImGuiStyle, sizeof(ImGuiStyle));
-
 	ApplyFileTypeColors();
 }
 
@@ -658,8 +650,6 @@ void ThemeHelper::ApplyStyleColorsLight()
 	prFileTypeInfos[".cpp"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.7f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
 	prFileTypeInfos[".h"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.5f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
 	prFileTypeInfos[".ifs"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.5f, 0.1f, 1.0f), ICON_IGFS_FILE_TYPE_PROJECT);
-
-	memcpy(&ImGui::GetStyle(), &prImGuiStyle, sizeof(ImGuiStyle));
 
 	ApplyFileTypeColors();
 }
@@ -773,8 +763,6 @@ void ThemeHelper::ApplyStyleColorsDarcula()
 	prFileTypeInfos[".h"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.5f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
 	prFileTypeInfos[".ifs"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.5f, 0.1f, 1.0f), ICON_IGFS_FILE_TYPE_PROJECT);
 
-	memcpy(&ImGui::GetStyle(), &prImGuiStyle, sizeof(ImGuiStyle));
-
 	ApplyFileTypeColors();
 }
 
@@ -884,8 +872,6 @@ void ThemeHelper::ApplyStyleColorsRedDark()
 	prFileTypeInfos[".h"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.5f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
 	prFileTypeInfos[".ifs"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.5f, 0.1f, 1.0f), ICON_IGFS_FILE_TYPE_PROJECT);
 
-	memcpy(&ImGui::GetStyle(), &prImGuiStyle, sizeof(ImGuiStyle));
-
 	ApplyFileTypeColors();
 }
 
@@ -895,6 +881,8 @@ void ThemeHelper::ApplyFileTypeColors()
 	{
 		ImGuiFileDialog::Instance()->SetExtentionInfos(it.first.c_str(), it.second.color, it.second.icon);
 	}
+
+	memcpy(&ImGui::GetStyle(), &prImGuiStyle, sizeof(ImGuiStyle));
 }
 
 ///////////////////////////////////////////////////////
@@ -916,6 +904,12 @@ std::string ThemeHelper::getXml(const std::string& vOffset, const std::string& v
 		{
 			str += vOffset + "\t<" + GetStyleColorName(i) + " value=\"" + ct::fvec4(colors[i]).string() + "\"/>\n";
 		}
+
+		str += vOffset + "\t<GoodColor value=\"" + ct::fvec4(ImGui::CustomStyle::GoodColor).string() + "\"/>\n";
+		str += vOffset + "\t<BadColor value=\"" + ct::fvec4(ImGui::CustomStyle::BadColor).string() + "\"/>\n";
+		str += vOffset + "\t<GlyphButtonColor value=\"" + ct::fvec4(ImGui::CustomStyle::GlyphButtonColor).string() + "\"/>\n";
+		str += vOffset + "\t<GlyphButtonColorActive value=\"" + ct::fvec4(ImGui::CustomStyle::GlyphButtonColorActive).string() + "\"/>\n";
+
 		str += vOffset + "\t<WindowPadding value=\"" + ct::fvec2(prImGuiStyle.WindowPadding).string() + "\"/>\n";
 		str += vOffset + "\t<FramePadding value=\"" + ct::fvec2(prImGuiStyle.FramePadding).string() + "\"/>\n";
 		str += vOffset + "\t<ItemSpacing value=\"" + ct::fvec2(prImGuiStyle.ItemSpacing).string() + "\"/>\n";
@@ -1007,7 +1001,11 @@ bool ThemeHelper::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 				}
 			}
 
-			if (strName == "WindowPadding") prImGuiStyle.WindowPadding = ct::toImVec2(ct::fvariant(strValue).GetV2());
+			if (strName == "GoodColor") ImGui::CustomStyle::GoodColor = ct::toImVec4(ct::fvariant(strValue).GetV4());
+			else if (strName == "BadColor") ImGui::CustomStyle::BadColor = ct::toImVec4(ct::fvariant(strValue).GetV4());
+			else if (strName == "GlyphButtonColor") ImGui::CustomStyle::GlyphButtonColor = ct::toImVec4(ct::fvariant(strValue).GetV4());
+			else if (strName == "GlyphButtonColorActive") ImGui::CustomStyle::GlyphButtonColorActive = ct::toImVec4(ct::fvariant(strValue).GetV4());
+			else if (strName == "WindowPadding") prImGuiStyle.WindowPadding = ct::toImVec2(ct::fvariant(strValue).GetV2());
 			else if (strName == "FramePadding") prImGuiStyle.FramePadding = ct::toImVec2(ct::fvariant(strValue).GetV2());
 			else if (strName == "ItemSpacing") prImGuiStyle.ItemSpacing = ct::toImVec2(ct::fvariant(strValue).GetV2());
 			else if (strName == "ItemInnerSpacing") prImGuiStyle.ItemInnerSpacing = ct::toImVec2(ct::fvariant(strValue).GetV2());
@@ -1037,6 +1035,10 @@ bool ThemeHelper::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 	return true;
 }
 
+void ThemeHelper::ApplyStyle()
+{
+	ApplyFileTypeColors();
+}
 
 ///////////////////////////////////////////////////////
 //// PRIVVATE /////////////////////////////////////////

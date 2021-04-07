@@ -44,6 +44,8 @@ public:
 	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas = "") override;
 
 	ImGuiStyle GetImGuiStyle() { return prImGuiStyle; }
+	
+	void ApplyStyle();
 
 private:
 	void ApplyStyleColorsDefault();

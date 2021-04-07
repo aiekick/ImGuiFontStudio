@@ -114,6 +114,9 @@ public:
 
 	std::shared_ptr<FontInfos> GetFontWithFontName(const std::string& vFontName);
 
+public: // UI
+	bool CollapsingHeader_Centered(const char* vName, float vWidth, bool& vCollapsed);
+
 public:
 	std::string getXml(const std::string& vOffset, const std::string& vUserDatas = "") override;
 	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas = "") override;

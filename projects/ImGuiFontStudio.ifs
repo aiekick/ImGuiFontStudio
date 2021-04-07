@@ -911,6 +911,7 @@
 			<padding>1</padding>
 			<filtering>9729</filtering>
 			<enabled>true</enabled>
+			<collapsed>false</collapsed>
 		</font>
 		<font name="fontawesome-webfont.ttf">
 			<glyphs>
@@ -983,6 +984,7 @@
 			<padding>1</padding>
 			<filtering>9729</filtering>
 			<enabled>true</enabled>
+			<collapsed>false</collapsed>
 		</font>
 		<rangecoloring show="false" hash="42.606;14.789;27.817;0.5"/>
 		<previewglyphcount>6</previewglyphcount>
@@ -993,7 +995,7 @@
 		<curglyphtooltip>true</curglyphtooltip>
 		<srcglyphtooltip>true</srcglyphtooltip>
 		<dstglyphtooltip>true</dstglyphtooltip>
-		<glyphpreviewscale>0.208</glyphpreviewscale>
+		<glyphpreviewscale>0.658</glyphpreviewscale>
 		<glyphdrawingflags>2046</glyphdrawingflags>
 		<glyphpreviewquadbeziercounsegment>5</glyphpreviewquadbeziercounsegment>
 		<glyphpreviewzoomprecision>20</glyphpreviewzoomprecision>

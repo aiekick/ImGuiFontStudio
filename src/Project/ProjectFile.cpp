@@ -21,7 +21,7 @@
 #include <Helper/Messaging.h>
 #include <Helper/SelectionHelper.h>
 #include <ctools/FileHelper.h>
-
+#include <Gui/ImWidgets.h>
 #include <Panes/Manager/LayoutManager.h>
 
 ProjectFile::ProjectFile() = default;
@@ -240,6 +240,21 @@ std::shared_ptr<FontInfos> ProjectFile::GetFontWithFontName(const std::string& v
 	}
 
 	return 0;
+}
+
+bool ProjectFile::CollapsingHeader_Centered(const char* vName, float vWidth, bool& vCollapsed)
+{
+	bool res = false;
+
+	ImGui::SetNextItemOpen(!vCollapsed);
+	res = ImGui::CollapsingHeader_CheckBox(vName, vWidth);
+	if (res != !vCollapsed)
+	{
+		SetProjectChange();
+		vCollapsed = !res;
+	}
+
+	return res;
 }
 
 std::string ProjectFile::getXml(const std::string& vOffset, const std::string& /*vUserDatas*/)

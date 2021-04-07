@@ -70,8 +70,9 @@ void MainFrame::Init()
 
 	ImGui::CustomStyle::Init();
 
-	LoadConfigFile("config.xml");
 	ThemeHelper::Instance();
+	LoadConfigFile("config.xml");
+	ThemeHelper::Instance()->ApplyStyle();
 
 	LayoutManager::Instance()->Init();
 
