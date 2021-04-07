@@ -59,7 +59,7 @@ private:
 	void GeneratorFileDialogPane(const char *vFilter, IGFDUserDatas vUserDatas, bool* vCantContinue);
 
 	bool CheckAndDisplayGenerationConditions(ProjectFile *vProjectFile);
-	void ShowGenerationStatus(ProjectFile* vProjectFile);
+	void Show_BatchMode_PerFontSettings(ProjectFile* vProjectFile);
 	void ModifyConfigurationAccordingToSelectedFeaturesAndErrors(ProjectFile* vProjectFile);
 
 public: // singleton
