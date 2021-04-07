@@ -780,6 +780,11 @@ bool FontGenerator::Assemble_Post_Table(std::map<CodePoint, std::string> vSelect
 				{
 					names.push_back(sfntly::PostScriptTable::STANDARD_NAMES[id]);
 				}
+				else
+				{
+					LogVar("Err : id (%i) was not found in m_NewToOldGlyfId and is higher than sfntly::PostScriptTable::NUM_STANDARD_NAMES (%i).. to debug", 
+						id, sfntly::PostScriptTable::NUM_STANDARD_NAMES);
+				}
 			}
 		}
 	}
