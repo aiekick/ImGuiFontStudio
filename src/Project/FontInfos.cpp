@@ -407,7 +407,7 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 
 			if (!m_InfosToDisplay.empty())
 			{
-				if (ImGui::CollapsingHeader("Infos", ImGuiTreeNodeFlags_Bullet))
+				if (ImGui::CollapsingHeader("Infos"))
 				{
 					static ImGuiTableFlags flags =
 						ImGuiTableFlags_SizingFixedFit |
@@ -531,7 +531,7 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 
 			if (FontInfos::m_RasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
 			{
-				if (ImGui::CollapsingHeader("Freetype Settings", ImGuiTreeNodeFlags_Bullet))
+				if (ImGui::CollapsingHeader("Freetype Settings"))
 				{
 					needFontReGen |= ImGui::CheckboxFlags("NoHinting", &m_FreeTypeFlag, FreeType_NoHinting);
 					needFontReGen |= ImGui::CheckboxFlags("NoAutoHint", &m_FreeTypeFlag, FreeType_NoAutoHint);
