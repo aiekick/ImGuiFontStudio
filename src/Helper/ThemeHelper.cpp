@@ -178,7 +178,7 @@ void ThemeHelper::ApplyStyleColorsOrangeBlue()
 	prImGuiStyle.ItemSpacing = ImVec2(4.00f, 4.00f);
 	prImGuiStyle.ItemInnerSpacing = ImVec2(4.00f, 4.00f);
 	prImGuiStyle.TouchExtraPadding = ImVec2(0.00f, 0.00f);
-	prImGuiStyle.IndentSpacing = 1.00f;
+	prImGuiStyle.IndentSpacing = 4.00f;
 	prImGuiStyle.ScrollbarSize = 10.00f;
 	prImGuiStyle.GrabMinSize = 8.00f;
 
