@@ -33,7 +33,6 @@
 #include <Helper/ThemeHelper.h>
 #include <Helper/Messaging.h>
 #include <Helper/SelectionHelper.h>
-#include <Helper/SettingsDlg.h>
 #include <Panes/FinalFontPane.h>
 #include <Panes/GeneratorPane.h>
 #include <Panes/GlyphPane.h>
@@ -198,7 +197,6 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 	ImGui::SetWindowSize(vSize - ImVec2(0.0f, barH));
 	ImGui::SetWindowPos(vPos);
 
-#ifndef USE_RIBBONBAR
 	if (ImGui::BeginMainMenuBar())
 	{
 		DrawMainMenuBar();
@@ -212,9 +210,6 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 
 		ImGui::EndMainMenuBar();
 	}
-#else
-	m_RibbonBar.Draw(&m_ProjectFile);
-#endif
 
 	LayoutManager::Instance()->StartDockPane(dockspace_flags, vSize);
 
@@ -296,12 +291,6 @@ void MainFrame::DrawMainMenuBar()
 
 	if (ImGui::BeginMenu(ICON_IGFS_SETTINGS " Settings"))
 	{
-#ifdef _DEBUG
-		if (ImGui::MenuItem("Settings"))
-		{
-			SettingsDlg::Instance()->OpenDialog();
-		}
-#endif
 		if (ImGui::BeginMenu(ICON_IGFS_EDIT " Styles"))
 		{
 			ThemeHelper::Instance()->DrawMenu();

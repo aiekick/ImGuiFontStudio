@@ -8,6 +8,8 @@
  executed time to time only if executed action retrun true
  each succesfull action is erased
  not sucessfull action is applied again each frame
+
+ apply action each frame until the action is returning true
 */
 
 class ProjectFile;
@@ -29,6 +31,6 @@ public:
 	// apply first action each frame until true is returned
 	// if return true, erase action
 	// let the next frame call the next action
-	// il false, action executed until true
+	// if false, action executed until true
 	void RunActions();
 };

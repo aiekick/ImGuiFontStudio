@@ -1,269 +1,8 @@
 <config>
 	<project>
-		<font name="Cousine-Regular.ttf">
-			<prefix>CR</prefix>
-			<pathfilename>C:\gamedev\github\FontStudio\bin\x64\samples_Fonts\fonts\Cousine-Regular.ttf</pathfilename>
-			<oversample>1</oversample>
-			<fontsize>17</fontsize>
-			<rasterizer>0</rasterizer>
-			<freetypeflag>259</freetypeflag>
-			<freetypemultiply>1</freetypemultiply>
-			<padding>1</padding>
-			<texturefiltering>9729</texturefiltering>
-			<glyphfiltering>
-			<flags>127</flags>
-			<op>true</op>
-			<use_color>false</use_color>
-			<simple_color>3425907660</simple_color>
-			<composite_color>3430953932</composite_color>
-			<mapped_color>3430953856</mapped_color>
-			<unmapped_color>3429289088</unmapped_color>
-			<colored_color>3425927219</colored_color>
-			<layer_color>3429289037</layer_color>
-			<named_color>3435954227</named_color>
-			</glyphfiltering>
-		</font>
-		<font name="DroidSans.ttf">
-			<prefix>DS</prefix>
-			<pathfilename>C:\gamedev\github\FontStudio\bin\x64\samples_Fonts\fonts\DroidSans.ttf</pathfilename>
-			<oversample>1</oversample>
-			<fontsize>17</fontsize>
-			<rasterizer>0</rasterizer>
-			<freetypeflag>259</freetypeflag>
-			<freetypemultiply>1</freetypemultiply>
-			<padding>1</padding>
-			<texturefiltering>9729</texturefiltering>
-			<glyphfiltering>
-			<flags>127</flags>
-			<op>true</op>
-			<use_color>false</use_color>
-			<simple_color>3425907660</simple_color>
-			<composite_color>3430953932</composite_color>
-			<mapped_color>3430953856</mapped_color>
-			<unmapped_color>3429289088</unmapped_color>
-			<colored_color>3425927219</colored_color>
-			<layer_color>3429289037</layer_color>
-			<named_color>3435954227</named_color>
-			</glyphfiltering>
-		</font>
-		<font name="Gilbert-Bold Preview5.otf">
-			<prefix>GBP</prefix>
-			<pathfilename>C:\gamedev\github\FontStudio\bin\x64\samples_Fonts\Gilbert-Bold Preview5.otf</pathfilename>
-			<oversample>1</oversample>
-			<fontsize>17</fontsize>
-			<rasterizer>0</rasterizer>
-			<freetypeflag>259</freetypeflag>
-			<freetypemultiply>1</freetypemultiply>
-			<padding>1</padding>
-			<texturefiltering>9729</texturefiltering>
-			<glyphfiltering>
-			<flags>127</flags>
-			<op>true</op>
-			<use_color>false</use_color>
-			<simple_color>3425907660</simple_color>
-			<composite_color>3430953932</composite_color>
-			<mapped_color>3430953856</mapped_color>
-			<unmapped_color>3429289088</unmapped_color>
-			<colored_color>3425927219</colored_color>
-			<layer_color>3429289037</layer_color>
-			<named_color>3435954227</named_color>
-			</glyphfiltering>
-		</font>
-		<font name="Gilbert-Color Bold Preview5.otf">
-			<prefix>GCBP</prefix>
-			<pathfilename>C:\gamedev\github\FontStudio\bin\x64\samples_Fonts\Gilbert-Color Bold Preview5.otf</pathfilename>
-			<oversample>1</oversample>
-			<fontsize>17</fontsize>
-			<rasterizer>0</rasterizer>
-			<freetypeflag>259</freetypeflag>
-			<freetypemultiply>1</freetypemultiply>
-			<padding>1</padding>
-			<texturefiltering>9729</texturefiltering>
-			<glyphfiltering>
-			<flags>127</flags>
-			<op>true</op>
-			<use_color>false</use_color>
-			<simple_color>3425907660</simple_color>
-			<composite_color>3430953932</composite_color>
-			<mapped_color>3430953856</mapped_color>
-			<unmapped_color>3429289088</unmapped_color>
-			<colored_color>3425927219</colored_color>
-			<layer_color>3429289037</layer_color>
-			<named_color>3435954227</named_color>
-			</glyphfiltering>
-		</font>
-		<font name="Karla-Regular.ttf">
-			<prefix>KR</prefix>
-			<pathfilename>C:\gamedev\github\FontStudio\bin\x64\samples_Fonts\fonts\Karla-Regular.ttf</pathfilename>
-			<oversample>1</oversample>
-			<fontsize>17</fontsize>
-			<rasterizer>0</rasterizer>
-			<freetypeflag>259</freetypeflag>
-			<freetypemultiply>1</freetypemultiply>
-			<padding>1</padding>
-			<texturefiltering>9729</texturefiltering>
-			<glyphfiltering>
-			<flags>127</flags>
-			<op>true</op>
-			<use_color>false</use_color>
-			<simple_color>3425907660</simple_color>
-			<composite_color>3430953932</composite_color>
-			<mapped_color>3430953856</mapped_color>
-			<unmapped_color>3429289088</unmapped_color>
-			<colored_color>3425927219</colored_color>
-			<layer_color>3429289037</layer_color>
-			<named_color>3435954227</named_color>
-			</glyphfiltering>
-		</font>
-		<font name="ProggyClean.ttf">
-			<prefix>PC</prefix>
-			<pathfilename>C:\gamedev\github\FontStudio\bin\x64\samples_Fonts\fonts\ProggyClean.ttf</pathfilename>
-			<oversample>1</oversample>
-			<fontsize>50</fontsize>
-			<rasterizer>0</rasterizer>
-			<freetypeflag>259</freetypeflag>
-			<freetypemultiply>1</freetypemultiply>
-			<padding>1</padding>
-			<texturefiltering>9729</texturefiltering>
-			<glyphfiltering>
-			<flags>127</flags>
-			<op>true</op>
-			<use_color>false</use_color>
-			<simple_color>3425907660</simple_color>
-			<composite_color>3430953932</composite_color>
-			<mapped_color>3430953856</mapped_color>
-			<unmapped_color>3429289088</unmapped_color>
-			<colored_color>3425927219</colored_color>
-			<layer_color>3429289037</layer_color>
-			<named_color>3435954227</named_color>
-			</glyphfiltering>
-		</font>
-		<font name="ProggyTiny.ttf">
-			<prefix>PT</prefix>
-			<pathfilename>C:\gamedev\github\FontStudio\bin\x64\samples_Fonts\fonts\ProggyTiny.ttf</pathfilename>
-			<oversample>1</oversample>
-			<fontsize>46</fontsize>
-			<rasterizer>0</rasterizer>
-			<freetypeflag>259</freetypeflag>
-			<freetypemultiply>1</freetypemultiply>
-			<padding>1</padding>
-			<texturefiltering>9729</texturefiltering>
-			<glyphfiltering>
-			<flags>127</flags>
-			<op>true</op>
-			<use_color>false</use_color>
-			<simple_color>3425907660</simple_color>
-			<composite_color>3430953932</composite_color>
-			<mapped_color>3430953856</mapped_color>
-			<unmapped_color>3429289088</unmapped_color>
-			<colored_color>3425927219</colored_color>
-			<layer_color>3429289037</layer_color>
-			<named_color>3435954227</named_color>
-			</glyphfiltering>
-		</font>
-		<font name="Roboto-Medium.ttf">
-			<prefix>RM</prefix>
-			<pathfilename>C:\gamedev\github\FontStudio\bin\x64\samples_Fonts\fonts\Roboto-Medium.ttf</pathfilename>
-			<oversample>1</oversample>
-			<fontsize>40</fontsize>
-			<rasterizer>0</rasterizer>
-			<freetypeflag>259</freetypeflag>
-			<freetypemultiply>1</freetypemultiply>
-			<padding>1</padding>
-			<texturefiltering>9729</texturefiltering>
-			<glyphfiltering>
-			<flags>127</flags>
-			<op>true</op>
-			<use_color>false</use_color>
-			<simple_color>3425907660</simple_color>
-			<composite_color>3430953932</composite_color>
-			<mapped_color>3430953856</mapped_color>
-			<unmapped_color>3429289088</unmapped_color>
-			<colored_color>3425927219</colored_color>
-			<layer_color>3429289037</layer_color>
-			<named_color>3435954227</named_color>
-			</glyphfiltering>
-		</font>
-		<font name="SentyWEN2017.ttf">
-			<glyphs>
-				<glyph orgId="11164" newId="11164" orgName="uni0443" newName="uni0443" trans="0;0" scale="1;1"/>
-				<glyph orgId="11165" newId="11165" orgName="uni0444" newName="uni0444" trans="0;0" scale="1;1"/>
-				<glyph orgId="11184" newId="11184" orgName="egrave" newName="egrave" trans="0;0" scale="1;1"/>
-				<glyph orgId="11185" newId="11185" orgName="imacron" newName="imacron" trans="0;0" scale="1;1"/>
-				<glyph orgId="11186" newId="11186" orgName="iacute" newName="iacute" trans="0;0" scale="1;1"/>
-				<glyph orgId="11187" newId="11187" orgName="uni01D0" newName="uni01D0" trans="0;0" scale="1;1"/>
-				<glyph orgId="11188" newId="11188" orgName="igrave" newName="igrave" trans="0;0" scale="1;1"/>
-				<glyph orgId="11189" newId="11189" orgName="omacron" newName="omacron" trans="0;0" scale="1;1"/>
-				<glyph orgId="11208" newId="11208" orgName="uni3105" newName="uni3105" trans="0;0" scale="1;1"/>
-				<glyph orgId="11209" newId="11209" orgName="uni3106" newName="uni3106" trans="0;0" scale="1;1"/>
-				<glyph orgId="11210" newId="11210" orgName="uni3107" newName="uni3107" trans="0;0" scale="1;1"/>
-				<glyph orgId="11211" newId="11211" orgName="uni3108" newName="uni3108" trans="0;0" scale="1;1"/>
-				<glyph orgId="11212" newId="11212" orgName="uni3109" newName="uni3109" trans="0;0" scale="1;1"/>
-				<glyph orgId="11226" newId="11226" orgName="uni3117" newName="uni3117" trans="0;0" scale="1;1"/>
-				<glyph orgId="11227" newId="11227" orgName="uni3118" newName="uni3118" trans="0;0" scale="1;1"/>
-				<glyph orgId="11228" newId="11228" orgName="uni3119" newName="uni3119" trans="0;0" scale="1;1"/>
-				<glyph orgId="11229" newId="11229" orgName="uni311A" newName="uni311A" trans="0;0" scale="1;1"/>
-				<glyph orgId="11230" newId="11230" orgName="uni311B" newName="uni311B" trans="0;0" scale="1;1"/>
-				<glyph orgId="11231" newId="11231" orgName="uni311C" newName="uni311C" trans="0;0" scale="1;1"/>
-				<glyph orgId="11232" newId="11232" orgName="uni311D" newName="uni311D" trans="0;0" scale="1;1"/>
-			</glyphs>
-			<prefix>SWEN</prefix>
-			<pathfilename>C:\gamedev\github\FontStudio\bin\x64\samples_Fonts\SentyWEN2017.ttf</pathfilename>
-			<oversample>1</oversample>
-			<fontsize>50</fontsize>
-			<rasterizer>0</rasterizer>
-			<freetypeflag>259</freetypeflag>
-			<freetypemultiply>1</freetypemultiply>
-			<padding>1</padding>
-			<texturefiltering>9729</texturefiltering>
-			<glyphfiltering>
-			<flags>127</flags>
-			<op>true</op>
-			<use_color>false</use_color>
-			<simple_color>3425907660</simple_color>
-			<composite_color>3430953932</composite_color>
-			<mapped_color>3430953856</mapped_color>
-			<unmapped_color>3429289088</unmapped_color>
-			<colored_color>3425927219</colored_color>
-			<layer_color>3429289037</layer_color>
-			<named_color>3435954227</named_color>
-			</glyphfiltering>
-		</font>
-		<font name="TwemojiMozilla.ttf">
-			<glyphs>
-				<glyph orgId="1110" newId="1110" orgName="u1f932" newName="u1f932" trans="0;0" scale="1;1"/>
-				<glyph orgId="1111" newId="1111" orgName="u1f933" newName="u1f933" trans="0;0" scale="1;1"/>
-				<glyph orgId="1136" newId="1136" orgName="u1f94e" newName="u1f94e" trans="0;0" scale="1;1"/>
-				<glyph orgId="1233" newId="1233" orgName="u1f9b8" newName="u1f9b8" trans="0;0" scale="1;1"/>
-				<glyph orgId="1234" newId="1234" orgName="u1f9b9" newName="u1f9b9" trans="0;0" scale="1;1"/>
-				<glyph orgId="1235" newId="1235" orgName="u1f9ba" newName="u1f9ba" trans="0;0" scale="1;1"/>
-				<glyph orgId="1737" newId="1737" orgName="u1f1e8_1f1f5" newName="u1f1e8_1f1f5" trans="0;0" scale="1;1"/>
-			</glyphs>
-			<prefix>TM</prefix>
-			<pathfilename>C:\gamedev\github\FontStudio\bin\x64\samples_Fonts\TwemojiMozilla.ttf</pathfilename>
-			<oversample>1</oversample>
-			<fontsize>50</fontsize>
-			<rasterizer>0</rasterizer>
-			<freetypeflag>259</freetypeflag>
-			<freetypemultiply>1</freetypemultiply>
-			<padding>1</padding>
-			<texturefiltering>9729</texturefiltering>
-			<glyphfiltering>
-			<flags>17</flags>
-			<op>false</op>
-			<use_color>false</use_color>
-			<simple_color>3425907660</simple_color>
-			<composite_color>3430953932</composite_color>
-			<mapped_color>3430953856</mapped_color>
-			<unmapped_color>3429289088</unmapped_color>
-			<colored_color>3425927219</colored_color>
-			<layer_color>3429289037</layer_color>
-			<named_color>3435954227</named_color>
-			</glyphfiltering>
-		</font>
 		<font name="fontawesome-webfont.ttf">
 			<prefix></prefix>
-			<pathfilename>C:\gamedev\github\FontStudio\bin\x64\samples_Fonts\fontawesome-webfont.ttf</pathfilename>
+			<pathfilename>C:\gamedev\github\ImGuiFontStudio\samples_Fonts\fontawesome-webfont.ttf</pathfilename>
 			<oversample>1</oversample>
 			<fontsize>17</fontsize>
 			<rasterizer>0</rasterizer>
@@ -286,7 +25,7 @@
 		</font>
 		<font name="forkawesome-webfont.ttf">
 			<prefix></prefix>
-			<pathfilename>C:\gamedev\github\FontStudio\bin\x64\samples_Fonts\forkawesome-webfont.ttf</pathfilename>
+			<pathfilename>C:\gamedev\github\ImGuiFontStudio\samples_Fonts\forkawesome-webfont.ttf</pathfilename>
 			<oversample>1</oversample>
 			<fontsize>17</fontsize>
 			<rasterizer>0</rasterizer>
@@ -309,99 +48,7 @@
 		</font>
 		<font name="seguiemj.ttf">
 			<prefix></prefix>
-			<pathfilename>C:\gamedev\github\FontStudio\bin\x64\samples_Fonts\seguiemj.ttf</pathfilename>
-			<oversample>1</oversample>
-			<fontsize>17</fontsize>
-			<rasterizer>0</rasterizer>
-			<freetypeflag>259</freetypeflag>
-			<freetypemultiply>1</freetypemultiply>
-			<padding>1</padding>
-			<texturefiltering>9729</texturefiltering>
-			<glyphfiltering>
-			<flags>127</flags>
-			<op>true</op>
-			<use_color>false</use_color>
-			<simple_color>3425907660</simple_color>
-			<composite_color>3430953932</composite_color>
-			<mapped_color>3430953856</mapped_color>
-			<unmapped_color>3429289088</unmapped_color>
-			<colored_color>3425927219</colored_color>
-			<layer_color>3429289037</layer_color>
-			<named_color>3435954227</named_color>
-			</glyphfiltering>
-		</font>
-		<font name="seguisym.ttf">
-			<prefix></prefix>
-			<pathfilename>C:\gamedev\github\FontStudio\bin\x64\samples_Fonts\seguisym.ttf</pathfilename>
-			<oversample>1</oversample>
-			<fontsize>17</fontsize>
-			<rasterizer>0</rasterizer>
-			<freetypeflag>259</freetypeflag>
-			<freetypemultiply>1</freetypemultiply>
-			<padding>1</padding>
-			<texturefiltering>9729</texturefiltering>
-			<glyphfiltering>
-			<flags>127</flags>
-			<op>true</op>
-			<use_color>false</use_color>
-			<simple_color>3425907660</simple_color>
-			<composite_color>3430953932</composite_color>
-			<mapped_color>3430953856</mapped_color>
-			<unmapped_color>3429289088</unmapped_color>
-			<colored_color>3425927219</colored_color>
-			<layer_color>3429289037</layer_color>
-			<named_color>3435954227</named_color>
-			</glyphfiltering>
-		</font>
-		<font name="test.ttf">
-			<prefix></prefix>
-			<pathfilename>C:\gamedev\github\FontStudio\bin\x64\samples_Fonts\test.ttf</pathfilename>
-			<oversample>1</oversample>
-			<fontsize>17</fontsize>
-			<rasterizer>0</rasterizer>
-			<freetypeflag>259</freetypeflag>
-			<freetypemultiply>1</freetypemultiply>
-			<padding>1</padding>
-			<texturefiltering>9729</texturefiltering>
-			<glyphfiltering>
-			<flags>127</flags>
-			<op>true</op>
-			<use_color>false</use_color>
-			<simple_color>3425907660</simple_color>
-			<composite_color>3430953932</composite_color>
-			<mapped_color>3430953856</mapped_color>
-			<unmapped_color>3429289088</unmapped_color>
-			<colored_color>3425927219</colored_color>
-			<layer_color>3429289037</layer_color>
-			<named_color>3435954227</named_color>
-			</glyphfiltering>
-		</font>
-		<font name="webdings.ttf">
-			<prefix></prefix>
-			<pathfilename>C:\gamedev\github\FontStudio\bin\x64\samples_Fonts\webdings.ttf</pathfilename>
-			<oversample>1</oversample>
-			<fontsize>17</fontsize>
-			<rasterizer>0</rasterizer>
-			<freetypeflag>259</freetypeflag>
-			<freetypemultiply>1</freetypemultiply>
-			<padding>1</padding>
-			<texturefiltering>9729</texturefiltering>
-			<glyphfiltering>
-			<flags>127</flags>
-			<op>true</op>
-			<use_color>false</use_color>
-			<simple_color>3425907660</simple_color>
-			<composite_color>3430953932</composite_color>
-			<mapped_color>3430953856</mapped_color>
-			<unmapped_color>3429289088</unmapped_color>
-			<colored_color>3425927219</colored_color>
-			<layer_color>3429289037</layer_color>
-			<named_color>3435954227</named_color>
-			</glyphfiltering>
-		</font>
-		<font name="wingding.ttf">
-			<prefix></prefix>
-			<pathfilename>C:\gamedev\github\FontStudio\bin\x64\samples_Fonts\wingding.ttf</pathfilename>
+			<pathfilename>C:\Windows\Fonts\seguiemj.ttf</pathfilename>
 			<oversample>1</oversample>
 			<fontsize>17</fontsize>
 			<rasterizer>0</rasterizer>
@@ -423,28 +70,28 @@
 			</glyphfiltering>
 		</font>
 		<rangecoloring show="false" hash="10;15;35;0.5"/>
-		<previewglyphcount>24</previewglyphcount>
-		<previewglyphwidth>11.625</previewglyphwidth>
+		<previewglyphcount>20</previewglyphcount>
+		<previewglyphwidth>50</previewglyphwidth>
 		<mergedfontprefix></mergedfontprefix>
 		<curglyphtooltip>true</curglyphtooltip>
 		<srcglyphtooltip>true</srcglyphtooltip>
 		<dstglyphtooltip>true</dstglyphtooltip>
-		<glyphpreviewscale>0.35</glyphpreviewscale>
-		<glyphdrawingflags>1535</glyphdrawingflags>
-		<glyphpreviewquadbeziercounsegment>4</glyphpreviewquadbeziercounsegment>
+		<glyphpreviewscale>0.208</glyphpreviewscale>
+		<glyphdrawingflags>1406</glyphdrawingflags>
+		<glyphpreviewquadbeziercounsegment>5</glyphpreviewquadbeziercounsegment>
 		<glyphpreviewzoomprecision>20</glyphpreviewzoomprecision>
 		<genmodeflags>275</genmodeflags>
-		<fonttomergein>TwemojiMozilla.ttf</fonttomergein>
-		<glyphdisplaytuningmode>1</glyphdisplaytuningmode>
+		<fonttomergein>seguiemj.ttf</fonttomergein>
+		<glyphdisplaytuningmode>2</glyphdisplaytuningmode>
 		<sourcefontpaneflags>1</sourcefontpaneflags>
 		<cardglyhpheight>40</cardglyhpheight>
 		<cardcountrowsmax>20</cardcountrowsmax>
 		<lastgeneratedpath>.</lastgeneratedpath>
 		<lastgeneratedfilename>Generated_Font</lastgeneratedfilename>
 		<zoomglyphs>false</zoomglyphs>
-		<showbaseline>false</showbaseline>
+		<showbaseline>true</showbaseline>
 		<showadvancex>false</showadvancex>
-		<glyphdrawingflags>1535</glyphdrawingflags>
+		<glyphdrawingflags>1406</glyphdrawingflags>
 		<finalselection>
 		</finalselection>
 		<fonttest>

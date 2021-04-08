@@ -216,7 +216,7 @@ void HeaderGenerator::GenerateHeader_One(
 	std::string vFontBufferName, // for header generation wehn using a cpp bytes array instead of a file
 	size_t vFontBufferSize) // for header generation wehn using a cpp bytes array instead of a file
 {
-	if (!vFilePathName.empty() && vFontInfos.use_count())
+	if (vProjectFile && !vFilePathName.empty() && vFontInfos.use_count())
 	{
 		std::string filePathName = vFilePathName;
 		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
@@ -244,17 +244,17 @@ void HeaderGenerator::GenerateHeader_One(
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C))
 			{
 				lang = "c";
-				headerExt = ".h";
+				headerExt = "h";
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
 			{
 				lang = "cpp";
-				headerExt = ".h";
+				headerExt = "h";
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
 			{
 				lang = "c#";
-				headerExt = ".cs";
+				headerExt = "cs";
 			}
 			if (!lang.empty())
 			{
@@ -276,7 +276,8 @@ void HeaderGenerator::GenerateHeader_One(
 				Messaging::Instance()->AddError(true, nullptr, nullptr, "Language not set for : %s", vFilePathName.c_str());
 			}
 
-			FileHelper::Instance()->OpenFile(filePathName);
+			if (vProjectFile->IsGenMode(GENERATOR_MODE_OPEN_GENERATED_FILES_AUTO))
+				FileHelper::Instance()->OpenFile(filePathName);
 		}
 		else
 		{
@@ -291,9 +292,7 @@ void HeaderGenerator::GenerateHeader_Merged(
 	std::string vFontBufferName, // for header generation wehn using a cpp bytes array instead of a file
 	size_t vFontBufferSize) // for header generation wehn using a cpp bytes array instead of a file
 {
-	if (vProjectFile &&
-		!vFilePathName.empty() &&
-		!vProjectFile->m_Fonts.empty())
+	if (vProjectFile && !vFilePathName.empty() && !vProjectFile->m_Fonts.empty())
 	{
 		std::string filePathName = vFilePathName;
 		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
@@ -301,7 +300,7 @@ void HeaderGenerator::GenerateHeader_Merged(
 		{
 			std::string name = ps.name;
 			ct::replaceString(name, "-", "_");
-			filePathName = ps.GetFPNE_WithNameExt(name, ".h");
+			filePathName = ps.GetFPNE_WithNameExt(name, "h");
 			
 			// we take only selected glyphs of all fonts
 			std::map<std::string, uint32_t> glyphNames;
@@ -323,17 +322,17 @@ void HeaderGenerator::GenerateHeader_Merged(
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C))
 			{
 				lang = "c";
-				headerExt = ".h";
+				headerExt = "h";
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
 			{
 				lang = "cpp";
-				headerExt = ".h";
+				headerExt = "h";
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
 			{
 				lang = "c#";
-				headerExt = ".cs";
+				headerExt = "cs";
 			}
 			if (!lang.empty())
 			{
@@ -355,7 +354,8 @@ void HeaderGenerator::GenerateHeader_Merged(
 				Messaging::Instance()->AddError(true, nullptr, nullptr, "Language not set for : %s", vFilePathName.c_str());
 			}
 
-			FileHelper::Instance()->OpenFile(filePathName);
+			if (vProjectFile->IsGenMode(GENERATOR_MODE_OPEN_GENERATED_FILES_AUTO))
+				FileHelper::Instance()->OpenFile(filePathName);
 		}
 		else
 		{

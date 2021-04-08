@@ -24,6 +24,7 @@
 #include <Project/FontTestInfos.h>
 #include <Generator/Generator.h>
 #include <Helper/MeshDecomposer.h>
+#include <Generator/GenMode.h>
 
 enum SourceFontPaneFlags
 {
@@ -39,37 +40,33 @@ enum GlyphDisplayTuningModeFlags
 	GLYPH_DISPLAY_TUNING_MODE_GLYPH_SIZE = (1 << 1),
 };
 
-class ProjectFile : public conf::ConfigAbstract
+class ProjectFile : public conf::ConfigAbstract, public GenMode
 {
 public: // to save
 	std::map<std::string, std::shared_ptr<FontInfos>> m_Fonts;
 	bool m_ShowRangeColoring = false;
 	ImVec4 m_RangeColoringHash = ImVec4(10, 15, 35, 0.5f);
 	int m_Preview_Glyph_CountX = 20;
-	float m_Preview_Glyph_Width = 40.0f;
+	float m_Preview_Glyph_Width = 30.0f;
 	std::string m_ProjectFilePathName;
 	std::string m_ProjectFilePath;
 	std::string m_LastGeneratedPath = ".";
 	std::string m_LastGeneratedFileName = "Generated_Font";
 	std::string m_MergedFontPrefix;
-	GenModeFlags m_GenModeFlags =
-		GENERATOR_MODE_CURRENT_HEADER |					// current font + header
-		GENERATOR_MODE_FONT_SETTINGS_USE_POST_TABLES |	// tables exported in font
-		GENERATOR_MODE_LANG_CPP;						// cpp style for header or source
+	uint32_t m_MergedCardGlyphHeightInPixel = 40U; // glyph item height in card
+	uint32_t m_MergedCardCountRowsMax = 20U; // after this max, new columns
 	bool m_CurrentPane_ShowGlyphTooltip = true;
 	bool m_SourcePane_ShowGlyphTooltip = true;
 	bool m_FinalPane_ShowGlyphTooltip = true;
 	std::string m_FontToMergeIn;
 	float m_GlyphPreview_Scale = 1.0f;
-	int m_GlyphPreview_QuadBezierCountSegments = 4; // count segments per bezier quad, 0 mean auto tesselation
+	int m_GlyphPreview_QuadBezierCountSegments = 0; // count segments per bezier quad, 0 mean auto tesselation
 	float m_GlyphPreviewZoomPrecision = 20.0f;
 	GlyphDrawingFlags m_GlyphDrawingFlags = GLYPH_DRAWING_GLYPH_Default;
 	GlyphDisplayTuningModeFlags m_GlyphDisplayTuningMode =
 		GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT;
 	SourceFontPaneFlags m_SourceFontPaneFlags = 
 		SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH;
-	uint32_t m_CardGlyphHeightInPixel = 40U; // glyph item height in card
-	uint32_t m_CardCountRowsMax = 20U; // after this max, new columns
 	bool m_ZoomGlyphs = false; // keep the glyph aligned to font glyph bounding box
 	bool m_ShowBaseLine = false; // show the base line of the glyph only when m_ZoomGlyphs is false
 	bool m_ShowAdvanceX = false; // show the advance x of the glyph only when m_ZoomGlyphs is false
@@ -82,12 +79,14 @@ public: // dont save
 	size_t m_CountFontWithSelectedGlyphs = 0; // for all fonts
     bool m_NameFoundInDouble = false;
     bool m_CodePointFoundInDouble = false;
+	bool m_SomeFontHaveNamesInDouble = false;
+	bool m_SomeFontHaveCodePointsInDouble = false;
 	bool m_GlyphSizePolicyChangeFromWidgetUse = false; // say if the user is chnaging the size policy by the widget, for avoid change when via the resize on another pane
 	PartitionAlgoFlags m_PartitionAlgo = PARTITION_ALGO_EAR_CLIPPING;
 
 private: // dont save
 	bool m_IsLoaded = false;
-	bool m_NeverSaved = true;
+	bool m_NeverSaved = false;
 	bool m_IsThereAnyNotSavedChanged = false;
 
 public:
@@ -117,11 +116,8 @@ public:
 
 	std::shared_ptr<FontInfos> GetFontWithFontName(const std::string& vFontName);
 
-public: // Generation Mode
-	void AddGenMode(GenModeFlags vFlags);
-	void RemoveGenMode(GenModeFlags vFlags);
-	GenModeFlags GetGenMode() const;
-	bool IsGenMode(GenModeFlags vFlags) const;
+public: // UI
+	bool CollapsingHeader_Centered(const char* vName, float vWidth, bool& vCollapsed);
 
 public:
 	std::string getXml(const std::string& vOffset, const std::string& vUserDatas = "") override;

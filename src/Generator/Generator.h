@@ -19,10 +19,11 @@
 #include <ctools/cTools.h>
 
 #include "HeaderGenerator.h"
-#include <Generator/GenMode.h>
 
 #include <stdint.h>
 #include <string>
+
+#include <Generator/GenMode.h>
 
 class FontInfos;
 class ProjectFile;
@@ -46,10 +47,8 @@ public:
 		const std::string& vFileName = "");
 
 private:
-	bool GenerateCard_One(const std::string& vFilePathName, std::shared_ptr<FontInfos> vFontInfos,
-		const uint32_t& vGlyphHeight, const uint32_t& vMaxRows);
-	bool GenerateCard_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
-		const uint32_t& vGlyphHeight, const uint32_t& vMaxRows);
+	bool GenerateCard_One(const std::string& vFilePathName, std::shared_ptr<FontInfos> vFontInfos, ProjectFile* vProjectFile);
+	bool GenerateCard_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile);
 	
 	/*void GenerateHeader_One(const std::string& vFilePathName, std::shared_ptr<FontInfos> vFontInfos,
 		std::string vFontBufferName = "", size_t vFontBufferSize = 0);

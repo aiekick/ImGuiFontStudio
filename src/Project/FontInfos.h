@@ -130,13 +130,18 @@ public: // not to save
 public: // to save
 	std::string m_FontPrefix; // can be used for one/batch generation
 	std::string m_FontFilePathName;
-	int m_Oversample = 1;
-	int m_FontSize = 17;
-	RasterizerEnum rasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
-	uint32_t freeTypeFlag = ImGuiFreeType_unleashed::FreeType_Default;
-	float fontMultiply = 1.0f;
-	int32_t fontPadding = 1;
-	GLenum textureFiltering = GL_LINEAR;
+	int m_Oversample = 1; // for Rasterizer (AA)
+	int m_FontSize = 17; // for Rasterizer
+	float m_FontMultiply = 1.0f; // for Rasterizer
+	int32_t m_FontPadding = 1; // for Rasterizer
+	std::string m_GeneratedFileName; // the file name defined by the user in save dialog
+	RasterizerEnum m_RasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
+	GLenum m_TextureFiltering = GL_LINEAR; // for texture generation
+	uint32_t m_FreeTypeFlag = ImGuiFreeType_unleashed::FreeType_Default;
+	uint32_t m_CardGlyphHeightInPixel = 40U; // glyph item height in card
+	uint32_t m_CardCountRowsMax = 20U; // after this max, new columns
+	bool m_EnabledForGeneration = true; // enable for generation (in abtch mode per font settings)
+	bool m_CollapseFontInFinalPane = false; // collapse the font in final pane
 
 public:// filtering to save
 	bool m_GlyphFilteringOpOR = true; // or / and
