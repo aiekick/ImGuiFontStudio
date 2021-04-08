@@ -21,7 +21,6 @@
 #include <ctools/ConfigAbstract.h>
 #include <Project/ProjectFile.h>
 #include <Helper/FrameActionSystem.h>
-#include <Gui/RibbonBar.h>
 
 #include <functional>
 #include <string>

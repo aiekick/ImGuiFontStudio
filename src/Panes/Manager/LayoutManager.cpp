@@ -22,7 +22,7 @@
 #include <ctools/FileHelper.h>
 #include <MainFrame.h>
 #include <Res/CustomFont.h>
-#include <Gui/ImGuiWidgets.h>
+#include <Gui/ImWidgets.h>
 #include <Project/ProjectFile.h>
 #include <Helper/Profiler.h>
 
@@ -55,7 +55,7 @@ void LayoutManager::Init()
 	if (!FileHelper::Instance()->IsFileExist("imgui.ini"))
 	{
 		m_FirstLayout = true; // need default layout
-		LogStr("We will apply default layout :)");
+		LogVar("We will apply default layout :)");
 	}
 #ifdef _DEBUG
 	DebugPane::Instance()->Init();

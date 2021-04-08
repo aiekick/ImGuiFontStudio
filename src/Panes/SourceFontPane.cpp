@@ -117,7 +117,7 @@ int SourceFontPane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::s
 							vProjectFile->SetProjectChange();
 						}
 
-						ImGui::EndFramedGroup(true);
+						ImGui::EndFramedGroup();
 					}
 				}
 			}

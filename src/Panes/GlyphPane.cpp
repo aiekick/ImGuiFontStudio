@@ -22,7 +22,7 @@
 #include <MainFrame.h>
 
 #include <Panes/Manager/LayoutManager.h>
-#include <Gui/ImGuiWidgets.h>
+#include <Gui/ImWidgets.h>
 #ifdef _DEBUG
 #include <Panes/DebugPane.h>
 #endif
@@ -135,7 +135,7 @@ int GlyphPane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string
 					}
 				}
 
-				ImGui::EndFramedGroup(true);
+				ImGui::EndFramedGroup();
 			}
 		}
 	}

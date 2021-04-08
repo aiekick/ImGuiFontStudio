@@ -18,7 +18,7 @@
 #include <Panes/Abstract/AbstractPane.h>
 #include <ctools/ConfigAbstract.h>
 #include <ctools/cTools.h>
-#include <Gui/ImGuiWidgets.h>
+#include <Gui/ImWidgets.h>
 #include <Project/BaseGlyph.h>
 
 #include <string>

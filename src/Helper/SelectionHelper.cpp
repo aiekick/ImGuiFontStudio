@@ -20,7 +20,7 @@
 #include "SelectionHelper.h"
 
 #include <MainFrame.h>
-#include <Gui/ImGuiWidgets.h>
+#include <Gui/ImWidgets.h>
 #include <Helper/Messaging.h>
 #include <Panes/Manager/LayoutManager.h>
 #include <Panes/FinalFontPane.h>
@@ -231,7 +231,7 @@ void SelectionHelper::DrawMenu(ProjectFile * vProjectFile)
 				}
 			}
 
-			ImGui::EndFramedGroup(true);
+			ImGui::EndFramedGroup();
 		}
 	}
 
@@ -277,7 +277,7 @@ void SelectionHelper::DrawMenu(ProjectFile * vProjectFile)
 				&m_GlyphSelectionModeFlags, GlyphSelectionModeFlags::GLYPH_SELECTION_MODE_INVERSE, true);
 		}
 
-		ImGui::EndFramedGroup(true);
+		ImGui::EndFramedGroup();
 	}
 }
 

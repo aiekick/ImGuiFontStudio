@@ -144,7 +144,7 @@ bool FontGenerator::GenerateFontFile(
 				{
 					std::string filePathName = ps.name + ".ttf";
 					if (!ps.path.empty())
-						filePathName = ps.path + FileHelper::Instance()->m_SlashType + filePathName;
+						filePathName = ps.path + FileHelper::Instance()->puSlashType + filePathName;
 					res = SerializeFont(filePathName.c_str(), newFont);
 				}
 			}
@@ -565,7 +565,7 @@ sfntly::Ptr<sfntly::WritableFontData> FontGenerator::ReScale_Glyph(
 		}
 		else if (glyph->GlyphType() == sfntly::GlyphType::kComposite)
 		{
-			LogStr("No support of Compositie glyph for the moment");
+			LogVar("No support of Compositie glyph for the moment");
 		}
 	}
 		

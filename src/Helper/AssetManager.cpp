@@ -199,7 +199,7 @@ ct::texture AssetManager::CreateFromFile(const char* vFilePathName, GLenum vTexT
 	}
 	else
 	{
-		LogStr("Failed to load texture");
+		LogVar("Failed to load texture");
 	}
 
 	return res;

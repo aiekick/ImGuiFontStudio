@@ -223,7 +223,7 @@ void ParamsPane::DrawFontListWidget(ProjectFile* vProjectFile)
 			}
 			ImGui::EndTable();
 		}
-		ImGui::EndFramedGroup(true);
+		ImGui::EndFramedGroup();
 	}
 }
 
@@ -276,7 +276,7 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 						}
 					}
 
-					ImGui::EndFramedGroup(true);
+					ImGui::EndFramedGroup();
 				}
 
 				LayoutManager::Instance()->DrawWidgets(vProjectFile, 0, "");
@@ -302,7 +302,7 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 							vProjectFile->SetProjectChange();
 						}
 
-						ImGui::EndFramedGroup(true);
+						ImGui::EndFramedGroup();
 					}
 
 					if (ImGui::BeginFramedGroup("Font Layout"))
@@ -368,7 +368,7 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 								vProjectFile->SetProjectChange();
 						}
 
-						ImGui::EndFramedGroup(true);
+						ImGui::EndFramedGroup();
 					}
 				}
 			}

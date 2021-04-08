@@ -20,7 +20,7 @@
 
 #include <ctools/FileHelper.h>
 #include <Project/ProjectFile.h>
-#include <Gui/ImGuiWidgets.h>
+#include <Gui/ImWidgets.h>
 #include <Helper/Messaging.h>
 #include <ctools/Logger.h>
 #include <Panes/ParamsPane.h>
@@ -668,7 +668,7 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 				}
 			}
 
-			ImGui::EndFramedGroup(true);
+			ImGui::EndFramedGroup();
 		}
 
 		if (needFontReGen)
@@ -739,49 +739,57 @@ void FontInfos::DrawFilteringWidgets(ProjectFile* vProjectFile)
 			ImGuiColorEditFlags_NoTooltip |
 			ImGuiColorEditFlags_NoLabel;
 
-		change |= ImGui::RadioButtonLabeled_BitWize<GlyphCategoryFlags>(mrw, ct::toCStr("Simple (%u)", m_GlyphFilteringStats.m_CountSimpleGlyphs),
+		static char buffer[255];
+		snprintf(buffer, 254, "Simple (%u)", m_GlyphFilteringStats.m_CountSimpleGlyphs);
+		change |= ImGui::RadioButtonLabeled_BitWize<GlyphCategoryFlags>(mrw, buffer,
 			"Simple", &m_GlyphDisplayCategoryFlags, GLYPH_CATEGORY_FLAG_SIMPLE);
 		if (useColorFiltering)
 		{
 			ImGui::SameLine();
 			ImGui::ColorEdit4("Simple", &m_GlyphFilteringStats.SimpleColor.x, colorFlags);
 		}
-		change |= ImGui::RadioButtonLabeled_BitWize<GlyphCategoryFlags>(mrw, ct::toCStr("Composite (%u)", m_GlyphFilteringStats.m_CountCompositeGlyphs),
+		snprintf(buffer, 254, "Composite (%u)", m_GlyphFilteringStats.m_CountCompositeGlyphs);
+		change |= ImGui::RadioButtonLabeled_BitWize<GlyphCategoryFlags>(mrw, buffer,
 			"Composite", &m_GlyphDisplayCategoryFlags, GLYPH_CATEGORY_FLAG_COMPOSITE);
 		if (useColorFiltering)
 		{
 			ImGui::SameLine();
 			ImGui::ColorEdit4("Composite", &m_GlyphFilteringStats.CompositeColor.x, colorFlags);
 		}
-		change |= ImGui::RadioButtonLabeled_BitWize<GlyphCategoryFlags>(mrw, ct::toCStr("Mapped (%u)", m_GlyphFilteringStats.m_CountMappedGlyphs),
+		snprintf(buffer, 254, "Mapped (%u)", m_GlyphFilteringStats.m_CountMappedGlyphs);
+		change |= ImGui::RadioButtonLabeled_BitWize<GlyphCategoryFlags>(mrw, buffer,
 			"Mapped", &m_GlyphDisplayCategoryFlags, GLYPH_CATEGORY_FLAG_MAPPED);
 		if (useColorFiltering)
 		{
 			ImGui::SameLine();
 			ImGui::ColorEdit4("Mapped", &m_GlyphFilteringStats.MappedColor.x, colorFlags);
 		}
-		change |= ImGui::RadioButtonLabeled_BitWize<GlyphCategoryFlags>(mrw, ct::toCStr("Un Mapped (%u)", m_GlyphFilteringStats.m_CountUnMappedGlyphs),
+		snprintf(buffer, 254, "Un Mapped (%u)", m_GlyphFilteringStats.m_CountUnMappedGlyphs);
+		change |= ImGui::RadioButtonLabeled_BitWize<GlyphCategoryFlags>(mrw, buffer,
 			"Un Mapped", &m_GlyphDisplayCategoryFlags, GLYPH_CATEGORY_FLAG_UNMAPPED);
 		if (useColorFiltering)
 		{
 			ImGui::SameLine();
 			ImGui::ColorEdit4("Un Mapped", &m_GlyphFilteringStats.UnMappedColor.x, colorFlags);
 		}
-		change |= ImGui::RadioButtonLabeled_BitWize<GlyphCategoryFlags>(mrw, ct::toCStr("Colored (%u)", m_GlyphFilteringStats.m_CountColoredGlyphs),
+		snprintf(buffer, 254, "Colored (%u)", m_GlyphFilteringStats.m_CountColoredGlyphs);
+		change |= ImGui::RadioButtonLabeled_BitWize<GlyphCategoryFlags>(mrw, buffer,
 			"Colored", &m_GlyphDisplayCategoryFlags, GLYPH_CATEGORY_FLAG_COLORED);
 		if (useColorFiltering)
 		{
 			ImGui::SameLine();
 			ImGui::ColorEdit4("Colored", &m_GlyphFilteringStats.ColoredColor.x, colorFlags);
 		}
-		change |= ImGui::RadioButtonLabeled_BitWize<GlyphCategoryFlags>(mrw, ct::toCStr("Layer (%u)", m_GlyphFilteringStats.m_CountLayerGlyphs),
+		snprintf(buffer, 254, "Layer (%u)", m_GlyphFilteringStats.m_CountLayerGlyphs);
+		change |= ImGui::RadioButtonLabeled_BitWize<GlyphCategoryFlags>(mrw, buffer,
 			"Layer", &m_GlyphDisplayCategoryFlags, GLYPH_CATEGORY_FLAG_LAYER);
 		if (useColorFiltering)
 		{
 			ImGui::SameLine();
 			ImGui::ColorEdit4("Layer", &m_GlyphFilteringStats.LayerColor.x, colorFlags);
 		}
-		change |= ImGui::RadioButtonLabeled_BitWize<GlyphCategoryFlags>(mrw, ct::toCStr("Named (%u)", m_GlyphFilteringStats.m_CountMamedGlyphs),
+		snprintf(buffer, 254, "Named (%u)", m_GlyphFilteringStats.m_CountMamedGlyphs);
+		change |= ImGui::RadioButtonLabeled_BitWize<GlyphCategoryFlags>(mrw, buffer,
 			"Named", &m_GlyphDisplayCategoryFlags, GLYPH_CATEGORY_FLAG_NAMED);
 		if (useColorFiltering)
 		{
@@ -795,7 +803,7 @@ void FontInfos::DrawFilteringWidgets(ProjectFile* vProjectFile)
 			vProjectFile->SetProjectChange();
 		}
 
-		ImGui::EndFramedGroup(true);
+		ImGui::EndFramedGroup();
 	}
 }
 

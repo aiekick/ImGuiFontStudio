@@ -28,10 +28,10 @@
 #include <ctools/Logger.h>
 #include <ctools/FileHelper.h>
 #include <Panes/Manager/LayoutManager.h>
-#include <Gui/ImGuiWidgets.h>
+#include <Gui/ImWidgets.h>
 #include <Helper/Messaging.h>
 #include <Helper/SelectionHelper.h>
-#include <Helper/ImGuiThemeHelper.h>
+#include <Helper/ThemeHelper.h>
 #include <Panes/FinalFontPane.h>
 #include <Panes/SourceFontPane.h>
 #include <Project/ProjectFile.h>
@@ -392,7 +392,7 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile *vProjectFile)
 			ImGui::Text("No Selected Font.");
 		}
 
-		ImGui::EndFramedGroup(true);
+		ImGui::EndFramedGroup();
 	}
 }
 
@@ -417,7 +417,7 @@ bool GeneratorPane::CheckGenerationConditions(ProjectFile *vProjectFile)
 	else
 	{
 		res = false;
-		ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "Can't generate.\n\tSelect one feature at least");
+		ImGui::TextColored(ImGui::CustomStyle::BadColor, "Can't generate.\n\tSelect one feature at least");
 	}
 
 	// not remembered why i done that.. so disabled for the moment
@@ -426,7 +426,7 @@ bool GeneratorPane::CheckGenerationConditions(ProjectFile *vProjectFile)
 			vProjectFile->IsGenMode(GENERATOR_MODE_SRC)))
 	{
 		res = false;
-		ImGui::TextColored(ImGuiThemeHelper::Instance()->badColor, "Merged mode require the\ngeneration of font or cpp.\nPlease Select one of\nthese two at least");
+		ImGui::TextColored(ImGui::CustomStyle::BadColor, "Merged mode require the\ngeneration of font or cpp.\nPlease Select one of\nthese two at least");
 	}*/
 
 	bool needOneLangageSelectedAtLeast = 
@@ -441,14 +441,14 @@ bool GeneratorPane::CheckGenerationConditions(ProjectFile *vProjectFile)
 			vProjectFile->IsGenMode(GENERATOR_MODE_SRC)))
 		{
 			res = false;
-			ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->badColor, "the Header is linked ot a font or a cpp.\nPlease Select Cpp or Font at least");
+			ImGui::FramedGroupText(ImGui::CustomStyle::BadColor, "the Header is linked ot a font or a cpp.\nPlease Select Cpp or Font at least");
 		}
 
 		// need on language at mini
 		if (!needOneLangageSelectedAtLeast)
 		{
 			res = false;
-			ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->badColor, "A language must be selected for the generation of the Header file");
+			ImGui::FramedGroupText(ImGui::CustomStyle::BadColor, "A language must be selected for the generation of the Header file");
 		}
 	}
 
@@ -458,7 +458,7 @@ bool GeneratorPane::CheckGenerationConditions(ProjectFile *vProjectFile)
 		if (!needOneLangageSelectedAtLeast)
 		{
 			res = false;
-			ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->badColor, "A language must be selected for the generation of the Source file");
+			ImGui::FramedGroupText(ImGui::CustomStyle::BadColor, "A language must be selected for the generation of the Source file");
 		}
 	}
 	// check of codepoint/name in double 
@@ -472,24 +472,24 @@ bool GeneratorPane::CheckGenerationConditions(ProjectFile *vProjectFile)
 		{
 			if (font.second->m_CodePointInDoubleFound || font.second->m_NameInDoubleFound)
 			{
-				ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->badColor, "%s : NOK", font.second->m_FontFileName.c_str());
+				ImGui::FramedGroupText(ImGui::CustomStyle::BadColor, "%s : NOK", font.second->m_FontFileName.c_str());
 				errorsCount++;
 			}
 			else if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED) && font.second->m_SelectedGlyphs.empty())
 			{
-				ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->badColor, "%s : NOK\nNo Glyphs are selected.\nYou need it in Merged mode", font.second->m_FontFileName.c_str());
+				ImGui::FramedGroupText(ImGui::CustomStyle::BadColor, "%s : NOK\nNo Glyphs are selected.\nYou need it in Merged mode", font.second->m_FontFileName.c_str());
 				errorsCount++;
 			}
 			else
 			{
 				if (font.second->m_SelectedGlyphs.empty()) // no glyphs to extract, we wille extract alls, current and batch only
 				{
-					ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->badColor, "%s : NOK\nNo Glyphs are selected.\nCan't generate.", font.second->m_FontFileName.c_str());
+					ImGui::FramedGroupText(ImGui::CustomStyle::BadColor, "%s : NOK\nNo Glyphs are selected.\nCan't generate.", font.second->m_FontFileName.c_str());
 					errorsCount++;
 				}
 				else
 				{
-					ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->goodColor, "%s : OK\n%u Glyphs selected", font.second->m_FontFileName.c_str(), font.second->m_SelectedGlyphs.size());
+					ImGui::FramedGroupText(ImGui::CustomStyle::GoodColor, "%s : OK\n%u Glyphs selected", font.second->m_FontFileName.c_str(), font.second->m_SelectedGlyphs.size());
 					vProjectFile->m_CountFontWithSelectedGlyphs++;
 				}
 			}
@@ -505,22 +505,22 @@ bool GeneratorPane::CheckGenerationConditions(ProjectFile *vProjectFile)
 		{
 			if (errorsCount > 0)
 			{
-				ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->badColor, "Can partially generate\nCheck status bar");
+				ImGui::FramedGroupText(ImGui::CustomStyle::BadColor, "Can partially generate\nCheck status bar");
 			}
 			else
 			{
-				ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->goodColor, "Can fully generate");
+				ImGui::FramedGroupText(ImGui::CustomStyle::GoodColor, "Can fully generate");
 			}
 
 			if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED))
 			{
-				ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->goodColor,
+				ImGui::FramedGroupText(ImGui::CustomStyle::GoodColor,
 					"The selected font\nscale / bounding box\nwill be used for merge in\nall other font glyphs");
 			}
 		}
 		else
 		{
-			ImGui::FramedGroupText(ImGuiThemeHelper::Instance()->badColor, "Can't generate\nCheck status bar");
+			ImGui::FramedGroupText(ImGui::CustomStyle::BadColor, "Can't generate\nCheck status bar");
 			res = false;
 		}
 	}

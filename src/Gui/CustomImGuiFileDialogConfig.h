@@ -5,6 +5,8 @@
 //#define MAX_FILE_DIALOG_NAME_BUFFER 1024
 //#define MAX_PATH_BUFFER_SIZE 1024
 
+#include <Gui/ImWidgets.h>
+
 #define USE_EXPLORATION_BY_KEYS
 // this mapping by default is for GLFW but you can use another
 //#include <GLFW/glfw3.h> 
@@ -21,9 +23,9 @@
 // filter combobox width
 //#define FILTER_COMBO_WIDTH 120.0f
 // button widget use for compose path
-//#define IMGUI_PATH_BUTTON ImGui::Button
-// standar button
-//#define IMGUI_BUTTON ImGui::Button
+#define IMGUI_PATH_BUTTON ImGui::ContrastedButton
+// standard button
+#define IMGUI_BUTTON ImGui::ContrastedButton
 
 #include <Res/CustomFont.h>
 

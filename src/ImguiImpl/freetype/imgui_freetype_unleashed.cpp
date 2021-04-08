@@ -145,7 +145,7 @@ namespace
         SetPixelHeight((uint32_t)cfg.SizePixels);
 
         // Convert to FreeType flags (NB: Bold and Oblique are processed separately)
-        UserFlags = cfg.RasterizerFlags | extra_user_flags;
+        UserFlags = extra_user_flags;
         LoadFlags = FT_LOAD_NO_BITMAP;
         if (UserFlags & ImGuiFreeType_unleashed::FreeType_NoHinting)
             LoadFlags |= FT_LOAD_NO_HINTING;
@@ -502,8 +502,8 @@ static void ImFreeTypeUnleashedFontAtlasBuildRenderDefaultTexData(ImFontAtlas* a
         const int x_for_black = r->X + FT_FONT_ATLAS_DEFAULT_TEX_DATA_W + 1;
         if (atlas->TexPixelsAlpha8 != NULL)
         {
-            ImFontAtlasBuildRender1bppRectFromString(atlas, x_for_white, r->Y, FT_FONT_ATLAS_DEFAULT_TEX_DATA_W, FT_FONT_ATLAS_DEFAULT_TEX_DATA_H, FT_FONT_ATLAS_DEFAULT_TEX_DATA_PIXELS, '.', 0xFF);
-            ImFontAtlasBuildRender1bppRectFromString(atlas, x_for_black, r->Y, FT_FONT_ATLAS_DEFAULT_TEX_DATA_W, FT_FONT_ATLAS_DEFAULT_TEX_DATA_H, FT_FONT_ATLAS_DEFAULT_TEX_DATA_PIXELS, 'X', 0xFF);
+            ImFontAtlasBuildRender8bppRectFromString(atlas, x_for_white, r->Y, FT_FONT_ATLAS_DEFAULT_TEX_DATA_W, FT_FONT_ATLAS_DEFAULT_TEX_DATA_H, FT_FONT_ATLAS_DEFAULT_TEX_DATA_PIXELS, '.', 0xFF);
+            ImFontAtlasBuildRender8bppRectFromString(atlas, x_for_black, r->Y, FT_FONT_ATLAS_DEFAULT_TEX_DATA_W, FT_FONT_ATLAS_DEFAULT_TEX_DATA_H, FT_FONT_ATLAS_DEFAULT_TEX_DATA_PIXELS, 'X', 0xFF);
         }
         else
         {
@@ -601,7 +601,7 @@ void ImFreeTypeUnleashedFontAtlasBuildFinish(ImFontAtlas* atlas)
         IM_ASSERT(r->Font->ContainerAtlas == atlas);
         ImVec2 uv0, uv1;
         atlas->CalcCustomRectUV(r, &uv0, &uv1);
-        r->Font->AddGlyph(NULL, (ImWchar)r->GlyphID, r->GlyphOffset.x, r->GlyphOffset.y, r->GlyphOffset.x + r->Width, r->GlyphOffset.y + r->Height, uv0.x, uv0.y, uv1.x, uv1.y, r->GlyphAdvanceX, r->IgnoreTint);
+        r->Font->AddGlyph(NULL, (ImWchar)r->GlyphID, r->GlyphOffset.x, r->GlyphOffset.y, r->GlyphOffset.x + r->Width, r->GlyphOffset.y + r->Height, uv0.x, uv0.y, uv1.x, uv1.y, r->GlyphAdvanceX);
     }
 
     // Build all fonts lookup tables
@@ -959,7 +959,7 @@ bool ImFontAtlasBuildWithFreeTypeUnleashed(FT_Library ft_library, ImFontAtlas* a
                 float v0 = (ty) / (float)atlas->TexHeight;
                 float u1 = (tx + info.Width) / (float)atlas->TexWidth;
                 float v1 = (ty + info.Height) / (float)atlas->TexHeight;
-                dst_font->AddGlyph(&cfg, (ImWchar)src_glyph.GlyphIndex, x0, y0, x1, y1, u0, v0, u1, v1, char_advance_x_mod, info.colored);
+                dst_font->AddGlyph(&cfg, (ImWchar)src_glyph.GlyphIndex, x0, y0, x1, y1, u0, v0, u1, v1, char_advance_x_mod);
             }
 
             src_tmp.Rects = NULL;

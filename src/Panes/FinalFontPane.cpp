@@ -20,7 +20,7 @@
 
 #include <MainFrame.h>
 #include <Generator/Generator.h>
-#include <Gui/ImGuiWidgets.h>
+#include <Gui/ImWidgets.h>
 #include <Panes/Manager/LayoutManager.h>
 #include <Res/CustomFont.h>
 #include <Helper/SelectionHelper.h>

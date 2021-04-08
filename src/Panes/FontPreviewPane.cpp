@@ -22,7 +22,7 @@
 #include <Generator/FontGenerator.h>
 #include <MainFrame.h>
 #include <Panes/Manager/LayoutManager.h>
-#include <Gui/ImGuiWidgets.h>
+#include <Gui/ImWidgets.h>
 #ifdef _DEBUG
 #include <Panes/DebugPane.h>
 #endif
@@ -36,7 +36,7 @@
 #include <ctools/cTools.h>
 #include <ctools/FileHelper.h>
 #include <sfntly/font_factory.h>
-#include <Gui/ImGuiWidgets.h>
+#include <Gui/ImWidgets.h>
 #include <Helper/SelectionHelper.h>
 #include <Project/GlyphInfos.h>
 #include <Helper/Profiler.h>

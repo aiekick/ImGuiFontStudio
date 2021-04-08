@@ -20,8 +20,8 @@
 #include "SettingsDlg.h"
 
 #include <MainFrame.h>
-#include <Gui/ImGuiWidgets.h>
-#include <Helper/ImGuiThemeHelper.h>
+#include <Gui/ImWidgets.h>
+#include <Helper/ThemeHelper.h>
 #include <Res/CustomFont.h>
 
 #include <imgui/imgui.h>

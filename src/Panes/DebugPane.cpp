@@ -24,7 +24,7 @@
 #include <MainFrame.h>
 
 #include <Panes/Manager/LayoutManager.h>
-#include <Gui/ImGuiWidgets.h>
+#include <Gui/ImWidgets.h>
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
@@ -184,7 +184,7 @@ void DebugPane::DrawDebugGlyphPane(ProjectFile* /*vProjectFile*/)
 				for (auto& co : g->m_Glyph.contours)
 				{
 					ImGui::PushID(++paneWidgetId);
-					bool res = ImGui::CollapsingHeader_SmallHeight("Contour", 0.7f, -1, true);
+					bool res = ImGui::CollapsingHeader_SmallHeight("Contour", 0.7f, -1);
 					ImGui::PopID();
 					if (res)
 					{

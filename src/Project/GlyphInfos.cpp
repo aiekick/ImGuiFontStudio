@@ -26,8 +26,8 @@
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 
-#include <Gui/ImGuiWidgets.h>
-#include <Helper/ImGuiThemeHelper.h>
+#include <Gui/ImWidgets.h>
+#include <Helper/ThemeHelper.h>
 #include <Helper/AssetManager.h>
 #include <Panes/DebugPane.h>
 #include <Helper/MeshDecomposer.h>
@@ -935,7 +935,7 @@ int GlyphInfos::DrawGlyphButton(
 
 			const float rounding = ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding);
 #ifdef USE_SHADOW
-			if (!ImGuiThemeHelper::m_UseShadow)
+			if (!ThemeHelper::m_UseShadow)
 			{
 #endif
 				// normal
@@ -944,7 +944,7 @@ int GlyphInfos::DrawGlyphButton(
 			}
 			else
 			{
-				if (ImGuiThemeHelper::m_UseTextureForShadow)
+				if (ThemeHelper::m_UseTextureForShadow)
 				{
 					ImTextureID texId = (ImTextureID)AssetManager::Instance()->m_Textures["btn"].glTex;
 					window->DrawList->AddImage(texId, bb.Min, bb.Max, ImVec2(0, 0), ImVec2(1, 1), col);
@@ -953,7 +953,7 @@ int GlyphInfos::DrawGlyphButton(
 				{
 					// inner shadow
 					ImVec4 cb = ImColor(col).Value; // color base : cb
-					float sha = ImGuiThemeHelper::Instance()->m_ShadowStrength;
+					float sha = ThemeHelper::Instance()->m_ShadowStrength;
 					ImVec4 cbd = ImVec4(cb.x * sha, cb.y * sha, cb.z * sha, cb.w * 0.9f); // color base darker : cbd
 					ImGui::RenderInnerShadowFrame(bb.Min, bb.Max, col, ImGui::GetColorU32(cbd), ImGui::GetColorU32(ImGuiCol_WindowBg), true, rounding);
 				}
@@ -1076,7 +1076,7 @@ void GlyphInfos::RenderGlyph(ImFont* vFont, ImDrawList* vDrawList, float vGlyphH
 		const ImVec2 uv1 = ImVec2(glyph->U1, glyph->V1);
 
 		ImU32 glyph_col = vCol;
-		if (glyph->IgnoreTint)
+		if (glyph->Colored)
 			glyph_col |= ~IM_COL32_A_MASK;
 
 		vDrawList->PushTextureID(vFont->ContainerAtlas->TexID);

@@ -147,13 +147,13 @@ int main(int, char**argv)
 	ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
 	ImGui::GetIO().Fonts->AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_IGFS, 15.0f, &icons_config, icons_ranges);
 
-    ImGuiFreeType::FT_Error freetypeError;
+    /*ImGuiFreeType::FT_Error freetypeError;
     uint32_t freeTypeFlag = ImGuiFreeType::FreeType_Default;
     if (!ImGuiFreeType::BuildFontAtlas(ImGui::GetIO().Fonts, freeTypeFlag, &freetypeError))
     {
-        printf("Faila to load font, reason : %s \n", ImGuiFreeType::GetErrorMessage(freetypeError));
+        printf("Fail to load font, reason : %s \n", ImGuiFreeType::GetErrorMessage(freetypeError));
         return 1;
-    }
+    }*/
 
 	MainFrame::Instance(mainWindow)->Init();
 
@@ -180,8 +180,8 @@ int main(int, char**argv)
             ImGuiViewport* viewport = ImGui::GetMainViewport();
             if (viewport)
             {
-                pos = viewport->GetWorkPos();
-                size = viewport->GetWorkSize();
+                pos = viewport->WorkPos;
+                size = viewport->WorkSize;
             }
         }
         else

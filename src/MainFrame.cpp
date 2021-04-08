@@ -28,9 +28,9 @@
 
 #include <ImGuiFileDialog/ImGuiFileDialog.h>
 #include <Generator/Generator.h>
-#include <Gui/ImGuiWidgets.h>
+#include <Gui/ImWidgets.h>
 #include <Panes/Manager/LayoutManager.h>
-#include <Helper/ImGuiThemeHelper.h>
+#include <Helper/ThemeHelper.h>
 #include <Helper/Messaging.h>
 #include <Helper/SelectionHelper.h>
 #include <Helper/SettingsDlg.h>
@@ -68,15 +68,11 @@ void MainFrame::Init()
 	snprintf(buf, 255, "ImGuiFontStudio %s", IMGUIFONTSTUDIO_VERSION);
 	glfwSetWindowTitle(m_Window, buf);
 
-	ImGuiThemeHelper::Instance()->ApplyStyleColorsDefault();
-	
+	ThemeHelper::Instance();
 	LoadConfigFile("config.xml");
+	ThemeHelper::Instance()->ApplyStyle();
 
 	LayoutManager::Instance()->Init();
-
-#ifdef USE_RIBBONBAR
-	m_RibbonBar.Init();
-#endif
 
 #ifdef USE_SHADOW
 	AssetManager::Instance()->LoadTexture2D("btn", "src/res/btn.png");
@@ -191,7 +187,6 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 	ImGui::SetWindowSize(vSize - ImVec2(0.0f, barH));
 	ImGui::SetWindowPos(vPos);
 
-#ifndef USE_RIBBONBAR
 	if (ImGui::BeginMenuBar())
 	{
 		if (ImGui::BeginMenu(ICON_IGFS_PROJECT " Project"))
@@ -260,7 +255,7 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 
 			if (ImGui::BeginMenu(ICON_IGFS_EDIT " Styles"))
 			{
-				ImGuiThemeHelper::Instance()->DrawMenu();
+				ThemeHelper::Instance()->DrawMenu();
 
 				ImGui::Separator();
 
@@ -286,9 +281,6 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 
 		ImGui::EndMenuBar();
 	}
-#else
-	m_RibbonBar.Draw(&m_ProjectFile);
-#endif
 
 	LayoutManager::Instance()->StartDockPane(dockspace_flags, vSize);
 
@@ -345,8 +337,6 @@ void MainFrame::DisplayDialogsAndPopups()
 		ShowAboutDialog(&m_ShowAboutDialog);
 	if (m_ShowImGui)
 		ImGui::ShowDemoWindow(&m_ShowImGui);
-	if (m_ShowImGuiStyle)
-		ImGuiThemeHelper::Instance()->ShowCustomStyleEditor(&m_ShowImGuiStyle);
 	if (m_ShowMetric)
 		ImGui::ShowMetricsWindow(&m_ShowMetric);
 
@@ -908,7 +898,7 @@ std::string MainFrame::getXml(const std::string& vOffset, const std::string& vUs
 
 	std::string str;
 
-	str += ImGuiThemeHelper::Instance()->getXml(vOffset);
+	str += ThemeHelper::Instance()->getXml(vOffset);
 	str += LayoutManager::Instance()->getXml(vOffset, "app");
 	str += vOffset + "<bookmarks>" + ImGuiFileDialog::Instance()->SerializeBookmarks() + "</bookmarks>\n";
 	str += vOffset + "<showaboutdialog>" + (m_ShowAboutDialog ? "true" : "false") + "</showaboutdialog>\n";
@@ -935,7 +925,7 @@ bool MainFrame::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 	if (vParent != 0)
 		strParentName = vParent->Value();
 
-	ImGuiThemeHelper::Instance()->setFromXml(vElem, vParent);
+	ThemeHelper::Instance()->setFromXml(vElem, vParent);
 	LayoutManager::Instance()->setFromXml(vElem, vParent, "app");
 
 	if (strName == "bookmarks")
