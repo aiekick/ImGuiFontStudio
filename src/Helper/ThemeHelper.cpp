@@ -203,7 +203,7 @@ void ThemeHelper::ApplyStyleColorsOrangeBlue()
 	prImGuiStyle.WindowMenuButtonPosition = ImGuiDir_Left;
 	prImGuiStyle.ColorButtonPosition = ImGuiDir_Right;
 	prImGuiStyle.ButtonTextAlign = ImVec2(0.50f, 0.50f);
-	prImGuiStyle.SelectableTextAlign = ImVec2(0.03f, 0.50f);
+	prImGuiStyle.SelectableTextAlign = ImVec2(0.00f, 0.50f);
 
 	// Safe Area Padding
 	prImGuiStyle.DisplaySafeAreaPadding = ImVec2(3.00f, 3.00f);
@@ -313,7 +313,7 @@ void ThemeHelper::ApplyStyleColorsGreenBlue()
 	prImGuiStyle.WindowMenuButtonPosition = ImGuiDir_Left;
 	prImGuiStyle.ColorButtonPosition = ImGuiDir_Right;
 	prImGuiStyle.ButtonTextAlign = ImVec2(0.50f, 0.50f);
-	prImGuiStyle.SelectableTextAlign = ImVec2(0.03f, 0.50f);
+	prImGuiStyle.SelectableTextAlign = ImVec2(0.00f, 0.50f);
 
 	// Safe Area Padding
 	prImGuiStyle.DisplaySafeAreaPadding = ImVec2(3.00f, 3.00f);
@@ -422,7 +422,7 @@ void ThemeHelper::ApplyStyleColorsClassic()
 	prImGuiStyle.WindowMenuButtonPosition = ImGuiDir_Left;
 	prImGuiStyle.ColorButtonPosition = ImGuiDir_Right;
 	prImGuiStyle.ButtonTextAlign = ImVec2(0.50f, 0.50f);
-	prImGuiStyle.SelectableTextAlign = ImVec2(0.03f, 0.50f);
+	prImGuiStyle.SelectableTextAlign = ImVec2(0.00f, 0.50f);
 
 	// Safe Area Padding
 	prImGuiStyle.DisplaySafeAreaPadding = ImVec2(3.00f, 3.00f);
@@ -531,7 +531,7 @@ void ThemeHelper::ApplyStyleColorsDark()
 	prImGuiStyle.WindowMenuButtonPosition = ImGuiDir_Left;
 	prImGuiStyle.ColorButtonPosition = ImGuiDir_Right;
 	prImGuiStyle.ButtonTextAlign = ImVec2(0.50f, 0.50f);
-	prImGuiStyle.SelectableTextAlign = ImVec2(0.03f, 0.50f);
+	prImGuiStyle.SelectableTextAlign = ImVec2(0.00f, 0.50f);
 
 	// Safe Area Padding
 	prImGuiStyle.DisplaySafeAreaPadding = ImVec2(3.00f, 3.00f);
@@ -640,7 +640,7 @@ void ThemeHelper::ApplyStyleColorsLight()
 	prImGuiStyle.WindowMenuButtonPosition = ImGuiDir_Left;
 	prImGuiStyle.ColorButtonPosition = ImGuiDir_Right;
 	prImGuiStyle.ButtonTextAlign = ImVec2(0.50f, 0.50f);
-	prImGuiStyle.SelectableTextAlign = ImVec2(0.03f, 0.50f);
+	prImGuiStyle.SelectableTextAlign = ImVec2(0.00f, 0.50f);
 
 	// Safe Area Padding
 	prImGuiStyle.DisplaySafeAreaPadding = ImVec2(3.00f, 3.00f);
@@ -752,7 +752,7 @@ void ThemeHelper::ApplyStyleColorsDarcula()
 	prImGuiStyle.WindowMenuButtonPosition = ImGuiDir_Left;
 	prImGuiStyle.ColorButtonPosition = ImGuiDir_Right;
 	prImGuiStyle.ButtonTextAlign = ImVec2(0.50f, 0.50f);
-	prImGuiStyle.SelectableTextAlign = ImVec2(0.03f, 0.50f);
+	prImGuiStyle.SelectableTextAlign = ImVec2(0.00f, 0.50f);
 
 	// Safe Area Padding
 	prImGuiStyle.DisplaySafeAreaPadding = ImVec2(3.00f, 3.00f);
@@ -861,7 +861,7 @@ void ThemeHelper::ApplyStyleColorsRedDark()
 	prImGuiStyle.WindowMenuButtonPosition = ImGuiDir_Left;
 	prImGuiStyle.ColorButtonPosition = ImGuiDir_Right;
 	prImGuiStyle.ButtonTextAlign = ImVec2(0.50f, 0.50f);
-	prImGuiStyle.SelectableTextAlign = ImVec2(0.03f, 0.50f);
+	prImGuiStyle.SelectableTextAlign = ImVec2(0.00f, 0.50f);
 
 	// Safe Area Padding
 	prImGuiStyle.DisplaySafeAreaPadding = ImVec2(3.00f, 3.00f);
