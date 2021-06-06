@@ -985,8 +985,8 @@ int GlyphInfos::DrawGlyphButton(
 			return false;
 
 		bool hovered, held;
-		bool pressed = ImGui::ButtonBehavior(bb, id, &hovered, &held, ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
-		if (pressed)
+		ImGui::ButtonBehavior(bb, id, &hovered, &held, ImGuiButtonFlags_MouseButtonLeft | ImGuiButtonFlags_MouseButtonRight);
+		if (held)
 		{
 			if (vSelected)
 			{
