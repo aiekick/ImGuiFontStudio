@@ -149,7 +149,7 @@ void GeneratorPane::DrawGeneratorPane(ProjectFile * vProjectFile)
 void GeneratorPane::DrawFontsGenerator(ProjectFile * vProjectFile)
 {
 	float maxWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().FramePadding.x;
-	ImVec2 btnSize = ImVec2(maxWidth - ImGui::GetStyle().FramePadding.x, 0);
+	float btnWidth = maxWidth - ImGui::GetStyle().FramePadding.x;
 	float mrw = maxWidth;
 
 	if (vProjectFile->m_SelectedFont)
@@ -160,7 +160,7 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile * vProjectFile)
 #ifdef _DEBUG
 		if (ImGui::BeginFramedGroup("Quick Generation (Debug only)"))
 		{
-			if (ImGui::ContrastedButton("Quick Font Current", nullptr, nullptr, 0.0f, btnSize))
+			if (ImGui::ContrastedButton("Quick Font Current", nullptr, nullptr, btnWidth))
 			{
 				vProjectFile->m_GenModeFlags = (GenModeFlags)0;
 				vProjectFile->AddGenMode(GENERATOR_MODE_CURRENT_FONT); // font + header
@@ -170,7 +170,7 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile * vProjectFile)
 				FileHelper::Instance()->CreateDirectoryIfNotExist(path);
 				Generator::Instance()->Generate(vProjectFile, path, "test.ttf");
 			}
-			if (ImGui::ContrastedButton("Quick Font Merged", nullptr, nullptr, 0.0f, btnSize))
+			if (ImGui::ContrastedButton("Quick Font Merged", nullptr, nullptr, btnWidth))
 			{
 				bool disableGlyphReScale = vProjectFile->IsGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE);
 				vProjectFile->m_GenModeFlags = (GenModeFlags)0;
@@ -183,7 +183,7 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile * vProjectFile)
 				FileHelper::Instance()->CreateDirectoryIfNotExist(path);
 				Generator::Instance()->Generate(vProjectFile, path, "test.ttf");
 			}
-			if (ImGui::ContrastedButton("Quick Header Font Current", nullptr, nullptr, 0.0f, btnSize))
+			if (ImGui::ContrastedButton("Quick Header Font Current", nullptr, nullptr, btnWidth))
 			{
 				vProjectFile->m_GenModeFlags = (GenModeFlags)0;
 				vProjectFile->AddGenMode(GENERATOR_MODE_CURRENT_HEADER); // header
@@ -192,7 +192,7 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile * vProjectFile)
 				FileHelper::Instance()->CreateDirectoryIfNotExist(path);
 				Generator::Instance()->Generate(vProjectFile, path, "test.h");
 			}
-			if (ImGui::ContrastedButton("Quick Card Font Current", nullptr, nullptr, 0.0f, btnSize))
+			if (ImGui::ContrastedButton("Quick Card Font Current", nullptr, nullptr, btnWidth))
 			{
 				vProjectFile->m_GenModeFlags = (GenModeFlags)0;
 				vProjectFile->AddGenMode(GENERATOR_MODE_CURRENT_CARD); // card
@@ -357,7 +357,7 @@ void GeneratorPane::DrawFontsGenerator(ProjectFile * vProjectFile)
 				GenMode::RadioButtonLabeled_BitWize_GenMode(maxWidth - ImGui::GetStyle().FramePadding.x,
 					"Auto Opening", "Auto Opening of Generated Files in associated app after generation",
 					vProjectFile, GENERATOR_MODE_OPEN_GENERATED_FILES_AUTO);
-				if (ImGui::ContrastedButton(ICON_IGFS_GENERATE " Generate", nullptr, nullptr, 0.0f, ImVec2(maxWidth - ImGui::GetStyle().FramePadding.x, 0.0f)))
+				if (ImGui::ContrastedButton(ICON_IGFS_GENERATE " Generate", nullptr, nullptr, maxWidth - ImGui::GetStyle().FramePadding.x))
 				{
 					btnClick = true;
 					if (vProjectFile->IsGenMode(GENERATOR_MODE_FONT)) exts = ".ttf";

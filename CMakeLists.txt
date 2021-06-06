@@ -6,6 +6,8 @@ enable_language(C CXX)
 
 project(${PROJECT} CXX)
 
+option(USE_VULKAN OFF)
+
 ## some defines for debug mode (before 3rdparty.cmake)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 
@@ -56,6 +58,29 @@ file(GLOB_RECURSE PROJECT_SRC_RECURSE
 	${CMAKE_CURRENT_SOURCE_DIR}/src/*.hpp)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX src FILES ${PROJECT_SRC_RECURSE})
 
+file(GLOB_RECURSE PROJECT_BACKEND_COMMON_RECURSE 
+	${CMAKE_CURRENT_SOURCE_DIR}/Backends/common/*.c
+	${CMAKE_CURRENT_SOURCE_DIR}/Backends/common/*.h
+	${CMAKE_CURRENT_SOURCE_DIR}/Backends/common/*.cpp
+	${CMAKE_CURRENT_SOURCE_DIR}/Backends/common/*.hpp)
+source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX src FILES ${PROJECT_BACKEND_COMMON_RECURSE})
+
+if (USE_VULKAN)
+	file(GLOB_RECURSE PROJECT_BACKEND_VULKAN_RECURSE 
+		${CMAKE_CURRENT_SOURCE_DIR}/Backends/vulkan/*.c
+		${CMAKE_CURRENT_SOURCE_DIR}/Backends/vulkan/*.h
+		${CMAKE_CURRENT_SOURCE_DIR}/Backends/vulkan/*.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/Backends/vulkan/*.hpp)
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX src FILES ${PROJECT_BACKEND_VULKAN_RECURSE})
+else()
+	file(GLOB_RECURSE PROJECT_BACKEND_OPENGL_RECURSE 
+		${CMAKE_CURRENT_SOURCE_DIR}/Backends/opengl/*.c
+		${CMAKE_CURRENT_SOURCE_DIR}/Backends/opengl/*.h
+		${CMAKE_CURRENT_SOURCE_DIR}/Backends/opengl/*.cpp
+		${CMAKE_CURRENT_SOURCE_DIR}/Backends/opengl/*.hpp)
+	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX src FILES ${PROJECT_BACKEND_OPENGL_RECURSE})
+endif()
+
 if (APPLE)
 	##set(ICON icon.icns)
 	##set_source_files_properties(icon.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
@@ -66,6 +91,9 @@ add_executable(${PROJECT}
 	##${ICON}
 	${PROJECT_MAIN}
 	${PROJECT_SRC_RECURSE}
+	${PROJECT_BACKEND_COMMON_RECURSE}
+	${PROJECT_BACKEND_VULKAN_RECURSE}
+	${PROJECT_BACKEND_OPENGL_RECURSE}
 )
 
 if ("${CMAKE_EXE_LINKER_FLAGS}" STREQUAL "/machine:x64")
@@ -105,6 +133,7 @@ install(FILES LICENSE MacOSXBundleInfo.plist.in README.md DESTINATION "${CMAKE_S
 install(TARGETS ${PROJECT} DESTINATION ${CMAKE_INSTALL_PREFIX})
 
 include_directories(
+	Backends
 	src
 	3rdparty
 	${PLOG_INCLUDE_DIR}

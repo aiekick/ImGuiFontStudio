@@ -2,15 +2,15 @@
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
 #include <imgui/imgui.h>
-#include <ImguiImpl/imgui_impl_glfw.h>
-#include <ImguiImpl/imgui_impl_opengl3.h>
+#include <common/glfw/imgui_impl_glfw.h>
+#include <opengl/imgui_impl_opengl3.h>
 #include <stdio.h>
 
 #include <ctools/FileHelper.h>
 #include <MainFrame.h>
 #include <Res/CustomFont.cpp>
 #include <Res/Roboto_Medium.cpp>
-#include <ImguiImpl/freetype/imgui_freetype.h>
+#include <common/freetype/imgui_freetype.h>
 
 #include <glad/glad.h> 
 #include <GLFW/glfw3.h>

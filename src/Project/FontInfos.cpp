@@ -25,8 +25,6 @@
 #include <ctools/Logger.h>
 #include <Panes/ParamsPane.h>
 
-#include <ImguiImpl/freetype/imgui_freetype.h>
-
 #define STB_TRUETYPE_IMPLEMENTATION  
 #include <imgui/imstb_truetype.h>
 
@@ -461,21 +459,21 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 
 			aw = (ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x * 2.0f) * 0.3333f;
 
-			if (ImGui::ContrastedButton("Translations", nullptr, nullptr, 0.0f, ImVec2(aw, 0)))
+			if (ImGui::ContrastedButton("Translations", nullptr, nullptr, aw))
 			{
 				ClearTranslations(vProjectFile);
 			}
 
 			ImGui::SameLine();
 
-			if (ImGui::ContrastedButton("Scales", nullptr, nullptr, 0.0f, ImVec2(aw, 0)))
+			if (ImGui::ContrastedButton("Scales", nullptr, nullptr, aw))
 			{
 				ClearScales(vProjectFile);
 			}
 
 			ImGui::SameLine();
 
-			if (ImGui::ContrastedButton("Both", nullptr, nullptr, 0.0f, ImVec2(aw, 0)))
+			if (ImGui::ContrastedButton("Both", nullptr, nullptr, aw))
 			{
 				ClearTransforms(vProjectFile);
 			}

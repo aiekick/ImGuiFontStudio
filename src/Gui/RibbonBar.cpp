@@ -5,7 +5,7 @@
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
-#include <ImguiImpl/freetype/imgui_freetype.h>
+#include <common/freetype/imgui_freetype.h>
 
 #include <MainFrame.h>
 #include <Panes/Manager/LayoutManager.h>
@@ -276,7 +276,7 @@ bool RibbonBar::RibbonButton(const char* icon, const char* label, float height, 
 	if (!ItemAdd(bb, id))
 		return false;
 
-	if (window->DC.ItemFlags & ImGuiItemFlags_ButtonRepeat)
+	if (g.CurrentItemFlags & ImGuiItemFlags_ButtonRepeat)
 		flags |= ImGuiButtonFlags_Repeat;
 	bool hovered, held;
 	bool pressed = ButtonBehavior(bb, id, &hovered, &held, flags);

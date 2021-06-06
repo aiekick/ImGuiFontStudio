@@ -1,6 +1,3 @@
-set(OpenGL_GL_PREFERENCE GLVND)
-find_package(OpenGL REQUIRED)
-
 if (CMAKE_SYSTEM_NAME STREQUAL Linux)
   find_package(X11 REQUIRED)
 
@@ -9,7 +6,15 @@ if (CMAKE_SYSTEM_NAME STREQUAL Linux)
   endif ()
 endif ()
 
-include(cmake/glad.cmake)
+if (USE_VULKAN)
+	find_package(Vulkan REQUIRED)
+	add_definitions(-DUSE_VULKAN)
+else()
+	set(OpenGL_GL_PREFERENCE GLVND)
+	find_package(OpenGL REQUIRED)
+	include(cmake/glad.cmake)
+endif()
+
 include(cmake/glfw.cmake)
 include(cmake/imgui.cmake)
 include(cmake/ctools.cmake)

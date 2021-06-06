@@ -136,7 +136,7 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 					float maxWidth = ImGui::GetContentRegionAvail().x - ImGui::GetStyle().ItemSpacing.x;
 					float mrw = maxWidth / 2.0f;
 
-					if (ImGui::ContrastedButton(ICON_IGFS_FOLDER_OPEN " Open Font", nullptr, nullptr, 0.0f, ImVec2(mrw, 0.0f)))
+					if (ImGui::ContrastedButton(ICON_IGFS_FOLDER_OPEN " Open Font", nullptr, nullptr, mrw))
 					{
 						Action_Menu_OpenFont();
 					}
@@ -145,7 +145,7 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 					{
 						ImGui::SameLine();
 
-						if (ImGui::ContrastedButton(ICON_IGFS_DESTROY " Close Font", nullptr, nullptr, 0.0f, ImVec2(mrw, 0.0f)))
+						if (ImGui::ContrastedButton(ICON_IGFS_DESTROY " Close Font", nullptr, nullptr, mrw))
 						{
 							Action_Menu_CloseFont();
 						}

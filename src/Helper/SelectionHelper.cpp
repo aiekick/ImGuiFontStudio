@@ -158,7 +158,7 @@ void SelectionHelper::DrawMenu(ProjectFile * vProjectFile)
 		{
 			ImGui::FramedGroupText("Selection : %u Glyphs", m_SelectionForOperation.size());
 
-			if (ImGui::ContrastedButton("Remove From Final", nullptr, nullptr, 0.0f, ImVec2(-1,0)))
+			if (ImGui::ContrastedButton("Remove From Final", nullptr, nullptr, -1.0f))
 			{
 				RemoveSelectionFromFinal(vProjectFile);
 			}
@@ -194,7 +194,7 @@ void SelectionHelper::DrawMenu(ProjectFile * vProjectFile)
 			if (m_ReRangeStruct.startCodePoint.codePoint + (int)m_SelectionForOperation.size() <=
 				m_ReRangeStruct.MaxCodePoint)
 			{
-				if (ImGui::ContrastedButton("ReRange after start", nullptr, nullptr, 0.0f, ImVec2(-1, 0)))
+				if (ImGui::ContrastedButton("ReRange after start", nullptr, nullptr, -1.0f))
 				{
 					ReRange_Offset_After_Start(vProjectFile, (uint32_t)m_ReRangeStruct.startCodePoint.codePoint);
 				}
@@ -203,7 +203,7 @@ void SelectionHelper::DrawMenu(ProjectFile * vProjectFile)
 			if (m_ReRangeStruct.endCodePoint.codePoint - (int)m_SelectionForOperation.size() >=
 				m_ReRangeStruct.MinCodePoint)
 			{
-				if (ImGui::ContrastedButton("ReRange before end", nullptr, nullptr, 0.0f, ImVec2(-1, 0)))
+				if (ImGui::ContrastedButton("ReRange before end", nullptr, nullptr, -1.0f))
 				{
 					ReRange_Offset_Before_End(vProjectFile, (uint32_t)m_ReRangeStruct.endCodePoint.codePoint);
 				}

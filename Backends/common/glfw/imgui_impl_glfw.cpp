@@ -1,5 +1,5 @@
 // dear imgui: Platform Backend for GLFW
-// This needs to be used along with a Renderer (e.g. OpenGL3, Vulkan..)
+// This needs to be used along with a Renderer (e.g. OpenGL3, Vulkan, WebGPU..)
 // (Info: GLFW is a cross-platform general purpose library for handling windows, inputs, OpenGL/Vulkan graphics context creation, etc.)
 // (Requires: GLFW 3.1+. Prefer GLFW 3.3+ for full feature support.)
 
@@ -13,13 +13,14 @@
 // Issues:
 //  [ ] Platform: Multi-viewport support: ParentViewportID not honored, and so io.ConfigViewportsNoDefaultParent has no effect (minor).
 
-// You can copy and use unmodified imgui_impl_* files in your project. See examples/ folder for examples of using this.
+// You can use unmodified imgui_impl_* files in your project. See examples/ folder for examples of using this. 
+// Prefer including the entire imgui/ repository into your project (either as a copy or as a submodule), and only build the backends you need.
 // If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
 // CHANGELOG
 // (minor and older changes stripped away, please see git history for details)
-//  2020-XX-XX: Platform: Added support for multiple windows via the ImGuiPlatformIO interface.
+//  2021-XX-XX: Platform: Added support for multiple windows via the ImGuiPlatformIO interface.
 //  2020-01-17: Inputs: Disable error callback while assigning mouse cursors because some X11 setup don't have them and it generates errors.
 //  2019-12-05: Inputs: Added support for new mouse cursors added in GLFW 3.4+ (resizing cursors, not allowed cursor).
 //  2019-10-18: Misc: Previously installed user callbacks are now restored on shutdown.
@@ -42,7 +43,7 @@
 //  2017-08-25: Inputs: MousePos set to -FLT_MAX,-FLT_MAX when mouse is unavailable/missing (instead of -1,-1).
 //  2016-10-15: Misc: Added a void* user_data parameter to Clipboard function handlers.
 
-#include <imgui/imgui.h>
+#include "imgui.h"
 #include "imgui_impl_glfw.h"
 
 // GLFW
@@ -84,6 +85,7 @@ static GlfwClientApi        g_ClientApi = GlfwClientApi_Unknown;
 static double               g_Time = 0.0;
 static bool                 g_MouseJustPressed[ImGuiMouseButton_COUNT] = {};
 static GLFWcursor*          g_MouseCursors[ImGuiMouseCursor_COUNT] = {};
+static GLFWwindow*          g_KeyOwnerWindows[512] = {};
 static bool                 g_InstalledCallbacks = false;
 static bool                 g_WantUpdateMonitors = true;
 
@@ -134,10 +136,19 @@ void ImGui_ImplGlfw_KeyCallback(GLFWwindow* window, int key, int scancode, int a
         g_PrevUserCallbackKey(window, key, scancode, action, mods);
 
     ImGuiIO& io = ImGui::GetIO();
-    if (action == GLFW_PRESS)
-        io.KeysDown[key] = true;
-    if (action == GLFW_RELEASE)
-        io.KeysDown[key] = false;
+    if (key >= 0 && key < IM_ARRAYSIZE(io.KeysDown))
+    {
+        if (action == GLFW_PRESS)
+        {
+            io.KeysDown[key] = true;
+            g_KeyOwnerWindows[key] = window;
+        }
+        if (action == GLFW_RELEASE)
+        {
+            io.KeysDown[key] = false;
+            g_KeyOwnerWindows[key] = NULL;
+        }
+    }
 
     // Modifiers are not reliable across systems
     io.KeyCtrl = io.KeysDown[GLFW_KEY_LEFT_CONTROL] || io.KeysDown[GLFW_KEY_RIGHT_CONTROL];
@@ -179,7 +190,7 @@ static bool ImGui_ImplGlfw_Init(GLFWwindow* window, bool install_callbacks, Glfw
 #endif
     io.BackendPlatformName = "imgui_impl_glfw";
 
-    // Keyboard mapping. ImGui will use those indices to peek into the io.KeysDown[] array.
+    // Keyboard mapping. Dear ImGui will use those indices to peek into the io.KeysDown[] array.
     io.KeyMap[ImGuiKey_Tab] = GLFW_KEY_TAB;
     io.KeyMap[ImGuiKey_LeftArrow] = GLFW_KEY_LEFT;
     io.KeyMap[ImGuiKey_RightArrow] = GLFW_KEY_RIGHT;
@@ -271,6 +282,11 @@ bool ImGui_ImplGlfw_InitForOpenGL(GLFWwindow* window, bool install_callbacks)
 bool ImGui_ImplGlfw_InitForVulkan(GLFWwindow* window, bool install_callbacks)
 {
     return ImGui_ImplGlfw_Init(window, install_callbacks, GlfwClientApi_Vulkan);
+}
+
+bool ImGui_ImplGlfw_InitForOther(GLFWwindow* window, bool install_callbacks)
+{
+    return ImGui_ImplGlfw_Init(window, install_callbacks, GlfwClientApi_Unknown);
 }
 
 void ImGui_ImplGlfw_Shutdown()
@@ -562,7 +578,7 @@ static void ImGui_ImplGlfw_CreateWindow(ImGuiViewport* viewport)
     glfwWindowHint(GLFW_VISIBLE, false);
     glfwWindowHint(GLFW_FOCUSED, false);
 #if GLFW_HAS_FOCUS_ON_SHOW
-     glfwWindowHint(GLFW_FOCUS_ON_SHOW, false);
+    glfwWindowHint(GLFW_FOCUS_ON_SHOW, false);
  #endif
     glfwWindowHint(GLFW_DECORATED, (viewport->Flags & ImGuiViewportFlags_NoDecoration) ? false : true);
 #if GLFW_HAS_WINDOW_TOPMOST
@@ -602,6 +618,13 @@ static void ImGui_ImplGlfw_DestroyWindow(ImGuiViewport* viewport)
             HWND hwnd = (HWND)viewport->PlatformHandleRaw;
             ::RemovePropA(hwnd, "IMGUI_VIEWPORT");
 #endif
+
+            // Release any keys that were pressed in the window being destroyed and are still held down,
+            // because we will not receive any release events after window is destroyed.
+            for (int i = 0; i < IM_ARRAYSIZE(g_KeyOwnerWindows); i++)
+                if (g_KeyOwnerWindows[i] == data->Window)
+                    ImGui_ImplGlfw_KeyCallback(data->Window, i, 0, GLFW_RELEASE, 0); // Later params are only used for main viewport, on which this function is never called.
+
             glfwDestroyWindow(data->Window);
         }
         data->Window = NULL;
@@ -768,7 +791,7 @@ static void ImGui_ImplGlfw_SwapBuffers(ImGuiViewport* viewport, void*)
 //--------------------------------------------------------------------------------------------------------
 
 // We provide a Win32 implementation because this is such a common issue for IME users
-#if defined(_WIN32) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS) && !defined(IMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS) && !defined(__GNUC__)
+#if defined(_WIN32) && !defined(IMGUI_DISABLE_WIN32_FUNCTIONS) && !defined(IMGUI_DISABLE_WIN32_DEFAULT_IME_FUNCTIONS)
 #define HAS_WIN32_IME   1
 #include <imm.h>
 #ifdef _MSC_VER

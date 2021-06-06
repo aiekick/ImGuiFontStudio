@@ -19,7 +19,7 @@
 #include <tinyxml2/tinyxml2.h>
 
 #include <Project/GlyphInfos.h>
-#include <ImguiImpl/freetype/imgui_freetype.h>
+#include <common/freetype/imgui_freetype.h>
 #include <glad/glad.h>
 #include <Generator/GenMode.h>
 
