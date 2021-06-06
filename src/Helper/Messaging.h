@@ -87,7 +87,7 @@ private:
 	bool DrawMessage(const Messagekey& vMsg);
 
 public:
-	void Draw(ProjectFile *vProjectFile);
+	void Draw();
 	void AddInfos(bool vSelect, MessageData vDatas, const MessageFunc& vFunction, const char* fmt, ...); // select => set currentMsgIdx to this msg idx
 	void AddWarning(bool vSelect, MessageData vDatas, const MessageFunc& vFunction, const char* fmt, ...); // select => set currentMsgIdx to this msg idx
 	void AddError(bool vSelect, MessageData vDatas, const MessageFunc& vFunction, const char* fmt, ...); // select => set currentMsgIdx to this msg idx

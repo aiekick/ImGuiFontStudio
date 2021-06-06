@@ -30,14 +30,14 @@ private:
 	FontParser m_FontParser;
 
 public:
-	void Init() override;
+	bool Init() override;
 	void Unit() override;
-	int DrawPanes(ProjectFile* vProjectFile, int vWidgetId) override;
-	void DrawDialogsAndPopups(ProjectFile* vProjectFile) override;
-	int DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas) override;
+	int DrawPanes(int vWidgetId, std::string vUserDatas)  override;
+	void DrawDialogsAndPopups(std::string vUserDatas) override;
+	int DrawWidgets(int vWidgetId, std::string vUserDatas)  override;
 
 private:
-	void DrawFontStructurePane(ProjectFile *vProjectFile);
+	void DrawFontStructurePane();
 	void DisplayAnalyze();
 
 public: // singleton

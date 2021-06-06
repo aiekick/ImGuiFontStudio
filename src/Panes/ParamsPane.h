@@ -40,18 +40,18 @@ private: // private enum
 	bool m_Show_ConfirmToCloseFont_Dialog = false;  // show confirm to close font dialog
 
 public:
-	void Init() override;
+	bool Init() override;
 	void Unit() override;
-	int DrawPanes(ProjectFile* vProjectFile, int vWidgetId) override;
-	void DrawDialogsAndPopups(ProjectFile* vProjectFile) override;
-	int DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas) override;
+	int DrawPanes(int vWidgetId, std::string vUserDatas)  override;
+	void DrawDialogsAndPopups(std::string vUserDatas) override;
+	int DrawWidgets(int vWidgetId, std::string vUserDatas)  override;
 
-	void OpenFonts(ProjectFile* vProjectFile, const std::map<std::string, std::string>& vFontFilePathNames);
-	bool OpenFont(ProjectFile* vProjectFile, const std::string& vFontFilePathName, bool vUpdateCount);
-	void SelectFont(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos);
+	void OpenFonts(const std::map<std::string, std::string>& vFontFilePathNames);
+	bool OpenFont(const std::string& vFontFilePathName, bool vUpdateCount);
+	void SelectFont(std::shared_ptr<FontInfos> vFontInfos);
 
 private: 
-	void DrawParamsPane(ProjectFile *vProjectFile);
+	void DrawParamsPane();
 
 private: // actions
 	// via menu

@@ -145,19 +145,17 @@ private:
 	static void DrawLine(ImVec2 vStart, ImVec2 vEnd);
 
 public:
-	void DrawMenu(ProjectFile *vProjectFile);
-	void DrawSelectionMenu(ProjectFile *vProjectFile, SelectionContainerEnum vSelectionContainerEnum);
+	void DrawMenu();
+	void DrawSelectionMenu( SelectionContainerEnum vSelectionContainerEnum);
 	void Clear();
-	void Load(ProjectFile* vProjectFile);
+	void Load();
 
 public:
 	std::set<FontInfosCodePoint>* GetSelection();
 public:
 	void SelectWithToolOrApply(
-		ProjectFile *vProjectFile, 
 		SelectionContainerEnum vSelectionContainerEnum);
 	void SelectWithToolOrApplyOnGlyph(
-		ProjectFile *vProjectFile, 
 		std::shared_ptr<FontInfos> vFontInfos, 
 		ImFontGlyph vGlyph,
         uint32_t vGlyphIdx,
@@ -172,34 +170,34 @@ public:
 		SelectionContainerEnum vSelectionContainerEnum);
 	bool IsSelectionMode(GlyphSelectionModeFlags vGlyphSelectionModeFlags);
 	bool IsSelectionType(GlyphSelectionTypeFlags vGlyphSelectionTypeFlags);
-	void AnalyseSourceSelection(ProjectFile *vProjectFile);
+	void AnalyseSourceSelection();
 
 private:
-	void SelectAllGlyphs(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
+	void SelectAllGlyphs( std::shared_ptr<FontInfos> vFontInfos,
 		SelectionContainerEnum vSelectionContainerEnum);
-	void SelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, ImFontGlyph vGlyph, bool vUpdateMaps,
+	void SelectGlyph( std::shared_ptr<FontInfos> vFontInfos, ImFontGlyph vGlyph, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
-	void SelectGlyph(ProjectFile *vProjectFile, FontInfosCodePoint vFontInfosCodePoint, bool vUpdateMaps,
+	void SelectGlyph( FontInfosCodePoint vFontInfosCodePoint, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
-	void SelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, uint32_t vCodePoint, bool vUpdateMaps,
+	void SelectGlyph( std::shared_ptr<FontInfos> vFontInfos, uint32_t vCodePoint, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 	
-	void UnSelectAllGlyphs(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
+	void UnSelectAllGlyphs( std::shared_ptr<FontInfos> vFontInfos,
 		SelectionContainerEnum vSelectionContainerEnum);
-	void UnSelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, ImFontGlyph vGlyph, bool vUpdateMaps,
+	void UnSelectGlyph( std::shared_ptr<FontInfos> vFontInfos, ImFontGlyph vGlyph, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
-	void UnSelectGlyph(ProjectFile *vProjectFile, FontInfosCodePoint vFontInfosCodePoint, bool vUpdateMaps,
+	void UnSelectGlyph( FontInfosCodePoint vFontInfosCodePoint, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
-	void UnSelectGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, uint32_t vCodePoint, bool vUpdateMaps,
+	void UnSelectGlyph( std::shared_ptr<FontInfos> vFontInfos, uint32_t vCodePoint, bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 
 private:
-	void RemoveSelectionFromFinal(ProjectFile *vProjectFile);
-	void ReRange_Offset_After_Start(ProjectFile *vProjectFile, uint32_t vOffsetCodePoint);
-	void ReRange_Offset_Before_End(ProjectFile *vProjectFile, uint32_t vOffsetCodePoint);
+	void RemoveSelectionFromFinal();
+	void ReRange_Offset_After_Start( uint32_t vOffsetCodePoint);
+	void ReRange_Offset_Before_End( uint32_t vOffsetCodePoint);
 	
 private: // selection for view modes
-	void PrepareSelection(ProjectFile *vProjectFile,
+	void PrepareSelection(
 		SelectionContainerEnum vSelectionContainerEnum);
 	
 private: // ReRange
@@ -211,11 +209,11 @@ private: // selections mode common
 		ImVec2 vCaseSize, uint32_t vCodePoint,
 		bool *vSelected,
 		SelectionContainerEnum vSelectionContainerEnum);
-	void ApplySelection(ProjectFile *vProjectFile,
+	void ApplySelection(
 		SelectionContainerEnum vSelectionContainerEnum);
 
 private: // selection by line
-	void SelectByLine(ProjectFile *vProjectFile, 
+	void SelectByLine( 
 		SelectionContainerEnum vSelectionContainerEnum);
 	bool DrawGlyphSelectionByLine(
 		std::shared_ptr<FontInfos> vFontInfos,
@@ -224,7 +222,7 @@ private: // selection by line
 		SelectionContainerEnum vSelectionContainerEnum);
 	
 private: // selection by zone
-	void SelectByZone(ProjectFile *vProjectFile, 
+	void SelectByZone( 
 		SelectionContainerEnum vSelectionContainerEnum);
 	bool DrawGlyphSelectionByZone(
 		std::shared_ptr<FontInfos> vFontInfos,
@@ -234,21 +232,18 @@ private: // selection by zone
 	
 private: // selection by range
 	void SelectGlyphByRangeFromStartCodePoint(
-		ProjectFile *vProjectFile,
 		std::shared_ptr<FontInfos> vFontInfos, 
 		ImFontGlyph vGlyph,
         uint32_t vFontGlyphIndex,
 		bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 	void UnSelectGlyphByRangeFromStartCodePoint(
-		ProjectFile *vProjectFile,
 		std::shared_ptr<FontInfos> vFontInfos, 
 		ImFontGlyph vGlyph,
         uint32_t vFontGlyphIndex,
 		bool vUpdateMaps,
 		SelectionContainerEnum vSelectionContainerEnum);
 	void UnSelectGlyphByRangeFromStartCodePoint(
-		ProjectFile *vProjectFile,
 		std::shared_ptr<FontInfos> vFontInfos, 
 		ImFontGlyph vGlyph, 
 		bool vUpdateMaps,

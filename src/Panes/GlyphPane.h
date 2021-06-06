@@ -37,18 +37,18 @@ private:
 	std::weak_ptr<GlyphInfos> m_GlyphToDisplay;
 	
 public:
-	void Init() override;
+	bool Init() override;
 	void Unit() override;
-	int DrawPanes(ProjectFile* vProjectFile, int vWidgetId) override;
-	void DrawDialogsAndPopups(ProjectFile* vProjectFile) override;
-	int DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas) override;
+	int DrawPanes(int vWidgetId, std::string vUserDatas)  override;
+	void DrawDialogsAndPopups(std::string vUserDatas) override;
+	int DrawWidgets(int vWidgetId, std::string vUserDatas)  override;
 
-	void DrawGlyphPane(ProjectFile *vProjectFile);
-	bool LoadGlyph(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos, std::weak_ptr<GlyphInfos> vGlyphInfos);
+	void DrawGlyphPane();
+	bool LoadGlyph( std::shared_ptr<FontInfos> vFontInfos, std::weak_ptr<GlyphInfos> vGlyphInfos);
 	void Clear();
 
 private:
-	bool DrawSimpleGlyph(ProjectFile* vProjectFile);
+	bool DrawSimpleGlyph();
 
 public: // singleton
 	static GlyphPane *Instance()

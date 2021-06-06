@@ -43,24 +43,24 @@ private: // STATUS FLAGS
 	GeneratorStatusFlags m_GeneratorStatusFlags = GENERATOR_STATUS_DEFAULT;
 
 public:
-	void Init() override;
+	bool Init() override;
 	void Unit() override;
-	int DrawPanes(ProjectFile* vProjectFile, int vWidgetId) override;
-	void DrawDialogsAndPopups(ProjectFile* vProjectFile) override;
-	int DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas) override;
+	int DrawPanes(int vWidgetId, std::string vUserDatas)  override;
+	void DrawDialogsAndPopups(std::string vUserDatas) override;
+	int DrawWidgets(int vWidgetId, std::string vUserDatas)  override;
 
 	// STATUS FLAGS
 	void AllowStatus(GeneratorStatusFlags vGeneratorStatusFlags);
 	void ProhibitStatus(GeneratorStatusFlags vGeneratorStatusFlags);
 
 private:
-	void DrawGeneratorPane(ProjectFile *vProjectFile);
-	void DrawFontsGenerator(ProjectFile *vProjectFile);
+	void DrawGeneratorPane();
+	void DrawFontsGenerator();
 	void GeneratorFileDialogPane(const char *vFilter, IGFDUserDatas vUserDatas, bool* vCantContinue);
 
-	bool CheckAndDisplayGenerationConditions(ProjectFile *vProjectFile);
-	void Show_BatchMode_PerFontSettings(ProjectFile* vProjectFile);
-	void ModifyConfigurationAccordingToSelectedFeaturesAndErrors(ProjectFile* vProjectFile);
+	bool CheckAndDisplayGenerationConditions();
+	void Show_BatchMode_PerFontSettings();
+	void ModifyConfigurationAccordingToSelectedFeaturesAndErrors();
 
 public: // singleton
 	static GeneratorPane *Instance()

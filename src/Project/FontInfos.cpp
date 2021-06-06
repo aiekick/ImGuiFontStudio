@@ -90,18 +90,18 @@ void FontInfos::Clear()
 	m_CardCountRowsMax = 20U; // after this max, new columns
 }
 
-bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFilePathName)
+bool FontInfos::LoadFont( const std::string& vFontFilePathName)
 {
 	bool res = false;
 
-	if (!vProjectFile || !vProjectFile->IsLoaded())
+	if (!ProjectFile::Instance()->IsLoaded())
 		return res;
 
 	std::string fontFilePathName = FileHelper::Instance()->CorrectSlashTypeForFilePathName(vFontFilePathName);
 	
 	if (!FileHelper::Instance()->IsAbsolutePath(fontFilePathName))
 	{
-		fontFilePathName = vProjectFile->GetAbsolutePath(fontFilePathName);
+		fontFilePathName = ProjectFile::Instance()->GetAbsolutePath(fontFilePathName);
 	}
 	
 	if (FileHelper::Instance()->IsFileExist(fontFilePathName))
@@ -153,7 +153,7 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 					success = m_ImFontAtlas.Build();
 				}
 
-				m_FontFilePathName = vProjectFile->GetRelativePath(fontFilePathName);
+				m_FontFilePathName = ProjectFile::Instance()->GetRelativePath(fontFilePathName);
 
 				if (success)
 				{
@@ -205,7 +205,7 @@ bool FontInfos::LoadFont(ProjectFile *vProjectFile, const std::string& vFontFile
 		m_NeedFilePathResolve = true;
 	}
 
-	vProjectFile->SetProjectChange();
+	ProjectFile::Instance()->SetProjectChange();
 
 	return res;
 }
@@ -390,7 +390,7 @@ void FontInfos::FillGlyphColoreds()
 	}
 }
 
-void FontInfos::DrawInfos(ProjectFile* vProjectFile)
+void FontInfos::DrawInfos()
 {
 	if (!m_ImFontAtlas.Fonts.empty())
 	{
@@ -460,21 +460,21 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 
 			if (ImGui::ContrastedButton("Translations", nullptr, nullptr, aw))
 			{
-				ClearTranslations(vProjectFile);
+				ClearTranslations();
 			}
 
 			ImGui::SameLine();
 
 			if (ImGui::ContrastedButton("Scales", nullptr, nullptr, aw))
 			{
-				ClearScales(vProjectFile);
+				ClearScales();
 			}
 
 			ImGui::SameLine();
 
 			if (ImGui::ContrastedButton("Both", nullptr, nullptr, aw))
 			{
-				ClearTransforms(vProjectFile);
+				ClearTransforms();
 			}
 
 			ImGui::EndFramedGroup();
@@ -516,11 +516,11 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 
 			ImGui::FramedGroupSeparator();
 
-			needFontReGen |= ImGui::SliderIntDefaultCompact(-1.0f, "Font Size", &vProjectFile->m_SelectedFont->m_FontSize, 7, 50, defaultFontInfosValues.m_FontSize);
+			needFontReGen |= ImGui::SliderIntDefaultCompact(-1.0f, "Font Size", &ProjectFile::Instance()->m_SelectedFont->m_FontSize, 7, 50, defaultFontInfosValues.m_FontSize);
 
 			if (FontInfos::m_RasterizerMode == RasterizerEnum::RASTERIZER_STB)
 			{
-				needFontReGen |= ImGui::SliderIntDefaultCompact(-1.0f, "Font Anti-aliasing", &vProjectFile->m_SelectedFont->m_Oversample, 1, 5, defaultFontInfosValues.m_Oversample);
+				needFontReGen |= ImGui::SliderIntDefaultCompact(-1.0f, "Font Anti-aliasing", &ProjectFile::Instance()->m_SelectedFont->m_Oversample, 1, 5, defaultFontInfosValues.m_Oversample);
 			}
 			else if (FontInfos::m_RasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
 			{
@@ -550,10 +550,10 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 
 		if (needFontReGen)
 		{
-			vProjectFile->m_SelectedFont->m_FontSize = ct::clamp(vProjectFile->m_SelectedFont->m_FontSize, 7, 50);
-			vProjectFile->m_SelectedFont->m_Oversample = ct::clamp(vProjectFile->m_SelectedFont->m_Oversample, 1, 5);
-			ParamsPane::Instance()->OpenFont(vProjectFile, vProjectFile->m_SelectedFont->m_FontFilePathName, false);
-			vProjectFile->SetProjectChange();
+			ProjectFile::Instance()->m_SelectedFont->m_FontSize = ct::clamp(ProjectFile::Instance()->m_SelectedFont->m_FontSize, 7, 50);
+			ProjectFile::Instance()->m_SelectedFont->m_Oversample = ct::clamp(ProjectFile::Instance()->m_SelectedFont->m_Oversample, 1, 5);
+			ParamsPane::Instance()->OpenFont(ProjectFile::Instance()->m_SelectedFont->m_FontFilePathName, false);
+			ProjectFile::Instance()->SetProjectChange();
 		}
 	}
 }
@@ -687,16 +687,14 @@ void FontInfos::UpdateFiltering()
 	}
 }
 
-void FontInfos::ClearTransforms(ProjectFile* vProjectFile)
+void FontInfos::ClearTransforms()
 {
-	ClearTranslations(vProjectFile);
-	ClearScales(vProjectFile);
+	ClearTranslations();
+	ClearScales();
 }
 
-void FontInfos::ClearScales(ProjectFile* vProjectFile)
+void FontInfos::ClearScales()
 {
-	if (vProjectFile)
-	{
 		for (auto glyph : m_SelectedGlyphs)
 		{
 			if (glyph.second)
@@ -706,14 +704,11 @@ void FontInfos::ClearScales(ProjectFile* vProjectFile)
 			}
 		}
 
-		vProjectFile->SetProjectChange();
-	}
+		ProjectFile::Instance()->SetProjectChange();
 }
 
-void FontInfos::ClearTranslations(ProjectFile* vProjectFile)
+void FontInfos::ClearTranslations()
 {
-	if (vProjectFile)
-	{
 		for (auto glyph : m_SelectedGlyphs)
 		{
 			if (glyph.second)
@@ -723,8 +718,7 @@ void FontInfos::ClearTranslations(ProjectFile* vProjectFile)
 			}
 		}
 
-		vProjectFile->SetProjectChange();
-	}
+		ProjectFile::Instance()->SetProjectChange();
 }
 
 ImFont* FontInfos::GetImFont()

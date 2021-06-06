@@ -41,9 +41,9 @@ DebugPane::~DebugPane() = default;
 //// OVERRIDES ////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void DebugPane::Init()
+bool DebugPane::Init()
 {
-	
+	return true;
 }
 
 void DebugPane::Unit()
@@ -51,23 +51,22 @@ void DebugPane::Unit()
 
 }
 
-int DebugPane::DrawPanes(ProjectFile * vProjectFile, int vWidgetId)
+int DebugPane::DrawPanes(int vWidgetId, std::string vUserDatas)
 {
-	paneWidgetId = vWidgetId;
+	m_PaneWidgetId = vWidgetId;
 
-	DrawDebugPane(vProjectFile);
+	DrawDebugPane();
 
-	return paneWidgetId;
+	return m_PaneWidgetId;
 }
 
-void DebugPane::DrawDialogsAndPopups(ProjectFile* /*vProjectFile*/)
+void DebugPane::DrawDialogsAndPopups(std::string vUserDatas)
 {
 
 }
 
-int DebugPane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas)
+int DebugPane::DrawWidgets(int vWidgetId, std::string vUserDatas)
 {
-	UNUSED(vProjectFile);
 	UNUSED(vUserDatas);
 
 	return vWidgetId;
@@ -77,12 +76,12 @@ int DebugPane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string
 //// PRIVATE //////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void DebugPane::DrawDebugPane(ProjectFile *vProjectFile)
+void DebugPane::DrawDebugPane()
 {
-	if (LayoutManager::m_Pane_Shown & PaneFlags::PANE_DEBUG)
+	if (LayoutManager::Instance()->m_Pane_Shown & m_PaneFlag)
 	{
-		if (ImGui::Begin<PaneFlags>(DEBUG_PANE,
-			&LayoutManager::m_Pane_Shown, PaneFlags::PANE_DEBUG,
+		if (ImGui::BeginFlag<PaneFlags>(m_PaneName,
+			&LayoutManager::Instance()->m_Pane_Shown, m_PaneFlag,
 			//ImGuiWindowFlags_NoTitleBar |
 			//ImGuiWindowFlags_MenuBar |
 			//ImGuiWindowFlags_NoMove |
@@ -90,11 +89,11 @@ void DebugPane::DrawDebugPane(ProjectFile *vProjectFile)
 			//ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoBringToFrontOnFocus))
 		{
-			if (vProjectFile &&  vProjectFile->IsLoaded())
+			if (ProjectFile::Instance()->IsLoaded())
 			{
-				if (LayoutManager::Instance()->IsSpecificPaneFocused(PaneFlags::PANE_GLYPH))
+				if (LayoutManager::Instance()->IsSpecificPaneFocused(m_PaneFlag))
 				{
-					DrawDebugGlyphPane(vProjectFile);
+					DrawDebugGlyphPane();
 				}
 			}
 		}
@@ -161,7 +160,7 @@ void DebugPane::DrawGlyphCurrentPoint(float vPreviewScale, ImVec2 vScreenPos, Im
 	}*/
 }
 
-void DebugPane::DrawDebugGlyphPane(ProjectFile* /*vProjectFile*/)
+void DebugPane::DrawDebugGlyphPane()
 {
 	if (!m_GlyphToDisplay.expired())
 	{
@@ -174,7 +173,7 @@ void DebugPane::DrawDebugGlyphPane(ProjectFile* /*vProjectFile*/)
 				int _c = 0;
 				for (auto& co : g->coords)
 				{
-					ImGui::PushID(++paneWidgetId);
+					ImGui::PushID(++m_PaneWidgetId);
 					ImGui::SetNextItemOpen(true);
 					bool res = ImGui::CollapsingHeader_SmallHeight("Contour", 0.7f, -1, true);
 					ImGui::PopID();

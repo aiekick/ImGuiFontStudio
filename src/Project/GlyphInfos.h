@@ -33,7 +33,6 @@ class GlyphDisplayHelper
 {
 public:
 	static int CalcGlyphsCountAndSize(			/* return new glyph count x				*/
-		ProjectFile* vProjectFile,				/* project file for save some vars		*/
 		ImVec2* vCellSize,						/* cell size							*/
 		ImVec2* vGlyphSize,						/* glyph size (cell - paddings)			*/
 		bool vGlyphEdited = false,				/* in edition							*/
@@ -155,12 +154,12 @@ public:
 		std::string vNewName, uint32_t vNewCodePoint = 0,
 		ImVec2 vTranslation = ImVec2(0, 0), ImVec2 vScale = ImVec2(1, 1));
 	static void GetGlyphButtonColorsForCodePoint(
-		ProjectFile* vProjectFile, bool vShowRangeColoring,
+		bool vShowRangeColoring,
 		CodePoint vCurCdp, CodePoint vLastCdp, ImVec4* vOut3StateColors);
 	// 0 => none, 1 => left pressed, 2 => right pressed
 	static int DrawGlyphButton(
 		int& vWidgetPushId, // by adress because we want modify it
-		ProjectFile* vProjectFile, ImFont* vFont,
+		ImFont* vFont,
 		bool* vSelected, ImVec2 vGlyphSize, const ImFontGlyph* vGlyph,
 		ImVec4 vGlyphButtonStateColor[3], bool vColored = false,
 		ImVec2 vTranslation = ImVec2(0, 0), ImVec2 vScale = ImVec2(1, 1),

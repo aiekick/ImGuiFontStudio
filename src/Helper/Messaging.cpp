@@ -98,14 +98,14 @@ bool Messaging::DrawMessage(const Messagekey& vMsg)
 ///// PUBLIC //////////////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
 
-void Messaging::Draw(ProjectFile *vProjectFile)
+void Messaging::Draw()
 {
 	ImGui::Text("Messages :");
 
 	if (ImGui::MenuItem(ICON_IGFS_REFRESH "##Refresh"))
 	{
 		Messaging::Instance()->Clear();
-		SelectionHelper::Instance()->AnalyseSourceSelection(vProjectFile);
+		SelectionHelper::Instance()->AnalyseSourceSelection();
 	}
 
 	if (!m_Messages.empty())

@@ -39,16 +39,16 @@ void FontTestInfos::Clear()
 	m_TestFont.reset();
 }
 
-void FontTestInfos::Load(ProjectFile* vProjectFile)
+void FontTestInfos::Load()
 {
-	if (vProjectFile && vProjectFile->IsLoaded())
+	if (ProjectFile::Instance()->IsLoaded())
 	{
 		m_GlyphToInsert.clear();
 		if (!m_GlyphToInsert_ToLoad.empty())
 		{
 			for (auto ficdp_toload : m_GlyphToInsert_ToLoad)
 			{
-				auto font = vProjectFile->GetFontWithFontName(ficdp_toload.second.second);
+				auto font = ProjectFile::Instance()->GetFontWithFontName(ficdp_toload.second.second);
 				if (font)
 				{
 					FontInfosCodePoint ficdp;
@@ -61,7 +61,7 @@ void FontTestInfos::Load(ProjectFile* vProjectFile)
 			m_GlyphToInsert_ToLoad.clear();
 		}
 
-		m_TestFont = vProjectFile->GetFontWithFontName(m_TestFontName);
+		m_TestFont = ProjectFile::Instance()->GetFontWithFontName(m_TestFontName);
 	}
 }
 

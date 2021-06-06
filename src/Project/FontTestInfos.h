@@ -41,7 +41,7 @@ public: // to save
 	
 public: // callable
 	void Clear();
-	void Load(ProjectFile *vProjectFile);
+	void Load();
 	void ResizeInsertedGlyphs(uint32_t vPos, bool vExpandOrReduce);
 
 public: // Configuration

@@ -44,9 +44,9 @@ ParamsPane::~ParamsPane() = default;
 //// OVERRIDES ////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void ParamsPane::Init()
+bool ParamsPane::Init()
 {
-	
+	return true;
 }
 
 void ParamsPane::Unit()
@@ -54,18 +54,18 @@ void ParamsPane::Unit()
 
 }
 
-int ParamsPane::DrawPanes(ProjectFile * vProjectFile, int vWidgetId)
+int ParamsPane::DrawPanes(int vWidgetId, std::string vUserDatas)
 {
-	paneWidgetId = vWidgetId;
+	m_PaneWidgetId = vWidgetId;
 
-	DrawParamsPane(vProjectFile);
+	DrawParamsPane();
 
-	return paneWidgetId;
+	return m_PaneWidgetId;
 }
 
-void ParamsPane::DrawDialogsAndPopups(ProjectFile * vProjectFile)
+void ParamsPane::DrawDialogsAndPopups(std::string vUserDatas)
 {
-	if (vProjectFile && vProjectFile->IsLoaded())
+	if (ProjectFile::Instance()->IsLoaded())
 	{
 		ImVec2 min = MainFrame::Instance()->m_DisplaySize * 0.5f;
 		ImVec2 max = MainFrame::Instance()->m_DisplaySize;
@@ -74,7 +74,7 @@ void ParamsPane::DrawDialogsAndPopups(ProjectFile * vProjectFile)
 		{
 			if (ImGuiFileDialog::Instance()->IsOk())
 			{
-				OpenFonts(vProjectFile, ImGuiFileDialog::Instance()->GetSelection());
+				OpenFonts(ImGuiFileDialog::Instance()->GetSelection());
 			}
 
 			ImGuiFileDialog::Instance()->Close();
@@ -104,9 +104,8 @@ void ParamsPane::DrawDialogsAndPopups(ProjectFile * vProjectFile)
 	}
 }
 
-int ParamsPane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas)
+int ParamsPane::DrawWidgets(int vWidgetId, std::string vUserDatas)
 {
-	UNUSED(vProjectFile);
 	UNUSED(vUserDatas);
 
 	return vWidgetId;
@@ -116,12 +115,12 @@ int ParamsPane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::strin
 //// PRIVATE : PANES //////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
+void ParamsPane::DrawParamsPane()
 {
-	if (LayoutManager::m_Pane_Shown & PaneFlags::PANE_PARAM)
+	if (LayoutManager::Instance()->m_Pane_Shown & m_PaneFlag)
 	{
-		if (ImGui::Begin<PaneFlags>(PARAM_PANE,
-			&LayoutManager::m_Pane_Shown, PaneFlags::PANE_PARAM,
+		if (ImGui::BeginFlag<PaneFlags>(m_PaneName,
+			&LayoutManager::Instance()->m_Pane_Shown, m_PaneFlag,
 			//ImGuiWindowFlags_NoTitleBar |
 			//ImGuiWindowFlags_MenuBar |
 			//ImGuiWindowFlags_NoMove |
@@ -129,7 +128,7 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 			//ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoBringToFrontOnFocus))
 		{
-			if (vProjectFile && vProjectFile->IsLoaded())
+			if (ProjectFile::Instance()->IsLoaded())
 			{
 				if (ImGui::BeginFramedGroup("Font File"))
 				{
@@ -141,7 +140,7 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 						Action_Menu_OpenFont();
 					}
 
-					if (!vProjectFile->m_Fonts.empty())
+					if (!ProjectFile::Instance()->m_Fonts.empty())
 					{
 						ImGui::SameLine();
 
@@ -168,7 +167,7 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 							ImGui::TableSetupColumn("Edit", ImGuiTableColumnFlags_WidthFixed, 32, 1);
 							ImGui::TableHeadersRow();
 							
-							for (const auto& itFont : vProjectFile->m_Fonts) // importnat need to sahre by address for the userdatas when need to resolve
+							for (const auto& itFont : ProjectFile::Instance()->m_Fonts) // importnat need to sahre by address for the userdatas when need to resolve
 							{
 								bool sel = false;
 
@@ -181,7 +180,7 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 
 									ImGuiSelectableFlags selectableFlags = ImGuiSelectableFlags_AllowDoubleClick;
 									selectableFlags |= ImGuiSelectableFlags_SpanAllColumns | ImGuiSelectableFlags_AllowItemOverlap;
-									sel = ImGui::Selectable(itFont.first.c_str(), vProjectFile->m_SelectedFont == itFont.second, 
+									sel = ImGui::Selectable(itFont.first.c_str(), ProjectFile::Instance()->m_SelectedFont == itFont.second, 
 										selectableFlags, ImVec2(0, 0));
 
 									if (itFont.second->m_NeedFilePathResolve)
@@ -197,7 +196,7 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 								}
 								if (ImGui::TableSetColumnIndex(1)) // second column
 								{
-									ImGui::PushID(++paneWidgetId);
+									ImGui::PushID(++m_PaneWidgetId);
 									if (itFont.second->m_NeedFilePathResolve)
 										ImGui::PushStyleColor(ImGuiCol_Text, ImVec4(1.0f, 1.0f, 0.0f, 0.8f));
 									if (ImGui::TransparentButton((itFont.second->m_NeedFilePathResolve ? ICON_IGFS_WARNING : ICON_IGFS_EDIT), 
@@ -233,7 +232,7 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 								{
 									//if (!itFont.second->m_NeedFilePathResolve)
 									{
-										SelectFont(vProjectFile, itFont.second);
+										SelectFont(itFont.second);
 									}
 								}
 							}
@@ -244,11 +243,11 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 					ImGui::EndFramedGroup();
 				}
 
-				if (vProjectFile->m_SelectedFont)
+				if (ProjectFile::Instance()->m_SelectedFont)
 				{
-					vProjectFile->m_SelectedFont->DrawInfos(vProjectFile);
+					ProjectFile::Instance()->m_SelectedFont->DrawInfos();
 
-					LayoutManager::Instance()->DrawWidgets(vProjectFile, 0, "");
+					LayoutManager::Instance()->DrawWidgets(0, "");
 
 					if (ImGui::BeginFramedGroup("Glyphs"))
 					{
@@ -256,17 +255,17 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 
 						bool change = false;
 
-						change |= ImGui::RadioButtonLabeled(mrw, "Zoom", "Zoom Each Glyphs for best fit", &vProjectFile->m_ZoomGlyphs);
+						change |= ImGui::RadioButtonLabeled(mrw, "Zoom", "Zoom Each Glyphs for best fit", ProjectFile::Instance()->m_ZoomGlyphs);
 						ImGui::SameLine();
-						change |= ImGui::RadioButtonLabeled(mrw, "Base", "Show the base line of the font", &vProjectFile->m_ShowBaseLine, vProjectFile->m_ZoomGlyphs);
+						change |= ImGui::RadioButtonLabeled(mrw, "Base", "Show the base line of the font", ProjectFile::Instance()->m_ShowBaseLine, ProjectFile::Instance()->m_ZoomGlyphs);
 						ImGui::SameLine();
-						change |= ImGui::RadioButtonLabeled(mrw, "OrgX", "Show the Origin X of the glyph", &vProjectFile->m_ShowOriginX, vProjectFile->m_ZoomGlyphs);
+						change |= ImGui::RadioButtonLabeled(mrw, "OrgX", "Show the Origin X of the glyph", ProjectFile::Instance()->m_ShowOriginX, ProjectFile::Instance()->m_ZoomGlyphs);
 						ImGui::SameLine();
-						change |= ImGui::RadioButtonLabeled(mrw, "AdvX", "Show the Advance X of the glyph", &vProjectFile->m_ShowAdvanceX, vProjectFile->m_ZoomGlyphs);
+						change |= ImGui::RadioButtonLabeled(mrw, "AdvX", "Show the Advance X of the glyph", ProjectFile::Instance()->m_ShowAdvanceX, ProjectFile::Instance()->m_ZoomGlyphs);
 						
 						if (change)
 						{
-							vProjectFile->SetProjectChange();
+							ProjectFile::Instance()->SetProjectChange();
 						}
 
 						ImGui::EndFramedGroup();
@@ -274,38 +273,38 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 
 					if (ImGui::BeginFramedGroup("Font Layout"))
 					{
-						if (vProjectFile->m_SourceFontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH)
+						if (ProjectFile::Instance()->m_SourceFontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH)
 						{
 							static float radioButtonWidth = ImGui::GetFrameHeight();
 							const float aw = ImGui::GetContentRegionAvail().x - radioButtonWidth - ImGui::GetStyle().ItemSpacing.x * 3.0f;
 
 							bool change = false;
-							if (ImGui::SliderIntDefaultCompact(aw, "Glyph Count X", &vProjectFile->m_Preview_Glyph_CountX, 
+							if (ImGui::SliderIntDefaultCompact(aw, "Glyph Count X", &ProjectFile::Instance()->m_Preview_Glyph_CountX, 
 								50, 1, defaultProjectValues.m_Preview_Glyph_CountX))
 							{
 								change = true;
-								vProjectFile->m_GlyphSizePolicyChangeFromWidgetUse = true;
-								vProjectFile->m_GlyphDisplayTuningMode = GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT;
-								vProjectFile->m_Preview_Glyph_CountX = ct::maxi(vProjectFile->m_Preview_Glyph_CountX, 1); // can prevent bugs (like div by zero) everywhere when user input value
+								ProjectFile::Instance()->m_GlyphSizePolicyChangeFromWidgetUse = true;
+								ProjectFile::Instance()->m_GlyphDisplayTuningMode = GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT;
+								ProjectFile::Instance()->m_Preview_Glyph_CountX = ct::maxi(ProjectFile::Instance()->m_Preview_Glyph_CountX, 1); // can prevent bugs (like div by zero) everywhere when user input value
 							}
 							ImGui::SameLine();
 							if (ImGui::RadioButtonLabeled_BitWize<GlyphDisplayTuningModeFlags>(radioButtonWidth,
 								ICON_IGFS_USED "##GlypCountIsMaster",
 								ICON_IGFS_NOT_USED "##GlypCountIsMaster",
 								"Apply Glyph Count Policy when Resized",
-								&vProjectFile->m_GlyphDisplayTuningMode, GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT, true))
+								&ProjectFile::Instance()->m_GlyphDisplayTuningMode, GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT, true))
 							{
-								vProjectFile->SetProjectChange();
+								ProjectFile::Instance()->SetProjectChange();
 							}
 							radioButtonWidth = ImGui::GetItemRectSize().x;
 
-							if (ImGui::SliderFloatDefaultCompact(aw, "Glyph Width", &vProjectFile->m_Preview_Glyph_Width, 10.0f,
+							if (ImGui::SliderFloatDefaultCompact(aw, "Glyph Width", &ProjectFile::Instance()->m_Preview_Glyph_Width, 10.0f,
 								300.0f, defaultProjectValues.m_Preview_Glyph_Width))
 							{
 								change = true;
-								vProjectFile->m_GlyphSizePolicyChangeFromWidgetUse = true;
-								vProjectFile->m_GlyphDisplayTuningMode = GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_SIZE;
-								vProjectFile->m_Preview_Glyph_Width = ct::maxi(vProjectFile->m_Preview_Glyph_Width, 10.0f); // can prevent bugs (like div by zero) everywhere when user input value
+								ProjectFile::Instance()->m_GlyphSizePolicyChangeFromWidgetUse = true;
+								ProjectFile::Instance()->m_GlyphDisplayTuningMode = GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_SIZE;
+								ProjectFile::Instance()->m_Preview_Glyph_Width = ct::maxi(ProjectFile::Instance()->m_Preview_Glyph_Width, 10.0f); // can prevent bugs (like div by zero) everywhere when user input value
 							}
 
 							ImGui::SameLine();
@@ -313,24 +312,24 @@ void ParamsPane::DrawParamsPane(ProjectFile *vProjectFile)
 								ICON_IGFS_USED "##GlypSizeIsMaster",
 								ICON_IGFS_NOT_USED "##GlypSizeIsMaster",
 								"Policy to be applied When resized :\n1) Glyph Width Policy\n2) Glyph Count Policy",
-								&vProjectFile->m_GlyphDisplayTuningMode, GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_SIZE, true))
+								&ProjectFile::Instance()->m_GlyphDisplayTuningMode, GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_SIZE, true))
 							{
-								vProjectFile->SetProjectChange();
+								ProjectFile::Instance()->SetProjectChange();
 							}
 							
 							ImGui::FramedGroupSeparator();
 
-							ImGui::Checkbox("Differential Colorations", &vProjectFile->m_ShowRangeColoring);
-							if (vProjectFile->IsRangeColoringShown())
+							ImGui::Checkbox("Differential Colorations", &ProjectFile::Instance()->m_ShowRangeColoring);
+							if (ProjectFile::Instance()->IsRangeColoringShown())
 							{
-								change |= ImGui::SliderFloatDefaultCompact(-1.0f, "H x", &vProjectFile->m_RangeColoringHash.x, 0, 50, defaultProjectValues.m_RangeColoringHash.x);
-								change |= ImGui::SliderFloatDefaultCompact(-1.0f, "H y", &vProjectFile->m_RangeColoringHash.y, 0, 50, defaultProjectValues.m_RangeColoringHash.y);
-								change |= ImGui::SliderFloatDefaultCompact(-1.0f, "H z", &vProjectFile->m_RangeColoringHash.z, 0, 50, defaultProjectValues.m_RangeColoringHash.z);
-								//change |= ImGui::SliderFloatDefaultCompact(-1.0f, "Alpha", &vProjectFile->m_RangeColoringHash.w, 0, 1, defaultProjectValues.m_RangeColoringHash.w);
+								change |= ImGui::SliderFloatDefaultCompact(-1.0f, "H x", &ProjectFile::Instance()->m_RangeColoringHash.x, 0, 50, defaultProjectValues.m_RangeColoringHash.x);
+								change |= ImGui::SliderFloatDefaultCompact(-1.0f, "H y", &ProjectFile::Instance()->m_RangeColoringHash.y, 0, 50, defaultProjectValues.m_RangeColoringHash.y);
+								change |= ImGui::SliderFloatDefaultCompact(-1.0f, "H z", &ProjectFile::Instance()->m_RangeColoringHash.z, 0, 50, defaultProjectValues.m_RangeColoringHash.z);
+								//change |= ImGui::SliderFloatDefaultCompact(-1.0f, "Alpha", ProjectFile::Instance()->m_RangeColoringHash.w, 0, 1, defaultProjectValues.m_RangeColoringHash.w);
 							}
 
 							if (change)
-								vProjectFile->SetProjectChange();
+								ProjectFile::Instance()->SetProjectChange();
 						}
 
 						ImGui::EndFramedGroup();
@@ -397,11 +396,11 @@ close font :
 					prj->m_Fonts.erase(prj->m_SelectedFont->m_FontFileName);
 					if (!prj->m_Fonts.empty())
 					{
-						SelectFont(prj, prj->m_Fonts.begin()->second);
+						SelectFont(prj->m_Fonts.begin()->second);
 					}
 					else
 					{
-						SelectFont(prj, nullptr);
+						SelectFont(nullptr);
 					}
 					prj->SetProjectChange();
 				}
@@ -468,51 +467,51 @@ bool ParamsPane::Display_ConfirmToCloseFont_Dialog()
 //// FONT ////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
-void ParamsPane::OpenFonts(ProjectFile *vProjectFile, const std::map<std::string, std::string>& vFontFilePathNames)
+void ParamsPane::OpenFonts( const std::map<std::string, std::string>& vFontFilePathNames)
 {
-	if (vProjectFile && vProjectFile->IsLoaded())
+	if (ProjectFile::Instance()->IsLoaded())
 	{
 		bool res = false;
 		for (auto & it : vFontFilePathNames)
 		{
-			res |= OpenFont(vProjectFile, it.second, false);
+			res |= OpenFont(it.second, false);
 		}
 
 		if (res) // si au moins est bon
-			vProjectFile->UpdateCountSelectedGlyphs();
+			ProjectFile::Instance()->UpdateCountSelectedGlyphs();
 	}
 }
 
-bool ParamsPane::OpenFont(ProjectFile *vProjectFile, const std::string& vFontFilePathName, bool vUpdateCount)
+bool ParamsPane::OpenFont( const std::string& vFontFilePathName, bool vUpdateCount)
 {
 	bool res = false;
 
-	if (vProjectFile && vProjectFile->IsLoaded())
+	if (ProjectFile::Instance()->IsLoaded())
 	{
 		auto ps = FileHelper::Instance()->ParsePathFileName(vFontFilePathName);
 		if (ps.isOk)
 		{
 			std::string fontName = ps.name + "." + ps.ext;
 
-			if (vProjectFile->m_Fonts.find(fontName) == vProjectFile->m_Fonts.end())
+			if (ProjectFile::Instance()->m_Fonts.find(fontName) == ProjectFile::Instance()->m_Fonts.end())
 			{
 				// create font 
-				vProjectFile->m_Fonts[fontName] = FontInfos::Create();
+				ProjectFile::Instance()->m_Fonts[fontName] = FontInfos::Create();
 			}
 						
-			auto font = vProjectFile->m_Fonts[fontName];
+			auto font = ProjectFile::Instance()->m_Fonts[fontName];
 			if (font)
 			{
-				if (font->LoadFont(vProjectFile, vFontFilePathName))
+				if (font->LoadFont(vFontFilePathName))
 				{
-					if (vProjectFile->m_FontToMergeIn.empty() ||
-						vProjectFile->m_FontToMergeIn == font->m_FontFileName)
+					if (ProjectFile::Instance()->m_FontToMergeIn.empty() ||
+						ProjectFile::Instance()->m_FontToMergeIn == font->m_FontFileName)
 					{
-						SelectFont(vProjectFile, font);
+						SelectFont(font);
 					}
 
 					if (vUpdateCount)
-						vProjectFile->UpdateCountSelectedGlyphs();
+						ProjectFile::Instance()->UpdateCountSelectedGlyphs();
 
 					res = true;
 				}
@@ -523,16 +522,16 @@ bool ParamsPane::OpenFont(ProjectFile *vProjectFile, const std::string& vFontFil
 	return res;
 }
 
-void ParamsPane::SelectFont(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos)
+void ParamsPane::SelectFont( std::shared_ptr<FontInfos> vFontInfos)
 {
-	if (vProjectFile && vProjectFile->IsLoaded())
+	if (ProjectFile::Instance()->IsLoaded())
 	{
-		vProjectFile->m_SelectedFont = vFontInfos;
+		ProjectFile::Instance()->m_SelectedFont = vFontInfos;
 		if (vFontInfos.use_count())
 		{
-			vProjectFile->m_FontToMergeIn = vFontInfos->m_FontFileName;
+			ProjectFile::Instance()->m_FontToMergeIn = vFontInfos->m_FontFileName;
 		}
-		vProjectFile->SetProjectChange();
+		ProjectFile::Instance()->SetProjectChange();
 	}
 }
 

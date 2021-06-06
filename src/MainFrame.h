@@ -22,6 +22,7 @@
 #include <ctools/ConfigAbstract.h>
 #include <Project/ProjectFile.h>
 #include <Helper/FrameActionSystem.h>
+#include <globals.h>
 
 #if VULKAN
 	#include <vulkan/imgui_impl_vulkan_user_texture.h>
@@ -123,7 +124,6 @@ public:
 #endif
 
 private:
-	ProjectFile m_ProjectFile;				// project file
 	bool m_ShowAboutDialog = false;			// show about dlg
 	bool m_NeedToCloseApp = false;			// whenn app closing app is required
 	bool m_SaveDialogIfRequired = false;	// open save options dialog (save / save as / continue without saving / cancel)
@@ -154,7 +154,6 @@ public: // drop
 	void JustDropFiles(int count, const char** paths);
 
 private: // imgui pane / dialogs
-	void DrawDockPane(ImVec2 vPos, ImVec2 vSize);
 	void DisplayDialogsAndPopups();
 	void ShowAboutDialog(bool *vOpen);
 	void DrawMainMenuBar();

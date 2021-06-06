@@ -33,16 +33,16 @@ private:
 	ImVec4 m_GlyphButtonStateColor[3] = { ImVec4(), ImVec4(), ImVec4() };
 
 public:
-	void Init() override;
+	bool Init() override;
 	void Unit() override;
-	int DrawPanes(ProjectFile* vProjectFile, int vWidgetId) override;
-	void DrawDialogsAndPopups(ProjectFile* vProjectFile) override;
-	int DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas) override;
+	int DrawPanes(int vWidgetId, std::string vUserDatas)  override;
+	void DrawDialogsAndPopups(std::string vUserDatas) override;
+	int DrawWidgets(int vWidgetId, std::string vUserDatas)  override;
 	
 private:
-	void DrawFontPreviewPane(ProjectFile *vProjectFile);
-	void DrawMixerWidget(ProjectFile* vProjectFile);
-	void DrawMixedFontResult(ProjectFile* vProjectFile);
+	void DrawFontPreviewPane();
+	void DrawMixerWidget();
+	void DrawMixedFontResult();
 
 public: // singleton
 	static FontPreviewPane *Instance()

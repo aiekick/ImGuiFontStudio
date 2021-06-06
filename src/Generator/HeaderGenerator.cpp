@@ -211,12 +211,11 @@ two modes :
 */
 void HeaderGenerator::GenerateHeader_One(
 	const std::string& vFilePathName, 
-	ProjectFile* vProjectFile,
 	std::shared_ptr<FontInfos> vFontInfos,
 	std::string vFontBufferName, // for header generation wehn using a cpp bytes array instead of a file
 	size_t vFontBufferSize) // for header generation wehn using a cpp bytes array instead of a file
 {
-	if (vProjectFile && !vFilePathName.empty() && vFontInfos.use_count())
+	if (!vFilePathName.empty() && vFontInfos.use_count())
 	{
 		std::string filePathName = vFilePathName;
 		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
@@ -241,17 +240,17 @@ void HeaderGenerator::GenerateHeader_One(
 			}
 
 			std::string lang, headerExt;
-			if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C))
+			if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_LANG_C))
 			{
 				lang = "c";
 				headerExt = "h";
 			}
-			else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
+			else if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_LANG_CPP))
 			{
 				lang = "cpp";
 				headerExt = "h";
 			}
-			else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
+			else if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
 			{
 				lang = "c#";
 				headerExt = "cs";
@@ -276,7 +275,7 @@ void HeaderGenerator::GenerateHeader_One(
 				Messaging::Instance()->AddError(true, nullptr, nullptr, "Language not set for : %s", vFilePathName.c_str());
 			}
 
-			if (vProjectFile->IsGenMode(GENERATOR_MODE_OPEN_GENERATED_FILES_AUTO))
+			if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_OPEN_GENERATED_FILES_AUTO))
 				FileHelper::Instance()->OpenFile(filePathName);
 		}
 		else
@@ -288,11 +287,10 @@ void HeaderGenerator::GenerateHeader_One(
 
 void HeaderGenerator::GenerateHeader_Merged(
 	const std::string& vFilePathName,
-	ProjectFile* vProjectFile,
 	std::string vFontBufferName, // for header generation wehn using a cpp bytes array instead of a file
 	size_t vFontBufferSize) // for header generation wehn using a cpp bytes array instead of a file
 {
-	if (vProjectFile && !vFilePathName.empty() && !vProjectFile->m_Fonts.empty())
+	if (!vFilePathName.empty() && !ProjectFile::Instance()->m_Fonts.empty())
 	{
 		std::string filePathName = vFilePathName;
 		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
@@ -304,7 +302,7 @@ void HeaderGenerator::GenerateHeader_Merged(
 			
 			// we take only selected glyphs of all fonts
 			std::map<std::string, uint32_t> glyphNames;
-			for (const auto font : vProjectFile->m_Fonts)
+			for (const auto font : ProjectFile::Instance()->m_Fonts)
 				for (const auto& glyph : font.second->m_SelectedGlyphs)
 					if (glyph.second)
 						glyphNames[glyph.second->newHeaderName] = glyph.second->newCodePoint;
@@ -319,17 +317,17 @@ void HeaderGenerator::GenerateHeader_Merged(
 			}
 
 			std::string lang, headerExt;
-			if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C))
+			if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_LANG_C))
 			{
 				lang = "c";
 				headerExt = "h";
 			}
-			else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
+			else if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_LANG_CPP))
 			{
 				lang = "cpp";
 				headerExt = "h";
 			}
-			else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
+			else if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
 			{
 				lang = "c#";
 				headerExt = "cs";
@@ -343,7 +341,7 @@ void HeaderGenerator::GenerateHeader_Merged(
 				/////////////////////
 				// header generation
 				std::string headerFile = GenerateHeaderFile(
-					lang, vProjectFile->m_MergedFontPrefix,
+					lang, ProjectFile::Instance()->m_MergedFontPrefix,
 					ps.name + "." + ps.ext,
 					vFontBufferName, vFontBufferSize);
 				FileHelper::Instance()->SaveStringToFile(headerFile, filePathName);
@@ -354,7 +352,7 @@ void HeaderGenerator::GenerateHeader_Merged(
 				Messaging::Instance()->AddError(true, nullptr, nullptr, "Language not set for : %s", vFilePathName.c_str());
 			}
 
-			if (vProjectFile->IsGenMode(GENERATOR_MODE_OPEN_GENERATED_FILES_AUTO))
+			if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_OPEN_GENERATED_FILES_AUTO))
 				FileHelper::Instance()->OpenFile(filePathName);
 		}
 		else

@@ -35,37 +35,36 @@
  ///////////////////////////////////////////////////////////////////////////////////
 
 int GlyphDisplayHelper::CalcGlyphsCountAndSize(
-	ProjectFile* vProjectFile,				/* project file for save some vars  */
 	ImVec2* vCellSize,						/* cell size						*/
 	ImVec2* vGlyphSize,						/* glyph size (cell - paddings)		*/
 	bool vGlyphEdited,						/* in edition						*/
 	bool vForceEditMode,					/* edition forced					*/
 	bool vForceEditModeOneColumn			/* edition in one column			*/)
 {
-	if (vProjectFile && vCellSize && vGlyphSize)
+	if (vCellSize && vGlyphSize)
 	{
 		float aw = ImGui::GetContentRegionAvail().x;
 		
-		int glyphCount = vProjectFile->m_Preview_Glyph_CountX;
-		float glyphWidth = (float)vProjectFile->m_Preview_Glyph_Width;
+		int glyphCount = ProjectFile::Instance()->m_Preview_Glyph_CountX;
+		float glyphWidth = (float)ProjectFile::Instance()->m_Preview_Glyph_Width;
 		
 		// GlyphSize est Menant, puis glyphCount est appliqué
-		if (vProjectFile->m_GlyphDisplayTuningMode & GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_SIZE)
+		if (ProjectFile::Instance()->m_GlyphDisplayTuningMode & GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_SIZE)
 		{
 			glyphCount = (int)(aw / ct::maxi(glyphWidth, 1.0f));
 			glyphWidth = aw / (float)ct::maxi(glyphCount, 1);
-			if (vProjectFile->m_GlyphSizePolicyChangeFromWidgetUse)
+			if (ProjectFile::Instance()->m_GlyphSizePolicyChangeFromWidgetUse)
 			{
-				vProjectFile->m_Preview_Glyph_CountX = glyphCount;
+				ProjectFile::Instance()->m_Preview_Glyph_CountX = glyphCount;
 			}
 		}
 		// GlyphCount est Menant, dont m_Preview_Glyph_CountX n'est jamais réécrit en dehors du user
-		else if (vProjectFile->m_GlyphDisplayTuningMode & GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT)
+		else if (ProjectFile::Instance()->m_GlyphDisplayTuningMode & GlyphDisplayTuningModeFlags::GLYPH_DISPLAY_TUNING_MODE_GLYPH_COUNT)
 		{
 			glyphWidth = aw / (float)ct::maxi(glyphCount, 1);
-			if (vProjectFile->m_GlyphSizePolicyChangeFromWidgetUse)
+			if (ProjectFile::Instance()->m_GlyphSizePolicyChangeFromWidgetUse)
 			{
-				vProjectFile->m_Preview_Glyph_Width = glyphWidth;
+				ProjectFile::Instance()->m_Preview_Glyph_Width = glyphWidth;
 			}
 		}
 			
@@ -930,15 +929,15 @@ void GlyphInfos::SetFontInfos(std::weak_ptr<FontInfos> vFontInfos)
 	}
 }
 
-void GlyphInfos::GetGlyphButtonColorsForCodePoint(ProjectFile* vProjectFile, bool vShowRangeColoring, CodePoint vCurCdp, CodePoint vLastCdp, ImVec4* vOut3StateColors)
+void GlyphInfos::GetGlyphButtonColorsForCodePoint(bool vShowRangeColoring, CodePoint vCurCdp, CodePoint vLastCdp, ImVec4* vOut3StateColors)
 {
-	if (vProjectFile && vOut3StateColors)
+	if (vOut3StateColors)
 	{
 		if (vShowRangeColoring)
 		{
 			if (vCurCdp != vLastCdp + 1)
 			{
-				vOut3StateColors[0] = vProjectFile->GetColorFromInteger(vCurCdp);
+				vOut3StateColors[0] = ProjectFile::Instance()->GetColorFromInteger(vCurCdp);
 			}
 			vOut3StateColors[2] = vOut3StateColors[1] = vOut3StateColors[0];
 			vOut3StateColors[1].w = 0.75f;
@@ -955,7 +954,7 @@ void GlyphInfos::GetGlyphButtonColorsForCodePoint(ProjectFile* vProjectFile, boo
 
 int GlyphInfos::DrawGlyphButton(
 	int &vWidgetPushId, // by adress because we want modify it
-	ProjectFile* vProjectFile, ImFont* vFont,
+	ImFont* vFont,
 	bool* vSelected, ImVec2 vGlyphSize, const ImFontGlyph *vGlyph,
 	ImVec4 vGlyphButtonStateColor[3], bool vColored,
 	ImVec2 vTranslation, ImVec2 vScale,
@@ -1050,20 +1049,20 @@ int GlyphInfos::DrawGlyphButton(
 		ImVec2 trans = vTranslation * pScale;
 		ImVec2 scale = vScale;
 
-		if (!vProjectFile->m_ZoomGlyphs)
+		if (!ProjectFile::Instance()->m_ZoomGlyphs)
 		{
-			if (vProjectFile->m_ShowBaseLine)// draw base line
+			if (ProjectFile::Instance()->m_ShowBaseLine)// draw base line
 			{
 				float asc = vFont->Ascent * pScale.y;
 				window->DrawList->AddLine(ImVec2(bb.Min.x, bb.Min.y + asc), ImVec2(bb.Max.x, bb.Min.y + asc), ImGui::GetColorU32(ImGuiCol_PlotHistogram), 2.0f); // base line
 			}
 
-			if (vProjectFile->m_ShowOriginX) // draw origin x
+			if (ProjectFile::Instance()->m_ShowOriginX) // draw origin x
 			{
 				window->DrawList->AddLine(ImVec2(bb.Min.x + offsetX, bb.Min.y), ImVec2(bb.Min.x + offsetX, bb.Max.y), ImGui::GetColorU32(ImGuiCol_PlotLinesHovered), 2.0f); // base line
 			}
 
-			if (vProjectFile->m_ShowAdvanceX) // draw advance X
+			if (ProjectFile::Instance()->m_ShowAdvanceX) // draw advance X
 			{
 				window->DrawList->AddLine(ImVec2(bb.Min.x + adv + offsetX, bb.Min.y), ImVec2(bb.Min.x + adv + offsetX, bb.Max.y), ImGui::GetColorU32(ImGuiCol_PlotLines), 2.0f); // base line
 			}
@@ -1083,7 +1082,7 @@ int GlyphInfos::DrawGlyphButton(
 			textCol,
 			(ImWchar)vGlyph->Codepoint,
 			trans, scale,
-			vProjectFile->m_ZoomGlyphs);
+			ProjectFile::Instance()->m_ZoomGlyphs);
 		
 		ImGui::PopClipRect();
 	}

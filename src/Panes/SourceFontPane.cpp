@@ -45,9 +45,9 @@ SourceFontPane::~SourceFontPane() = default;
 //// OVERRIDES ////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void SourceFontPane::Init()
+bool SourceFontPane::Init()
 {
-	
+	return true;
 }
 
 void SourceFontPane::Unit()
@@ -55,27 +55,27 @@ void SourceFontPane::Unit()
 
 }
 
-int SourceFontPane::DrawPanes(ProjectFile * vProjectFile, int vWidgetId)
+int SourceFontPane::DrawPanes(int vWidgetId, std::string vUserDatas)
 {
-	paneWidgetId = vWidgetId;
+	m_PaneWidgetId = vWidgetId;
 
-	DrawSourceFontPane(vProjectFile);
+	DrawSourceFontPane();
 	
-	return paneWidgetId;
+	return m_PaneWidgetId;
 }
 
-void SourceFontPane::DrawDialogsAndPopups(ProjectFile * vProjectFile)
+void SourceFontPane::DrawDialogsAndPopups(std::string vUserDatas)
 {
-	UNUSED(vProjectFile);
+	
 }
 
-int SourceFontPane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas)
+int SourceFontPane::DrawWidgets(int vWidgetId, std::string vUserDatas)
 {
 	UNUSED(vUserDatas);
 
-	if (vProjectFile && vProjectFile->IsLoaded())
+	if (ProjectFile::Instance()->IsLoaded())
 	{
-		if (LayoutManager::Instance()->IsSpecificPaneFocused(PaneFlags::PANE_SOURCE))
+		if (LayoutManager::Instance()->IsSpecificPaneFocused(m_PaneFlag))
 		{
 			if (ImGui::BeginFramedGroup("Source Font Pane"))
 			{
@@ -86,17 +86,17 @@ int SourceFontPane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::s
 
 				change |= ImGui::RadioButtonLabeled_BitWize<SourceFontPaneFlags>(mrw,
 					ICON_IGFS_GLYPHS " Glyphs", "Show Font Glyphs",
-					&vProjectFile->m_SourceFontPaneFlags, SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH, true);
+					&ProjectFile::Instance()->m_SourceFontPaneFlags, SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH, true);
 
 				ImGui::SameLine();
 
 				change |= ImGui::RadioButtonLabeled_BitWize<SourceFontPaneFlags>(mrw,
 					ICON_IGFS_TEXTURE " Texture", "Show Font Texture",
-					&vProjectFile->m_SourceFontPaneFlags, SourceFontPaneFlags::SOURCE_FONT_PANE_TEXTURE, true);
+					&ProjectFile::Instance()->m_SourceFontPaneFlags, SourceFontPaneFlags::SOURCE_FONT_PANE_TEXTURE, true);
 
 				if (change)
 				{
-					vProjectFile->SetProjectChange();
+					ProjectFile::Instance()->SetProjectChange();
 				}
 
 				ImGui::EndFramedGroup();
@@ -111,12 +111,12 @@ int SourceFontPane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::s
 //// PRIVATE : PANES //////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void SourceFontPane::DrawSourceFontPane(ProjectFile *vProjectFile)
+void SourceFontPane::DrawSourceFontPane()
 {
-	if (LayoutManager::m_Pane_Shown & PaneFlags::PANE_SOURCE)
+	if (LayoutManager::Instance()->m_Pane_Shown & m_PaneFlag)
 	{
-		if (ImGui::Begin<PaneFlags>(SOURCE_PANE,
-			&LayoutManager::m_Pane_Shown, PaneFlags::PANE_SOURCE,
+		if (ImGui::BeginFlag<PaneFlags>(m_PaneName,
+			&LayoutManager::Instance()->m_Pane_Shown, m_PaneFlag,
 			//ImGuiWindowFlags_NoTitleBar |
 			ImGuiWindowFlags_MenuBar |
 			//ImGuiWindowFlags_NoMove |
@@ -124,19 +124,19 @@ void SourceFontPane::DrawSourceFontPane(ProjectFile *vProjectFile)
 			//ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoBringToFrontOnFocus))
 		{
-			if (vProjectFile && vProjectFile->IsLoaded())
+			if (ProjectFile::Instance()->IsLoaded())
 			{
-				if (vProjectFile->m_SelectedFont)
+				if (ProjectFile::Instance()->m_SelectedFont)
 				{
-					if (vProjectFile->m_SourceFontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH)
+					if (ProjectFile::Instance()->m_SourceFontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH)
 					{
 						if (ImGui::BeginMenuBar())
 						{
 							if (ImGui::BeginMenu("Infos"))
 							{
-								if (ImGui::MenuItem("Show Tooltip", "", &vProjectFile->m_SourcePane_ShowGlyphTooltip))
+								if (ImGui::MenuItem("Show Tooltip", "", ProjectFile::Instance()->m_SourcePane_ShowGlyphTooltip))
 								{
-									vProjectFile->SetProjectChange();
+									ProjectFile::Instance()->SetProjectChange();
 								}
 
 								ImGui::EndMenu();
@@ -144,23 +144,23 @@ void SourceFontPane::DrawSourceFontPane(ProjectFile *vProjectFile)
 
 							ImGui::Spacing();
 
-							SelectionHelper::Instance()->DrawSelectionMenu(vProjectFile, SelectionContainerEnum::SELECTION_CONTAINER_SOURCE);
+							SelectionHelper::Instance()->DrawSelectionMenu(SelectionContainerEnum::SELECTION_CONTAINER_SOURCE);
 
 							ImGui::Spacing();
 							
-							if (vProjectFile->m_Preview_Glyph_CountX)
+							if (ProjectFile::Instance()->m_Preview_Glyph_CountX)
 							{
-								DrawFilterBar(vProjectFile, vProjectFile->m_SelectedFont);
+								DrawFilterBar(ProjectFile::Instance()->m_SelectedFont);
 							}
 
 							ImGui::EndMenuBar();
 						}
 						
-						DrawFontAtlas_Virtual(vProjectFile, vProjectFile->m_SelectedFont);
+						DrawFontAtlas_Virtual(ProjectFile::Instance()->m_SelectedFont);
 					}
-					else if (vProjectFile->m_SourceFontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_TEXTURE)
+					else if (ProjectFile::Instance()->m_SourceFontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_TEXTURE)
 					{
-						DrawFontTexture(vProjectFile->m_SelectedFont);
+						DrawFontTexture(ProjectFile::Instance()->m_SelectedFont);
 					}
 				}
 			}
@@ -174,9 +174,9 @@ void SourceFontPane::DrawSourceFontPane(ProjectFile *vProjectFile)
 //// PRIVATE : WIDGETS, VIEW //////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void SourceFontPane::DrawFilterBar(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos)
+void SourceFontPane::DrawFilterBar( std::shared_ptr<FontInfos> vFontInfos)
 {
-	if (vProjectFile && vFontInfos.use_count())
+	if (vFontInfos.use_count())
 	{
 		ImGui::PushID(vFontInfos.get());
 		ImGui::Text("Filters");
@@ -187,7 +187,7 @@ void SourceFontPane::DrawFilterBar(ProjectFile *vProjectFile, std::shared_ptr<Fo
 		{
 			ct::ResetBuffer(vFontInfos->m_SearchBuffer);
 			vFontInfos->m_Filters.clear();
-			vProjectFile->SetProjectChange();
+			ProjectFile::Instance()->SetProjectChange();
 			vFontInfos->UpdateFiltering();
 		}
 		ImGui::PushItemWidth(400);
@@ -203,23 +203,23 @@ void SourceFontPane::DrawFilterBar(ProjectFile *vProjectFile, std::shared_ptr<Fo
 			{
 				vFontInfos->m_Filters.insert(it);
 			}
-			vProjectFile->SetProjectChange();
+			ProjectFile::Instance()->SetProjectChange();
 			vFontInfos->UpdateFiltering();
 		}
 	}
 }
 
-void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos)
+void SourceFontPane::DrawFontAtlas_Virtual( std::shared_ptr<FontInfos> vFontInfos)
 {
 	auto win = ImGui::GetCurrentWindowRead();
 	if (win)
 	{
 		win->DrawList->ChannelsSplit(2);
 
-		if (vProjectFile && vProjectFile->IsLoaded() &&
+		if (ProjectFile::Instance()->IsLoaded() &&
 			vFontInfos.use_count())
 		{
-			vProjectFile->m_Preview_Glyph_CountX = ct::maxi(vProjectFile->m_Preview_Glyph_CountX, 1);
+			ProjectFile::Instance()->m_Preview_Glyph_CountX = ct::maxi(ProjectFile::Instance()->m_Preview_Glyph_CountX, 1);
 
 			if (vFontInfos->m_ImFontAtlas.IsBuilt())
 			{
@@ -228,12 +228,12 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 					if (!vFontInfos->m_FilteredGlyphs.empty())
 					{
 						ImVec2 cell_size, glyph_size;
-						uint32_t glyphCountX = GlyphDisplayHelper::CalcGlyphsCountAndSize(vProjectFile, &cell_size, &glyph_size);
+						uint32_t glyphCountX = GlyphDisplayHelper::CalcGlyphsCountAndSize(&cell_size, &glyph_size);
 						if (glyphCountX)
 						{
 							uint32_t idx = 0, lastGlyphCodePoint = 0;
 							m_GlyphButtonStateColor[0] = ImGui::GetStyleColorVec4(ImGuiCol_Button);
-							bool showRangeColoring = vProjectFile->IsRangeColoringShown();
+							bool showRangeColoring = ProjectFile::Instance()->IsRangeColoringShown();
 							
 							uint32_t countGlyphs = (uint32_t)vFontInfos->m_FilteredGlyphs.size();
 							int rowCount = (int)ct::ceil((double)countGlyphs / (double)glyphCountX);
@@ -259,7 +259,7 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 
 											if (x) ImGui::SameLine();
 
-											GlyphInfos::GetGlyphButtonColorsForCodePoint(vProjectFile, showRangeColoring,
+											GlyphInfos::GetGlyphButtonColorsForCodePoint(showRangeColoring,
 												glyph.Codepoint, lastGlyphCodePoint, m_GlyphButtonStateColor);
 
 											win->DrawList->ChannelsSetCurrent(1);
@@ -275,7 +275,7 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 
 											// draw glyph in channel 0
 											int check = GlyphInfos::DrawGlyphButton(
-												paneWidgetId, vProjectFile, vFontInfos->GetImFont(), 
+												m_PaneWidgetId, vFontInfos->GetImFont(), 
 												&selected, glyph_size, &glyph, m_GlyphButtonStateColor, colored);
 											if (check)
 											{
@@ -283,12 +283,12 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 												// right button  : check == 2
 
 												SelectionHelper::Instance()->SelectWithToolOrApplyOnGlyph(
-													vProjectFile, vFontInfos,
+													vFontInfos,
 													glyph, idx, selected, true,
 													SelectionContainerEnum::SELECTION_CONTAINER_SOURCE);
 											}
 
-											if (vProjectFile->m_SourcePane_ShowGlyphTooltip)
+											if (ProjectFile::Instance()->m_SourcePane_ShowGlyphTooltip)
 											{
 												if (ImGui::IsItemHovered())
 												{
@@ -306,7 +306,7 @@ void SourceFontPane::DrawFontAtlas_Virtual(ProjectFile *vProjectFile, std::share
 						}
 
 						SelectionHelper::Instance()->SelectWithToolOrApply(
-							vProjectFile, SelectionContainerEnum::SELECTION_CONTAINER_SOURCE);
+							SelectionContainerEnum::SELECTION_CONTAINER_SOURCE);
 					}
 				}
 			}

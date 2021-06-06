@@ -129,5 +129,12 @@ public:
 	std::string m_QuickGenerationCustomPath;
 	std::string m_QuickGenerationCustomFileName;
 #endif
+
+public:
+	static ProjectFile* Instance()
+	{
+		static ProjectFile _instance;
+		return &_instance;
+	}
 };
 

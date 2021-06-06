@@ -196,8 +196,8 @@ namespace ImGui
 		}
 		return res;
 	}
-	template<typename T>
 
+	template<typename T>
 	IMGUI_API bool Begin(const char* name, T* vContainer, T vFlag, ImGuiWindowFlags flags)
 	{
 		bool check = *vContainer & vFlag;

@@ -70,66 +70,66 @@ private:
 	ImVec4 m_GlyphButtonStateColor[3] = { ImVec4(), ImVec4(), ImVec4() };
 
 public:
-	void Init() override;
+	bool Init() override;
 	void Unit() override;
-	int DrawPanes(ProjectFile* vProjectFile, int vWidgetId) override;
-	void DrawDialogsAndPopups(ProjectFile* vProjectFile) override;
-	int DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas) override;
+	int DrawPanes(int vWidgetId, std::string vUserDatas)  override;
+	void DrawDialogsAndPopups(std::string vUserDatas) override;
+	int DrawWidgets(int vWidgetId, std::string vUserDatas)  override;
 
 	// Preparation
 	void SetFinalFontPaneMode(FinalFontPaneModeFlags vFinalFontPaneModeFlags);
 	bool IsFinalFontPaneMode(FinalFontPaneModeFlags vFinalFontPaneModeFlags);
 	bool IsSelectedFontPaneMode(SelectedFontPaneModeFlags vSelectedFontPaneModeFlags);
-	void PrepareSelection(ProjectFile *vProjectFile);
+	void PrepareSelection();
 
 private:
-	void DrawFinalFontPane(ProjectFile* vProjectFile);
-	void DrawSelectedFontPane(ProjectFile* vProjectFile);
+	void DrawFinalFontPane();
+	void DrawSelectedFontPane();
 
-	bool DrawGlyph(ProjectFile *vProjectFile, 
+	bool DrawGlyph(
 		std::shared_ptr<FontInfos> vFontInfos, const ImVec2& vSize,
 		std::shared_ptr<GlyphInfos> vGlyph, bool vShowRect,
 		ImVec4 vGlyphButtonStateColor[3],
 		bool *vNameupdated, bool *vCodePointUpdated,
 		bool vForceEditMode = false);
 	
-	void DrawSelectionsByFontNoOrder(ProjectFile *vProjectFile,
+	void DrawSelectionsByFontNoOrder(
 		bool vShowTooltipInfos = false);
 	void DrawSelectionsByFontNoOrder_OneFontOnly(
-		ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
+		std::shared_ptr<FontInfos> vFontInfos,
 		bool vWithFramedGroup = true, 
 		bool vForceEditMode = false, 
 		bool vForceEditModeOneColumn = false,
 		bool vShowTooltipInfos = false);
 
-	static void PrepareSelectionByFontOrderedByCodePoint(ProjectFile *vProjectFile);
-	void DrawSelectionsByFontOrderedByCodePoint(ProjectFile *vProjectFile,
+	static void PrepareSelectionByFontOrderedByCodePoint();
+	void DrawSelectionsByFontOrderedByCodePoint(
 		bool vShowTooltipInfos = false);
 	void DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
-		ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
+		std::shared_ptr<FontInfos> vFontInfos,
 		bool vWithFramedGroup = true, 
 		bool vForceEditMode = false, 
 		bool vForceEditModeOneColumn = false,
 		bool vShowTooltipInfos = false);
 
-	static void PrepareSelectionByFontOrderedByGlyphNames(ProjectFile *vProjectFile);
-	void DrawSelectionsByFontOrderedByGlyphNames(ProjectFile *vProjectFile,
+	static void PrepareSelectionByFontOrderedByGlyphNames();
+	void DrawSelectionsByFontOrderedByGlyphNames(
 		bool vShowTooltipInfos = false);
 	void DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(
-		ProjectFile *vProjectFile, std::shared_ptr<FontInfos> vFontInfos,
+		std::shared_ptr<FontInfos> vFontInfos,
 		bool vWithFramedGroup = true, 
 		bool vForceEditMode = false, 
 		bool vForceEditModeOneColumn = false,
 		bool vShowTooltipInfos = false);
 
-	void PrepareSelectionMergedNoOrder(ProjectFile *vProjectFile);
-	void DrawSelectionMergedNoOrder(ProjectFile *vProjectFile);
+	void PrepareSelectionMergedNoOrder();
+	void DrawSelectionMergedNoOrder();
 
-	void PrepareSelectionMergedOrderedByCodePoint(ProjectFile *vProjectFile);
-	void DrawSelectionMergedOrderedByCodePoint(ProjectFile *vProjectFile);
+	void PrepareSelectionMergedOrderedByCodePoint();
+	void DrawSelectionMergedOrderedByCodePoint();
 
-	void PrepareSelectionMergedOrderedByGlyphNames(ProjectFile *vProjectFile);
-	void DrawSelectionMergedOrderedByGlyphNames(ProjectFile *vProjectFile);
+	void PrepareSelectionMergedOrderedByGlyphNames();
+	void DrawSelectionMergedOrderedByGlyphNames();
 
 public: // configuration
 	std::string getXml(const std::string& vOffset, const std::string& vUserDatas);

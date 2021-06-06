@@ -61,9 +61,9 @@ static int InputTextCallback(ImGuiInputTextCallbackData * vData)
 //// OVERRIDES ////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void FontPreviewPane::Init()
+bool FontPreviewPane::Init()
 {
-	
+	return true;
 }
 
 void FontPreviewPane::Unit()
@@ -71,23 +71,23 @@ void FontPreviewPane::Unit()
 
 }
 
-int FontPreviewPane::DrawPanes(ProjectFile * vProjectFile, int vWidgetId)
+int FontPreviewPane::DrawPanes(int vWidgetId, std::string vUserDatas)
 {
-	paneWidgetId = vWidgetId;
+	m_PaneWidgetId = vWidgetId;
 
-	DrawFontPreviewPane(vProjectFile);
+	DrawFontPreviewPane();
 
-	return paneWidgetId;
+	return m_PaneWidgetId;
 }
 
-void FontPreviewPane::DrawDialogsAndPopups(ProjectFile* /*vProjectFile*/)
+void FontPreviewPane::DrawDialogsAndPopups(std::string vUserDatas)
 {
 
 }
 
-int FontPreviewPane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas)
+int FontPreviewPane::DrawWidgets(int vWidgetId, std::string vUserDatas)
 {
-	UNUSED(vProjectFile);
+	
 	UNUSED(vUserDatas);
 
 	return vWidgetId;
@@ -112,12 +112,12 @@ et il faudra pouvoir scale/translate le glyph
 //// PRIVATE //////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void FontPreviewPane::DrawFontPreviewPane(ProjectFile *vProjectFile)
+void FontPreviewPane::DrawFontPreviewPane()
 {
-	if (LayoutManager::m_Pane_Shown & PaneFlags::PANE_FONT_PREVIEW)
+	if (LayoutManager::Instance()->m_Pane_Shown & m_PaneFlag)
 	{
-		if (ImGui::Begin<PaneFlags>(FONT_PREVIEW_PANE,
-			&LayoutManager::m_Pane_Shown, PaneFlags::PANE_FONT_PREVIEW,
+		if (ImGui::BeginFlag<PaneFlags>(m_PaneName,
+			&LayoutManager::Instance()->m_Pane_Shown, m_PaneFlag,
 			//ImGuiWindowFlags_NoTitleBar |
 			//ImGuiWindowFlags_MenuBar |
 			//ImGuiWindowFlags_NoMove |
@@ -125,7 +125,7 @@ void FontPreviewPane::DrawFontPreviewPane(ProjectFile *vProjectFile)
 			//ImGuiWindowFlags_NoResize |
 			ImGuiWindowFlags_NoBringToFrontOnFocus))
 		{
-			if (vProjectFile &&  vProjectFile->IsLoaded())
+			if (ProjectFile::Instance()->IsLoaded())
 			{
 				ImGui::Text("Select glyphs to test in Final Pane");
 				
@@ -133,12 +133,12 @@ void FontPreviewPane::DrawFontPreviewPane(ProjectFile *vProjectFile)
 
 				ImGui::Text("Left click for insert the font icon at the pos into the test string");
 
-				GlyphInfos::GetGlyphButtonColorsForCodePoint(vProjectFile, false,
+				GlyphInfos::GetGlyphButtonColorsForCodePoint(false,
 					0, 0, m_GlyphButtonStateColor);
 
 				bool change = false;
 				ImVec2 cell_size, glyph_size;
-				uint32_t glyphCountX = GlyphDisplayHelper::CalcGlyphsCountAndSize(vProjectFile, &cell_size, &glyph_size);
+				uint32_t glyphCountX = GlyphDisplayHelper::CalcGlyphsCountAndSize(&cell_size, &glyph_size);
 				if (glyphCountX)
 				{
 					auto font = ImGui::GetFont();
@@ -160,11 +160,11 @@ void FontPreviewPane::DrawFontPreviewPane(ProjectFile *vProjectFile)
 										if (x) ImGui::SameLine();
 
 										auto glyphFont = glyph.second->GetImFont();
-										if (GlyphInfos::DrawGlyphButton(paneWidgetId, vProjectFile, glyphFont, 0, glyph_size, &glyphInfos->glyph, m_GlyphButtonStateColor) == 1) // left
+										if (GlyphInfos::DrawGlyphButton(m_PaneWidgetId, glyphFont, 0, glyph_size, &glyphInfos->glyph, m_GlyphButtonStateColor) == 1) // left
 										{
-											vProjectFile->m_FontTestInfos.m_GlyphToInsert[_TextCursorPos] = glyph;
-											vProjectFile->SetProjectChange();
-											GlyphPane::Instance()->LoadGlyph(vProjectFile, glyph.second, glyphInfos);
+											ProjectFile::Instance()->m_FontTestInfos.m_GlyphToInsert[_TextCursorPos] = glyph;
+											ProjectFile::Instance()->SetProjectChange();
+											GlyphPane::Instance()->LoadGlyph(glyph.second, glyphInfos);
 											change = true;
 										}
 									}
@@ -181,21 +181,21 @@ void FontPreviewPane::DrawFontPreviewPane(ProjectFile *vProjectFile)
 				ImGui::Text("Test :");
 				if (ImGui::ContrastedButton("Clear##testfont"))
 				{
-					vProjectFile->m_FontTestInfos.m_TestFont.reset();
-					vProjectFile->m_FontTestInfos.m_TestFontName = "";
-					vProjectFile->SetProjectChange();
+					ProjectFile::Instance()->m_FontTestInfos.m_TestFont.reset();
+					ProjectFile::Instance()->m_FontTestInfos.m_TestFontName = "";
+					ProjectFile::Instance()->SetProjectChange();
 				}
 				ImGui::SameLine();
 				if (ImGui::ContrastedButton("Use the selected font"))
 				{
-					vProjectFile->m_FontTestInfos.m_TestFont = vProjectFile->m_SelectedFont;
-					vProjectFile->m_FontTestInfos.m_TestFontName = vProjectFile->m_SelectedFont->m_FontFileName;
-					vProjectFile->SetProjectChange();
+					ProjectFile::Instance()->m_FontTestInfos.m_TestFont = ProjectFile::Instance()->m_SelectedFont;
+					ProjectFile::Instance()->m_FontTestInfos.m_TestFontName = ProjectFile::Instance()->m_SelectedFont->m_FontFileName;
+					ProjectFile::Instance()->SetProjectChange();
 				}
 				
 				ImGui::PushItemWidth(ImGui::GetContentRegionAvail().x);
-				ImGui::PushID(paneWidgetId++);
-				change |= ImGui::InputText("##ImGuiFontStudio", vProjectFile->m_FontTestInfos.m_InputBuffer, 499,
+				ImGui::PushID(m_PaneWidgetId++);
+				change |= ImGui::InputText("##ImGuiFontStudio", ProjectFile::Instance()->m_FontTestInfos.m_InputBuffer, 499,
 					ImGuiInputTextFlags_CallbackAlways | ImGuiInputTextFlags_CallbackCharFilter,
 					&InputTextCallback);
 				ImGui::PopID();
@@ -203,22 +203,22 @@ void FontPreviewPane::DrawFontPreviewPane(ProjectFile *vProjectFile)
 
 				if (change)
 				{
-					std::string bufferString = vProjectFile->m_FontTestInfos.m_InputBuffer;
-					if (bufferString.size() < vProjectFile->m_FontTestInfos.m_TestString.size())
+					std::string bufferString = ProjectFile::Instance()->m_FontTestInfos.m_InputBuffer;
+					if (bufferString.size() < ProjectFile::Instance()->m_FontTestInfos.m_TestString.size())
 					{
-						vProjectFile->m_FontTestInfos.ResizeInsertedGlyphs(_TextCursorPos, false);
+						ProjectFile::Instance()->m_FontTestInfos.ResizeInsertedGlyphs(_TextCursorPos, false);
 					}
-					else if (bufferString.size() > vProjectFile->m_FontTestInfos.m_TestString.size())
+					else if (bufferString.size() > ProjectFile::Instance()->m_FontTestInfos.m_TestString.size())
 					{
-						vProjectFile->m_FontTestInfos.ResizeInsertedGlyphs(_TextCursorPos, true);
+						ProjectFile::Instance()->m_FontTestInfos.ResizeInsertedGlyphs(_TextCursorPos, true);
 					}
-					vProjectFile->m_FontTestInfos.m_TestString = vProjectFile->m_FontTestInfos.m_InputBuffer;
-					vProjectFile->SetProjectChange();
+					ProjectFile::Instance()->m_FontTestInfos.m_TestString = ProjectFile::Instance()->m_FontTestInfos.m_InputBuffer;
+					ProjectFile::Instance()->SetProjectChange();
 				}
 
-				DrawMixerWidget(vProjectFile);
+				DrawMixerWidget();
 
-				DrawMixedFontResult(vProjectFile);
+				DrawMixedFontResult();
 			}
 		}
 
@@ -227,9 +227,9 @@ void FontPreviewPane::DrawFontPreviewPane(ProjectFile *vProjectFile)
 }
 
 // mixer widget
-void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
+void FontPreviewPane::DrawMixerWidget()
 {
-	if (vProjectFile->m_FontTestInfos.m_TestString.empty())
+	if (ProjectFile::Instance()->m_FontTestInfos.m_TestString.empty())
 	{
 		ImGui::Text("You need to input a test text first");
 		return;
@@ -237,16 +237,16 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 
 	if (ImGui::ContrastedButton("Clear Glyphs##glyphselection"))
 	{
-		vProjectFile->m_FontTestInfos.m_GlyphToInsert.clear();
-		vProjectFile->SetProjectChange();
+		ProjectFile::Instance()->m_FontTestInfos.m_GlyphToInsert.clear();
+		ProjectFile::Instance()->SetProjectChange();
 	}
 
 	ImGui::Text("Left/Right click for select box where to insert Icon\nRight click on button for remove the font Icon");
 	
 	ImFont* font = ImGui::GetFont();
-	if (!vProjectFile->m_FontTestInfos.m_TestFont.expired())
+	if (!ProjectFile::Instance()->m_FontTestInfos.m_TestFont.expired())
 	{
-		auto fontPtr = vProjectFile->m_FontTestInfos.m_TestFont.lock();
+		auto fontPtr = ProjectFile::Instance()->m_FontTestInfos.m_TestFont.lock();
 		if (fontPtr.use_count())
 		{
 			font = fontPtr->GetImFont();
@@ -256,7 +256,7 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 	if (font)
 	{
 		ImVec2 cell_size, glyph_size;
-		GlyphDisplayHelper::CalcGlyphsCountAndSize(vProjectFile, &cell_size, &glyph_size);
+		GlyphDisplayHelper::CalcGlyphsCountAndSize(&cell_size, &glyph_size);
 
 		//ImVec2 basePos = ImGui::GetCursorPos();
 
@@ -272,10 +272,10 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 			auto defaultGlyph = font->FindGlyph(' '); // putain ! c'est un const
 			if (defaultGlyph)
 			{
-				GlyphInfos::GetGlyphButtonColorsForCodePoint(vProjectFile, false,
+				GlyphInfos::GetGlyphButtonColorsForCodePoint(false,
 					0, 0, m_GlyphButtonStateColor);
 
-				uint32_t count = (uint32_t)vProjectFile->m_FontTestInfos.m_TestString.size();
+				uint32_t count = (uint32_t)ProjectFile::Instance()->m_FontTestInfos.m_TestString.size();
 				for (uint32_t idx = 0; idx <= count; idx++)
 				{
 					if (idx)
@@ -287,9 +287,9 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 					bool selected = (_TextCursorPos == idx);
 					int check = 0;
 					bool found = false;
-					if (vProjectFile->m_FontTestInfos.m_GlyphToInsert.find(idx) != vProjectFile->m_FontTestInfos.m_GlyphToInsert.end())
+					if (ProjectFile::Instance()->m_FontTestInfos.m_GlyphToInsert.find(idx) != ProjectFile::Instance()->m_FontTestInfos.m_GlyphToInsert.end())
 					{
-						auto glyphInsert = &vProjectFile->m_FontTestInfos.m_GlyphToInsert[idx];
+						auto glyphInsert = &ProjectFile::Instance()->m_FontTestInfos.m_GlyphToInsert[idx];
 						if (glyphInsert->second.use_count() &&
 							glyphInsert->second->m_SelectedGlyphs.find(glyphInsert->first) != glyphInsert->second->m_SelectedGlyphs.end())
 						{
@@ -300,7 +300,7 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 								auto glyphFont = glyphInsert->second->GetImFont();
 								ct::fvec2 trans = glyphInfos->m_Translation * glyphInsert->second->m_Point;
 								ct::fvec2 scale = glyphInfos->m_Scale;
-								check = GlyphInfos::DrawGlyphButton(paneWidgetId, vProjectFile,
+								check = GlyphInfos::DrawGlyphButton(m_PaneWidgetId,
 									glyphFont, &selected,
 									glyph_size, glyph, m_GlyphButtonStateColor, glyphInfos->m_Colored,
 									ImVec2(trans.x, trans.y), 
@@ -312,7 +312,7 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 					
 					if (!found)
 					{
-						check = GlyphInfos::DrawGlyphButton(paneWidgetId, vProjectFile, font, &selected, glyph_size, defaultGlyph, m_GlyphButtonStateColor);
+						check = GlyphInfos::DrawGlyphButton(m_PaneWidgetId, font, &selected, glyph_size, defaultGlyph, m_GlyphButtonStateColor);
 					}
 					
 					if (check)
@@ -321,8 +321,8 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 
 						if (check == 2)
 						{
-							vProjectFile->m_FontTestInfos.m_GlyphToInsert.erase(_TextCursorPos);
-							vProjectFile->SetProjectChange();
+							ProjectFile::Instance()->m_FontTestInfos.m_GlyphToInsert.erase(_TextCursorPos);
+							ProjectFile::Instance()->SetProjectChange();
 							GlyphPane::Instance()->Clear();
 						}
 					}
@@ -342,7 +342,7 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 
 				for (uint32_t idx = 0; idx < count; idx++)
 				{
-					ImWchar c = vProjectFile->m_FontTestInfos.m_TestString[idx];
+					ImWchar c = ProjectFile::Instance()->m_FontTestInfos.m_TestString[idx];
 					auto glyph = font->FindGlyph(c);
 					if (glyph)
 					{
@@ -352,7 +352,7 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 						}
 
 						bool selected = false;
-						GlyphInfos::DrawGlyphButton(paneWidgetId, vProjectFile, font, &selected, glyph_size, glyph, m_GlyphButtonStateColor);
+						GlyphInfos::DrawGlyphButton(m_PaneWidgetId, font, &selected, glyph_size, glyph, m_GlyphButtonStateColor);
 					}
 				}
 			}
@@ -361,13 +361,13 @@ void FontPreviewPane::DrawMixerWidget(ProjectFile* vProjectFile)
 }
 
 // final test
-void FontPreviewPane::DrawMixedFontResult(ProjectFile* vProjectFile)
+void FontPreviewPane::DrawMixedFontResult()
 {
 	ImFont* font = ImGui::GetFont();
 	
-	if (!vProjectFile->m_FontTestInfos.m_TestFont.expired())
+	if (!ProjectFile::Instance()->m_FontTestInfos.m_TestFont.expired())
 	{
-		auto fontPtr = vProjectFile->m_FontTestInfos.m_TestFont.lock();
+		auto fontPtr = ProjectFile::Instance()->m_FontTestInfos.m_TestFont.lock();
 		if (fontPtr.use_count())
 		{
 			font = fontPtr->GetImFont();
@@ -377,16 +377,16 @@ void FontPreviewPane::DrawMixedFontResult(ProjectFile* vProjectFile)
 	if (font)
 	{
 		bool change = false;
-		change |= ImGui::RadioButtonLabeled(0.0f, "Base Line", "Show/Hide base line", &vProjectFile->m_FontTestInfos.m_ShowBaseLine);
+		change |= ImGui::RadioButtonLabeled(0.0f, "Base Line", "Show/Hide base line", ProjectFile::Instance()->m_FontTestInfos.m_ShowBaseLine);
 		ImGui::SameLine();
-		change |= ImGui::SliderFloatDefaultCompact(ImGui::GetContentRegionAvail().x, "Preview Size", &vProjectFile->m_FontTestInfos.m_PreviewFontSize, 1, 300, font->FontSize);
+		change |= ImGui::SliderFloatDefaultCompact(ImGui::GetContentRegionAvail().x, "Preview Size", &ProjectFile::Instance()->m_FontTestInfos.m_PreviewFontSize, 1, 300, font->FontSize);
 
 		if (change)
 		{
-			vProjectFile->SetProjectChange();
+			ProjectFile::Instance()->SetProjectChange();
 		}
 
-		float testFontScale = vProjectFile->m_FontTestInfos.m_PreviewFontSize / font->FontSize;
+		float testFontScale = ProjectFile::Instance()->m_FontTestInfos.m_PreviewFontSize / font->FontSize;
 		float testFontAscent = font->Ascent * testFontScale;
 
 		// ici il va falloir afficher les glyphs au bon endroit dans la string m_TestSentense
@@ -408,20 +408,20 @@ void FontPreviewPane::DrawMixedFontResult(ProjectFile* vProjectFile)
 				baseFontRatioX = (float)font->ContainerAtlas->TexWidth / (float)font->ContainerAtlas->TexHeight;*/
 
 			ImVec2 pos = window->DC.CursorPos;
-			ImVec2 size = ImVec2(aw, vProjectFile->m_FontTestInfos.m_PreviewFontSize);
+			ImVec2 size = ImVec2(aw, ProjectFile::Instance()->m_FontTestInfos.m_PreviewFontSize);
 			const ImRect bb(pos, pos + size);
 			ImGui::ItemSize(bb);
 			if (!ImGui::ItemAdd(bb, id))
 				return;
 
-			uint32_t count = (uint32_t)vProjectFile->m_FontTestInfos.m_TestString.size();
+			uint32_t count = (uint32_t)ProjectFile::Instance()->m_FontTestInfos.m_TestString.size();
 			for (uint32_t idx = 0; idx <= count; idx++)
 			{
-				if (vProjectFile->m_FontTestInfos.m_GlyphToInsert.find(idx) !=
-					vProjectFile->m_FontTestInfos.m_GlyphToInsert.end())
+				if (ProjectFile::Instance()->m_FontTestInfos.m_GlyphToInsert.find(idx) !=
+					ProjectFile::Instance()->m_FontTestInfos.m_GlyphToInsert.end())
 				{
 					// on dessin le glyph
-					auto glyphInfos = &vProjectFile->m_FontTestInfos.m_GlyphToInsert[idx];
+					auto glyphInfos = &ProjectFile::Instance()->m_FontTestInfos.m_GlyphToInsert[idx];
 					if (glyphInfos->second)
 					{
 						if (glyphInfos->second->m_SelectedGlyphs.find(glyphInfos->first) != glyphInfos->second->m_SelectedGlyphs.end())
@@ -429,7 +429,7 @@ void FontPreviewPane::DrawMixedFontResult(ProjectFile* vProjectFile)
 							ImFont* glyphFont = glyphInfos->second->GetImFont();
 							if (glyphFont)
 							{
-								float scale = (font->FontSize / glyphInfos->second->m_FontSize) * (vProjectFile->m_FontTestInfos.m_PreviewFontSize / font->FontSize);
+								float scale = (font->FontSize / glyphInfos->second->m_FontSize) * (ProjectFile::Instance()->m_FontTestInfos.m_PreviewFontSize / font->FontSize);
 								float glyphFontAscent = glyphFont->Ascent * scale;
 								float ascOffset = glyphFontAscent - testFontAscent;
 
@@ -444,7 +444,7 @@ void FontPreviewPane::DrawMixedFontResult(ProjectFile* vProjectFile)
 
 									window->DrawList->PushTextureID(texId);
 									glyphFont->RenderChar(
-										window->DrawList, vProjectFile->m_FontTestInfos.m_PreviewFontSize,
+										window->DrawList, ProjectFile::Instance()->m_FontTestInfos.m_PreviewFontSize,
 										pMin, colFont, (ImWchar)glyphInfos->first);
 									window->DrawList->PopTextureID();
 									offsetX += glyph.AdvanceX * scale;
@@ -456,20 +456,20 @@ void FontPreviewPane::DrawMixedFontResult(ProjectFile* vProjectFile)
 
 				if (idx < count)
 				{
-					ImWchar c = vProjectFile->m_FontTestInfos.m_TestString[idx];
+					ImWchar c = ProjectFile::Instance()->m_FontTestInfos.m_TestString[idx];
 					auto glyph = font->FindGlyph(c);
 					if (glyph)
 					{
 						ImVec2 pMin = ImVec2(pos.x + offsetX, pos.y);
 						ImTextureID texId = (ImTextureID)font->ContainerAtlas->TexID;
 						window->DrawList->PushTextureID(texId);
-						font->RenderChar(window->DrawList, vProjectFile->m_FontTestInfos.m_PreviewFontSize, pMin, colFont, (ImWchar)c);
+						font->RenderChar(window->DrawList, ProjectFile::Instance()->m_FontTestInfos.m_PreviewFontSize, pMin, colFont, (ImWchar)c);
 						window->DrawList->PopTextureID();
 						offsetX += glyph->AdvanceX * testFontScale;
 					}
 				}
 
-				if (vProjectFile->m_FontTestInfos.m_ShowBaseLine)
+				if (ProjectFile::Instance()->m_FontTestInfos.m_ShowBaseLine)
 				{
 					// Base Line
 					float asc = font->Ascent * testFontScale;

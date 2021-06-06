@@ -1188,7 +1188,7 @@ bool ImGui::BeginMainStatusBar()
 
 	ImVec2 status_bar_pos, status_bar_size;
 
-	// Get our rectangle at the top of the work area
+	// Get our rectangle at the bottom of the work area
 	if (status_bar_window == nullptr)
 	{
 		status_bar_pos = viewport->Pos + viewport->WorkOffsetMin;

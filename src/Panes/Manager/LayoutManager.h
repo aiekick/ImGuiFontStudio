@@ -25,14 +25,14 @@ SOFTWARE.
 #pragma once
 
 #include <ctools/ConfigAbstract.h>
-#include "AbstractPane.h"
+#include <Panes/Abstract/AbstractPane.h>
 #include <imgui/imgui.h>
 
 namespace ImGui
 {
 	// ImGui::Begin for bitwize
 	template<typename T>
-	IMGUI_API bool Begin(const char* name, T* vContainer, T vFlag, ImGuiWindowFlags flags)
+	IMGUI_API bool BeginFlag(const char* name, T* vContainer, T vFlag, ImGuiWindowFlags flags)
 	{
 		bool check = *vContainer & vFlag;
 		const bool res = Begin(name, &check, flags);

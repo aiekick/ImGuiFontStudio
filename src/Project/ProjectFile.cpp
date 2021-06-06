@@ -115,8 +115,8 @@ bool ProjectFile::LoadAs(const std::string vFilePathName)
 			SetProjectChange(false);
 
 			// we do that after m_IsLoaded
-			SelectionHelper::Instance()->Load(this); // first
-			m_FontTestInfos.Load(this); // then because use final selection from SelectionHelper
+			SelectionHelper::Instance()->Load(); // first
+			m_FontTestInfos.Load(); // then because use final selection from SelectionHelper
 		}
 		else
 		{
@@ -196,7 +196,7 @@ void ProjectFile::UpdateCountSelectedGlyphs()
 		}
 	}
 
-	SelectionHelper::Instance()->AnalyseSourceSelection(this);
+	SelectionHelper::Instance()->AnalyseSourceSelection();
 }
 
 bool ProjectFile::IsRangeColoringShown() const

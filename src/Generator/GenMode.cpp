@@ -60,54 +60,51 @@ void GenMode::ManageFlag(bool vSelected, GenModeFlags* vContainer, GenModeFlags 
 	}
 }
 
-void GenMode::ManageFlag(bool vSelected, ProjectFile* vProjectFile, GenModeFlags vFlag, bool vOneOrZeroAtTime, bool vAlwaysOne, GenModeFlags vFlagsToTakeIntoAccount)
+void GenMode::ManageFlag(bool vSelected, GenModeFlags vFlag, bool vOneOrZeroAtTime, bool vAlwaysOne, GenModeFlags vFlagsToTakeIntoAccount)
 {
-	if (vProjectFile)
-	{
-		vProjectFile->SetProjectChange();
-		ManageFlag(vSelected, &vProjectFile->m_GenModeFlags, vFlag, vOneOrZeroAtTime, vAlwaysOne, vFlagsToTakeIntoAccount);
-		for (auto font : vProjectFile->m_Fonts)
+		ProjectFile::Instance()->SetProjectChange();
+		ManageFlag(vSelected, &ProjectFile::Instance()->m_GenModeFlags, vFlag, vOneOrZeroAtTime, vAlwaysOne, vFlagsToTakeIntoAccount);
+		for (auto font : ProjectFile::Instance()->m_Fonts)
 		{
 			if (font.second.use_count())
 			{
 				ManageFlag(vSelected, &font.second->m_GenModeFlags, vFlag, vOneOrZeroAtTime, vAlwaysOne, vFlagsToTakeIntoAccount);
 			}
 		}
-	}
 }
 
 bool GenMode::RadioButtonLabeled_BitWize_GenMode(
-	float vWidth, const char* vLabel, const char* vHelp, ProjectFile* vProjectFile, GenModeFlags vFlag,
+	float vWidth, const char* vLabel, const char* vHelp, GenModeFlags vFlag,
 	bool vOneOrZeroAtTime, //only one selcted at a time
 	bool vAlwaysOne, // radio behavior, always one selected
 	GenModeFlags vFlagsToTakeIntoAccount,
 	bool vDisableSelection,
 	ImFont* vLabelFont) // radio witl use only theses flags
 {
-	bool selected = vProjectFile->m_GenModeFlags & vFlag;
+	bool selected = ProjectFile::Instance()->m_GenModeFlags & vFlag;
 	const bool res = ImGui::RadioButtonLabeled(vWidth, vLabel, vHelp, &selected, vDisableSelection, vLabelFont);
 	if (res) 
 	{
-		ManageFlag(selected, vProjectFile, vFlag, vOneOrZeroAtTime, vAlwaysOne, vFlagsToTakeIntoAccount);
+		ManageFlag(selected, vFlag, vOneOrZeroAtTime, vAlwaysOne, vFlagsToTakeIntoAccount);
 	}
 	return res;
 }
 
 bool GenMode::RadioButtonLabeled_BitWize_GenMode(float vWidth, 
 	const char* vLabelOK, const char* vLabelNOK, const char* vHelp, 
-	ProjectFile* vProjectFile, GenModeFlags vFlag,
+	GenModeFlags vFlag,
 	bool vOneOrZeroAtTime, //only one selected at a time
 	bool vAlwaysOne, // radio behavior, always one selected
 	GenModeFlags vFlagsToTakeIntoAccount,
 	bool vDisableSelection,
 	ImFont* vLabelFont) // radio witl use only theses flags
 {
-	bool selected = vProjectFile->m_GenModeFlags & vFlag;
+	bool selected = ProjectFile::Instance()->m_GenModeFlags & vFlag;
 	const char* label = (selected ? vLabelOK : vLabelNOK);
 	const bool res = ImGui::RadioButtonLabeled(vWidth, label, vHelp, &selected, vDisableSelection, vLabelFont);
 	if (res) 
 	{
-		ManageFlag(selected, vProjectFile, vFlag, vOneOrZeroAtTime, vAlwaysOne, vFlagsToTakeIntoAccount);
+		ManageFlag(selected, vFlag, vOneOrZeroAtTime, vAlwaysOne, vFlagsToTakeIntoAccount);
 	}
 	return res;
 }

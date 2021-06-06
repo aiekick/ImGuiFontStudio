@@ -39,9 +39,9 @@ FontStructurePane::~FontStructurePane() = default;
 //// OVERRIDES ////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void FontStructurePane::Init()
+bool FontStructurePane::Init()
 {
-    
+    return true;
 }
 
 void FontStructurePane::Unit()
@@ -49,23 +49,23 @@ void FontStructurePane::Unit()
 
 }
 
-int FontStructurePane::DrawPanes(ProjectFile * vProjectFile, int vWidgetId)
+int FontStructurePane::DrawPanes(int vWidgetId, std::string vUserDatas)
 {
-    paneWidgetId = vWidgetId;
+    m_PaneWidgetId = vWidgetId;
 
-    DrawFontStructurePane(vProjectFile);
+    DrawFontStructurePane();
 
-    return paneWidgetId;
+    return m_PaneWidgetId;
 }
 
-void FontStructurePane::DrawDialogsAndPopups(ProjectFile* /*vProjectFile*/)
+void FontStructurePane::DrawDialogsAndPopups(std::string vUserDatas)
 {
 
 }
 
-int FontStructurePane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas)
+int FontStructurePane::DrawWidgets(int vWidgetId, std::string vUserDatas)
 {
-    UNUSED(vProjectFile);
+    
     UNUSED(vUserDatas);
 
     return vWidgetId;
@@ -75,28 +75,28 @@ int FontStructurePane::DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std
 //// PRIVATE //////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void FontStructurePane::DrawFontStructurePane(ProjectFile *vProjectFile)
+void FontStructurePane::DrawFontStructurePane()
 {
-    if (LayoutManager::m_Pane_Shown & PaneFlags::PANE_FONT_STRUCTURE)
+    if (LayoutManager::Instance()->m_Pane_Shown & m_PaneFlag)
     {
-        if (ImGui::Begin<PaneFlags>(FONT_STRUCTURE_PANE,
-                &LayoutManager::m_Pane_Shown, PaneFlags::PANE_FONT_STRUCTURE,
-                //ImGuiWindowFlags_NoTitleBar |
-                //ImGuiWindowFlags_MenuBar |
-                //ImGuiWindowFlags_NoMove |
-                ImGuiWindowFlags_NoCollapse |
-                //ImGuiWindowFlags_NoResize |
-                ImGuiWindowFlags_NoBringToFrontOnFocus))
+        if (ImGui::BeginFlag<PaneFlags>(m_PaneName,
+            &LayoutManager::Instance()->m_Pane_Shown, m_PaneFlag,
+            //ImGuiWindowFlags_NoTitleBar |
+            //ImGuiWindowFlags_MenuBar |
+            //ImGuiWindowFlags_NoMove |
+            ImGuiWindowFlags_NoCollapse |
+            //ImGuiWindowFlags_NoResize |
+            ImGuiWindowFlags_NoBringToFrontOnFocus))
         {
-            if (vProjectFile &&  vProjectFile->IsLoaded())
+            if (ProjectFile::Instance()->IsLoaded())
             {
                 if (ImGui::ContrastedButton("Analyse Font"))
                 {
-					std::string fontFilePathName = FileHelper::Instance()->CorrectSlashTypeForFilePathName(vProjectFile->m_SelectedFont->m_FontFilePathName);
+					std::string fontFilePathName = FileHelper::Instance()->CorrectSlashTypeForFilePathName(ProjectFile::Instance()->m_SelectedFont->m_FontFilePathName);
 
 					if (!FileHelper::Instance()->IsAbsolutePath(fontFilePathName))
 					{
-						fontFilePathName = vProjectFile->GetAbsolutePath(fontFilePathName);
+						fontFilePathName = ProjectFile::Instance()->GetAbsolutePath(fontFilePathName);
 					}
 
 					m_FontParser.ParseFont(fontFilePathName);
@@ -116,5 +116,5 @@ void FontStructurePane::DrawFontStructurePane(ProjectFile *vProjectFile)
 
 void FontStructurePane::DisplayAnalyze()
 {
-    paneWidgetId = m_FontParser.draw(paneWidgetId);
+    m_PaneWidgetId = m_FontParser.draw(m_PaneWidgetId);
 }

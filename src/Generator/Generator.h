@@ -42,27 +42,26 @@ private:
 
 public:
 	bool Generate(
-		ProjectFile *vProjectFile,
 		const std::string& vFilePath = "",
 		const std::string& vFileName = "");
 
 private:
-	bool GenerateCard_One(const std::string& vFilePathName, std::shared_ptr<FontInfos> vFontInfos, ProjectFile* vProjectFile);
-	bool GenerateCard_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile);
+	bool GenerateCard_One(const std::string& vFilePathName, std::shared_ptr<FontInfos> vFontInfos);
+	bool GenerateCard_Merged(const std::string& vFilePathName);
 	
 	/*void GenerateHeader_One(const std::string& vFilePathName, std::shared_ptr<FontInfos> vFontInfos,
 		std::string vFontBufferName = "", size_t vFontBufferSize = 0);
-	void GenerateHeader_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
+	void GenerateHeader_Merged(const std::string& vFilePathName,
 		std::string vFontBufferName = "", size_t vFontBufferSize = 0);*/
 	
-	bool GenerateFontFile_One(const std::string& vFilePathName, ProjectFile* vProjectFile,
+	bool GenerateFontFile_One(const std::string& vFilePathName,
 		std::shared_ptr<FontInfos> vFontInfos, const GenModeFlags& vFlags);
-	bool GenerateFontFile_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
+	bool GenerateFontFile_Merged(const std::string& vFilePathName,
 		const GenModeFlags& vFlags);
 	
-	bool GenerateSource_One(const std::string& vFilePathName, ProjectFile* vProjectFile,
+	bool GenerateSource_One(const std::string& vFilePathName,
 		std::shared_ptr<FontInfos> vFontInfos, const GenModeFlags& vFlags);
-	bool GenerateSource_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
+	bool GenerateSource_Merged(const std::string& vFilePathName,
 		const GenModeFlags& vFlags);
 
 public: // singleton

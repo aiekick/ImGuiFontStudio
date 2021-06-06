@@ -59,130 +59,117 @@ Generator::Generator() = default;
 Generator::~Generator() = default;
 
 bool Generator::Generate(
-	ProjectFile *vProjectFile,
-	const std::string& vFilePath,
-	const std::string& vFileName)
+	const std::string & vFilePath,
+	const std::string & vFileName)
 {
 	bool res = false;
 
-	if (vProjectFile)
+	PathStruct mainPS(ProjectFile::Instance()->m_LastGeneratedPath, ProjectFile::Instance()->m_LastGeneratedFileName, "");
+
+	if (!vFilePath.empty()) mainPS.path = vFilePath;
+	if (!vFileName.empty()) mainPS.name = vFileName;
+
+	if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_CURRENT) &&
+		ProjectFile::Instance()->m_SelectedFont.use_count())
 	{
-		PathStruct mainPS(vProjectFile->m_LastGeneratedPath, vProjectFile->m_LastGeneratedFileName, "");
-
-		if (!vFilePath.empty()) mainPS.path = vFilePath;
-		if (!vFileName.empty()) mainPS.name = vFileName;
-
-		if (vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT) && 
-			vProjectFile->m_SelectedFont.use_count())
+		if (ProjectFile::Instance()->m_SelectedFont->IsGenMode(GENERATOR_MODE_SRC))
 		{
-			if (vProjectFile->m_SelectedFont->IsGenMode(GENERATOR_MODE_SRC))
-			{
-				res = GenerateSource_One(
-					mainPS.GetFPNE(),
-					vProjectFile,
-					vProjectFile->m_SelectedFont,
-					vProjectFile->m_SelectedFont->m_GenModeFlags);
-			}
-			else if (vProjectFile->m_SelectedFont->IsGenMode(GENERATOR_MODE_FONT))
-			{
-				res = GenerateFontFile_One(
-					mainPS.GetFPNE(),
-					vProjectFile,
-					vProjectFile->m_SelectedFont,
-					vProjectFile->m_SelectedFont->m_GenModeFlags);
-#ifdef AUTO_OPEN_FONT_IN_APP_AFTER_GENERATION_FOR_DEBUG_PURPOSE
-				if (res)
-					ParamsPane::Instance()->OpenFont(vProjectFile, mainPS.GetFPNE(), false); // directly load the generated font file
-#endif
-			}
-			else if (vProjectFile->m_SelectedFont->IsGenMode(GENERATOR_MODE_CARD))
-			{
-				res = GenerateCard_One(
-					mainPS.GetFPNE_WithExt("png"),
-					vProjectFile->m_SelectedFont,
-					vProjectFile);
-			}
+			res = GenerateSource_One(
+				mainPS.GetFPNE(),
+				ProjectFile::Instance()->m_SelectedFont,
+				ProjectFile::Instance()->m_SelectedFont->m_GenModeFlags);
 		}
-		else if (vProjectFile->IsGenMode(GENERATOR_MODE_BATCH))
+		else if (ProjectFile::Instance()->m_SelectedFont->IsGenMode(GENERATOR_MODE_FONT))
 		{
-			for (auto font : vProjectFile->m_Fonts)
-			{
-				if (font.second.use_count() && 
-					font.second->m_EnabledForGeneration) // actif dans le per font pour la generation
-				{
-					std::string fileName = font.second->m_FontFileName;
-					if (!font.second->m_GeneratedFileName.empty())
-						fileName = font.second->m_GeneratedFileName;
-					auto ps = FileHelper::Instance()->ParsePathFileName(fileName);
-					if (ps.isOk)
-					{
-						// settings per font
-						if (font.second->IsGenMode(GENERATOR_MODE_SRC))
-						{
-							GenerateSource_One(
-								ps.GetFPNE_WithPath(mainPS.path),
-								vProjectFile,
-								font.second,
-								font.second->m_GenModeFlags);
-						}
-						else if (font.second->IsGenMode(GENERATOR_MODE_FONT))
-						{
-							res = GenerateFontFile_One(
-								ps.GetFPNE_WithPath(mainPS.path),
-								vProjectFile,
-								font.second,
-								font.second->m_GenModeFlags);
+			res = GenerateFontFile_One(
+				mainPS.GetFPNE(),
+				ProjectFile::Instance()->m_SelectedFont,
+				ProjectFile::Instance()->m_SelectedFont->m_GenModeFlags);
 #ifdef AUTO_OPEN_FONT_IN_APP_AFTER_GENERATION_FOR_DEBUG_PURPOSE
-							if (res)
-								ParamsPane::Instance()->OpenFont(vProjectFile, mainPS.GetFPNE(), false); // directly load the generated font file
+			if (res)
+				ParamsPane::Instance()->OpenFont(mainPS.GetFPNE(), false); // directly load the generated font file
 #endif
-						}
-						else if (font.second->IsGenMode(GENERATOR_MODE_CARD))
+		}
+		else if (ProjectFile::Instance()->m_SelectedFont->IsGenMode(GENERATOR_MODE_CARD))
+		{
+			res = GenerateCard_One(
+				mainPS.GetFPNE_WithExt("png"),
+				ProjectFile::Instance()->m_SelectedFont);
+		}
+	}
+	else if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_BATCH))
+	{
+		for (auto font : ProjectFile::Instance()->m_Fonts)
+		{
+			if (font.second.use_count() &&
+				font.second->m_EnabledForGeneration) // actif dans le per font pour la generation
+			{
+				std::string fileName = font.second->m_FontFileName;
+				if (!font.second->m_GeneratedFileName.empty())
+					fileName = font.second->m_GeneratedFileName;
+				auto ps = FileHelper::Instance()->ParsePathFileName(fileName);
+				if (ps.isOk)
+				{
+					// settings per font
+					if (font.second->IsGenMode(GENERATOR_MODE_SRC))
+					{
+						GenerateSource_One(
+							ps.GetFPNE_WithPath(mainPS.path),
+							font.second,
+							font.second->m_GenModeFlags);
+					}
+					else if (font.second->IsGenMode(GENERATOR_MODE_FONT))
+					{
+						res = GenerateFontFile_One(
+							ps.GetFPNE_WithPath(mainPS.path),
+							font.second,
+							font.second->m_GenModeFlags);
+#ifdef AUTO_OPEN_FONT_IN_APP_AFTER_GENERATION_FOR_DEBUG_PURPOSE
+						if (res)
+							ParamsPane::Instance()->OpenFont(mainPS.GetFPNE(), false); // directly load the generated font file
+#endif
+					}
+					else if (font.second->IsGenMode(GENERATOR_MODE_CARD))
+					{
+						std::string fileName = font.second->m_FontFileName;
+						if (!font.second->m_GeneratedFileName.empty())
+							fileName = font.second->m_GeneratedFileName;
+						auto ps = FileHelper::Instance()->ParsePathFileName(fileName);
+						if (ps.isOk)
 						{
-							std::string fileName = font.second->m_FontFileName;
-							if (!font.second->m_GeneratedFileName.empty())
-								fileName = font.second->m_GeneratedFileName;
-							auto ps = FileHelper::Instance()->ParsePathFileName(fileName);
-							if (ps.isOk)
-							{
-								res = GenerateCard_One(
-									ps.GetFPNE_WithPathExt(mainPS.path, "png"),
-									font.second,
-									vProjectFile);
-							}
+							res = GenerateCard_One(
+								ps.GetFPNE_WithPathExt(mainPS.path, "png"),
+								font.second);
 						}
 					}
 				}
 			}
 		}
-		else if (vProjectFile->IsGenMode(GENERATOR_MODE_MERGED))
+	}
+	else if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_MERGED))
+	{
+		if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_SRC))
 		{
-			if (vProjectFile->IsGenMode(GENERATOR_MODE_SRC))
-			{
-				res = GenerateSource_Merged(
-					mainPS.GetFPNE(),
-					vProjectFile,
-					vProjectFile->m_GenModeFlags);
-			}
-			else if (vProjectFile->IsGenMode(GENERATOR_MODE_FONT))
-			{
-				res = GenerateFontFile_Merged(
-					mainPS.GetFPNE(),
-					vProjectFile,
-					vProjectFile->m_GenModeFlags);
+			res = GenerateSource_Merged(
+				mainPS.GetFPNE(),
+				ProjectFile::Instance()->m_GenModeFlags);
+		}
+		else if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_FONT))
+		{
+			res = GenerateFontFile_Merged(
+				mainPS.GetFPNE(),
+				ProjectFile::Instance()->m_GenModeFlags);
 #ifdef AUTO_OPEN_FONT_IN_APP_AFTER_GENERATION_FOR_DEBUG_PURPOSE
-				if (res)
-					ParamsPane::Instance()->OpenFont(vProjectFile, mainPS.GetFPNE(), false); // directly load the generated font file
+			if (res)
+				ParamsPane::Instance()->OpenFont(mainPS.GetFPNE(), false); // directly load the generated font file
 #endif
-			}
-			else if (vProjectFile->IsGenMode(GENERATOR_MODE_CARD))
-			{
-				res = GenerateCard_Merged(
-					mainPS.GetFPNE_WithExt("png"),
-					vProjectFile);
-			}
+		}
+		else if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_CARD))
+		{
+			res = GenerateCard_Merged(mainPS.GetFPNE_WithExt("png"));
 		}
 	}
+
 
 	return res;
 }
@@ -193,14 +180,14 @@ bool Generator::Generate(
 
 #if VULKAN
 
-static inline bool Vulkan_SaveTextureToPng(GLFWwindow* vWin, const std::string& vFilePathName,
+static inline bool Vulkan_SaveTextureToPng(GLFWwindow * vWin, const std::string & vFilePathName,
 	ImTextureID vTextureId, ct::uvec2 vTextureSize, uint32_t vChannelCount)
 {
 	bool res = false;
 
 	if (!vFilePathName.empty() && vWin)
 	{
-		
+
 	}
 
 	return res;
@@ -208,7 +195,7 @@ static inline bool Vulkan_SaveTextureToPng(GLFWwindow* vWin, const std::string& 
 
 #else
 
-static inline bool Opengl_SaveTextureToPng(GLFWwindow* vWin, const std::string& vFilePathName,
+static inline bool Opengl_SaveTextureToPng(GLFWwindow * vWin, const std::string & vFilePathName,
 	ImTextureID vTextureId, ct::uvec2 vTextureSize, uint32_t vChannelCount)
 {
 	bool res = false;
@@ -230,7 +217,7 @@ static inline bool Opengl_SaveTextureToPng(GLFWwindow* vWin, const std::string& 
 		// Upload texture to graphics system
 		GLint last_texture;
 		glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
-		glBindTexture(GL_TEXTURE_2D, vTextureId);
+		glBindTexture(GL_TEXTURE_2D, (GLuint)(size_t)vTextureId);
 		glPixelStorei(GL_PACK_ALIGNMENT, 1);
 		glGetTexImage(GL_TEXTURE_2D, 0, format, GL_UNSIGNED_BYTE, bytes.data());
 		glBindTexture(GL_TEXTURE_2D, last_texture);
@@ -251,7 +238,7 @@ static inline bool Opengl_SaveTextureToPng(GLFWwindow* vWin, const std::string& 
 #endif
 
 
-bool Generator::SaveTextureToPng(GLFWwindow* vWin, const std::string& vFilePathName, 
+bool Generator::SaveTextureToPng(GLFWwindow * vWin, const std::string & vFilePathName,
 	ImTextureID vTextureId, ct::uvec2 vTextureSize, uint32_t vChannelCount)
 {
 	bool res = false;
@@ -270,9 +257,9 @@ bool Generator::SaveTextureToPng(GLFWwindow* vWin, const std::string& vFilePathN
 ///////////////////////////////////////////////////////////////////////////////////
 
 bool Generator::WriteGlyphCardToPicture(
-	const std::string& vFilePathName, 
+	const std::string & vFilePathName,
 	std::map<std::string, std::pair<uint32_t, size_t>> vLabels, // lable, codepoint, FontInfos ptr
-	const uint32_t& vGlyphHeight, const uint32_t& vMaxRows)
+	const uint32_t & vGlyphHeight, const uint32_t & vMaxRows)
 {
 	bool res = false;
 
@@ -478,7 +465,7 @@ bool Generator::WriteGlyphCardToPicture(
 	return res;
 }
 
-static std::string GetNewHeaderName(const std::string& vPrefix, const std::string& vName)
+static std::string GetNewHeaderName(const std::string & vPrefix, const std::string & vName)
 {
 	std::string glyphName = vName;
 	ct::replaceString(glyphName, " ", "_");
@@ -502,13 +489,12 @@ two modes :
 - if glyph were selected => will generate header only for these glyphs
 */
 bool Generator::GenerateCard_One(
-	const std::string& vFilePathName,
-	std::shared_ptr<FontInfos> vFontInfos,
-	ProjectFile* vProjectFile)
+	const std::string & vFilePathName,
+	std::shared_ptr<FontInfos> vFontInfos)
 {
 	bool res = false;
 
-	if (vProjectFile && !vFilePathName.empty() && vFontInfos.use_count())
+	if (!vFilePathName.empty() && vFontInfos.use_count())
 	{
 		std::string filePathName = vFilePathName;
 		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
@@ -518,12 +504,12 @@ bool Generator::GenerateCard_One(
 			std::string name = ps.name;
 			ct::replaceString(name, "-", "_");
 			filePathName = ps.GetFPNE_WithNameExt(name, "png");
-			
+
 			// Prefix
 			std::string prefix = "";
 			if (!vFontInfos->m_FontPrefix.empty())
 				prefix = "ICON_" + vFontInfos->m_FontPrefix;
-			
+
 			// generate bd of old codepoint and new string
 			// old codepoint because, we will get the glyph from te already loaded texture,
 			// so can only be accessed with old codepoints
@@ -547,7 +533,7 @@ bool Generator::GenerateCard_One(
 			}
 
 			res = WriteGlyphCardToPicture(filePathName, glyphs, vFontInfos->m_CardGlyphHeightInPixel, vFontInfos->m_CardCountRowsMax);
-			if (res && vProjectFile->IsGenMode(GENERATOR_MODE_OPEN_GENERATED_FILES_AUTO))
+			if (res && ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_OPEN_GENERATED_FILES_AUTO))
 				FileHelper::Instance()->OpenFile(vFilePathName);
 		}
 		else
@@ -560,17 +546,15 @@ bool Generator::GenerateCard_One(
 }
 
 bool Generator::GenerateCard_Merged(
-	const std::string& vFilePathName,
-	ProjectFile* vProjectFile)
+	const std::string & vFilePathName)
 {
 	bool res = false;
 
 	UNUSED(vFilePathName);
-	UNUSED(vProjectFile);
 
-	if (vProjectFile &&
-		!vFilePathName.empty() &&
-		!vProjectFile->m_Fonts.empty())
+
+	if (!vFilePathName.empty() &&
+		!ProjectFile::Instance()->m_Fonts.empty())
 	{
 		std::string filePathName = vFilePathName;
 		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
@@ -583,14 +567,14 @@ bool Generator::GenerateCard_Merged(
 
 			// Prefix
 			std::string prefix = "";
-			if (!vProjectFile->m_MergedFontPrefix.empty())
-				prefix = "ICON_" + vProjectFile->m_MergedFontPrefix;
+			if (!ProjectFile::Instance()->m_MergedFontPrefix.empty())
+				prefix = "ICON_" + ProjectFile::Instance()->m_MergedFontPrefix;
 
 			// generate bd of old codepoint and new string
 			// old codepoint because, we will get the glyph from te already loaded texture,
 			// so can only be accessed with old codepoints
 			std::map<std::string, std::pair<uint32_t, size_t>> glyphs;
-			for (const auto font : vProjectFile->m_Fonts)
+			for (const auto font : ProjectFile::Instance()->m_Fonts)
 			{
 				if (font.second)
 				{
@@ -604,8 +588,8 @@ bool Generator::GenerateCard_Merged(
 				}
 			}
 
-			res = WriteGlyphCardToPicture(filePathName, glyphs, vProjectFile->m_MergedCardGlyphHeightInPixel, vProjectFile->m_MergedCardCountRowsMax);
-			if (res && vProjectFile->IsGenMode(GENERATOR_MODE_OPEN_GENERATED_FILES_AUTO))
+			res = WriteGlyphCardToPicture(filePathName, glyphs, ProjectFile::Instance()->m_MergedCardGlyphHeightInPixel, ProjectFile::Instance()->m_MergedCardCountRowsMax);
+			if (res && ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_OPEN_GENERATED_FILES_AUTO))
 				FileHelper::Instance()->OpenFile(vFilePathName);
 		}
 		else
@@ -623,19 +607,18 @@ bool Generator::GenerateCard_Merged(
 
 /* 03/03/2020 22h41 it work like a charm (Yihaaaa!!) */
 /*
-Generate Font File with selected Glyphs 
-if vGenerateHeader is true, will Generate also a Header file with glyphs 
+Generate Font File with selected Glyphs
+if vGenerateHeader is true, will Generate also a Header file with glyphs
    code like in https://github.com/juliettef/IconFontCppHeaders
 */
 bool Generator::GenerateFontFile_One(
-	const std::string& vFilePathName, 
-	ProjectFile* vProjectFile,
+	const std::string & vFilePathName,
 	std::shared_ptr<FontInfos> vFontInfos,
-	const GenModeFlags& vFlags)
+	const GenModeFlags & vFlags)
 {
 	bool res = false;
 
-	if (vProjectFile && !vFilePathName.empty() && vFontInfos.use_count())
+	if (!vFilePathName.empty() && vFontInfos.use_count())
 	{
 		FontGenerator fontGenerator;
 
@@ -658,18 +641,18 @@ bool Generator::GenerateFontFile_One(
 		{
 			Messaging::Instance()->AddError(true, nullptr, nullptr,
 				"No glyphs are seleted for font file %s. aborting.\n",
-				vProjectFile->m_SelectedFont->m_FontFilePathName.c_str());
+				ProjectFile::Instance()->m_SelectedFont->m_FontFilePathName.c_str());
 			return false;
 		}
 
 		if (!newHeaderNames.empty() && !newCodePoints.empty())
 		{
-			std::string absPath = vProjectFile->GetAbsolutePath(vFontInfos->m_FontFilePathName);
+			std::string absPath = ProjectFile::Instance()->GetAbsolutePath(vFontInfos->m_FontFilePathName);
 			if (!fontGenerator.OpenFontFile(absPath, newHeaderNames, newCodePoints, newGlyphInfos, true))
 			{
 				Messaging::Instance()->AddError(true, nullptr, nullptr,
 					"Could not open font file %s.\n",
-					vProjectFile->m_SelectedFont->m_FontFilePathName.c_str());
+					ProjectFile::Instance()->m_SelectedFont->m_FontFilePathName.c_str());
 				return false;
 			}
 		}
@@ -677,7 +660,7 @@ bool Generator::GenerateFontFile_One(
 		{
 			Messaging::Instance()->AddError(true, nullptr, nullptr,
 				"No glyphs header or codepoint found for font file %s. aborting.\n",
-				vProjectFile->m_SelectedFont->m_FontFilePathName.c_str());
+				ProjectFile::Instance()->m_SelectedFont->m_FontFilePathName.c_str());
 			return false;
 		}
 
@@ -700,7 +683,7 @@ bool Generator::GenerateFontFile_One(
 		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
 		if (ps.isOk)
 		{
-			if (vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT))
+			if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_CURRENT))
 			{
 				vFontInfos->m_GeneratedFileName = ps.name;
 			}
@@ -717,15 +700,13 @@ bool Generator::GenerateFontFile_One(
 				{
 					m_HeaderGenerator.GenerateHeader_One(
 						filePathName,
-						vProjectFile,
 						vFontInfos);
 				}
 				if (vFlags & GENERATOR_MODE_CARD)
 				{
 					GenerateCard_One(
 						filePathName,
-						vFontInfos,
-						vProjectFile);
+						vFontInfos);
 				}
 			}
 			else
@@ -745,16 +726,15 @@ bool Generator::GenerateFontFile_One(
 }
 
 bool Generator::GenerateFontFile_Merged(
-	const std::string& vFilePathName, 
-	ProjectFile* vProjectFile,
-	const GenModeFlags& vFlags)
+	const std::string & vFilePathName,
+	const GenModeFlags & vFlags)
 {
 	bool res = false;
 
-	if (vProjectFile && vProjectFile->IsLoaded() &&
+	if (ProjectFile::Instance()->IsLoaded() &&
 		!vFilePathName.empty() &&
-		!vProjectFile->m_Fonts.empty() &&
-		!vProjectFile->m_FontToMergeIn.empty())
+		!ProjectFile::Instance()->m_Fonts.empty() &&
+		!ProjectFile::Instance()->m_FontToMergeIn.empty())
 	{
 		FontGenerator fontGenerator;
 
@@ -766,12 +746,12 @@ bool Generator::GenerateFontFile_Merged(
 		int32_t baseFontDescent = 0;
 
 		// abse infos for merge all toher fonts in this one
-		for (auto it : vProjectFile->m_Fonts)
+		for (auto it : ProjectFile::Instance()->m_Fonts)
 		{
 			if (it.second)
 			{
-				if (vProjectFile->m_FontToMergeIn == it.second->m_FontFileName &&
-					!vProjectFile->IsGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE))
+				if (ProjectFile::Instance()->m_FontToMergeIn == it.second->m_FontFileName &&
+					!ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE))
 				{
 					baseFontBoundingBox = it.second->m_BoundingBox;
 					baseFontAscent = it.second->m_Ascent;
@@ -781,14 +761,14 @@ bool Generator::GenerateFontFile_Merged(
 			}
 		}
 
-		for (auto it : vProjectFile->m_Fonts)
+		for (auto it : ProjectFile::Instance()->m_Fonts)
 		{
 			if (it.second)
 			{
 				bool scaleChanged = false;
 				ct::dvec2 scale = 1.0;
-				if (vProjectFile->m_FontToMergeIn != it.second->m_FontFileName &&
-					!vProjectFile->IsGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE))
+				if (ProjectFile::Instance()->m_FontToMergeIn != it.second->m_FontFileName &&
+					!ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE))
 				{
 					scaleChanged = true;
 					ct::ivec2 newSize = it.second->m_BoundingBox.zw() - it.second->m_BoundingBox.xy();
@@ -810,7 +790,7 @@ bool Generator::GenerateFontFile_Merged(
 						newCodePoints[glyph.first] = glyph.second->newCodePoint;
 
 						if (scaleChanged &&
-							!vProjectFile->IsGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE))
+							!ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_MERGED_SETTINGS_DISABLE_GLYPH_RESCALE))
 						{
 							glyph.second->simpleGlyph.isValid = true;
 							glyph.second->simpleGlyph.m_Scale = ImVec2((float)scale.x, (float)scale.y);
@@ -826,7 +806,7 @@ bool Generator::GenerateFontFile_Merged(
 
 				if (!newHeaderNames.empty())
 				{
-					std::string absPath = vProjectFile->GetAbsolutePath(it.second->m_FontFilePathName);
+					std::string absPath = ProjectFile::Instance()->GetAbsolutePath(it.second->m_FontFilePathName);
 					tasks &= fontGenerator.OpenFontFile(absPath, newHeaderNames, newCodePoints, newGlyphInfos, !scaleChanged);
 				}
 				else
@@ -835,7 +815,7 @@ bool Generator::GenerateFontFile_Merged(
 				}
 			}
 		}
-		
+
 		if (tasks)
 		{
 			std::set<int32_t> table_blacklist;
@@ -869,14 +849,12 @@ bool Generator::GenerateFontFile_Merged(
 					if (vFlags & GENERATOR_MODE_HEADER)
 					{
 						m_HeaderGenerator.GenerateHeader_Merged(
-							filePathName, 
-							vProjectFile);
+							filePathName);
 					}
 					if (vFlags & GENERATOR_MODE_CARD)
 					{
 						GenerateCard_Merged(
-							filePathName, 
-							vProjectFile);
+							filePathName);
 					}
 				}
 				else
@@ -895,7 +873,7 @@ bool Generator::GenerateFontFile_Merged(
 		{
 			Messaging::Instance()->AddError(true, nullptr, nullptr,
 				"Could not open font file %s.\n",
-				vProjectFile->m_SelectedFont->m_FontFilePathName.c_str());
+				ProjectFile::Instance()->m_SelectedFont->m_FontFilePathName.c_str());
 			return res;
 		}
 	}
@@ -914,13 +892,12 @@ two modes :
 - some glyohs selectef => export glyph selection in a new temporary font file, then exported in cpp (and header if asked)
 */
 bool Generator::GenerateSource_One(
-	const std::string& vFilePathName, 
-	ProjectFile* vProjectFile,
+	const std::string & vFilePathName,
 	std::shared_ptr<FontInfos> vFontInfos,
-	const GenModeFlags& vFlags)
+	const GenModeFlags & vFlags)
 {
 	bool res = false;
-	if (vProjectFile && !vFilePathName.empty() && vFontInfos.use_count())
+	if (!vFilePathName.empty() && vFontInfos.use_count())
 	{
 		std::string filePathName = vFilePathName;
 		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
@@ -931,7 +908,7 @@ bool Generator::GenerateSource_One(
 			bool generateTemporaryFontFile = false;
 			if (vFontInfos->m_SelectedGlyphs.empty()) // export whole font file to cpp (and header is asked)
 			{
-				filePathName = vProjectFile->GetAbsolutePath(vFontInfos->m_FontFilePathName);
+				filePathName = ProjectFile::Instance()->GetAbsolutePath(vFontInfos->m_FontFilePathName);
 				// todo: il faut gerer le cas ou on va exporter tout les fichier sans selction
 				// ici on ne fait que l'actif, c'est aps ce qu'on veut
 			}
@@ -939,18 +916,18 @@ bool Generator::GenerateSource_One(
 			{
 				// generate temporary font file first
 				generateTemporaryFontFile = true;
-				
+
 				std::string name = ps.name;
 				ct::replaceString(name, "-", "_");
 				filePathName = ps.GetFPNE_WithNameExt("temporary_" + name, "ttf");
 
-				GenerateFontFile_One(filePathName, vProjectFile, vFontInfos,
+				GenerateFontFile_One(filePathName, vFontInfos,
 					(GenModeFlags)(vFlags & ~GENERATOR_MODE_HEADER_CARD)); // no header or card to generate
 			}
 
 			if (FileHelper::Instance()->IsFileExist(filePathName))
 			{
-				if (vProjectFile->IsGenMode(GENERATOR_MODE_CURRENT))
+				if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_CURRENT))
 				{
 					vFontInfos->m_GeneratedFileName = ps.name;
 				}
@@ -989,7 +966,7 @@ bool Generator::GenerateSource_One(
 							psSource.name += "_Bytes";
 							sourceExt = "cs";
 						}
-						
+
 						std::string sourceFile;
 
 						if (vFlags & GENERATOR_MODE_HEADER)
@@ -1013,7 +990,6 @@ bool Generator::GenerateSource_One(
 
 							m_HeaderGenerator.GenerateHeader_One(
 								psHeader.GetFPNE_WithExt(headerExt),
-								vProjectFile,
 								vFontInfos,
 								bufferName,
 								bufferSize);
@@ -1023,20 +999,19 @@ bool Generator::GenerateSource_One(
 						{
 							GenerateCard_One(
 								ps.GetFPNE_WithExt("png"),
-								vFontInfos,
-								vProjectFile);
+								vFontInfos);
 						}
 
 						if (vFontInfos->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
 						{
 							sourceFile += "using System;\n";
 							sourceFile += "using System.Collections.Generic;\n\n";
-							sourceFile += ct::toStr("namespace IconFonts\n{\n\tpublic static class %s_Bytes\n\t{ \n", vProjectFile->m_MergedFontPrefix.c_str());
+							sourceFile += ct::toStr("namespace IconFonts\n{\n\tpublic static class %s_Bytes\n\t{ \n", ProjectFile::Instance()->m_MergedFontPrefix.c_str());
 							sourceFile += buffer;
 							sourceFile += "\t}\n}\n";
 						}
 						else if (vFontInfos->IsGenMode(GENERATOR_MODE_LANG_C) ||
-								 vFontInfos->IsGenMode(GENERATOR_MODE_LANG_CPP))
+							vFontInfos->IsGenMode(GENERATOR_MODE_LANG_CPP))
 						{
 							sourceFile += buffer;
 						}
@@ -1077,13 +1052,12 @@ bool Generator::GenerateSource_One(
 }
 
 bool Generator::GenerateSource_Merged(
-	const std::string& vFilePathName, 
-	ProjectFile* vProjectFile,
-	const GenModeFlags& vFlags)
+	const std::string & vFilePathName,
+	const GenModeFlags & vFlags)
 {
 	bool res = false;
 
-	if (vProjectFile &&	!vFilePathName.empty())
+	if (!vFilePathName.empty())
 	{
 		std::string filePathName = vFilePathName;
 		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
@@ -1095,16 +1069,15 @@ bool Generator::GenerateSource_Merged(
 			filePathName = ps.GetFPNE_WithNameExt("temporary_" + ps.name, "ttf");
 
 			GenerateFontFile_Merged(
-				filePathName, 
-				vProjectFile,
+				filePathName,
 				(GenModeFlags)(vFlags & ~GENERATOR_MODE_HEADER_CARD)); // no header to generate
 
 			if (FileHelper::Instance()->IsFileExist(filePathName))
 			{
 				std::string lang;
-				if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C)) lang = "c";
-				else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) lang = "cpp";
-				else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP)) lang = "c#";
+				if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_LANG_C)) lang = "c";
+				else if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_LANG_CPP)) lang = "cpp";
+				else if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_LANG_CSHARP)) lang = "c#";
 				if (!lang.empty())
 				{
 					std::string bufferName;
@@ -1112,7 +1085,7 @@ bool Generator::GenerateSource_Merged(
 					buffer = Compress::GetCompressedBase85BytesArray(
 						lang,
 						filePathName,
-						vProjectFile->m_MergedFontPrefix,
+						ProjectFile::Instance()->m_MergedFontPrefix,
 						&bufferName,
 						&bufferSize);
 
@@ -1123,43 +1096,42 @@ bool Generator::GenerateSource_Merged(
 					if (!buffer.empty() && !bufferName.empty() && bufferSize > 0)
 					{
 						PathStruct psSource = ps;
-						
+
 						std::string sourceExt;
-						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C)) sourceExt = "c";
-						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) sourceExt = "cpp";
-						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
+						if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_LANG_C)) sourceExt = "c";
+						else if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_LANG_CPP)) sourceExt = "cpp";
+						else if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
 						{
 							psSource.name += "_Bytes";
 							sourceExt = "cs";
 						}
-						
+
 						std::string sourceFile;
-						
+
 						if (vFlags & GENERATOR_MODE_HEADER)
 						{
 							PathStruct psHeader = ps;
-							
+
 							std::string headerExt;
-							if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C) ||
-								vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP)) headerExt = "h";
-							else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
+							if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_LANG_C) ||
+								ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_LANG_CPP)) headerExt = "h";
+							else if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
 							{
 								psHeader.name += "_Labels";
 								headerExt = "cs";
 							}
 
-							if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_C) ||
-								vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
+							if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_LANG_C) ||
+								ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_LANG_CPP))
 							{
 								sourceFile = "#include \"" + ps.name + "." + headerExt + "\"\n\n";
 								std::string prefix = "";
-								prefix = "FONT_ICON_BUFFER_NAME_" + vProjectFile->m_MergedFontPrefix;
-								ct::replaceString(buffer, vProjectFile->m_MergedFontPrefix + "_compressed_data_base85", prefix);
+								prefix = "FONT_ICON_BUFFER_NAME_" + ProjectFile::Instance()->m_MergedFontPrefix;
+								ct::replaceString(buffer, ProjectFile::Instance()->m_MergedFontPrefix + "_compressed_data_base85", prefix);
 							}
 
 							m_HeaderGenerator.GenerateHeader_Merged(
 								psHeader.GetFPNE_WithExt(headerExt),
-								vProjectFile,
 								bufferName,
 								bufferSize);
 						}
@@ -1167,19 +1139,18 @@ bool Generator::GenerateSource_Merged(
 						if (vFlags & GENERATOR_MODE_CARD)
 						{
 							GenerateCard_Merged(
-								ps.GetFPNE_WithExt("png"),
-								vProjectFile);
+								ps.GetFPNE_WithExt("png"));
 						}
 
-						if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
+						if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_LANG_CSHARP))
 						{
 							sourceFile += "using System;\n";
 							sourceFile += "using System.Collections.Generic;\n\n";
-							sourceFile += ct::toStr("namespace IconFonts\n{\n\tpublic static class %s_Bytes\n\t{ \n", vProjectFile->m_MergedFontPrefix.c_str());
+							sourceFile += ct::toStr("namespace IconFonts\n{\n\tpublic static class %s_Bytes\n\t{ \n", ProjectFile::Instance()->m_MergedFontPrefix.c_str());
 							sourceFile += buffer;
 							sourceFile += "\t}\n}\n";
 						}
-						else if (vProjectFile->IsGenMode(GENERATOR_MODE_LANG_CPP))
+						else if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_LANG_CPP))
 						{
 							sourceFile += buffer;
 						}

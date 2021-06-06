@@ -31,9 +31,9 @@ private:
 	ct::uvec2 m_FinalCodePointRange = ct::uvec2(65535, 0);
 
 public:
-	void GenerateHeader_One(const std::string& vFilePathName, ProjectFile* vProjectFile,
+	void GenerateHeader_One(const std::string& vFilePathName,
 		std::shared_ptr<FontInfos> vFontInfos, std::string vFontBufferName = "", size_t vFontBufferSize = 0);
-	void GenerateHeader_Merged(const std::string& vFilePathName, ProjectFile* vProjectFile,
+	void GenerateHeader_Merged(const std::string& vFilePathName,
 		std::string vFontBufferName = "", size_t vFontBufferSize = 0);
 
 private:

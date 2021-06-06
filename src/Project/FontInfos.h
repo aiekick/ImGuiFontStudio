@@ -96,16 +96,16 @@ public: // to save
 	bool m_CollapseFontInFinalPane = false; // collapse the font in final pane
 
 public: // callable
-	bool LoadFont(ProjectFile *vProjectFile, const std::string& vFontFilePathName);
+	bool LoadFont( const std::string& vFontFilePathName);
 	void Clear();
 	std::string GetGlyphName(uint32_t vCodePoint);
-	void DrawInfos(ProjectFile* vProjectFile);
+	void DrawInfos();
 	void UpdateInfos();
 	void UpdateFiltering();
 	void UpdateSelectedGlyphs(ImFont* vFont);
-	void ClearTransforms(ProjectFile* vProjectFile);
-	void ClearScales(ProjectFile* vProjectFile);
-	void ClearTranslations(ProjectFile* vProjectFile);
+	void ClearTransforms();
+	void ClearScales();
+	void ClearTranslations();
 	ImFont* GetImFont();
 
 private: // Glyph Names Extraction / DB

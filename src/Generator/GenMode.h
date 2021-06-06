@@ -81,17 +81,17 @@ public:
 public:
 	static void ManageFlag(bool vSelected, GenModeFlags* vContainer, GenModeFlags vFlag, 
 		bool vOneOrZeroAtTime, bool vAlwaysOne, GenModeFlags vFlagsToTakeIntoAccount);
-	static void ManageFlag(bool vSelected, ProjectFile* vProjectFile,
+	static void ManageFlag(bool vSelected,
 		GenModeFlags vFlag, bool vOneOrZeroAtTime, bool vAlwaysOne, GenModeFlags vFlagsToTakeIntoAccount);
 	static bool RadioButtonLabeled_BitWize_GenMode(
 		float vWidth, const char* vLabel,
-		const char* vHelp, ProjectFile* vProjectFile, GenModeFlags vFlag,
+		const char* vHelp, GenModeFlags vFlag,
 		bool vOneOrZeroAtTime = false, bool vAlwaysOne = true,
 		GenModeFlags vFlagsToTakeIntoAccount = (GenModeFlags)0, bool vDisableSelection = false,
 		ImFont* vLabelFont = nullptr);
 	static bool RadioButtonLabeled_BitWize_GenMode(
 		float vWidth, const char* vLabelOK,
-		const char* vLabelNOK, const char* vHelp, ProjectFile* vProjectFile, GenModeFlags vFlag,
+		const char* vLabelNOK, const char* vHelp, GenModeFlags vFlag,
 		bool vOneOrZeroAtTime = false, bool vAlwaysOne = true, // radio behavior, always one selected
 		GenModeFlags vFlagsToTakeIntoAccount = (GenModeFlags)0, bool vDisableSelection = false,
 		ImFont* vLabelFont = nullptr);

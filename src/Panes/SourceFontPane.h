@@ -42,19 +42,19 @@ private: // private enum
 	ImVec4 m_GlyphButtonStateColor[3] = { ImVec4(), ImVec4(), ImVec4() };
 
 public:
-	void Init() override;
+	bool Init() override;
 	void Unit() override;
-	int DrawPanes(ProjectFile* vProjectFile, int vWidgetId) override;
-	void DrawDialogsAndPopups(ProjectFile* vProjectFile) override;
-	int DrawWidgets(ProjectFile* vProjectFile, int vWidgetId, std::string vUserDatas) override;
+	int DrawPanes(int vWidgetId, std::string vUserDatas)  override;
+	void DrawDialogsAndPopups(std::string vUserDatas) override;
+	int DrawWidgets(int vWidgetId, std::string vUserDatas)  override;
 
 private: 
-	void DrawFilterBar(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos);
+	void DrawFilterBar(std::shared_ptr<FontInfos> vFontInfos);
 	void DrawFontTexture(std::shared_ptr<FontInfos> vFontInfos);
-	void DrawFontAtlas_Virtual(ProjectFile* vProjectFile, std::shared_ptr<FontInfos> vFontInfos);
+	void DrawFontAtlas_Virtual(std::shared_ptr<FontInfos> vFontInfos);
 	
 	// panes
-	void DrawSourceFontPane(ProjectFile *vProjectFile);
+	void DrawSourceFontPane();
 
 public: // configuration
 	std::string getXml(const std::string& vOffset, const std::string& vUserDatas);
