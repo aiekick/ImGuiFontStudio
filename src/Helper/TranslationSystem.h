@@ -1,6 +1,7 @@
 #pragma once
 
 #include <ctools/ConfigAbstract.h>
+#include <ctools/cTools.h>
 
 #define TSLOC(MainClass,Locat) TranslationSystem::MainClass.Locat
 

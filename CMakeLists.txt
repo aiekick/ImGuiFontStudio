@@ -11,6 +11,16 @@ option(USE_VULKAN OFF)
 ## some defines for debug mode (before 3rdparty.cmake)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 
+if (USE_VULKAN)
+	add_definitions(-DVULKAN)
+else()
+	add_definitions(-DGLAD)
+endif()
+
+add_definitions(-DIMGUI)
+add_definitions(-DUSE_IMGUI="../imgui/imgui.h")
+add_definitions(-DUSE_GLFW3)
+
 include(cmake/3rdparty.cmake)
 
 ## other define
@@ -46,7 +56,6 @@ if(MSVC)
 else ()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -std=c++11 -Wdeprecated-declarations -Wunused-parameter")
 endif ()
-
 
 file(GLOB PROJECT_MAIN ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
 source_group(main FILES ${PROJECT_MAIN})
