@@ -412,7 +412,6 @@ int main(int, char** argv)
     ImGui_ImplVulkanH_Window* wd = &MainFrame::sMainWindowData;
     SetupVulkanWindow(wd, surface, w, h);
 
-    glfwSwapInterval(1); // Enable vsync
     glfwSetWindowCloseCallback(mainWindow, glfw_window_close_callback);
     glfwSetDropCallback(mainWindow, glfw_window_drop_callback);
     
