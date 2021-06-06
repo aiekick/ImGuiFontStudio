@@ -212,11 +212,6 @@ bool MainFrame::Display(ImVec2 vPos, ImVec2 vSize)
 	return true;
 }
 
-void MainFrame::ExecuteActions()
-{
-	m_ActionSystem.RunActions();
-}
-
 void MainFrame::OpenAboutDialog()
 {
 	m_ShowAboutDialog = true;
@@ -317,6 +312,8 @@ void MainFrame::DrawMainMenuBar()
 
 void MainFrame::DisplayDialogsAndPopups()
 {
+	m_ActionSystem.RunActions();
+
 	if (ProjectFile::Instance()->IsLoaded())
 	{
 		LayoutManager::Instance()->DrawDialogsAndPopups();

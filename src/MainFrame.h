@@ -140,7 +140,6 @@ public:
 	void SaveAsProject(const std::string& vFilePathName);
 
 	bool Display(ImVec2 vPos, ImVec2 vSize);
-	void ExecuteActions();
 
 	GLFWwindow* GetGLFWwindow() { return m_Window; }
 	FrameActionSystem* GetActionSystem() { return &m_ActionSystem; }
