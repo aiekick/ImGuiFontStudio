@@ -8,10 +8,11 @@ endif ()
 
 if (USE_VULKAN)
 	find_package(Vulkan REQUIRED)
-	add_definitions(-DUSE_VULKAN)
+	add_definitions(-DVULKAN)
 else()
 	set(OpenGL_GL_PREFERENCE GLVND)
 	find_package(OpenGL REQUIRED)
+	add_definitions(-DGLAD)
 	include(cmake/glad.cmake)
 endif()
 

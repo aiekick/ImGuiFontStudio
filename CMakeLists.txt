@@ -8,27 +8,28 @@ project(${PROJECT} CXX)
 
 option(USE_VULKAN OFF)
 
+## for group smake targets in the dir cmakeTargets
+set_property(GLOBAL PROPERTY USE_FOLDERS ON)
+set_property(GLOBAL PROPERTY PREDEFINED_TARGETS_FOLDER "cmakeTargets")
+
+set(CMAKE_CXX_STANDARD 14)
+set(CMAKE_CXX_STANDARD_REQUIRED ON)
+set(CMAKE_CXX_EXTENSIONS OFF)
+
 ## some defines for debug mode (before 3rdparty.cmake)
 set(CMAKE_CXX_FLAGS_DEBUG "${CMAKE_CXX_FLAGS_DEBUG} -D_DEBUG")
 
-if (USE_VULKAN)
-	add_definitions(-DVULKAN)
-else()
-	add_definitions(-DGLAD)
-endif()
+include(cmake/3rdparty.cmake)
 
 add_definitions(-DIMGUI)
 add_definitions(-DUSE_IMGUI="../imgui/imgui.h")
 add_definitions(-DUSE_GLFW3)
-
-include(cmake/3rdparty.cmake)
-
-## other define
-add_definitions(-DPROJECT_PATH="${CMAKE_SOURCE_DIR}")
-
 add_definitions(-DIMGUI_DISABLE_OBSOLETE_FUNCTIONS)
 add_definitions(${GLFW_DEFINITIONS})
 add_definitions(-DCUSTOM_IMGUIFILEDIALOG_CONFIG="../../../src/Gui/CustomImGuiFileDialogConfig.h")
+
+## other define
+add_definitions(-DPROJECT_PATH="${CMAKE_SOURCE_DIR}")
 
 if(UNIX)
     if(APPLE)
@@ -48,13 +49,13 @@ endif()
 
 if(MSVC)
     # Ignore 4055 for glad
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /IGNORE:4055")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4")
     add_definitions(-D_USE_MATH_DEFINES)
     add_definitions(-DMSVC)
 	add_definitions(-DNOMINMAX) ## for avoid conflicts with std::min and std::max
 	add_definitions(-D_CRT_SECURE_NO_WARNINGS) ## fot disable crt secure warnings (du to no cross plafrom secure function for windows)
 else ()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -std=c++11 -Wdeprecated-declarations -Wunused-parameter")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wpedantic -Wdeprecated-declarations -Wunused-parameter")
 endif ()
 
 file(GLOB PROJECT_MAIN ${CMAKE_CURRENT_SOURCE_DIR}/*.cpp)
@@ -75,6 +76,7 @@ file(GLOB_RECURSE PROJECT_BACKEND_COMMON_RECURSE
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX src FILES ${PROJECT_BACKEND_COMMON_RECURSE})
 
 if (USE_VULKAN)
+	file(GLOB PROJECT_MAIN ${CMAKE_CURRENT_SOURCE_DIR}/main_vulkan.cpp)
 	file(GLOB_RECURSE PROJECT_BACKEND_VULKAN_RECURSE 
 		${CMAKE_CURRENT_SOURCE_DIR}/Backends/vulkan/*.c
 		${CMAKE_CURRENT_SOURCE_DIR}/Backends/vulkan/*.h
@@ -82,6 +84,7 @@ if (USE_VULKAN)
 		${CMAKE_CURRENT_SOURCE_DIR}/Backends/vulkan/*.hpp)
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX src FILES ${PROJECT_BACKEND_VULKAN_RECURSE})
 else()
+	file(GLOB PROJECT_MAIN ${CMAKE_CURRENT_SOURCE_DIR}/main_opengl.cpp)
 	file(GLOB_RECURSE PROJECT_BACKEND_OPENGL_RECURSE 
 		${CMAKE_CURRENT_SOURCE_DIR}/Backends/opengl/*.c
 		${CMAKE_CURRENT_SOURCE_DIR}/Backends/opengl/*.h
@@ -90,6 +93,8 @@ else()
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX src FILES ${PROJECT_BACKEND_OPENGL_RECURSE})
 endif()
 
+source_group(main FILES ${PROJECT_MAIN})
+	
 if (APPLE)
 	##set(ICON icon.icns)
 	##set_source_files_properties(icon.icns PROPERTIES MACOSX_PACKAGE_LOCATION "Resources")
@@ -141,14 +146,24 @@ install(DIRECTORY doc DESTINATION "${CMAKE_SOURCE_DIR}/bin/${ARCH}")
 install(FILES LICENSE MacOSXBundleInfo.plist.in README.md DESTINATION "${CMAKE_SOURCE_DIR}/bin/${ARCH}")
 install(TARGETS ${PROJECT} DESTINATION ${CMAKE_INSTALL_PREFIX})
 
+if (USE_VULKAN)
+	set(BACKEND_INCLUDE_DIRS ${Vulkan_INCLUDE_DIRS})
+	set(BACKEND_LIBRARIES ${Vulkan_LIBRARIES})
+else()
+	set(BACKEND_INCLUDE_DIRS ${OPENGL_INCLUDE_DIR} ${GLAD_INCLUDE_DIR})
+	set(BACKEND_LIBRARIES ${OPENGL_LIBRARIES} ${GLAD_LIBRARIES})
+endif()
+
+message("BACKEND_INCLUDE_DIRS : ${BACKEND_INCLUDE_DIRS}")
+message("BACKEND_LIBRARIES : ${BACKEND_LIBRARIES}")
+
 include_directories(
 	Backends
 	src
 	3rdparty
+	${BACKEND_INCLUDE_DIRS}
 	${PLOG_INCLUDE_DIR}
-	${OPENGL_INCLUDE_DIR}
 	${GLFW_INCLUDE_DIR}
-	${GLAD_INCLUDE_DIR}
 	${IMGUI_INCLUDE_DIR}
 	${SFNTLY_INCLUDE_DIR}
 	${TINYXML2_INCLUDE_DIR}
@@ -157,9 +172,8 @@ include_directories(
 )
 
 target_link_libraries(${PROJECT} PRIVATE
-	${OPENGL_LIBRARIES}
+	${BACKEND_LIBRARIES}
 	${GLFW_LIBRARIES}
-	${GLAD_LIBRARIES}
 	${IMGUI_LIBRARIES}
 	${CTOOLS_LIBRARIES}
 	${SFNTLY_LIBRARIES}

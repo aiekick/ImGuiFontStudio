@@ -87,7 +87,7 @@ void ParamsPane::DrawDialogsAndPopups(ProjectFile * vProjectFile)
 				auto atlas = dynamic_cast<ImFontAtlas*>((ImFontAtlas*)ImGuiFileDialog::Instance()->GetUserDatas());
 				if (atlas)
 				{
-					GLuint textureToSave = (GLuint)(size_t)atlas->TexID;
+					ImTextureID textureToSave = (ImTextureID)(size_t)atlas->TexID;
 					if (textureToSave)
 					{
 						auto win = MainFrame::Instance()->GetGLFWwindow();

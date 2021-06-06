@@ -191,8 +191,25 @@ bool Generator::Generate(
 //// STATIC TEXTURE TO PICTURE FILE ///////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-bool Generator::SaveTextureToPng(GLFWwindow* vWin, const std::string& vFilePathName, 
-	GLuint vTextureId, ct::uvec2 vTextureSize, uint32_t vChannelCount)
+#if VULKAN
+
+static inline bool Vulkan_SaveTextureToPng(GLFWwindow* vWin, const std::string& vFilePathName,
+	ImTextureID vTextureId, ct::uvec2 vTextureSize, uint32_t vChannelCount)
+{
+	bool res = false;
+
+	if (!vFilePathName.empty() && vWin)
+	{
+		
+	}
+
+	return res;
+}
+
+#else
+
+static inline bool Opengl_SaveTextureToPng(GLFWwindow* vWin, const std::string& vFilePathName,
+	ImTextureID vTextureId, ct::uvec2 vTextureSize, uint32_t vChannelCount)
 {
 	bool res = false;
 
@@ -228,6 +245,22 @@ bool Generator::SaveTextureToPng(GLFWwindow* vWin, const std::string& vFilePathN
 
 		res = (resWrite > 0);
 	}
+
+	return res;
+}
+#endif
+
+
+bool Generator::SaveTextureToPng(GLFWwindow* vWin, const std::string& vFilePathName, 
+	ImTextureID vTextureId, ct::uvec2 vTextureSize, uint32_t vChannelCount)
+{
+	bool res = false;
+
+#if VULKAN
+	res = Vulkan_SaveTextureToPng(vWin, vFilePathName, vTextureId, vTextureSize, vChannelCount);
+#else
+	res = Opengl_SaveTextureToPng(vWin, vFilePathName, vTextureId, vTextureSize, vChannelCount);
+#endif
 
 	return res;
 }

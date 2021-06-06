@@ -24,11 +24,10 @@
 #include <Helper/Messaging.h>
 #include <ctools/Logger.h>
 #include <Panes/ParamsPane.h>
+#include <MainFrame.h>
 
 #define STB_TRUETYPE_IMPLEMENTATION  
 #include <imgui/imstb_truetype.h>
-
-#include <glad/glad.h>
 
 #include <array>
 
@@ -86,7 +85,7 @@ void FontInfos::Clear()
 	m_FreeTypeFlag = FreeType_Default;
 	m_FontMultiply = 1.0f;
 	m_FontPadding = 1;
-	m_TextureFiltering = GL_NEAREST;
+	m_TextureFiltering = TextureFilteringEnum::TEX_FILTER_LINEAR; // for texture generation
 	m_CardGlyphHeightInPixel = 40U; // ine item height in card
 	m_CardCountRowsMax = 20U; // after this max, new columns
 }
@@ -500,18 +499,18 @@ void FontInfos::DrawInfos(ProjectFile* vProjectFile)
 			}
 
 #ifdef _DEBUG
-			if (ImGui::RadioButtonLabeled(aw, "Linear", "Use Linear Texture Filtering", m_TextureFiltering == GL_LINEAR))
+			if (ImGui::RadioButtonLabeled(aw, "Linear", "Use Linear Texture Filtering", m_TextureFiltering == TextureFilteringEnum::TEX_FILTER_LINEAR))
 			{
 				needFontReGen = true;
-				m_TextureFiltering = GL_LINEAR;
+				m_TextureFiltering = TextureFilteringEnum::TEX_FILTER_LINEAR;
 			}
 
 			ImGui::SameLine();
 
-			if (ImGui::RadioButtonLabeled(aw, "Nearest", "Use Nearest Texture Filtering", m_TextureFiltering == GL_NEAREST))
+			if (ImGui::RadioButtonLabeled(aw, "Nearest", "Use Nearest Texture Filtering", m_TextureFiltering == TextureFilteringEnum::TEX_FILTER_NEAREST))
 			{
 				needFontReGen = true;
-				m_TextureFiltering = GL_NEAREST;
+				m_TextureFiltering = TextureFilteringEnum::TEX_FILTER_NEAREST;
 			}
 #endif
 
@@ -749,39 +748,39 @@ void FontInfos::CreateFontTexture()
 		int width, height;
 		m_ImFontAtlas.GetTexDataAsRGBA32(&pixels, &width, &height);   // Load as RGBA 32-bit (75% of the memory is wasted, but default font is so small) because it is more likely to be compatible with user's existing shaders. If your ImTextureId represent a higher-level concept than just a GL texture id, consider calling GetTexDataAsAlpha8() instead to save on GPU memory.
 
-		GLint last_texture;
-		glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
+#if VULKAN
+		VkCommandPool command_pool = MainFrame::sMainWindowData.Frames[MainFrame::sMainWindowData.FrameIndex].CommandPool;
 
-		GLuint id = 0;
-		glGenTextures(1, &id);
-		glBindTexture(GL_TEXTURE_2D, id);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, m_TextureFiltering);
-		glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, m_TextureFiltering);
-		glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
-		glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, width, height, 0, GL_RGBA, GL_UNSIGNED_BYTE, pixels);
+		// Use any command queue
+		auto cmd = TextureHelper::beginSingleTimeCommands(command_pool);
+		if (cmd)
+		{
+			m_FontTexture = TextureHelper::CreateTextureFromBuffer(cmd, pixels, width, height, 4, m_TextureFiltering);
+
+			TextureHelper::endSingleTimeCommands(command_pool, cmd);
+		}
 
 		// size_t is 4 bytes sized for x32 and 8 bytes sizes for x64.
 		// TexID is ImTextureID is a void so same size as size_t
 		// id is a uint so 4 bytes on x32 and x64
 		// so conversion first on size_t (uint32/64) and after on ImTextureID give no warnings
-		m_ImFontAtlas.TexID = (ImTextureID)(size_t)id; 
+		m_ImFontAtlas.TexID = (ImTextureID)&m_FontTexture->descriptor;
+#else
+		m_FontTexture = TextureHelper::CreateTextureFromBuffer(pixels, width, height, 4, m_TextureFiltering);
 
-		glBindTexture(GL_TEXTURE_2D, last_texture);
+		// size_t is 4 bytes sized for x32 and 8 bytes sizes for x64.
+		// TexID is ImTextureID is a void so same size as size_t
+		// id is a uint so 4 bytes on x32 and x64
+		// so conversion first on size_t (uint32/64) and after on ImTextureID give no warnings
+		m_ImFontAtlas.TexID = (ImTextureID)(size_t)m_FontTexture->textureId;
+#endif
 	}
 }
 
 void FontInfos::DestroyFontTexture()
 {
-	// size_t is 4 bytes sized for x32 and 8 bytes sizes for x64.
-	// TexID is ImTextureID is a void so same size as size_t
-	// id is a uint so 4 bytes on x32 and x64
-	// so conversion first on size_t (uint32/64) and after on GLuint give no warnings
-    GLuint id = (GLuint)(size_t)m_ImFontAtlas.TexID;
-	if (id)
-	{
-		glDeleteTextures(1, &id);
-		m_ImFontAtlas.TexID = nullptr;
-	}
+	m_FontTexture.reset();
+	m_ImFontAtlas.TexID = nullptr;
 }
 
 //////////////////////////////////////////////////////////////////////////////
@@ -823,11 +822,11 @@ std::string FontInfos::getXml(const std::string& vOffset, const std::string& vUs
 	res += vOffset + "\t<generatedfilename>" + m_GeneratedFileName + "</generatedfilename>\n";
 	res += vOffset + "\t<cardglyhpheight>" + ct::toStr(m_CardGlyphHeightInPixel) + "</cardglyhpheight>\n";
 	res += vOffset + "\t<cardcountrowsmax>" + ct::toStr(m_CardCountRowsMax) + "</cardcountrowsmax>\n";
-	res += vOffset + "\t<rasterizer>" + ct::toStr(m_RasterizerMode) + "</rasterizer>\n";
+	res += vOffset + "\t<rasterizer>" + ct::toStr((int)m_RasterizerMode) + "</rasterizer>\n";
 	res += vOffset + "\t<freetypeflag>" + ct::toStr(m_FreeTypeFlag) + "</freetypeflag>\n";
 	res += vOffset + "\t<freetypemultiply>" + ct::toStr(m_FontMultiply) + "</freetypemultiply>\n";
 	res += vOffset + "\t<padding>" + ct::toStr(m_FontPadding) + "</padding>\n";
-	res += vOffset + "\t<filtering>" + ct::toStr(m_TextureFiltering) + "</filtering>\n";
+	res += vOffset + "\t<filtering>" + ct::toStr((int)m_TextureFiltering) + "</filtering>\n";
 	res += vOffset + "\t<enabled>" + (m_EnabledForGeneration ? "true" : "false") + "</enabled>\n";
 	res += vOffset + "\t<collapsed>" + (m_CollapseFontInFinalPane ? "true" : "false") + "</collapsed>\n";
 	
@@ -899,7 +898,7 @@ bool FontInfos::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vP
 		else if (strName == "padding")
 			m_FontPadding = ct::ivariant(strValue).GetI();
 		else if (strName == "textureFiletring")
-			m_TextureFiltering = (GLenum)ct::ivariant(strValue).GetI();
+			m_TextureFiltering = (TextureFilteringEnum)ct::ivariant(strValue).GetI();
 		else if (strName == "enabled")
 			m_EnabledForGeneration = ct::ivariant(strValue).GetB();
 		else if (strName == "collapsed")

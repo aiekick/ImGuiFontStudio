@@ -15,13 +15,18 @@
  */
 #pragma once
 
-#include <glad/glad.h>
+#include <globals.h>
+
 #include <imgui/imgui.h>
 
 #include <ctools/ConfigAbstract.h>
 #include <Project/ProjectFile.h>
 #include <Helper/FrameActionSystem.h>
-#include <Gui/RibbonBar.h>
+
+#if VULKAN
+	#include <vulkan/imgui_impl_vulkan_user_texture.h>
+#else
+#endif
 
 #include <functional>
 #include <string>
@@ -112,16 +117,18 @@ public:
 	bool m_ShowImGui = false;				// show ImGui win
 	bool m_ShowMetric = false;				// show metrics
 
+#if VULKAN
+	static ImGui_ImplVulkan_InitInfo sVulkanInitInfo;
+	static ImGui_ImplVulkanH_Window sMainWindowData;
+#endif
+
 private:
 	ProjectFile m_ProjectFile;				// project file
 	bool m_ShowAboutDialog = false;			// show about dlg
 	bool m_NeedToCloseApp = false;			// whenn app closing app is required
 	bool m_SaveDialogIfRequired = false;	// open save options dialog (save / save as / continue without saving / cancel)
 	bool m_SaveDialogActionWasDone = false;	// if action was done by save options dialog
-	FrameActionSystem m_ActionSystem;
-#ifdef USE_RIBBONBAR
-	RibbonBar m_RibbonBar;
-#endif
+	FrameActionSystem m_ActionSystem; 
 
 public:
 	void Init();

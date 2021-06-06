@@ -7,8 +7,7 @@
 //  [ ] Platform: Multi-viewport / platform windows.
 //  [ ] Renderer: User texture binding. Changes of ImTextureID aren't supported by this backend! See https://github.com/ocornut/imgui/pull/914
 
-// You can use unmodified imgui_impl_* files in your project. See examples/ folder for examples of using this. 
-// Prefer including the entire imgui/ repository into your project (either as a copy or as a submodule), and only build the backends you need.
+// You can copy and use unmodified imgui_impl_* files in your project. See examples/ folder for examples of using this.
 // If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
@@ -100,6 +99,9 @@ IMGUI_IMPL_API void                 ImGui_ImplVulkanH_DestroyWindow(VkInstance i
 IMGUI_IMPL_API VkSurfaceFormatKHR   ImGui_ImplVulkanH_SelectSurfaceFormat(VkPhysicalDevice physical_device, VkSurfaceKHR surface, const VkFormat* request_formats, int request_formats_count, VkColorSpaceKHR request_color_space);
 IMGUI_IMPL_API VkPresentModeKHR     ImGui_ImplVulkanH_SelectPresentMode(VkPhysicalDevice physical_device, VkSurfaceKHR surface, const VkPresentModeKHR* request_modes, int request_modes_count);
 IMGUI_IMPL_API int                  ImGui_ImplVulkanH_GetMinImageCountFromPresentMode(VkPresentModeKHR present_mode);
+IMGUI_IMPL_API VkDescriptorSet      ImGui_ImplVulkanH_Create_UserTexture_Descriptor(VkSampler sampler, VkImageView image_view, VkImageLayout image_layout, VkDescriptorSet* vExistingDescriptorSet = nullptr);
+IMGUI_IMPL_API bool                 ImGui_ImplVulkanH_Destroy_UserTexture_Descriptor(VkDescriptorSet *vVkDescriptorSet);
+IMGUI_IMPL_API uint32_t             ImGui_ImplVulkanH_MemoryType(VkMemoryPropertyFlags properties, uint32_t type_bits);
 
 // Helper structure to hold the data needed by one rendering frame
 // (Used by example's main.cpp. Used by multi-viewport features. Probably NOT used by your own engine/app.)

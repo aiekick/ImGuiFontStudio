@@ -31,7 +31,7 @@ class Generator
 {
 public:
 	static bool SaveTextureToPng(GLFWwindow* vWin, const std::string& vFilePathName,
-		GLuint vTextureId, ct::uvec2 vTextureSize, uint32_t vChannelCount);
+		ImTextureID vTextureId, ct::uvec2 vTextureSize, uint32_t vChannelCount);
 	static bool WriteGlyphCardToPicture(
 		const std::string& vFilePathName,
 		std::map<std::string, std::pair<uint32_t, size_t>> vLabels, // lable, codepoint, FontInfos ptr

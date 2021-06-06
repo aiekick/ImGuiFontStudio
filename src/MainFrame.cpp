@@ -50,6 +50,11 @@
 #define WIDGET_ID_MAGIC_NUMBER 4577
 static int widgetId = WIDGET_ID_MAGIC_NUMBER;
 
+#if VULKAN
+ImGui_ImplVulkan_InitInfo MainFrame::sVulkanInitInfo;
+ImGui_ImplVulkanH_Window MainFrame::sMainWindowData;
+#endif
+
 MainFrame::MainFrame(GLFWwindow *vWin)
 {
 	m_Window = vWin;
@@ -75,10 +80,6 @@ void MainFrame::Init()
 	ThemeHelper::Instance()->ApplyStyle();
 
 	LayoutManager::Instance()->Init();
-
-#ifdef USE_RIBBONBAR
-	m_RibbonBar.Init();
-#endif
 
 #ifdef USE_SHADOW
 	AssetManager::Instance()->LoadTexture2D("btn", "src/res/btn.png");
@@ -122,7 +123,7 @@ void MainFrame::SaveAsProject(const std::string& vFilePathName)
 
 	if (m_NeedToCloseApp)
 	{
-		glfwSetWindowShouldClose(m_Window, GL_TRUE); // close app
+		glfwSetWindowShouldClose(m_Window, GLFW_TRUE); // close app
 	}
 }
 
@@ -193,7 +194,6 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 	ImGui::SetWindowSize(vSize - ImVec2(0.0f, barH));
 	ImGui::SetWindowPos(vPos);
 
-#ifndef USE_RIBBONBAR
 	if (ImGui::BeginMainMenuBar())
 	{
 		DrawMainMenuBar();
@@ -207,9 +207,6 @@ void MainFrame::DrawDockPane(ImVec2 vPos, ImVec2 vSize)
 
 		ImGui::EndMainMenuBar();
 	}
-#else
-	m_RibbonBar.Draw(&m_ProjectFile);
-#endif
 
 	LayoutManager::Instance()->StartDockPane(dockspace_flags, vSize);
 
@@ -737,7 +734,7 @@ Close app :
 	Action_OpenUnSavedDialog_IfNeeded();
 	m_ActionSystem.Add([this]()
 		{
-			glfwSetWindowShouldClose(m_Window, GL_TRUE); // close app
+			glfwSetWindowShouldClose(m_Window, GLFW_TRUE); // close app
 			return true;
 		});
 }

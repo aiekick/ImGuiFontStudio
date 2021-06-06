@@ -110,7 +110,7 @@ void SelectionHelper::DrawRect(ImVec2 vPos, ImVec2 vSize)
 		float round = ImClamp((float)ImMin(style->FramePadding.x, style->FramePadding.y), 0.0f, 12.0f);
 		window->DrawList->AddRect(vPos - spa * 0.5f,
 			vPos + vSize + pad + spa * 0.5f,
-			ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), round, 15, 3.0f);
+			ImGui::GetColorU32(ImVec4(1, 0, 0, 1)), round, ImDrawFlags_RoundCornersAll, 3.0f);
 	}
 }
 

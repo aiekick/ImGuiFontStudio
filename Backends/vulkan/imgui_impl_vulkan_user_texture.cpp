@@ -7,8 +7,7 @@
 // Missing features:
 //  [ ] Renderer: User texture binding. Changes of ImTextureID aren't supported by this backend! See https://github.com/ocornut/imgui/pull/914
 
-// You can use unmodified imgui_impl_* files in your project. See examples/ folder for examples of using this. 
-// Prefer including the entire imgui/ repository into your project (either as a copy or as a submodule), and only build the backends you need.
+// You can copy and use unmodified imgui_impl_* files in your project. See examples/ folder for examples of using this.
 // If you are new to Dear ImGui, read documentation from the docs/ folder + read the top of imgui.cpp.
 // Read online: https://github.com/ocornut/imgui/tree/master/docs
 
@@ -24,7 +23,6 @@
 
 // CHANGELOG
 // (minor and older changes stripped away, please see git history for details)
-//  2021-03-22: Vulkan: Fix mapped memory validation error when buffer sizes are not multiple of VkPhysicalDeviceLimits::nonCoherentAtomSize.
 //  2021-02-18: Vulkan: Change blending equation to preserve alpha in output buffer.
 //  2021-01-27: Vulkan: Added support for custom function load and IMGUI_IMPL_VULKAN_NO_PROTOTYPES by using ImGui_ImplVulkan_LoadFunctions().
 //  2020-11-11: Vulkan: Added support for specifying which subpass to reference during VkPipeline creation.
@@ -53,7 +51,7 @@
 //  2016-10-18: Vulkan: Add location decorators & change to use structs as in/out in glsl, update embedded spv (produced with glslangValidator -x). Null the released resources.
 //  2016-08-27: Vulkan: Fix Vulkan example for use when a depth buffer is active.
 
-#include "imgui_impl_vulkan.h"
+#include "imgui_impl_vulkan_user_texture.h"
 #include <stdio.h>
 
 // Reusable buffers used for rendering 1 current in-flight frame, for ImGui_ImplVulkan_RenderDrawData()
@@ -187,18 +185,7 @@ void ImGui_ImplVulkanH_CreateWindowCommandBuffers(VkPhysicalDevice physical_devi
     IMGUI_VULKAN_FUNC_MAP_MACRO(vkGetSwapchainImagesKHR) \
     IMGUI_VULKAN_FUNC_MAP_MACRO(vkMapMemory) \
     IMGUI_VULKAN_FUNC_MAP_MACRO(vkUnmapMemory) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkUpdateDescriptorSets) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkGetPhysicalDeviceSurfaceSupportKHR) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkWaitForFences) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdBeginRenderPass) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkCmdEndRenderPass) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkQueuePresentKHR) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkBeginCommandBuffer) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkEndCommandBuffer) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkResetFences) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkQueueSubmit) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkResetCommandPool) \
-    IMGUI_VULKAN_FUNC_MAP_MACRO(vkAcquireNextImageKHR)
+    IMGUI_VULKAN_FUNC_MAP_MACRO(vkUpdateDescriptorSets)
 
 // Define function pointers
 #define IMGUI_VULKAN_FUNC_DEF(func) static PFN_##func func;
@@ -323,7 +310,7 @@ static uint32_t __glsl_shader_frag_spv[] =
 // FUNCTIONS
 //-----------------------------------------------------------------------------
 
-static uint32_t ImGui_ImplVulkan_MemoryType(VkMemoryPropertyFlags properties, uint32_t type_bits)
+uint32_t ImGui_ImplVulkanH_MemoryType(VkMemoryPropertyFlags properties, uint32_t type_bits)
 {
     ImGui_ImplVulkan_InitInfo* v = &g_VulkanInitInfo;
     VkPhysicalDeviceMemoryProperties prop;
@@ -365,13 +352,13 @@ static void CreateOrResizeBuffer(VkBuffer& buffer, VkDeviceMemory& buffer_memory
     VkMemoryAllocateInfo alloc_info = {};
     alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
     alloc_info.allocationSize = req.size;
-    alloc_info.memoryTypeIndex = ImGui_ImplVulkan_MemoryType(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, req.memoryTypeBits);
+    alloc_info.memoryTypeIndex = ImGui_ImplVulkanH_MemoryType(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, req.memoryTypeBits);
     err = vkAllocateMemory(v->Device, &alloc_info, v->Allocator, &buffer_memory);
     check_vk_result(err);
 
     err = vkBindBufferMemory(v->Device, buffer, buffer_memory, 0);
     check_vk_result(err);
-    p_buffer_size = req.size;
+    p_buffer_size = new_size;
 }
 
 static void ImGui_ImplVulkan_SetupRenderState(ImDrawData* draw_data, VkPipeline pipeline, VkCommandBuffer command_buffer, ImGui_ImplVulkanH_FrameRenderBuffers* rb, int fb_width, int fb_height)
@@ -379,8 +366,8 @@ static void ImGui_ImplVulkan_SetupRenderState(ImDrawData* draw_data, VkPipeline 
     // Bind pipeline and descriptor sets:
     {
         vkCmdBindPipeline(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, pipeline);
-        VkDescriptorSet desc_set[1] = { g_DescriptorSet };
-        vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_PipelineLayout, 0, 1, desc_set, 0, NULL);
+        //VkDescriptorSet desc_set[1] = { g_DescriptorSet };
+        //vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_PipelineLayout, 0, 1, desc_set, 0, NULL);
     }
 
     // Bind Vertex And Index Buffer:
@@ -459,9 +446,9 @@ void ImGui_ImplVulkan_RenderDrawData(ImDrawData* draw_data, VkCommandBuffer comm
         // Upload vertex/index data into a single contiguous GPU buffer
         ImDrawVert* vtx_dst = NULL;
         ImDrawIdx* idx_dst = NULL;
-        VkResult err = vkMapMemory(v->Device, rb->VertexBufferMemory, 0, rb->VertexBufferSize, 0, (void**)(&vtx_dst));
+        VkResult err = vkMapMemory(v->Device, rb->VertexBufferMemory, 0, vertex_size, 0, (void**)(&vtx_dst));
         check_vk_result(err);
-        err = vkMapMemory(v->Device, rb->IndexBufferMemory, 0, rb->IndexBufferSize, 0, (void**)(&idx_dst));
+        err = vkMapMemory(v->Device, rb->IndexBufferMemory, 0, index_size, 0, (void**)(&idx_dst));
         check_vk_result(err);
         for (int n = 0; n < draw_data->CmdListsCount; n++)
         {
@@ -535,9 +522,23 @@ void ImGui_ImplVulkan_RenderDrawData(ImDrawData* draw_data, VkCommandBuffer comm
                     scissor.extent.height = (uint32_t)(clip_rect.w - clip_rect.y);
                     vkCmdSetScissor(command_buffer, 0, 1, &scissor);
 
-                    // Draw
-                    vkCmdDrawIndexed(command_buffer, pcmd->ElemCount, 1, pcmd->IdxOffset + global_idx_offset, pcmd->VtxOffset + global_vtx_offset, 0);
-                }
+					// Bind descriptor set with font or user texture
+                    auto descPtr = (VkDescriptorSet*)pcmd->TextureId;
+                    if (descPtr && *descPtr)
+                    {
+                        // Bind Descriptor like font or user texture
+                        VkDescriptorSet desc_set[1] = { *descPtr };
+                        vkCmdBindDescriptorSets(command_buffer, VK_PIPELINE_BIND_POINT_GRAPHICS, g_PipelineLayout, 0, 1, desc_set, 0, NULL);
+
+                        // Draw
+                        vkCmdDrawIndexed(command_buffer, pcmd->ElemCount, 1, pcmd->IdxOffset + global_idx_offset, pcmd->VtxOffset + global_vtx_offset, 0);
+                    }
+                    else
+                    {
+                        printf("pcmd->TextureId is NULL VkDescriptorSet\n");
+                        //break;
+                    }
+				}
             }
         }
         global_idx_offset += cmd_list->IdxBuffer.Size;
@@ -553,7 +554,7 @@ bool ImGui_ImplVulkan_CreateFontsTexture(VkCommandBuffer command_buffer)
     unsigned char* pixels;
     int width, height;
     io.Fonts->GetTexDataAsRGBA32(&pixels, &width, &height);
-    size_t upload_size = width * height * 4 * sizeof(char);
+    size_t upload_size = sizeof(char) * 4 * width * height;
 
     VkResult err;
 
@@ -580,7 +581,7 @@ bool ImGui_ImplVulkan_CreateFontsTexture(VkCommandBuffer command_buffer)
         VkMemoryAllocateInfo alloc_info = {};
         alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         alloc_info.allocationSize = req.size;
-        alloc_info.memoryTypeIndex = ImGui_ImplVulkan_MemoryType(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, req.memoryTypeBits);
+        alloc_info.memoryTypeIndex = ImGui_ImplVulkanH_MemoryType(VK_MEMORY_PROPERTY_DEVICE_LOCAL_BIT, req.memoryTypeBits);
         err = vkAllocateMemory(v->Device, &alloc_info, v->Allocator, &g_FontMemory);
         check_vk_result(err);
         err = vkBindImageMemory(v->Device, g_FontImage, g_FontMemory, 0);
@@ -631,7 +632,7 @@ bool ImGui_ImplVulkan_CreateFontsTexture(VkCommandBuffer command_buffer)
         VkMemoryAllocateInfo alloc_info = {};
         alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
         alloc_info.allocationSize = req.size;
-        alloc_info.memoryTypeIndex = ImGui_ImplVulkan_MemoryType(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, req.memoryTypeBits);
+        alloc_info.memoryTypeIndex = ImGui_ImplVulkanH_MemoryType(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT, req.memoryTypeBits);
         err = vkAllocateMemory(v->Device, &alloc_info, v->Allocator, &g_UploadBufferMemory);
         check_vk_result(err);
         err = vkBindBufferMemory(v->Device, g_UploadBuffer, g_UploadBufferMemory, 0);
@@ -692,7 +693,7 @@ bool ImGui_ImplVulkan_CreateFontsTexture(VkCommandBuffer command_buffer)
     }
 
     // Store our identifier
-    io.Fonts->SetTexID((ImTextureID)(intptr_t)g_FontImage);
+    io.Fonts->SetTexID((ImTextureID)&g_DescriptorSet);
 
     return true;
 }
@@ -1632,7 +1633,7 @@ static void ImGui_ImplVulkan_SwapBuffers(ImGuiViewport* viewport, void*)
     info.pSwapchains = &wd->Swapchain;
     info.pImageIndices = &present_index;
     err = vkQueuePresentKHR(v->Queue, &info);
-    if (err == VK_ERROR_OUT_OF_DATE_KHR || err == VK_SUBOPTIMAL_KHR)
+    if (err == VK_ERROR_OUT_OF_DATE_KHR)
         ImGui_ImplVulkanH_CreateOrResizeWindow(v->Instance, v->PhysicalDevice, v->Device, &data->Window, v->QueueFamily, v->Allocator, (int)viewport->Size.x, (int)viewport->Size.y, v->MinImageCount);
     else
         check_vk_result(err);
@@ -1656,4 +1657,75 @@ void ImGui_ImplVulkan_InitPlatformInterface()
 void ImGui_ImplVulkan_ShutdownPlatformInterface()
 {
     ImGui::DestroyPlatformWindows();
+}
+
+#include <stdexcept>
+	
+VkDescriptorSet ImGui_ImplVulkanH_Create_UserTexture_Descriptor(VkSampler sampler, VkImageView image_view, VkImageLayout image_layout, VkDescriptorSet* vExistingDescriptorSet)
+{
+    VkResult err = VK_SUCCESS;
+
+    ImGui_ImplVulkan_InitInfo* v = &g_VulkanInitInfo;
+    VkDescriptorSet descriptor_set = VK_NULL_HANDLE;
+
+    if (!vExistingDescriptorSet || (vExistingDescriptorSet && !*vExistingDescriptorSet))
+    {
+        // Create Descriptor Set:
+        {
+            VkDescriptorSetAllocateInfo alloc_info = {};
+            alloc_info.sType = VK_STRUCTURE_TYPE_DESCRIPTOR_SET_ALLOCATE_INFO;
+            alloc_info.descriptorPool = v->DescriptorPool;
+            alloc_info.descriptorSetCount = 1;
+            alloc_info.pSetLayouts = &g_DescriptorSetLayout;
+            err = vkAllocateDescriptorSets(v->Device, &alloc_info, &descriptor_set);
+            check_vk_result(err);
+        }
+    }
+    else
+    {
+        descriptor_set = *vExistingDescriptorSet;
+    }
+
+    if (err == VK_SUCCESS && descriptor_set)
+    {
+        // Update the Descriptor Set:
+        {
+            VkDescriptorImageInfo desc_image[1] = {};
+            desc_image[0].sampler = sampler;
+            desc_image[0].imageView = image_view;
+            desc_image[0].imageLayout = image_layout;
+
+            VkWriteDescriptorSet write_desc[1] = {};
+            write_desc[0].sType = VK_STRUCTURE_TYPE_WRITE_DESCRIPTOR_SET;
+            write_desc[0].dstSet = descriptor_set;
+            write_desc[0].descriptorCount = 1;
+            write_desc[0].descriptorType = VK_DESCRIPTOR_TYPE_COMBINED_IMAGE_SAMPLER;
+            write_desc[0].pImageInfo = desc_image;
+
+            vkUpdateDescriptorSets(v->Device, 1, write_desc, 0, NULL);
+        }
+    }
+    else
+    {
+        descriptor_set = VK_NULL_HANDLE;
+        printf("VkDescriptorSet is NULL");
+    }
+
+    return descriptor_set;
+}
+
+bool ImGui_ImplVulkanH_Destroy_UserTexture_Descriptor(VkDescriptorSet *vVkDescriptorSet)
+{
+    bool res = false;
+
+    if (vVkDescriptorSet)
+    {
+        ImGui_ImplVulkan_InitInfo* v = &g_VulkanInitInfo;
+        vkFreeDescriptorSets(v->Device, v->DescriptorPool, 1, vVkDescriptorSet);
+        vVkDescriptorSet = VK_NULL_HANDLE;
+
+        res = true;
+    }
+
+    return res;
 }

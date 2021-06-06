@@ -20,8 +20,10 @@
 
 #include <Project/GlyphInfos.h>
 #include <common/freetype/imgui_freetype.h>
-#include <glad/glad.h>
+#include <globals.h>
 #include <Generator/GenMode.h>
+
+#include <Helper/TextureHelper.h>
 
 #include <imgui/imgui.h>
 #include <string>
@@ -30,7 +32,7 @@
 #include <utility>
 #include <memory>
 
-enum RasterizerEnum
+enum class RasterizerEnum
 {
 	RASTERIZER_STB = 0,
 	RASTERIZER_FREETYPE,
@@ -87,7 +89,7 @@ public: // to save
 	std::set<std::string> m_Filters; // use map just for have binary tree search
 	RasterizerEnum m_RasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
 	uint32_t m_FreeTypeFlag = ImGuiFreeType::FreeType_Default;
-	GLenum m_TextureFiltering = GL_LINEAR; // for texture generation
+	TextureFilteringEnum m_TextureFiltering = TextureFilteringEnum::TEX_FILTER_LINEAR; // for texture generation
 	uint32_t m_CardGlyphHeightInPixel = 40U; // glyph item height in card
 	uint32_t m_CardCountRowsMax = 20U; // after this max, new columns
 	bool m_EnabledForGeneration = true; // enable for generation (in abtch mode per font settings)
@@ -111,7 +113,8 @@ private: // Glyph Names Extraction / DB
 	void GenerateCodePointToGlypNamesDB();
 	void FillGlyphColoreds();
 
-private: // Opengl Texture
+private: // Texture
+	std::shared_ptr<TextureObject> m_FontTexture = nullptr;
 	void CreateFontTexture();
 	void DestroyFontTexture();
 
