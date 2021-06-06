@@ -167,13 +167,13 @@ void MainFrame::Display(ImVec2 vPos, ImVec2 vSize)
 
 		// ImGui Infos
 		auto io = ImGui::GetIO();
-		const auto label = ct::toStr("Dear ImGui %s (%s Docking)", ImGui::GetVersion(),
+		const auto label = ct::toStr("Dear ImGui %s (%s Docking) WorkSize(%.f, %.f)", ImGui::GetVersion(),
 #if VULKAN
 			"Vulkan"
 #else
 			"Opengl3"
 #endif
-			);
+			, ImGui::GetMainViewport()->WorkSize.x, ImGui::GetMainViewport()->WorkSize.y);
 		const auto size = ImGui::CalcTextSize(label.c_str());
 		ImGui::Spacing(ImGui::GetContentRegionAvail().x - size.x - ImGui::GetStyle().FramePadding.x * 2.0f);
 		ImGui::Text("%s", label.c_str());

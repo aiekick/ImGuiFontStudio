@@ -1180,53 +1180,26 @@ ImGuiWindow* ImGui::GetHoveredWindow()
 
 bool ImGui::BeginMainStatusBar()
 {
-	const char* statusBarLabel = "##MainStatusBar";
-
 	ImGuiContext& g = *GImGui;
-	ImGuiViewportP* viewport = g.Viewports[0];
-	ImGuiWindow* status_bar_window = FindWindowByName(statusBarLabel);
+	ImGuiViewportP* viewport = (ImGuiViewportP*)(void*)GetMainViewport();
 
-	ImVec2 status_bar_pos, status_bar_size;
+	// Notify of viewport change so GetFrameHeight() can be accurate in case of DPI change
+	SetCurrentViewport(NULL, viewport);
 
-	// Get our rectangle at the bottom of the work area
-	if (status_bar_window == nullptr)
-	{
-		status_bar_pos = viewport->Pos + viewport->WorkOffsetMin;
-		status_bar_pos.y += viewport->Size.y - viewport->WorkOffsetMax.y - 1.0f;
-		status_bar_size = ImVec2(viewport->Size.x - viewport->WorkOffsetMin.x + viewport->WorkOffsetMax.x, 1.0f);
-	}
-	else
-	{
-		status_bar_pos = viewport->Pos + viewport->WorkOffsetMax;
-		status_bar_pos.y += viewport->Size.y - viewport->WorkOffsetMax.y - status_bar_window->Size.y;
-		status_bar_size = ImVec2(viewport->Size.x - viewport->WorkOffsetMin.x + viewport->WorkOffsetMax.x, status_bar_window->Size.y);
-	}
-
-	// Get our rectangle in the work area, and report the size we need for next frame.
-	// We don't attempt to calculate our height ahead, as it depends on the per-viewport font size. However menu-bar will affect the minimum window size so we'll get the right height.
-	SetNextWindowPos(status_bar_pos);
-	SetNextWindowSize(status_bar_size);
-	SetNextWindowViewport(viewport->ID); // Enforce viewport so we don't create our own viewport when ImGuiConfigFlags_ViewportsNoMerge is set.
-	PushStyleVar(ImGuiStyleVar_WindowRounding, 0.0f);
-	PushStyleVar(ImGuiStyleVar_WindowMinSize, ImVec2(0, 0));    // Lift normal size constraint, however the presence of a menu-bar will give us the minimum height we want.
-	const ImGuiWindowFlags window_flags =
-		ImGuiWindowFlags_NoDocking | ImGuiWindowFlags_NoTitleBar | ImGuiWindowFlags_NoResize |
-		ImGuiWindowFlags_NoMove | ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar;
-	const bool is_open = Begin(statusBarLabel, nullptr, window_flags) && BeginMenuBar();
-	PopStyleVar(2);
-
-	// Report our size into work area (for next frame) using actual window size
-	status_bar_window = GetCurrentWindow();
-	if (status_bar_window->BeginCount == 1)
-		viewport->WorkOffsetMax.y -= status_bar_window->Size.y;
-
+	// For the main menu bar, which cannot be moved, we honor g.Style.DisplaySafeAreaPadding to ensure text can be visible on a TV set.
+	// FIXME: This could be generalized as an opt-in way to clamp window->DC.CursorStartPos to avoid SafeArea?
+	// FIXME: Consider removing support for safe area down the line... it's messy. Nowadays consoles have support for TV calibration in OS settings.
+	g.NextWindowData.MenuBarOffsetMinVal = ImVec2(g.Style.DisplaySafeAreaPadding.x, ImMax(g.Style.DisplaySafeAreaPadding.y - g.Style.FramePadding.y, 0.0f));
+	ImGuiWindowFlags window_flags = ImGuiWindowFlags_NoScrollbar | ImGuiWindowFlags_NoSavedSettings | ImGuiWindowFlags_MenuBar;
+	float height = GetFrameHeight();
+	bool is_open = BeginViewportSideBar("##MainStatusBar", viewport, ImGuiDir_Down, height, window_flags);
 	g.NextWindowData.MenuBarOffsetMinVal = ImVec2(0.0f, 0.0f);
-	if (!is_open)
-	{
+
+	if (is_open)
+		BeginMenuBar();
+	else
 		End();
-		return false;
-	}
-	return true; //-V1020
+	return is_open;
 }
 
 void ImGui::EndMainStatusBar()
@@ -1236,8 +1209,8 @@ void ImGui::EndMainStatusBar()
 	// When the user has left the menu layer (typically: closed menus through activation of an item), we restore focus to the previous window
 	// FIXME: With this strategy we won't be able to restore a NULL focus.
 	ImGuiContext& g = *GImGui;
-	if (g.CurrentWindow == g.NavWindow && g.NavLayer == 0 && !g.NavAnyRequest)
-		FocusTopMostWindowUnderOne(g.NavWindow, nullptr);
+	if (g.CurrentWindow == g.NavWindow && g.NavLayer == ImGuiNavLayer_Main && !g.NavAnyRequest)
+		FocusTopMostWindowUnderOne(g.NavWindow, NULL);
 
 	End();
 }

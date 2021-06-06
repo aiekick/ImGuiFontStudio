@@ -110,8 +110,8 @@ public: // configuration
 public: // singleton
 	static LayoutManager *Instance()
 	{
-		static auto *_instance = new LayoutManager();
-		return _instance;
+		static LayoutManager _instance;
+		return &_instance;
 	}
 
 protected:

@@ -28,7 +28,7 @@ SOFTWARE.
 #include "LayoutManager.h"
 
 #include <ctools/FileHelper.h>
-#include <ctools/cTools.h>
+#include <ctools/Logger.h>
 
 #define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
@@ -75,7 +75,7 @@ void LayoutManager::Init(const char* vMenuLabel, const char* vDefautlMenuLabel)
 	if (!FileHelper::Instance()->IsFileExist("imgui.ini"))
 	{
 		m_FirstLayout = true; // need default layout
-		printf("We will apply default layout :)");
+		LogVar("We will apply default layout :)");
 	}
 }
 
