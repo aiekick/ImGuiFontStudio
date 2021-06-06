@@ -553,12 +553,15 @@ int main(int, char** argv)
         ImGui::Render();
         ImDrawData* main_draw_data = ImGui::GetDrawData();
         const bool main_is_minimized = (main_draw_data->DisplaySize.x <= 0.0f || main_draw_data->DisplaySize.y <= 0.0f);
-        wd->ClearValue.color.float32[0] = 0.0f;
-        wd->ClearValue.color.float32[1] = 0.0f;
-        wd->ClearValue.color.float32[2] = 0.0f;
-        wd->ClearValue.color.float32[3] = 1.0f;
+
         if (!main_is_minimized)
+        {
+            wd->ClearValue.color.float32[0] = 0.0f;
+            wd->ClearValue.color.float32[1] = 0.0f;
+            wd->ClearValue.color.float32[2] = 0.0f;
+            wd->ClearValue.color.float32[3] = 1.0f;
             FrameRender(wd, main_draw_data);
+        }
 
         // Update and Render additional Platform Windows
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
@@ -570,6 +573,9 @@ int main(int, char** argv)
         // Present Main Platform Window
         if (!main_is_minimized)
             FramePresent(wd);
+
+        // after rendering, designed at most for vulkan ressources
+        MainFrame::Instance()->ExecuteActions();
     }
 
     MainFrame::Instance()->Unit();

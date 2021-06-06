@@ -37,6 +37,7 @@
 #include <Project/ProjectFile.h>
 #include <Helper/AssetManager.h>
 #include <Res/CustomFont.h>
+#include <Helper/TextureHelper.h>
 
 #include <Panes/Manager/LayoutManager.h>
 #ifdef _DEBUG
@@ -104,6 +105,8 @@ void MainFrame::Init()
 void MainFrame::Unit()
 {
 	SaveConfigFile("config.xml");
+
+	ProjectFile::Instance()->Clear();
 }
 
 void MainFrame::NewProject(const std::string& vFilePathName)
@@ -142,22 +145,17 @@ void MainFrame::SaveAsProject(const std::string& vFilePathName)
 	}
 }
 
-ProjectFile* MainFrame::GetProject()
-{
-	return ProjectFile::Instance();
-}
-
 //////////////////////////////////////////////////////////////////////////////
 //// DRAW ////////////////////////////////////////////////////////////////////
 //////////////////////////////////////////////////////////////////////////////
 
 #define NewWidgetId() ++widgetId
 
-void MainFrame::Display(ImVec2 vPos, ImVec2 vSize)
+bool MainFrame::Display(ImVec2 vPos, ImVec2 vSize)
 {
 	widgetId = WIDGET_ID_MAGIC_NUMBER; // important for event catching on imgui widgets
-
 	ImGui::CustomStyle::ResetCustomId();
+	TextureHelper::sNeedToSkipRendering = false;
 
 	m_DisplayPos = vPos;
 	m_DisplaySize = vSize;
@@ -168,13 +166,13 @@ void MainFrame::Display(ImVec2 vPos, ImVec2 vSize)
 
 		// ImGui Infos
 		auto io = ImGui::GetIO();
-		const auto label = ct::toStr("Dear ImGui %s (%s Docking) WorkSize(%.f, %.f)", ImGui::GetVersion(),
+		const auto label = ct::toStr("Dear ImGui %s (%s Docking)", ImGui::GetVersion(),
 #if VULKAN
 			"Vulkan"
 #else
 			"Opengl3"
 #endif
-			, ImGui::GetMainViewport()->WorkSize.x, ImGui::GetMainViewport()->WorkSize.y);
+		);
 		const auto size = ImGui::CalcTextSize(label.c_str());
 		ImGui::Spacing(ImGui::GetContentRegionAvail().x - size.x - ImGui::GetStyle().FramePadding.x * 2.0f);
 		ImGui::Text("%s", label.c_str());
@@ -207,6 +205,16 @@ void MainFrame::Display(ImVec2 vPos, ImVec2 vSize)
 
 	ThemeHelper::Instance()->Draw();
 	LayoutManager::Instance()->InitAfterFirstDisplay(m_DisplaySize);
+
+	if (TextureHelper::sNeedToSkipRendering)
+		return false; // skip on frame if textue was destroyed
+
+	return true;
+}
+
+void MainFrame::ExecuteActions()
+{
+	m_ActionSystem.RunActions();
 }
 
 void MainFrame::OpenAboutDialog()
@@ -309,8 +317,6 @@ void MainFrame::DrawMainMenuBar()
 
 void MainFrame::DisplayDialogsAndPopups()
 {
-	m_ActionSystem.RunActions();
-
 	if (ProjectFile::Instance()->IsLoaded())
 	{
 		LayoutManager::Instance()->DrawDialogsAndPopups();
@@ -326,6 +332,19 @@ void MainFrame::DisplayDialogsAndPopups()
 				auto GoodFilePathName = ImGuiFileDialog::Instance()->GetFilePathName();
 				auto UserDatas = std::string((const char*)ImGuiFileDialog::Instance()->GetUserDatas());
 
+#if 0
+				m_ActionSystem.Add([this, GoodFilePathName, UserDatas]()
+					{
+						if (FileHelper::Instance()->IsFileExist(GoodFilePathName))
+						{
+							if (ProjectFile::Instance()->m_Fonts.find(UserDatas) != ProjectFile::Instance()->m_Fonts.end()) // found
+							{
+								ReRouteFontToFile(UserDatas, GoodFilePathName);
+							}
+						}
+						return true; // one time action
+					});
+#else
 				if (FileHelper::Instance()->IsFileExist(GoodFilePathName))
 				{
 					if (ProjectFile::Instance()->m_Fonts.find(UserDatas) != ProjectFile::Instance()->m_Fonts.end()) // found
@@ -333,6 +352,7 @@ void MainFrame::DisplayDialogsAndPopups()
 						ReRouteFontToFile(UserDatas, GoodFilePathName);
 					}
 				}
+#endif
 			}
 
 			ImGuiFileDialog::Instance()->Close();

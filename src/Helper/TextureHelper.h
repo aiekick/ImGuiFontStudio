@@ -35,6 +35,9 @@ enum class TextureFilteringEnum
 class TextureHelper
 {
 public:
+    static bool sNeedToSkipRendering;
+
+public:
 #if VULKAN
     static std::shared_ptr<TextureObject> CreateTextureFromBuffer(VkCommandBuffer command_buffer, uint8_t* buffer, int w, int h, int n, TextureFilteringEnum vFiltering);
     static std::shared_ptr<TextureObject> CreateTextureFromFile(VkCommandBuffer command_buffer, const char* inFile, TextureFilteringEnum vFiltering, VkDescriptorSet* vOriginal = nullptr);

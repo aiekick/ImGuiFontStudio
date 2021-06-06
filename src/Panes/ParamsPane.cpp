@@ -209,8 +209,8 @@ void ParamsPane::DrawParamsPane()
 											label = "Search an alternative font file " + itFont.first;
 
 										std::string path = ".";
-										if (MainFrame::Instance()->GetProject()->IsLoaded())
-											path = MainFrame::Instance()->GetProject()->m_ProjectFilePath;
+										if (ProjectFile::Instance()->IsLoaded())
+											path = ProjectFile::Instance()->m_ProjectFilePath;
 										ImGuiFileDialog::Instance()->OpenModal(
 											"SolveBadFilePathName",
 											label.c_str(), "Font File (*.ttf *.otf){.ttf,.otf}", path,
@@ -356,8 +356,8 @@ open font :
 	MainFrame::Instance()->GetActionSystem()->Add([this]()
 		{
 			std::string path = ".";
-			if (MainFrame::Instance()->GetProject()->IsLoaded())
-				path = MainFrame::Instance()->GetProject()->m_ProjectFilePath;
+			if (ProjectFile::Instance()->IsLoaded())
+				path = ProjectFile::Instance()->m_ProjectFilePath;
 			ImGuiFileDialog::Instance()->OpenModal(
 				"OpenFontDlg", "Open Font File", "Font File (*.ttf *.otf){.ttf,.otf},All Files (*.*){.*}", path, 0);
 			return true;
@@ -387,7 +387,7 @@ close font :
 	MainFrame::Instance()->GetActionSystem()->Add([this]()
 		{
 			// close font
-			auto prj = MainFrame::Instance()->GetProject();
+			auto prj = ProjectFile::Instance();
 			if (prj)
 			{
 				if (prj->m_SelectedFont)

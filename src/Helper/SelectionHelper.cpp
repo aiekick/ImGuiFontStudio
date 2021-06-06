@@ -1498,7 +1498,7 @@ void SelectionHelper::AnalyseSourceSelection()
 				Messaging::Instance()->AddError(true, font.second, [this](MessageData vDatas)
 					{
 						LayoutManager::Instance()->FocusSpecificPane(FINAL_PANE);
-						MainFrame::Instance()->GetProject()->m_SelectedFont = vDatas.GetUserDatas<FontInfos>();
+						ProjectFile::Instance()->m_SelectedFont = vDatas.GetUserDatas<FontInfos>();
 						FinalFontPane::Instance()->SetFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_CODEPOINT);
 						FinalFontPane::Instance()->PrepareSelection();
 					}, "Glyph codePoint found in double in font %s ! Font generation solo is prohibited until solved.", font.second->m_FontFileName.c_str());
@@ -1509,7 +1509,7 @@ void SelectionHelper::AnalyseSourceSelection()
 				Messaging::Instance()->AddError(true, font.second, [this](MessageData vDatas)
 					{
 						LayoutManager::Instance()->FocusSpecificPane(FINAL_PANE);
-						MainFrame::Instance()->GetProject()->m_SelectedFont = vDatas.GetUserDatas<FontInfos>();
+						ProjectFile::Instance()->m_SelectedFont = vDatas.GetUserDatas<FontInfos>();
 						FinalFontPane::Instance()->SetFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_NAMES);
 						FinalFontPane::Instance()->PrepareSelection();
 					}, "Glyph name found in double in font %s ! Font generation solo is prohibited until solved.", font.second->m_FontFileName.c_str());

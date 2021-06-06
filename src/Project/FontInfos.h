@@ -51,7 +51,7 @@ class FontInfos : public conf::ConfigAbstract, public GenMode
 {
 public:
 	static std::shared_ptr<FontInfos> Create();
-	
+
 public: // not to save
 	std::weak_ptr<FontInfos> m_This;
 	ImFontAtlas m_ImFontAtlas;

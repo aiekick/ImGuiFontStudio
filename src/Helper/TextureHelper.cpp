@@ -5,6 +5,8 @@
 
 #include <MainFrame.h>
 
+bool TextureHelper::sNeedToSkipRendering = false;
+
 #if VULKAN
 static void TextureHelper_check_vk_result(VkResult err)
 {
@@ -267,6 +269,8 @@ void TextureHelper::DestroyTexture(TextureObject* image_object)
 {
     if (image_object)
     {
+        TextureHelper::sNeedToSkipRendering = true;
+
 #if VULKAN
         if (image_object->buf)
         {

@@ -329,8 +329,8 @@ void SourceFontPane::DrawFontTexture(std::shared_ptr<FontInfos> vFontInfos)
 					if (ImGui::MenuItem("Save to File"))
 					{
 						std::string path = ".";
-						if (MainFrame::Instance()->GetProject()->IsLoaded())
-							path = MainFrame::Instance()->GetProject()->m_ProjectFilePath;
+						if (ProjectFile::Instance()->IsLoaded())
+							path = ProjectFile::Instance()->m_ProjectFilePath;
 						ImGuiFileDialog::Instance()->OpenModal("SaveFontToPictureFile", "Svae Font Testure to File", ".png", 
 							path, 0, IGFDUserDatas(&vFontInfos->m_ImFontAtlas), ImGuiFileDialogFlags_ConfirmOverwrite);
 					}
