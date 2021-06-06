@@ -99,8 +99,8 @@ public:
 public: // singleton
 	static Messaging *Instance()
 	{
-		static Messaging *_instance = new Messaging();
-		return _instance;
+		static Messaging _instance;
+		return &_instance;
 	}
 
 protected:

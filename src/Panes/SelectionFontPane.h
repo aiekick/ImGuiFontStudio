@@ -17,27 +17,31 @@
 
 #include <Panes/Abstract/AbstractPane.h>
 #include <ctools/ConfigAbstract.h>
-#include <ctools/cTools.h>
 #include <Gui/ImWidgets.h>
 
-#include <string>
+#include <imgui/imgui.h>
 #include <map>
-#include <set>
+#include <string>
+#include <vector>
 
-class FontInfos;
-class ProjectFile;
-struct ImGuiWindow;
-class SourceFontPane : public AbstractPane
+enum SelectedFontPaneModeFlags
 {
-private: // per pane settings to save
-	//int m_GlyphSize_Policy_Count = 20;
-	//float m_GlyphSize_Policy_Width = 40.0f;
+	SELECTED_FONT_PANE_NONE = 0,
+	SELECTED_FONT_PANE_ORDERED_BY_CODEPOINT = (1 << 0),
+	SELECTED_FONT_PANE_ORDERED_BY_NAMES = (1 << 1),
+};
 
-private: // private vars
-	ImGuiListClipper m_VirtualClipper;
-
-private: // private enum
-	bool m_Show_ConfirmToCloseFont_Dialog = false;  // show confirm to close font dialog
+class GlyphInfos;
+class ProjectFile;
+class FontInfos;
+class SelectionFontPane : public AbstractPane
+{
+private:
+	SelectedFontPaneModeFlags m_SelectedFontPaneModeFlags =
+		SelectedFontPaneModeFlags::SELECTED_FONT_PANE_ORDERED_BY_NAMES;
+	
+	bool m_GlyphEdition = false;
+	bool m_AutoUpdateCodepoint_WhenEditWithButtons = false;
 
 	ImVec4 m_GlyphButtonStateColor[3] = { ImVec4(), ImVec4(), ImVec4() };
 
@@ -48,29 +52,28 @@ public:
 	void DrawDialogsAndPopups(std::string vUserDatas) override;
 	int DrawWidgets(int vWidgetId, std::string vUserDatas)  override;
 
-private: 
-	void DrawFilterBar(std::shared_ptr<FontInfos> vFontInfos);
-	void DrawFontTexture(std::shared_ptr<FontInfos> vFontInfos);
-	void DrawFontAtlas_Virtual(std::shared_ptr<FontInfos> vFontInfos);
-	
-	// panes
-	void DrawSourceFontPane();
+	// Preparation
+	bool IsSelectedFontPaneMode(SelectedFontPaneModeFlags vSelectedFontPaneModeFlags);
+	void PrepareSelection();
+
+private:
+	void DrawSelectedFontPane();
 
 public: // configuration
 	std::string getXml(const std::string& vOffset, const std::string& vUserDatas);
 	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas);
 
 public: // singleton
-	static SourceFontPane* Instance()
+	static SelectionFontPane*Instance()
 	{
-		static SourceFontPane _instance;
+		static SelectionFontPane _instance;
 		return &_instance;
 	}
 
 protected:
-	SourceFontPane(); // Prevent construction
-	SourceFontPane(const SourceFontPane&) {}; // Prevent construction by copying
-	SourceFontPane& operator =(const SourceFontPane&) { return *this; }; // Prevent assignment
-	~SourceFontPane(); // Prevent unwanted destruction};
+	SelectionFontPane(); // Prevent construction
+	SelectionFontPane(const SelectionFontPane&) {}; // Prevent construction by copying
+	SelectionFontPane& operator =(const SelectionFontPane&) { return *this; }; // Prevent assignment
+	~SelectionFontPane(); // Prevent unwanted destruction};
 };
 

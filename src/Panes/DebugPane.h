@@ -56,8 +56,8 @@ public:
 public: // singleton
 	static DebugPane *Instance()
 	{
-		static DebugPane *_instance = new DebugPane();
-		return _instance;
+		static DebugPane _instance;
+		return &_instance;
 	}
 
 protected:

@@ -200,8 +200,8 @@ public: // configuration
 public: // singleton
 	static MainFrame *Instance(GLFWwindow *vWin = 0)
 	{
-		static MainFrame *_instance = new MainFrame(vWin);
-		return _instance;
+		static MainFrame _instance(vWin);
+		return &_instance;
 	}
 
 protected:

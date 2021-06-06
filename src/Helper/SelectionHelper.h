@@ -256,8 +256,8 @@ public:
 public: // singleton
 	static SelectionHelper *Instance()
 	{
-		static SelectionHelper *_instance = new SelectionHelper();
-		return _instance;
+		static SelectionHelper _instance;
+		return &_instance;
 	}
 
 protected:

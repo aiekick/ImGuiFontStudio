@@ -58,7 +58,6 @@ int FinalFontPane::DrawPanes(int vWidgetId, std::string vUserDatas)
 	m_PaneWidgetId = vWidgetId;
 
 	DrawFinalFontPane();
-	DrawSelectedFontPane();
 
 	return m_PaneWidgetId;
 }
@@ -81,10 +80,10 @@ int FinalFontPane::DrawWidgets(int vWidgetId, std::string vUserDatas)
 
 void FinalFontPane::DrawFinalFontPane()
 {
-	if (LayoutManager::Instance()->m_Pane_Shown & m_PaneFlag)
+	if (LayoutManager::Instance()->m_Pane_Shown & FINAL_PANE)
 	{
 		if (ImGui::BeginFlag<PaneFlags>(m_PaneName,
-			&LayoutManager::Instance()->m_Pane_Shown, m_PaneFlag,
+			&LayoutManager::Instance()->m_Pane_Shown, FINAL_PANE,
 			//ImGuiWindowFlags_NoTitleBar |
 			ImGuiWindowFlags_MenuBar |
 			//ImGuiWindowFlags_NoMove |
@@ -204,81 +203,6 @@ void FinalFontPane::DrawFinalFontPane()
 	}
 }
 
-void FinalFontPane::DrawSelectedFontPane()
-{
-	/*if (LayoutManager::Instance()->m_Pane_Shown & m_PaneFlag)
-	{
-		if (ImGui::BeginFlag<PaneFlags>(m_PaneName,
-			&LayoutManager::Instance()->m_Pane_Shown, m_PaneFlag,
-			//ImGuiWindowFlags_NoTitleBar |
-			ImGuiWindowFlags_MenuBar |
-			//ImGuiWindowFlags_NoMove |
-			ImGuiWindowFlags_NoCollapse |
-			//ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_NoBringToFrontOnFocus))
-		{
-			if (ProjectFile::Instance()->IsLoaded())
-			{
-				if (ProjectFile::Instance()->m_SelectedFont)
-				{
-					if (ImGui::BeginMenuBar())
-					{
-						if (ImGui::BeginMenu("Sorting"))
-						{
-							if (ImGui::MenuItem<SelectedFontPaneModeFlags>("by CodePoint", "",
-								&m_SelectedFontPaneModeFlags,
-								SelectedFontPaneModeFlags::SELECTED_FONT_PANE_ORDERED_BY_CODEPOINT, true))
-							{
-								PrepareSelectionByFontOrderedByCodePoint();
-							}
-
-							if (ImGui::MenuItem<SelectedFontPaneModeFlags>("by Name", "",
-								&m_SelectedFontPaneModeFlags,
-								SelectedFontPaneModeFlags::SELECTED_FONT_PANE_ORDERED_BY_NAMES, true))
-							{
-								PrepareSelectionByFontOrderedByGlyphNames();
-							}
-
-							ImGui::EndMenu();
-						}
-
-						if (ImGui::BeginMenu("Infos"))
-						{
-							if (ImGui::MenuItem("Show Tooltip", "", ProjectFile::Instance()->m_CurrentPane_ShowGlyphTooltip))
-							{
-								ProjectFile::Instance()->SetProjectChange();
-							}
-
-							ImGui::EndMenu();
-						}
-
-						if (ImGui::BeginMenu("Edition"))
-						{
-							ImGui::MenuItem("Auto Update codePoint during Edition", "",
-								&m_AutoUpdateCodepoint_WhenEditWithButtons);
-
-							ImGui::EndMenu();
-						}
-						
-						ImGui::EndMenuBar();
-					}
-
-					if (m_SelectedFontPaneModeFlags & SelectedFontPaneModeFlags::SELECTED_FONT_PANE_ORDERED_BY_CODEPOINT)
-					{
-						DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(ProjectFile::Instance()->m_SelectedFont, false, true, false, ProjectFile::Instance()->m_CurrentPane_ShowGlyphTooltip);
-					}
-					else if (m_SelectedFontPaneModeFlags & SelectedFontPaneModeFlags::SELECTED_FONT_PANE_ORDERED_BY_NAMES)
-					{
-						DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(ProjectFile::Instance()->m_SelectedFont, false, true, false, ProjectFile::Instance()->m_CurrentPane_ShowGlyphTooltip);
-					}
-				}
-			}
-		}
-
-		ImGui::End();
-	}*/
-}
-
 ///////////////////////////////////////////////////////////////////////////////////////////
 ////// PUBLIC : PREPARATON ////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////////////
@@ -293,22 +217,8 @@ bool FinalFontPane::IsFinalFontPaneMode(FinalFontPaneModeFlags vFinalFontPaneMod
 	return (m_FinalFontPaneModeFlags & vFinalFontPaneModeFlags) == vFinalFontPaneModeFlags; // check
 }
 
-bool FinalFontPane::IsSelectedFontPaneMode(SelectedFontPaneModeFlags vSelectedFontPaneModeFlags)
-{
-	return (m_SelectedFontPaneModeFlags & vSelectedFontPaneModeFlags) == vSelectedFontPaneModeFlags; // check
-}
-
 void FinalFontPane::PrepareSelection()
 {
-	if (IsSelectedFontPaneMode(SelectedFontPaneModeFlags::SELECTED_FONT_PANE_ORDERED_BY_CODEPOINT))
-	{
-		PrepareSelectionByFontOrderedByCodePoint();
-	}
-	else if (IsSelectedFontPaneMode(SelectedFontPaneModeFlags::SELECTED_FONT_PANE_ORDERED_BY_NAMES))
-	{
-		PrepareSelectionByFontOrderedByGlyphNames();
-	}
-
 	if (IsFinalFontPaneMode(FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_NO_ORDER))
 	{
 		// nothing to prepare because this is the default view => pointed on FontInfos->m_SelectedGlyphs

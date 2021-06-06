@@ -25,8 +25,8 @@ private:
 public: // singleton
 	static AssetManager* Instance()
 	{
-		static AssetManager* _instance = new AssetManager();
-		return _instance;
+		static AssetManager _instance;
+		return &_instance;
 	}
 
 protected:

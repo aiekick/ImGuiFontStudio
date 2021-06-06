@@ -573,9 +573,6 @@ int main(int, char** argv)
         // Present Main Platform Window
         if (!main_is_minimized)
             FramePresent(wd);
-
-        // after rendering, designed at most for vulkan ressources
-        MainFrame::Instance()->ExecuteActions();
     }
 
     MainFrame::Instance()->Unit();

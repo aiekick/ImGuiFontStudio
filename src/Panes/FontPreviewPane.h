@@ -47,8 +47,8 @@ private:
 public: // singleton
 	static FontPreviewPane *Instance()
 	{
-		static FontPreviewPane *_instance = new FontPreviewPane();
-		return _instance;
+		static FontPreviewPane _instance;
+		return &_instance;
 	}
 
 protected:

@@ -55,6 +55,7 @@ public:
 public: // not to save
 	std::weak_ptr<FontInfos> m_This;
 	ImFontAtlas m_ImFontAtlas;
+	std::shared_ptr<TextureObject> m_FontTexture = nullptr;
 	std::vector<std::string> m_GlyphNames;
 	std::map<uint32_t, std::string> m_GlyphCodePointToName;
 	std::map<uint32_t, uint32_t> m_GlyphCodePointToGlyphIndex;
@@ -114,7 +115,6 @@ private: // Glyph Names Extraction / DB
 	void FillGlyphColoreds();
 
 private: // Texture
-	std::shared_ptr<TextureObject> m_FontTexture = nullptr;
 	void CreateFontTexture();
 	void DestroyFontTexture();
 

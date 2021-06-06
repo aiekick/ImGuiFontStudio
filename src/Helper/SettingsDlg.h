@@ -50,8 +50,8 @@ private:
 public:
 	static SettingsDlg* Instance()
 	{
-		static SettingsDlg *_instance = new SettingsDlg();
-		return _instance;
+		static SettingsDlg _instance;
+		return &_instance;
 	}
 
 protected:

@@ -43,8 +43,8 @@ private:
 public: // singleton
 	static FontStructurePane *Instance()
 	{
-		static auto *_instance = new FontStructurePane();
-		return _instance;
+		static FontStructurePane _instance;
+		return &_instance;
 	}
 
 protected:

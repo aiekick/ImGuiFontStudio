@@ -30,8 +30,6 @@ class ProjectFile;
 class Generator
 {
 public:
-	static bool SaveTextureToPng(GLFWwindow* vWin, const std::string& vFilePathName,
-		ImTextureID vTextureId, ct::uvec2 vTextureSize, uint32_t vChannelCount);
 	static bool WriteGlyphCardToPicture(
 		const std::string& vFilePathName,
 		std::map<std::string, std::pair<uint32_t, size_t>> vLabels, // lable, codepoint, FontInfos ptr
@@ -67,8 +65,8 @@ private:
 public: // singleton
 	static Generator *Instance()
 	{
-		static Generator *_instance = new Generator();
-		return _instance;
+		static Generator _instance;
+		return &_instance;
 	}
 
 protected:

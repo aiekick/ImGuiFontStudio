@@ -35,24 +35,11 @@ enum FinalFontPaneModeFlags
 	FINAL_FONT_PANE_MERGED_ORDERED_BY_NAMES = (1 << 5)
 };
 
-enum SelectedFontPaneModeFlags
-{
-	SELECTED_FONT_PANE_NONE = 0,
-	SELECTED_FONT_PANE_ORDERED_BY_CODEPOINT = (1 << 0),
-	SELECTED_FONT_PANE_ORDERED_BY_NAMES = (1 << 1),
-};
-
 class GlyphInfos;
 class ProjectFile;
 class FontInfos;
 class FinalFontPane : public AbstractPane
 {
-private: // per pane settings to save
-	//int m_Final_GlyphSize_Policy_Count = 20;
-	//float m_Final_GlyphSize_Policy_Width = 40.0f;
-	//int m_Selected_GlyphSize_Policy_Count = 20;
-	//float m_Selected_GlyphSize_Policy_Width = 40.0f;
-
 private:
 	std::vector<std::shared_ptr<GlyphInfos>> m_GlyphsMergedNoOrder;
 	std::map<uint32_t, std::vector<std::shared_ptr<GlyphInfos>>> m_GlyphsMergedOrderedByCodePoints;
@@ -61,9 +48,7 @@ private:
 private:
 	FinalFontPaneModeFlags m_FinalFontPaneModeFlags = 
 		FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_NO_ORDER;
-	SelectedFontPaneModeFlags m_SelectedFontPaneModeFlags =
-		SelectedFontPaneModeFlags::SELECTED_FONT_PANE_ORDERED_BY_NAMES;
-
+	
 	bool m_GlyphEdition = false;
 	bool m_AutoUpdateCodepoint_WhenEditWithButtons = false;
 
@@ -79,12 +64,10 @@ public:
 	// Preparation
 	void SetFinalFontPaneMode(FinalFontPaneModeFlags vFinalFontPaneModeFlags);
 	bool IsFinalFontPaneMode(FinalFontPaneModeFlags vFinalFontPaneModeFlags);
-	bool IsSelectedFontPaneMode(SelectedFontPaneModeFlags vSelectedFontPaneModeFlags);
 	void PrepareSelection();
 
 private:
 	void DrawFinalFontPane();
-	void DrawSelectedFontPane();
 
 	bool DrawGlyph(
 		std::shared_ptr<FontInfos> vFontInfos, const ImVec2& vSize,
@@ -102,9 +85,8 @@ private:
 		bool vForceEditModeOneColumn = false,
 		bool vShowTooltipInfos = false);
 
+public:
 	static void PrepareSelectionByFontOrderedByCodePoint();
-	void DrawSelectionsByFontOrderedByCodePoint(
-		bool vShowTooltipInfos = false);
 	void DrawSelectionsByFontOrderedByCodePoint_OneFontOnly(
 		std::shared_ptr<FontInfos> vFontInfos,
 		bool vWithFramedGroup = true, 
@@ -112,14 +94,21 @@ private:
 		bool vForceEditModeOneColumn = false,
 		bool vShowTooltipInfos = false);
 
-	static void PrepareSelectionByFontOrderedByGlyphNames();
-	void DrawSelectionsByFontOrderedByGlyphNames(
+private:
+	void DrawSelectionsByFontOrderedByCodePoint(
 		bool vShowTooltipInfos = false);
+
+public:
+	static void PrepareSelectionByFontOrderedByGlyphNames();
 	void DrawSelectionsByFontOrderedByGlyphNames_OneFontOnly(
 		std::shared_ptr<FontInfos> vFontInfos,
 		bool vWithFramedGroup = true, 
 		bool vForceEditMode = false, 
 		bool vForceEditModeOneColumn = false,
+		bool vShowTooltipInfos = false);
+
+private:
+	void DrawSelectionsByFontOrderedByGlyphNames(
 		bool vShowTooltipInfos = false);
 
 	void PrepareSelectionMergedNoOrder();
@@ -138,8 +127,8 @@ public: // configuration
 public: // singleton
 	static FinalFontPane *Instance()
 	{
-		static FinalFontPane *_instance = new FinalFontPane();
-		return _instance;
+		static FinalFontPane _instance;
+		return &_instance;
 	}
 
 protected:

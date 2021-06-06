@@ -45,6 +45,7 @@
 #endif
 #include <Panes/ParamsPane.h>
 #include <Panes/FinalFontPane.h>
+#include <Panes/SelectionFontPane.h>
 #include <Panes/FontStructurePane.h>
 #include <Panes/GeneratorPane.h>
 #include <Panes/GlyphPane.h>
@@ -90,6 +91,7 @@ void MainFrame::Init()
 	LayoutManager::Instance()->AddPane(ParamsPane::Instance(), "Params", PARAM_PANE, PaneDisposal::LEFT, true, true);
 	LayoutManager::Instance()->AddPane(SourceFontPane::Instance(), "Source", SOURCE_PANE, PaneDisposal::CENTRAL, true, true);
 	LayoutManager::Instance()->AddPane(FinalFontPane::Instance(), "Final", FINAL_PANE, PaneDisposal::CENTRAL, true, true);
+	LayoutManager::Instance()->AddPane(SelectionFontPane::Instance(), "Selection", SELECTION_PANE, PaneDisposal::RIGHT, true, true);
 	LayoutManager::Instance()->AddPane(GeneratorPane::Instance(), "Generator", GENERATOR_PANE, PaneDisposal::RIGHT, true, true);
 	LayoutManager::Instance()->AddPane(FontStructurePane::Instance(), "Font Structure", STRUCTURE_PANE, PaneDisposal::CENTRAL, false, false);
 	LayoutManager::Instance()->AddPane(GlyphPane::Instance(), "Glyph", GLYPH_PANE, PaneDisposal::CENTRAL, false, false);
@@ -312,7 +314,7 @@ void MainFrame::DrawMainMenuBar()
 
 void MainFrame::DisplayDialogsAndPopups()
 {
-	m_ActionSystem.RunActions();
+	m_ActionSystem.RunActions(); 
 
 	if (ProjectFile::Instance()->IsLoaded())
 	{
@@ -329,19 +331,6 @@ void MainFrame::DisplayDialogsAndPopups()
 				auto GoodFilePathName = ImGuiFileDialog::Instance()->GetFilePathName();
 				auto UserDatas = std::string((const char*)ImGuiFileDialog::Instance()->GetUserDatas());
 
-#if 0
-				m_ActionSystem.Add([this, GoodFilePathName, UserDatas]()
-					{
-						if (FileHelper::Instance()->IsFileExist(GoodFilePathName))
-						{
-							if (ProjectFile::Instance()->m_Fonts.find(UserDatas) != ProjectFile::Instance()->m_Fonts.end()) // found
-							{
-								ReRouteFontToFile(UserDatas, GoodFilePathName);
-							}
-						}
-						return true; // one time action
-					});
-#else
 				if (FileHelper::Instance()->IsFileExist(GoodFilePathName))
 				{
 					if (ProjectFile::Instance()->m_Fonts.find(UserDatas) != ProjectFile::Instance()->m_Fonts.end()) // found
@@ -349,7 +338,6 @@ void MainFrame::DisplayDialogsAndPopups()
 						ReRouteFontToFile(UserDatas, GoodFilePathName);
 					}
 				}
-#endif
 			}
 
 			ImGuiFileDialog::Instance()->Close();

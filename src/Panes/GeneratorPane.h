@@ -65,8 +65,8 @@ private:
 public: // singleton
 	static GeneratorPane *Instance()
 	{
-		static GeneratorPane *_instance = new GeneratorPane();
-		return _instance;
+		static GeneratorPane _instance;
+		return &_instance;
 	}
 
 protected:

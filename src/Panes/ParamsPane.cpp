@@ -84,16 +84,18 @@ void ParamsPane::DrawDialogsAndPopups(std::string vUserDatas)
 		{
 			if (ImGuiFileDialog::Instance()->IsOk())
 			{
-				auto atlas = dynamic_cast<ImFontAtlas*>((ImFontAtlas*)ImGuiFileDialog::Instance()->GetUserDatas());
-				if (atlas)
+				auto tex = dynamic_cast<std::shared_ptr<TextureObject>*>((std::shared_ptr<TextureObject>*)ImGuiFileDialog::Instance()->GetUserDatas());
+				if (tex && *tex)
 				{
-					ImTextureID textureToSave = (ImTextureID)(size_t)atlas->TexID;
-					if (textureToSave)
+					auto win = MainFrame::Instance()->GetGLFWwindow();
+					auto file = ImGuiFileDialog::Instance()->GetFilePathName();
+#if VULKAN
+					VkCommandPool command_pool = MainFrame::sMainWindowData.Frames[MainFrame::sMainWindowData.FrameIndex].CommandPool;
+					if (TextureHelper::SaveTextureToPng(command_pool, win, file.c_str(), *tex))
+#else
+					if (TextureHelper::SaveTextureToPng(win, file.c_str(), *tex))
+#endif
 					{
-						auto win = MainFrame::Instance()->GetGLFWwindow();
-						auto file = ImGuiFileDialog::Instance()->GetFilePathName();
-						Generator::SaveTextureToPng(win, file, textureToSave,
-							ct::uvec2(atlas->TexWidth, atlas->TexHeight), 4U);
 						FileHelper::Instance()->OpenFile(file);
 					}
 				}

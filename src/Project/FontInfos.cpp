@@ -744,28 +744,10 @@ void FontInfos::CreateFontTexture()
 
 #if VULKAN
 		VkCommandPool command_pool = MainFrame::sMainWindowData.Frames[MainFrame::sMainWindowData.FrameIndex].CommandPool;
-
-		// Use any command queue
-		auto cmd = TextureHelper::beginSingleTimeCommands(command_pool);
-		if (cmd)
-		{
-			m_FontTexture = TextureHelper::CreateTextureFromBuffer(cmd, pixels, width, height, 4, m_TextureFiltering);
-
-			TextureHelper::endSingleTimeCommands(command_pool, cmd);
-		}
-
-		// size_t is 4 bytes sized for x32 and 8 bytes sizes for x64.
-		// TexID is ImTextureID is a void so same size as size_t
-		// id is a uint so 4 bytes on x32 and x64
-		// so conversion first on size_t (uint32/64) and after on ImTextureID give no warnings
+		m_FontTexture = TextureHelper::CreateTextureFromBuffer(command_pool, pixels, width, height, 4, m_TextureFiltering);
 		m_ImFontAtlas.TexID = (ImTextureID)&m_FontTexture->descriptor;
 #else
 		m_FontTexture = TextureHelper::CreateTextureFromBuffer(pixels, width, height, 4, m_TextureFiltering);
-
-		// size_t is 4 bytes sized for x32 and 8 bytes sizes for x64.
-		// TexID is ImTextureID is a void so same size as size_t
-		// id is a uint so 4 bytes on x32 and x64
-		// so conversion first on size_t (uint32/64) and after on ImTextureID give no warnings
 		m_ImFontAtlas.TexID = (ImTextureID)(size_t)m_FontTexture->textureId;
 #endif
 	}

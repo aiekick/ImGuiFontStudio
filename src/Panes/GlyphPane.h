@@ -53,8 +53,8 @@ private:
 public: // singleton
 	static GlyphPane *Instance()
 	{
-		static GlyphPane *_instance = new GlyphPane();
-		return _instance;
+		static GlyphPane _instance;
+		return &_instance;
 	}
 
 protected:

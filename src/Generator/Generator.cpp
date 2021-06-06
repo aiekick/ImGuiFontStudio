@@ -46,8 +46,8 @@
 #include <Panes/ParamsPane.h>
 #include <Project/FontInfos.h>
 #include <Project/ProjectFile.h>
+#include <Helper/TextureHelper.h>
 
-#define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <stb/stb_image_write.h>
 #include <imgui/imstb_truetype.h>
 
@@ -170,84 +170,6 @@ bool Generator::Generate(
 		}
 	}
 
-
-	return res;
-}
-
-///////////////////////////////////////////////////////////////////////////////////
-//// STATIC TEXTURE TO PICTURE FILE ///////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////
-
-#if VULKAN
-
-static inline bool Vulkan_SaveTextureToPng(GLFWwindow * vWin, const std::string & vFilePathName,
-	ImTextureID vTextureId, ct::uvec2 vTextureSize, uint32_t vChannelCount)
-{
-	bool res = false;
-
-	if (!vFilePathName.empty() && vWin)
-	{
-
-	}
-
-	return res;
-}
-
-#else
-
-static inline bool Opengl_SaveTextureToPng(GLFWwindow * vWin, const std::string & vFilePathName,
-	ImTextureID vTextureId, ct::uvec2 vTextureSize, uint32_t vChannelCount)
-{
-	bool res = false;
-
-	if (!vFilePathName.empty() && vWin)
-	{
-		glfwMakeContextCurrent(vWin);
-
-		std::vector<uint8_t> bytes;
-
-		bytes.resize((size_t)vTextureSize.x * (size_t)vTextureSize.y * (size_t)vChannelCount); // 1 channel only
-
-		GLenum format = GL_RGBA;
-		if (vChannelCount == 1) format = GL_RED;
-		if (vChannelCount == 2) format = GL_RG;
-		if (vChannelCount == 3) format = GL_RGB;
-		if (vChannelCount == 4) format = GL_RGBA;
-
-		// Upload texture to graphics system
-		GLint last_texture;
-		glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
-		glBindTexture(GL_TEXTURE_2D, (GLuint)(size_t)vTextureId);
-		glPixelStorei(GL_PACK_ALIGNMENT, 1);
-		glGetTexImage(GL_TEXTURE_2D, 0, format, GL_UNSIGNED_BYTE, bytes.data());
-		glBindTexture(GL_TEXTURE_2D, last_texture);
-
-		int32_t resWrite = stbi_write_png(
-			vFilePathName.c_str(),
-			vTextureSize.x,
-			vTextureSize.y,
-			vChannelCount,
-			bytes.data(),
-			vTextureSize.x * vChannelCount);
-
-		res = (resWrite > 0);
-	}
-
-	return res;
-}
-#endif
-
-
-bool Generator::SaveTextureToPng(GLFWwindow * vWin, const std::string & vFilePathName,
-	ImTextureID vTextureId, ct::uvec2 vTextureSize, uint32_t vChannelCount)
-{
-	bool res = false;
-
-#if VULKAN
-	res = Vulkan_SaveTextureToPng(vWin, vFilePathName, vTextureId, vTextureSize, vChannelCount);
-#else
-	res = Opengl_SaveTextureToPng(vWin, vFilePathName, vTextureId, vTextureSize, vChannelCount);
-#endif
 
 	return res;
 }

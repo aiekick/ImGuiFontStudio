@@ -69,8 +69,8 @@ public: // configuration
 public: // singleton
 	static ParamsPane* Instance()
 	{
-		static ParamsPane *_instance = new ParamsPane();
-		return _instance;
+		static ParamsPane _instance;
+		return &_instance;
 	}
 
 protected:

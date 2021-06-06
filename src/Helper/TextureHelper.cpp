@@ -2,6 +2,8 @@
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
+#define STB_IMAGE_WRITE_IMPLEMENTATION
+#include <stb/stb_image_write.h>
 
 #include <MainFrame.h>
 
@@ -52,6 +54,23 @@ void TextureHelper::endSingleTimeCommands(VkCommandPool commandPool, VkCommandBu
     vkFreeCommandBuffers(MainFrame::sVulkanInitInfo.Device, commandPool, 1, &commandBuffer);
 }
 
+
+std::shared_ptr<TextureObject> TextureHelper::CreateTextureFromBuffer(VkCommandPool vCommandPool, uint8_t* buffer, int w, int h, int n, TextureFilteringEnum vFiltering)
+{
+    std::shared_ptr<TextureObject> res = nullptr;
+
+    // Use any command queue
+    auto cmd = TextureHelper::beginSingleTimeCommands(vCommandPool);
+    if (cmd)
+    {
+        res = TextureHelper::CreateTextureFromBuffer(cmd, buffer, w, h, n, vFiltering);
+
+        TextureHelper::endSingleTimeCommands(vCommandPool, cmd);
+    }
+
+    return res;
+}
+
 std::shared_ptr<TextureObject> TextureHelper::CreateTextureFromBuffer(VkCommandBuffer command_buffer, uint8_t* buffer, int w, int h, int n, TextureFilteringEnum vFiltering)
 {
     std::shared_ptr<TextureObject> res = std::shared_ptr<TextureObject>(new TextureObject,
@@ -61,6 +80,10 @@ std::shared_ptr<TextureObject> TextureHelper::CreateTextureFromBuffer(VkCommandB
             delete obj;
         }
     );
+
+    res->w = w;
+    res->h = h;
+    res->n = n;
 
     VkResult err;
 
@@ -79,7 +102,7 @@ std::shared_ptr<TextureObject> TextureHelper::CreateTextureFromBuffer(VkCommandB
         info.arrayLayers = 1;
         info.samples = VK_SAMPLE_COUNT_1_BIT;
         info.tiling = VK_IMAGE_TILING_OPTIMAL;
-        info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+        info.usage = VK_IMAGE_USAGE_SAMPLED_BIT | VK_IMAGE_USAGE_TRANSFER_SRC_BIT | VK_IMAGE_USAGE_TRANSFER_DST_BIT;
         info.sharingMode = VK_SHARING_MODE_EXCLUSIVE;
         info.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
         err = vkCreateImage(MainFrame::sVulkanInitInfo.Device, &info, MainFrame::sVulkanInitInfo.Allocator, &res->img);
@@ -112,7 +135,7 @@ std::shared_ptr<TextureObject> TextureHelper::CreateTextureFromBuffer(VkCommandB
         info.minLod = -1000;
         info.maxLod = 1000;
         info.maxAnisotropy = 1.0f;
-        VkResult err = vkCreateSampler(MainFrame::sVulkanInitInfo.Device, &info, MainFrame::sVulkanInitInfo.Allocator, &res->sam);
+        err = vkCreateSampler(MainFrame::sVulkanInitInfo.Device, &info, MainFrame::sVulkanInitInfo.Allocator, &res->sam);
         TextureHelper_check_vk_result(err);
     }
 
@@ -215,7 +238,7 @@ std::shared_ptr<TextureObject> TextureHelper::CreateTextureFromBuffer(VkCommandB
     return res;
 }
 
-std::shared_ptr<TextureObject> TextureHelper::CreateTextureFromFile(VkCommandBuffer command_buffer, const char* inFile, TextureFilteringEnum vFiltering, VkDescriptorSet* vOriginal)
+std::shared_ptr<TextureObject> TextureHelper::CreateTextureFromFile(VkCommandBuffer command_buffer, const char* inFile, TextureFilteringEnum vFiltering)
 {
     std::shared_ptr<TextureObject> res = nullptr;
 
@@ -233,6 +256,135 @@ std::shared_ptr<TextureObject> TextureHelper::CreateTextureFromFile(VkCommandBuf
     return res;
 }
 
+bool TextureHelper::SaveTextureToPng(VkCommandPool vCommandPool, GLFWwindow* vWin, const char* vFilePathName, std::shared_ptr<TextureObject> vTextureObject)
+{
+    bool res = false;
+
+    if (vWin && strlen(vFilePathName) && vTextureObject)
+    {
+        VkResult err;
+        
+        // memory host image 
+        VkImageCreateInfo imgCreateInfo = {};
+        imgCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
+        imgCreateInfo.imageType = VK_IMAGE_TYPE_2D;
+        imgCreateInfo.format = VK_FORMAT_R8G8B8A8_UNORM;
+        imgCreateInfo.extent.width = vTextureObject->w;
+        imgCreateInfo.extent.height = vTextureObject->h;
+        imgCreateInfo.extent.depth = 1;
+        imgCreateInfo.arrayLayers = 1;
+        imgCreateInfo.mipLevels = 1;
+        imgCreateInfo.initialLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+        imgCreateInfo.samples = VK_SAMPLE_COUNT_1_BIT;
+        imgCreateInfo.tiling = VK_IMAGE_TILING_LINEAR;
+        imgCreateInfo.usage = VK_IMAGE_USAGE_TRANSFER_DST_BIT;
+
+        VkImage dstImage;
+        err = vkCreateImage(MainFrame::sVulkanInitInfo.Device, &imgCreateInfo, MainFrame::sVulkanInitInfo.Allocator, &dstImage);
+        TextureHelper_check_vk_result(err);
+        VkMemoryRequirements req;
+        vkGetImageMemoryRequirements(MainFrame::sVulkanInitInfo.Device, dstImage, &req);
+        VkMemoryAllocateInfo alloc_info = {};
+        alloc_info.sType = VK_STRUCTURE_TYPE_MEMORY_ALLOCATE_INFO;
+        alloc_info.allocationSize = req.size;
+        alloc_info.memoryTypeIndex = ImGui_ImplVulkanH_MemoryType(VK_MEMORY_PROPERTY_HOST_VISIBLE_BIT | VK_MEMORY_PROPERTY_HOST_COHERENT_BIT, req.memoryTypeBits);
+        if (alloc_info.memoryTypeIndex != 0xFFFFFFFF)
+        {
+            VkDeviceMemory dstImageMemory;
+            err = vkAllocateMemory(MainFrame::sVulkanInitInfo.Device, &alloc_info, MainFrame::sVulkanInitInfo.Allocator, &dstImageMemory);
+            TextureHelper_check_vk_result(err);
+            err = vkBindImageMemory(MainFrame::sVulkanInitInfo.Device, dstImage, dstImageMemory, 0);
+            TextureHelper_check_vk_result(err);
+
+            // Use any command queue
+            auto cmd = TextureHelper::beginSingleTimeCommands(vCommandPool);
+            if (cmd)
+            {
+                VkImageMemoryBarrier imageMemoryBarrier = {};
+                imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+                imageMemoryBarrier.srcAccessMask = 0;
+                imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+                imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_UNDEFINED;
+                imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+                imageMemoryBarrier.image = dstImage;
+                imageMemoryBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+                vkCmdPipelineBarrier(
+                    cmd,
+                    VK_PIPELINE_STAGE_TRANSFER_BIT,
+                    VK_PIPELINE_STAGE_TRANSFER_BIT,
+                    0,
+                    0, nullptr,
+                    0, nullptr,
+                    1, &imageMemoryBarrier);
+
+                VkImageCopy imageCopyRegion{};
+                imageCopyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                imageCopyRegion.srcSubresource.layerCount = 1;
+                imageCopyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                imageCopyRegion.dstSubresource.layerCount = 1;
+                imageCopyRegion.extent.width = vTextureObject->w;
+                imageCopyRegion.extent.height = vTextureObject->h;
+                imageCopyRegion.extent.depth = 1;
+                vkCmdCopyImage(
+                    cmd,
+                    vTextureObject->img, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                    dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                    1,
+                    &imageCopyRegion);
+
+                // Transition destination image to general layout, which is the required layout for mapping the image memory later on
+                imageMemoryBarrier = VkImageMemoryBarrier();
+                imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+                imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+                imageMemoryBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+                imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL;
+                imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_GENERAL;
+                imageMemoryBarrier.image = dstImage;
+                imageMemoryBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+                vkCmdPipelineBarrier(
+                    cmd,
+                    VK_PIPELINE_STAGE_TRANSFER_BIT,
+                    VK_PIPELINE_STAGE_TRANSFER_BIT,
+                    0,
+                    0, nullptr,
+                    0, nullptr,
+                    1, &imageMemoryBarrier);
+
+                TextureHelper::endSingleTimeCommands(vCommandPool, cmd);
+            }
+
+            // Get layout of the image (including row pitch)
+            VkImageSubresource subResource{};
+            subResource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+            VkSubresourceLayout subResourceLayout;
+            vkGetImageSubresourceLayout(MainFrame::sVulkanInitInfo.Device, dstImage, &subResource, &subResourceLayout);
+
+            // Map image memory so we can start copying from it
+            std::vector<uint8_t> bytes;
+            bytes.resize((size_t)vTextureObject->w * (size_t)vTextureObject->h * (size_t)vTextureObject->n); // 1 channel only
+            uint8_t* imagedata = bytes.data();
+            vkMapMemory(MainFrame::sVulkanInitInfo.Device, dstImageMemory, 0, VK_WHOLE_SIZE, 0, (void**)&imagedata);
+            imagedata += subResourceLayout.offset;
+
+            int32_t resWrite = stbi_write_png(
+                vFilePathName,
+                vTextureObject->w,
+                vTextureObject->h,
+                vTextureObject->n,
+                bytes.data(),
+                subResourceLayout.rowPitch);
+
+            res = (resWrite > 0);
+
+            vkUnmapMemory(MainFrame::sVulkanInitInfo.Device, dstImageMemory);
+            vkFreeMemory(MainFrame::sVulkanInitInfo.Device, dstImageMemory, nullptr);
+        }
+        vkDestroyImage(MainFrame::sVulkanInitInfo.Device, dstImage, nullptr);
+    }
+
+    return res;
+}
+
 #else
 
 std::shared_ptr<TextureObject> TextureHelper::CreateTextureFromBuffer(uint8_t* buffer, int w, int h, int n, TextureFilteringEnum vFiltering)
@@ -244,6 +396,10 @@ std::shared_ptr<TextureObject> TextureHelper::CreateTextureFromBuffer(uint8_t* b
             delete obj;
         }
     );
+
+    res->w = w;
+    res->h = h;
+    res->n = n;
 
     size_t buffer_size = sizeof(char) * n * w * h;
 
@@ -258,6 +414,46 @@ std::shared_ptr<TextureObject> TextureHelper::CreateTextureFromBuffer(uint8_t* b
     glPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
     glTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, w, h, 0, GL_RGBA, GL_UNSIGNED_BYTE, buffer);
     glBindTexture(GL_TEXTURE_2D, last_texture);
+
+    return res;
+}
+
+bool TextureHelper::SaveTextureToPng(GLFWwindow* vWin, const char* vFilePathName, std::shared_ptr<TextureObject> vTextureObject)
+{
+    bool res = false;
+
+    if (vWin && strlen(vFilePathName) && vTextureObject)
+    {
+        glfwMakeContextCurrent(vWin);
+
+        std::vector<uint8_t> bytes;
+
+        bytes.resize((size_t)vTextureObject->w * (size_t)vTextureObject->h * (size_t)vTextureObject->n); // 1 channel only
+
+        GLenum format = GL_RGBA;
+        if (vTextureObject->n == 1) format = GL_RED;
+        if (vTextureObject->n == 2) format = GL_RG;
+        if (vTextureObject->n == 3) format = GL_RGB;
+        if (vTextureObject->n == 4) format = GL_RGBA;
+
+        // Upload texture to graphics system
+        GLint last_texture;
+        glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
+        glBindTexture(GL_TEXTURE_2D, (GLuint)(size_t)vTextureObject->textureId);
+        glPixelStorei(GL_PACK_ALIGNMENT, 1);
+        glGetTexImage(GL_TEXTURE_2D, 0, format, GL_UNSIGNED_BYTE, bytes.data());
+        glBindTexture(GL_TEXTURE_2D, last_texture);
+
+        int32_t resWrite = stbi_write_png(
+            vFilePathName,
+            vTextureObject->w,
+            vTextureObject->h,
+            vTextureObject->n,
+            bytes.data(),
+            vTextureObject->w * vTextureObject->n);
+
+        res = (resWrite > 0);
+    }
 
     return res;
 }
