@@ -485,7 +485,7 @@ bool ImGui::ImageCheckButton(
 	RenderFrame(bb.Min, bb.Max, col, true, ImClamp((float)ImMin(padding.x, padding.y), 0.0f, style.FrameRounding));
 	if (vRectThickNess > 0.0f)
 	{
-		window->DrawList->AddRect(bb.Min, bb.Max, ImGui::GetColorU32(vRectColor), 0.0, 15, vRectThickNess);
+		window->DrawList->AddRect(bb.Min, bb.Max, ImGui::GetColorU32(vRectColor), 0.0, ImDrawFlags_RoundCornersAll, vRectThickNess);
 	}
 
 	// resize with respect to glyph ratio
@@ -1715,7 +1715,7 @@ bool ImGui::TextureOverLay(float vWidth, ct::texture* vTex, ImVec4 vBorderColor,
 
 	if (vBorderColor.w > 0.0f)
 	{
-		window->DrawList->AddRect(bb.Min, bb.Max, ImGui::GetColorU32(vBorderColor), 0.0f, 15, vBorderColor.w);
+		window->DrawList->AddRect(bb.Min, bb.Max, ImGui::GetColorU32(vBorderColor), 0.0f, ImDrawFlags_RoundCornersAll, vBorderColor.w);
 		window->DrawList->AddImage((ImTextureID)vTex->glTex, bb.Min + ImVec2(1, 1), bb.Max - ImVec2(1, 1), uv0, uv1, ImGui::GetColorU32(ImVec4(1, 1, 1, 1)));
 	}
 	else

@@ -331,7 +331,7 @@ void SimpleGlyph_Solo::DrawCurves(
 				max = LocalToScreen(ImVec2((float)frc.z, (float)frc.w));
 				if (vGlyphDrawingFlags & GLYPH_DRAWING_LEGENDS)
 					drawList->AddText(ImVec2(min.x + tlh, min.y - tlh), textCol, "Font BBox");
-				drawList->AddRect(min, max, textCol, 0.0f, 15, 2.0f);
+				drawList->AddRect(min, max, textCol, 0.0f, ImDrawFlags_RoundCornersAll, 2.0f);
 			}
 
 			// glyph bounding box
@@ -341,7 +341,7 @@ void SimpleGlyph_Solo::DrawCurves(
 				max = LocalToScreen(ImVec2((float)rc.z + m_Translation.x, (float)rc.w + m_Translation.y));
 				if (vGlyphDrawingFlags & GLYPH_DRAWING_LEGENDS)
 					drawList->AddText(ImVec2(min.x + tlh, max.y - tlh), textCol, "Glyph BBox");
-				drawList->AddRect(min, max, textCol, 0.0f, 15, 2.0f);
+				drawList->AddRect(min, max, textCol, 0.0f, ImDrawFlags_RoundCornersAll, 2.0f);
 			}
 
 			// adv x
@@ -706,7 +706,7 @@ void CompositeGlyph_Solo::DrawCurves(
 				max = LocalToScreen(ImVec2((float)frc.z, (float)frc.w));
 				if (vGlyphDrawingFlags & GLYPH_DRAWING_LEGENDS)
 					drawList->AddText(ImVec2(min.x + tlh, min.y - tlh), textCol, "Font BBox");
-				drawList->AddRect(min, max, textCol, 0.0f, 15, 2.0f);
+				drawList->AddRect(min, max, textCol, 0.0f, ImDrawFlags_RoundCornersAll, 2.0f);
 			}
 
 			// glyph bounding box
@@ -716,7 +716,7 @@ void CompositeGlyph_Solo::DrawCurves(
 				max = LocalToScreen(ImVec2((float)rc.z + m_Translation.x, (float)rc.w + m_Translation.y));
 				if (vGlyphDrawingFlags & GLYPH_DRAWING_LEGENDS)
 					drawList->AddText(ImVec2(min.x + tlh, max.y - tlh), textCol, "Glyph BBox");
-				drawList->AddRect(min, max, textCol, 0.0f, 15, 2.0f);
+				drawList->AddRect(min, max, textCol, 0.0f, ImDrawFlags_RoundCornersAll, 2.0f);
 			}
 
 			// adv x
@@ -1036,7 +1036,7 @@ int GlyphInfos::DrawGlyphButton(
 		// double codepoint / name rect display
 		if (vRectThickNess > 0.0f)
 		{
-			window->DrawList->AddRect(bb.Min, bb.Max, ImGui::GetColorU32(vRectColor), 0.0, 15, vRectThickNess);
+			window->DrawList->AddRect(bb.Min, bb.Max, ImGui::GetColorU32(vRectColor), 0.0, ImDrawFlags_RoundCornersAll, vRectThickNess);
 		}
 
 		ImGui::PushClipRect(bb.Min, bb.Max, true);
