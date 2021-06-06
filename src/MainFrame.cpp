@@ -93,8 +93,9 @@ void MainFrame::Init()
 	LayoutManager::Instance()->AddPane(FontStructurePane::Instance(), "Font Structure", STRUCTURE_PANE, PaneDisposal::CENTRAL, false, false);
 	LayoutManager::Instance()->AddPane(GlyphPane::Instance(), "Glyph", GLYPH_PANE, PaneDisposal::CENTRAL, false, false);
 	LayoutManager::Instance()->AddPane(FontPreviewPane::Instance(), "Font Preview", PREVIEW_PANE, PaneDisposal::BOTTOM, false, false);
+#ifdef _DEBUG
 	LayoutManager::Instance()->AddPane(DebugPane::Instance(), "Debug", DEBUG_PANE, PaneDisposal::LEFT, false, false);
-
+#endif
 #ifdef USE_SHADOW
 	AssetManager::Instance()->LoadTexture2D("btn", "src/res/btn.png");
 #endif

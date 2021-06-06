@@ -17,5 +17,7 @@ enum PaneFlags_
 	STRUCTURE_PANE = (1 << 4),
 	GLYPH_PANE = (1 << 5),
 	PREVIEW_PANE = (1 << 6),
+#ifdef _DEBUG
 	DEBUG_PANE = (1 << 7)
+#endif
 };
