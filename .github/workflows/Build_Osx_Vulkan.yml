@@ -14,7 +14,7 @@ jobs:
     - name: checkout submodules
       run : git submodule update --init --recursive 
     - name: Install Vulkan lib  / Requirement for Glfw3
-      run : brew update && brew install molten-vk
+      run : brew update && brew install molten-vk && export VULKAN_SDK="/usr/local/Cellar/molten-vk/1.1.3"
     - name: configure
       run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DUSE_VULKAN=on
     - name: build
