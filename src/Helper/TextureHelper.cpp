@@ -466,9 +466,10 @@ void TextureHelper::DestroyTexture(TextureObject* image_object)
     if (image_object)
     {
         TextureHelper::sNeedToSkipRendering = true;
-        vkDeviceWaitIdle(MainFrame::sVulkanInitInfo.Device);
 
 #if VULKAN
+        vkDeviceWaitIdle(MainFrame::sVulkanInitInfo.Device);
+
         if (image_object->buf)
         {
             vkDestroyBuffer(MainFrame::sVulkanInitInfo.Device, image_object->buf, MainFrame::sVulkanInitInfo.Allocator);
