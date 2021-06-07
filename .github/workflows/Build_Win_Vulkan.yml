@@ -13,6 +13,8 @@ jobs:
     - uses: actions/checkout@v1
     - name: checkout submodules
       run : git submodule update --init --recursive 
+    - name: Install Vulkan SDK
+      uses: aiekick/setup-vulkan-sdk@v1.0.1
     - name: Install Vulkan lib / Requirement for Glfw3
       run : vcpkg install vulkan:x86-windows 
     - name: configure
