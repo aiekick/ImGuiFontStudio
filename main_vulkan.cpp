@@ -554,7 +554,7 @@ int main(int, char** argv)
         ImDrawData* main_draw_data = ImGui::GetDrawData();
         const bool main_is_minimized = (main_draw_data->DisplaySize.x <= 0.0f || main_draw_data->DisplaySize.y <= 0.0f);
 
-        if (!main_is_minimized)
+        if (!main_is_minimized && !TextureHelper::sNeedToSkipRendering)
         {
             wd->ClearValue.color.float32[0] = 0.0f;
             wd->ClearValue.color.float32[1] = 0.0f;
@@ -567,11 +567,12 @@ int main(int, char** argv)
         if (io.ConfigFlags & ImGuiConfigFlags_ViewportsEnable)
         {
             ImGui::UpdatePlatformWindows();
-            ImGui::RenderPlatformWindowsDefault();
+            if (!TextureHelper::sNeedToSkipRendering)
+                ImGui::RenderPlatformWindowsDefault();
         }
 
         // Present Main Platform Window
-        if (!main_is_minimized)
+        if (!main_is_minimized && !TextureHelper::sNeedToSkipRendering)
             FramePresent(wd);
     }
 

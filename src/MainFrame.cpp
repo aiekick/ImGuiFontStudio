@@ -209,7 +209,7 @@ bool MainFrame::Display(ImVec2 vPos, ImVec2 vSize)
 	LayoutManager::Instance()->InitAfterFirstDisplay(m_DisplaySize);
 
 	if (TextureHelper::sNeedToSkipRendering)
-		return false; // skip on frame if textue was destroyed
+		return false; // skip on frame if texture was destroyed
 
 	return true;
 }

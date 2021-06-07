@@ -466,6 +466,7 @@ void TextureHelper::DestroyTexture(TextureObject* image_object)
     if (image_object)
     {
         TextureHelper::sNeedToSkipRendering = true;
+        vkDeviceWaitIdle(MainFrame::sVulkanInitInfo.Device);
 
 #if VULKAN
         if (image_object->buf)
