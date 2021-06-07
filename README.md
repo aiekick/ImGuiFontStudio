@@ -23,9 +23,10 @@ I enjoy all constructive comments and help is welcome.
 
 Succesfully tested on my side :
 
-* On Win 7 x64 (in exe version x86/x64)
-* On Linux Debian/Ubuntu (in exe version x86)
-* MacOs Mojave (in exe version x86)
+* On Win 7 x64 (in version x86/x64 OpenGl3/Vulkan)
+* On Linux Debian/Ubuntu (in version x64 OpenGl3/Vulkan)
+* On Linux Debian/RaspberryOs (in version x86/x64 OpenGl3/Vulkan)
+* MacOs Mojave (in exe version x86 OpenGl3)
 
 ## The features :
 
