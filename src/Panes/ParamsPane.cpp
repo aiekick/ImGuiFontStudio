@@ -257,13 +257,13 @@ void ParamsPane::DrawParamsPane()
 
 						bool change = false;
 
-						change |= ImGui::RadioButtonLabeled(mrw, "Zoom", "Zoom Each Glyphs for best fit", ProjectFile::Instance()->m_ZoomGlyphs);
+						change |= ImGui::RadioButtonLabeled(mrw, "Zoom", "Zoom Each Glyphs for best fit", &ProjectFile::Instance()->m_ZoomGlyphs);
 						ImGui::SameLine();
-						change |= ImGui::RadioButtonLabeled(mrw, "Base", "Show the base line of the font", ProjectFile::Instance()->m_ShowBaseLine, ProjectFile::Instance()->m_ZoomGlyphs);
+						change |= ImGui::RadioButtonLabeled(mrw, "Base", "Show the base line of the font", &ProjectFile::Instance()->m_ShowBaseLine, ProjectFile::Instance()->m_ZoomGlyphs);
 						ImGui::SameLine();
-						change |= ImGui::RadioButtonLabeled(mrw, "OrgX", "Show the Origin X of the glyph", ProjectFile::Instance()->m_ShowOriginX, ProjectFile::Instance()->m_ZoomGlyphs);
+						change |= ImGui::RadioButtonLabeled(mrw, "OrgX", "Show the Origin X of the glyph", &ProjectFile::Instance()->m_ShowOriginX, ProjectFile::Instance()->m_ZoomGlyphs);
 						ImGui::SameLine();
-						change |= ImGui::RadioButtonLabeled(mrw, "AdvX", "Show the Advance X of the glyph", ProjectFile::Instance()->m_ShowAdvanceX, ProjectFile::Instance()->m_ZoomGlyphs);
+						change |= ImGui::RadioButtonLabeled(mrw, "AdvX", "Show the Advance X of the glyph", &ProjectFile::Instance()->m_ShowAdvanceX, ProjectFile::Instance()->m_ZoomGlyphs);
 						
 						if (change)
 						{
