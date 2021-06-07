@@ -13,8 +13,8 @@ jobs:
     - uses: actions/checkout@v1
     - name: checkout submodules
       run : git submodule update --init --recursive 
-    - name: Install OpenGL lib  / Requirement for Glfw3
-      run : brew update
+    - name: Install Vulkan lib  / Requirement for Glfw3
+      run : brew update && brew install molten-vk
     - name: configure
       run: mkdir build && cd build && cmake .. -DCMAKE_BUILD_TYPE=Release -DUSE_VULKAN=on
     - name: build
