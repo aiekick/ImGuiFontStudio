@@ -3,6 +3,10 @@
 | Opengl 3 | [<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Win/badge.svg" width="150"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3AWin) | [<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Linux/badge.svg" width="165"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3ALinux) | [<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Osx/badge.svg" width="150"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3AOsx) |
 | Vulkan | [<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Win_Vulkan/badge.svg" width="150"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3AWin_Vulkan) | [<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Linux_Vulkan/badge.svg" width="165"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3ALinux_Vulkan) | [<img src="https://github.com/aiekick/ImGuiFontStudio/workflows/Osx_Vulkan/badge.svg" width="150"/>](https://github.com/aiekick/ImGuiFontStudio/actions?query=workflow%3AOsx_Vulkan) |
 
+Vulkan versions :
+ * on windows its working fine, here, just not found a way for isntall Vulkan SDk with github action
+ * on OSX, we must une Molten-Vk, and its not tested for now. if someone want to help :)
+
 <img src="https://github.com/aiekick/ImGuiFontStudio/blob/master/doc/src.png" width="500">
 
 # [ImGuiFontStudio](https://github.com/aiekick/ImGuiFontStudio)
