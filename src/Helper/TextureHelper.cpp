@@ -256,6 +256,7 @@ std::shared_ptr<TextureObject> TextureHelper::CreateTextureFromFile(VkCommandBuf
     return res;
 }
 
+// adapted from https://github.com/SaschaWillems/Vulkan/blob/master/examples/screenshot/screenshot.cpp
 bool TextureHelper::SaveTextureToPng(VkCommandPool vCommandPool, GLFWwindow* vWin, const char* vFilePathName, std::shared_ptr<TextureObject> vTextureObject)
 {
     bool res = false;
@@ -264,6 +265,8 @@ bool TextureHelper::SaveTextureToPng(VkCommandPool vCommandPool, GLFWwindow* vWi
     {
         VkResult err;
         
+        VkImage srcImage = vTextureObject->img;
+
         // memory host image 
         VkImageCreateInfo imgCreateInfo = {};
         imgCreateInfo.sType = VK_STRUCTURE_TYPE_IMAGE_CREATE_INFO;
@@ -296,11 +299,14 @@ bool TextureHelper::SaveTextureToPng(VkCommandPool vCommandPool, GLFWwindow* vWi
             err = vkBindImageMemory(MainFrame::sVulkanInitInfo.Device, dstImage, dstImageMemory, 0);
             TextureHelper_check_vk_result(err);
 
+            VkImageMemoryBarrier imageMemoryBarrier = {};
+
             // Use any command queue
-            auto cmd = TextureHelper::beginSingleTimeCommands(vCommandPool);
-            if (cmd)
+            auto copyCmd = TextureHelper::beginSingleTimeCommands(vCommandPool);
+            if (copyCmd)
             {
-                VkImageMemoryBarrier imageMemoryBarrier = {};
+                // dst image
+                imageMemoryBarrier = VkImageMemoryBarrier();
                 imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
                 imageMemoryBarrier.srcAccessMask = 0;
                 imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -309,7 +315,7 @@ bool TextureHelper::SaveTextureToPng(VkCommandPool vCommandPool, GLFWwindow* vWi
                 imageMemoryBarrier.image = dstImage;
                 imageMemoryBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
                 vkCmdPipelineBarrier(
-                    cmd,
+                    copyCmd,
                     VK_PIPELINE_STAGE_TRANSFER_BIT,
                     VK_PIPELINE_STAGE_TRANSFER_BIT,
                     0,
@@ -317,22 +323,73 @@ bool TextureHelper::SaveTextureToPng(VkCommandPool vCommandPool, GLFWwindow* vWi
                     0, nullptr,
                     1, &imageMemoryBarrier);
 
-                VkImageCopy imageCopyRegion{};
-                imageCopyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                imageCopyRegion.srcSubresource.layerCount = 1;
-                imageCopyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
-                imageCopyRegion.dstSubresource.layerCount = 1;
-                imageCopyRegion.extent.width = vTextureObject->w;
-                imageCopyRegion.extent.height = vTextureObject->h;
-                imageCopyRegion.extent.depth = 1;
-                vkCmdCopyImage(
-                    cmd,
-                    vTextureObject->img, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
-                    dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
-                    1,
-                    &imageCopyRegion);
+                // src image
+                imageMemoryBarrier = VkImageMemoryBarrier();
+                imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+                imageMemoryBarrier.srcAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+                imageMemoryBarrier.dstAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+                imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+                imageMemoryBarrier.image = srcImage;
+                imageMemoryBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+                vkCmdPipelineBarrier(
+                    copyCmd,
+                    VK_PIPELINE_STAGE_TRANSFER_BIT,
+                    VK_PIPELINE_STAGE_TRANSFER_BIT,
+                    0,
+                    0, nullptr,
+                    0, nullptr,
+                    1, &imageMemoryBarrier);
 
-                // Transition destination image to general layout, which is the required layout for mapping the image memory later on
+                const bool supportsBlit = false;
+
+                // If source and destination support blit we'll blit as this also does automatic format conversion (e.g. from BGR to RGB)
+                if (supportsBlit)
+                {
+                    // Define the region to blit (we will blit the whole swapchain image)
+                    VkOffset3D blitSize;
+                    blitSize.x = vTextureObject->w;
+                    blitSize.y = vTextureObject->h;
+                    blitSize.z = 1;
+                    VkImageBlit imageBlitRegion{};
+                    imageBlitRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                    imageBlitRegion.srcSubresource.layerCount = 1;
+                    imageBlitRegion.srcOffsets[1] = blitSize;
+                    imageBlitRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                    imageBlitRegion.dstSubresource.layerCount = 1;
+                    imageBlitRegion.dstOffsets[1] = blitSize;
+
+                    // Issue the blit command
+                    vkCmdBlitImage(
+                        copyCmd,
+                        srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                        dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                        1,
+                        &imageBlitRegion,
+                        VK_FILTER_NEAREST);
+                }
+                else
+                {
+                    // Otherwise use image copy (requires us to manually flip components)
+                    VkImageCopy imageCopyRegion{};
+                    imageCopyRegion.srcSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                    imageCopyRegion.srcSubresource.layerCount = 1;
+                    imageCopyRegion.dstSubresource.aspectMask = VK_IMAGE_ASPECT_COLOR_BIT;
+                    imageCopyRegion.dstSubresource.layerCount = 1;
+                    imageCopyRegion.extent.width = vTextureObject->w;
+                    imageCopyRegion.extent.height = vTextureObject->h;
+                    imageCopyRegion.extent.depth = 1;
+
+                    // Issue the copy command
+                    vkCmdCopyImage(
+                        copyCmd,
+                        srcImage, VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL,
+                        dstImage, VK_IMAGE_LAYOUT_TRANSFER_DST_OPTIMAL,
+                        1,
+                        &imageCopyRegion);
+                }
+
+                // dst
                 imageMemoryBarrier = VkImageMemoryBarrier();
                 imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
                 imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
@@ -342,7 +399,7 @@ bool TextureHelper::SaveTextureToPng(VkCommandPool vCommandPool, GLFWwindow* vWi
                 imageMemoryBarrier.image = dstImage;
                 imageMemoryBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
                 vkCmdPipelineBarrier(
-                    cmd,
+                    copyCmd,
                     VK_PIPELINE_STAGE_TRANSFER_BIT,
                     VK_PIPELINE_STAGE_TRANSFER_BIT,
                     0,
@@ -350,7 +407,25 @@ bool TextureHelper::SaveTextureToPng(VkCommandPool vCommandPool, GLFWwindow* vWi
                     0, nullptr,
                     1, &imageMemoryBarrier);
 
-                TextureHelper::endSingleTimeCommands(vCommandPool, cmd);
+                // src
+                imageMemoryBarrier = VkImageMemoryBarrier();
+                imageMemoryBarrier.sType = VK_STRUCTURE_TYPE_IMAGE_MEMORY_BARRIER;
+                imageMemoryBarrier.srcAccessMask = VK_ACCESS_TRANSFER_WRITE_BIT;
+                imageMemoryBarrier.dstAccessMask = VK_ACCESS_MEMORY_READ_BIT;
+                imageMemoryBarrier.oldLayout = VK_IMAGE_LAYOUT_TRANSFER_SRC_OPTIMAL;
+                imageMemoryBarrier.newLayout = VK_IMAGE_LAYOUT_SHADER_READ_ONLY_OPTIMAL;
+                imageMemoryBarrier.image = srcImage;
+                imageMemoryBarrier.subresourceRange = VkImageSubresourceRange{ VK_IMAGE_ASPECT_COLOR_BIT, 0, 1, 0, 1 };
+                vkCmdPipelineBarrier(
+                    copyCmd,
+                    VK_PIPELINE_STAGE_TRANSFER_BIT,
+                    VK_PIPELINE_STAGE_TRANSFER_BIT,
+                    0,
+                    0, nullptr,
+                    0, nullptr,
+                    1, &imageMemoryBarrier);
+
+                TextureHelper::endSingleTimeCommands(vCommandPool, copyCmd);
             }
 
             // Get layout of the image (including row pitch)
@@ -360,9 +435,7 @@ bool TextureHelper::SaveTextureToPng(VkCommandPool vCommandPool, GLFWwindow* vWi
             vkGetImageSubresourceLayout(MainFrame::sVulkanInitInfo.Device, dstImage, &subResource, &subResourceLayout);
 
             // Map image memory so we can start copying from it
-            std::vector<uint8_t> bytes;
-            bytes.resize((size_t)vTextureObject->w * (size_t)vTextureObject->h * (size_t)vTextureObject->n); // 1 channel only
-            uint8_t* imagedata = bytes.data();
+            const char* imagedata;
             vkMapMemory(MainFrame::sVulkanInitInfo.Device, dstImageMemory, 0, VK_WHOLE_SIZE, 0, (void**)&imagedata);
             imagedata += subResourceLayout.offset;
 
@@ -371,7 +444,7 @@ bool TextureHelper::SaveTextureToPng(VkCommandPool vCommandPool, GLFWwindow* vWi
                 vTextureObject->w,
                 vTextureObject->h,
                 vTextureObject->n,
-                bytes.data(),
+                imagedata,
                 subResourceLayout.rowPitch);
 
             res = (resWrite > 0);
@@ -426,10 +499,6 @@ bool TextureHelper::SaveTextureToPng(GLFWwindow* vWin, const char* vFilePathName
     {
         glfwMakeContextCurrent(vWin);
 
-        std::vector<uint8_t> bytes;
-
-        bytes.resize((size_t)vTextureObject->w * (size_t)vTextureObject->h * (size_t)vTextureObject->n); // 1 channel only
-
         GLenum format = GL_RGBA;
         if (vTextureObject->n == 1) format = GL_RED;
         if (vTextureObject->n == 2) format = GL_RG;
@@ -441,16 +510,20 @@ bool TextureHelper::SaveTextureToPng(GLFWwindow* vWin, const char* vFilePathName
         glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
         glBindTexture(GL_TEXTURE_2D, (GLuint)(size_t)vTextureObject->textureId);
         glPixelStorei(GL_PACK_ALIGNMENT, 1);
-        glGetTexImage(GL_TEXTURE_2D, 0, format, GL_UNSIGNED_BYTE, bytes.data());
+        
+        std::vector<uint8_t> imagedata;
+        imagedata.resize((size_t)vTextureObject->w * (size_t)vTextureObject->h * (size_t)vTextureObject->n); // 1 channel only
+        glGetTexImage(GL_TEXTURE_2D, 0, format, GL_UNSIGNED_BYTE, imagedata.data());
         glBindTexture(GL_TEXTURE_2D, last_texture);
 
+        const size_t stride = vTextureObject->w * vTextureObject->n;
         int32_t resWrite = stbi_write_png(
             vFilePathName,
             vTextureObject->w,
             vTextureObject->h,
             vTextureObject->n,
-            bytes.data(),
-            vTextureObject->w * vTextureObject->n);
+            imagedata.data(),
+            stride);
 
         res = (resWrite > 0);
     }
