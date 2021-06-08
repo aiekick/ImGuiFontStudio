@@ -1,4 +1,4 @@
-#include "TextureHelper.h"
+﻿#include "TextureHelper.h"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include <stb/stb_image.h>
@@ -125,16 +125,21 @@ std::shared_ptr<TextureObject> TextureHelper::CreateTextureFromBuffer(VkCommandB
         info.sType = VK_STRUCTURE_TYPE_SAMPLER_CREATE_INFO;
         info.magFilter = (VkFilter)vFiltering;
         info.minFilter = (VkFilter)vFiltering;
-        if (vFiltering == TextureFilteringEnum::TEX_FILTER_LINEAR)
-            info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
-        else
-            info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
         info.addressModeU = VK_SAMPLER_ADDRESS_MODE_REPEAT;
         info.addressModeV = VK_SAMPLER_ADDRESS_MODE_REPEAT;
         info.addressModeW = VK_SAMPLER_ADDRESS_MODE_REPEAT;
-        info.minLod = -1000;
-        info.maxLod = 1000;
-        info.maxAnisotropy = 1.0f;
+        if (vFiltering == TextureFilteringEnum::TEX_FILTER_LINEAR)
+        {
+            info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_LINEAR;
+            info.minLod = -1000;
+            info.maxLod = 1000;
+        }
+        else
+        {
+            info.mipmapMode = VK_SAMPLER_MIPMAP_MODE_NEAREST;
+            info.minLod = VK_LOD_CLAMP_NONE;
+            info.maxLod = VK_LOD_CLAMP_NONE;
+        }
         err = vkCreateSampler(MainFrame::sVulkanInitInfo.Device, &info, MainFrame::sVulkanInitInfo.Allocator, &res->sam);
         TextureHelper_check_vk_result(err);
     }
