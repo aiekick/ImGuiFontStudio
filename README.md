@@ -253,6 +253,9 @@ Let me know your project wiht a pciture and i can add it here :
 
 For the moment (as i know), there is :
 
-[ImGuiFontStudio](https://github.com/aiekick/ImGuiFontStudio) himself :)
+* [ImGuiFontStudio](https://github.com/aiekick/ImGuiFontStudio)
+* [ImGuiFileDialog](https://github.com/aiekick/ImGuiFileDialog)
+* [NoodlesPlate](https://github.com/aiekick/NoodlesPlate)
+* [SdfFontDesigner](https://github.com/aiekick/SdfFontDesigner)
+* SdfMesher (UnReleased for the moment)
 
-[ImGuiFileDialog](https://github.com/aiekick/ImGuiFileDialog)
