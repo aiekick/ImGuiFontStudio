@@ -47,7 +47,7 @@ Succesfully tested on my side :
 * Cross Platform, tested on Win/Osx/Linux 
 * Change / define ImGui app Theme
 
-For more information how to use the generated files, see this project : https://github.com/aiekick/IconFontCppHeaders
+For more information how to use the generated files, see this project : https://github.com/juliettef/IconFontCppHeaders
 
 My soft do the same job and more but easier for user :)
 
