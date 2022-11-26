@@ -1,32 +1,38 @@
-// dear imgui: wrapper to use FreeType (instead of stb_truetype)
-// Get latest version at https://github.com/ocornut/imgui/tree/master/misc/freetype
-// Original code by @vuhdo (Aleksei Skriabin). Improvements by @mikesart. Maintained and v0.60+ by @ocornut.
+// dear imgui: FreeType font builder (used as a replacement for the stb_truetype builder)
+// (code)
 
-// Changelog:
-// - v0.50: (2017/08/16) imported from https://github.com/Vuhdo/imgui_freetype into http://www.github.com/ocornut/imgui_club, updated for latest changes in ImFontAtlas, minor tweaks.
-// - v0.51: (2017/08/26) cleanup, optimizations, support for ImFontConfig::RasterizerFlags, ImFontConfig::RasterizerMultiply.
-// - v0.52: (2017/09/26) fixes for imgui internal changes.
-// - v0.53: (2017/10/22) minor inconsequential change to match change in master (removed an unnecessary statement).
-// - v0.54: (2018/01/22) fix for addition of ImFontAtlas::TexUvscale member.
-// - v0.55: (2018/02/04) moved to main imgui repository (away from http://www.github.com/ocornut/imgui_club)
-// - v0.56: (2018/06/08) added support for ImFontConfig::GlyphMinAdvanceX, GlyphMaxAdvanceX.
-// - v0.60: (2019/01/10) re-factored to match big update in STB builder. fixed texture height waste. fixed redundant glyphs when merging. support for glyph padding.
-// - v0.61: (2019/01/15) added support for imgui allocators + added FreeType only override function SetAllocatorFunctions().
-// - v0.62: (2019/02/09) added RasterizerFlags::Monochrome flag to disable font anti-aliasing (combine with ::MonoHinting for best results!)
-// - v0.63: (2020/06/04) fix for rare case where FT_Get_Char_Index() succeed but FT_Load_Glyph() fails.
-// - v0.64: (2021/01/18) add FT_Error in loading function call flag for a way for get freetype error message when bad font file
-// - v0.65: (2021/01/20) add copy/past function form ImDraw and specific for COLOR support in freetype from PR : https://github.com/ocornut/imgui/pull/336, for avoid modification of ImDraw
+// Get the latest version at https://github.com/ocornut/imgui/tree/master/misc/freetype
+// Original code by @vuhdo (Aleksei Skriabin). Improvements by @mikesart. Maintained since 2019 by @ocornut.
 
-// Gamma Correct Blending:
-//  FreeType assumes blending in linear space rather than gamma space.
-//  See https://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html#FT_Render_Glyph
-//  For correct results you need to be using sRGB and convert to linear space in the pixel shader output.
-//  The default imgui styles will be impacted by this change (alpha values will need tweaking).
+// CHANGELOG
+// (minor and older changes stripped away, please see git history for details)
+//  2021/08/23: fixed crash when FT_Render_Glyph() fails to render a glyph and returns NULL.
+//  2021/03/05: added ImGuiFreeTypeBuilderFlags_Bitmap to load bitmap glyphs.
+//  2021/03/02: set 'atlas->TexPixelsUseColors = true' to help some backends with deciding of a prefered texture format.
+//  2021/01/28: added support for color-layered glyphs via ImGuiFreeTypeBuilderFlags_LoadColor (require Freetype 2.10+).
+//  2021/01/26: simplified integration by using '#define IMGUI_ENABLE_FREETYPE'.
+//              renamed ImGuiFreeType::XXX flags to ImGuiFreeTypeBuilderFlags_XXX for consistency with other API. removed ImGuiFreeType::BuildFontAtlas().
+//  2020/06/04: fix for rare case where FT_Get_Char_Index() succeed but FT_Load_Glyph() fails.
+//  2019/02/09: added RasterizerFlags::Monochrome flag to disable font anti-aliasing (combine with ::MonoHinting for best results!)
+//  2019/01/15: added support for imgui allocators + added FreeType only override function SetAllocatorFunctions().
+//  2019/01/10: re-factored to match big update in STB builder. fixed texture height waste. fixed redundant glyphs when merging. support for glyph padding.
+//  2018/06/08: added support for ImFontConfig::GlyphMinAdvanceX, GlyphMaxAdvanceX.
+//  2018/02/04: moved to main imgui repository (away from http://www.github.com/ocornut/imgui_club)
+//  2018/01/22: fix for addition of ImFontAtlas::TexUvscale member.
+//  2017/10/22: minor inconsequential change to match change in master (removed an unnecessary statement).
+//  2017/09/26: fixes for imgui internal changes.
+//  2017/08/26: cleanup, optimizations, support for ImFontConfig::RasterizerFlags, ImFontConfig::RasterizerMultiply.
+//  2017/08/16: imported from https://github.com/Vuhdo/imgui_freetype into http://www.github.com/ocornut/imgui_club, updated for latest changes in ImFontAtlas, minor tweaks.
+
+// About Gamma Correct Blending:
+// - FreeType assumes blending in linear space rather than gamma space.
+// - See https://www.freetype.org/freetype2/docs/reference/ft2-base_interface.html#FT_Render_Glyph
+// - For correct results you need to be using sRGB and convert to linear space in the pixel shader output.
+// - The default dear imgui styles will be impacted by this change (alpha values will need tweaking).
 
 // FIXME: cfg.OversampleH, OversampleV are not supported (but perhaps not so necessary with this rasterizer).
 
 #include "imgui_freetype.h"
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include "imgui_internal.h"     // ImMin,ImMax,ImFontAtlasBuild*,
 #include <stdint.h>
 #include <ft2build.h>
@@ -36,13 +42,31 @@
 #include FT_SYNTHESIS_H         // <freetype/ftsynth.h>
 
 #ifdef _MSC_VER
-#pragma warning (disable: 4505) // unreferenced local function has been removed (stb stuff)
+#pragma warning (disable: 4505)     // unreferenced local function has been removed (stb stuff)
+#pragma warning (disable: 26812)    // [Static Analyzer] The enum type 'xxx' is unscoped. Prefer 'enum class' over 'enum' (Enum.3).
 #endif
 
 #if defined(__GNUC__)
 #pragma GCC diagnostic ignored "-Wpragmas"                  // warning: unknown option after '#pragma GCC diagnostic' kind
 #pragma GCC diagnostic ignored "-Wunused-function"          // warning: 'xxxx' defined but not used
 #endif
+
+//-------------------------------------------------------------------------
+// Data
+//-------------------------------------------------------------------------
+
+// Default memory allocators
+static void* ImGuiFreeTypeDefaultAllocFunc(size_t size, void* user_data) { IM_UNUSED(user_data); return IM_ALLOC(size); }
+static void  ImGuiFreeTypeDefaultFreeFunc(void* ptr, void* user_data) { IM_UNUSED(user_data); IM_FREE(ptr); }
+
+// Current memory allocators
+static void* (*GImGuiFreeTypeAllocFunc)(size_t size, void* user_data) = ImGuiFreeTypeDefaultAllocFunc;
+static void  (*GImGuiFreeTypeFreeFunc)(void* ptr, void* user_data) = ImGuiFreeTypeDefaultFreeFunc;
+static void* GImGuiFreeTypeAllocatorUserData = NULL;
+
+//-------------------------------------------------------------------------
+// Code
+//-------------------------------------------------------------------------
 
 namespace
 {
@@ -77,7 +101,7 @@ namespace
     //              |                                   |
     //              |------------- advanceX ----------->|
 
-    /// A structure that describe a glyph.
+    // A structure that describe a glyph.
     struct GlyphInfo
     {
         int         Width;              // Glyph's width in pixels.
@@ -85,6 +109,7 @@ namespace
         FT_Int      OffsetX;            // The distance from the origin ("pen position") to the left of the glyph.
         FT_Int      OffsetY;            // The distance from the origin to the top of the glyph. This is usually a value < 0.
         float       AdvanceX;           // The distance from the origin to the origin of the next glyph. This is usually a value > 0.
+        bool        IsColored;          // The glyph is colored
     };
 
     // Font parameters and metrics.
@@ -121,12 +146,12 @@ namespace
     // From SDL_ttf: Handy routines for converting from fixed point
     #define FT_CEIL(X)  (((X + 63) & -64) / 64)
 
-    bool FreeTypeFont::InitFont(FT_Library ft_library, const ImFontConfig& cfg, unsigned int extra_user_flags, FT_Error* vFT_Error)
+    bool FreeTypeFont::InitFont(FT_Library ft_library, const ImFontConfig& cfg, unsigned int extra_font_builder_flags, FT_Error* vFT_Error)
     {
         FT_Error error = FT_New_Memory_Face(ft_library, (uint8_t*)cfg.FontData, (uint32_t)cfg.FontDataSize, (uint32_t)cfg.FontNo, &Face);
         if (vFT_Error)
             *vFT_Error = error;
-        if (error != 0)
+		if (error != 0)
             return false;
         error = FT_Select_Charmap(Face, FT_ENCODING_UNICODE);
         if (vFT_Error)
@@ -134,32 +159,36 @@ namespace
         if (error != 0)
             return false;
 
-        memset(&Info, 0, sizeof(Info));
-        SetPixelHeight((uint32_t)cfg.SizePixels);
-
         // Convert to FreeType flags (NB: Bold and Oblique are processed separately)
-        UserFlags = /*cfg.RasterizerFlags |*/ extra_user_flags;
-        LoadFlags = FT_LOAD_NO_BITMAP;
-        if (UserFlags & ImGuiFreeType::FreeType_NoHinting)
+        UserFlags = cfg.FontBuilderFlags | extra_font_builder_flags;
+
+        LoadFlags = 0;
+        if ((UserFlags & ImGuiFreeTypeBuilderFlags_Bitmap) == 0)
+            LoadFlags |= FT_LOAD_NO_BITMAP;
+
+        if (UserFlags & ImGuiFreeTypeBuilderFlags_NoHinting)
             LoadFlags |= FT_LOAD_NO_HINTING;
-        if (UserFlags & ImGuiFreeType::FreeType_NoAutoHint)
+        if (UserFlags & ImGuiFreeTypeBuilderFlags_NoAutoHint)
             LoadFlags |= FT_LOAD_NO_AUTOHINT;
-        if (UserFlags & ImGuiFreeType::FreeType_ForceAutoHint)
+        if (UserFlags & ImGuiFreeTypeBuilderFlags_ForceAutoHint)
             LoadFlags |= FT_LOAD_FORCE_AUTOHINT;
-        if (UserFlags & ImGuiFreeType::FreeType_LightHinting)
+        if (UserFlags & ImGuiFreeTypeBuilderFlags_LightHinting)
             LoadFlags |= FT_LOAD_TARGET_LIGHT;
-        else if (UserFlags & ImGuiFreeType::FreeType_MonoHinting)
+        else if (UserFlags & ImGuiFreeTypeBuilderFlags_MonoHinting)
             LoadFlags |= FT_LOAD_TARGET_MONO;
         else
             LoadFlags |= FT_LOAD_TARGET_NORMAL;
 
-        if (UserFlags & ImGuiFreeType::FreeType_Monochrome)
+        if (UserFlags & ImGuiFreeTypeBuilderFlags_Monochrome)
             RenderMode = FT_RENDER_MODE_MONO;
         else
             RenderMode = FT_RENDER_MODE_NORMAL;
 
-        if (UserFlags & ImGuiFreeType::FreeType_LoadColor)
+        if (UserFlags & ImGuiFreeTypeBuilderFlags_LoadColor)
             LoadFlags |= FT_LOAD_COLOR;
+
+        memset(&Info, 0, sizeof(Info));
+        SetPixelHeight((uint32_t)cfg.SizePixels);
 
         return true;
     }
@@ -179,7 +208,7 @@ namespace
         // is a maximum height of an any given glyph, i.e. it's the sum of font's ascender and descender. Seems strange to me.
         // NB: FT_Set_Pixel_Sizes() doesn't seem to get us the same result.
         FT_Size_RequestRec req;
-        req.type = FT_SIZE_REQUEST_TYPE_REAL_DIM;
+        req.type = (UserFlags & ImGuiFreeTypeBuilderFlags_Bitmap) ? FT_SIZE_REQUEST_TYPE_NOMINAL : FT_SIZE_REQUEST_TYPE_REAL_DIM;
         req.width = 0;
         req.height = (uint32_t)pixel_height * 64;
         req.horiResolution = 0;
@@ -201,18 +230,24 @@ namespace
         uint32_t glyph_index = FT_Get_Char_Index(Face, codepoint);
         if (glyph_index == 0)
             return NULL;
+
+		// If this crash for you: FreeType 2.11.0 has a crash bug on some bitmap/colored fonts.
+		// - https://gitlab.freedesktop.org/freetype/freetype/-/issues/1076
+		// - https://github.com/ocornut/imgui/issues/4567
+		// - https://github.com/ocornut/imgui/issues/4566
+		// You can use FreeType 2.10, or the patched version of 2.11.0 in VcPkg, or probably any upcoming FreeType version.
         FT_Error error = FT_Load_Glyph(Face, glyph_index, LoadFlags);
         if (error)
             return NULL;
 
         // Need an outline for this to work
         FT_GlyphSlot slot = Face->glyph;
-        IM_ASSERT(slot->format == FT_GLYPH_FORMAT_OUTLINE);
+        IM_ASSERT(slot->format == FT_GLYPH_FORMAT_OUTLINE || slot->format == FT_GLYPH_FORMAT_BITMAP);
 
         // Apply convenience transform (this is not picking from real "Bold"/"Italic" fonts! Merely applying FreeType helper transform. Oblique == Slanting)
-        if (UserFlags & ImGuiFreeType::FreeType_Bold)
+        if (UserFlags & ImGuiFreeTypeBuilderFlags_Bold)
             FT_GlyphSlot_Embolden(slot);
-        if (UserFlags & ImGuiFreeType::FreeType_Oblique)
+        if (UserFlags & ImGuiFreeTypeBuilderFlags_Oblique)
         {
             FT_GlyphSlot_Oblique(slot);
             //FT_BBox bbox;
@@ -237,6 +272,7 @@ namespace
         out_glyph_info->OffsetX = Face->glyph->bitmap_left;
         out_glyph_info->OffsetY = -Face->glyph->bitmap_top;
         out_glyph_info->AdvanceX = (float)FT_CEIL(slot->advance.x);
+        out_glyph_info->IsColored = (ft_bitmap->pixel_mode == FT_PIXEL_MODE_BGRA);
 
         return ft_bitmap;
     }
@@ -256,18 +292,14 @@ namespace
                 if (multiply_table == NULL)
                 {
                     for (uint32_t y = 0; y < h; y++, src += src_pitch, dst += dst_pitch)
-                    {
                         for (uint32_t x = 0; x < w; x++)
                             dst[x] = IM_COL32(255, 255, 255, src[x]);
-                    }
                 }
                 else
                 {
                     for (uint32_t y = 0; y < h; y++, src += src_pitch, dst += dst_pitch)
-                    {
                         for (uint32_t x = 0; x < w; x++)
                             dst[x] = IM_COL32(255, 255, 255, multiply_table[src[x]]);
-                    }
                 }
                 break;
             }
@@ -290,33 +322,28 @@ namespace
             }
         case FT_PIXEL_MODE_BGRA:
             {
+                // FIXME: Converting pre-multiplied alpha to straight. Doesn't smell good.
                 #define DE_MULTIPLY(color, alpha) (ImU32)(255.0f * (float)color / (float)alpha + 0.5f)
-
                 if (multiply_table == NULL)
                 {
                     for (uint32_t y = 0; y < h; y++, src += src_pitch, dst += dst_pitch)
-                    {
                         for (uint32_t x = 0; x < w; x++)
-                            dst[x] = IM_COL32(
-                                DE_MULTIPLY(src[x * 4 + 2], src[x * 4 + 3]),
-                                DE_MULTIPLY(src[x * 4 + 1], src[x * 4 + 3]),
-                                DE_MULTIPLY(src[x * 4],     src[x * 4 + 3]),
-                                src[x * 4 + 3]);
-                    }
+                        {
+                            uint8_t r = src[x * 4 + 2], g = src[x * 4 + 1], b = src[x * 4], a = src[x * 4 + 3];
+                            dst[x] = IM_COL32(DE_MULTIPLY(r, a), DE_MULTIPLY(g, a), DE_MULTIPLY(b, a), a);
+                        }
                 }
                 else
                 {
                     for (uint32_t y = 0; y < h; y++, src += src_pitch, dst += dst_pitch)
                     {
                         for (uint32_t x = 0; x < w; x++)
-                            dst[x] = IM_COL32(
-                                multiply_table[DE_MULTIPLY(src[x * 4 + 2], src[x * 4 + 3])],
-                                multiply_table[DE_MULTIPLY(src[x * 4 + 1], src[x * 4 + 3])],
-                                multiply_table[DE_MULTIPLY(src[x * 4],     src[x * 4 + 3])],
-                                multiply_table[src[x * 4 + 3]]);
+                        {
+                            uint8_t r = src[x * 4 + 2], g = src[x * 4 + 1], b = src[x * 4], a = src[x * 4 + 3];
+                            dst[x] = IM_COL32(multiply_table[DE_MULTIPLY(r, a)], multiply_table[DE_MULTIPLY(g, a)], multiply_table[DE_MULTIPLY(b, a)], multiply_table[a]);
+                        }
                     }
                 }
-
                 #undef DE_MULTIPLY
                 break;
             }
@@ -344,6 +371,8 @@ struct ImFontBuildSrcGlyphFT
     GlyphInfo           Info;
     uint32_t            Codepoint;
     unsigned int*       BitmapData;         // Point within one of the dst_tmp_bitmap_buffers[] array
+
+    ImFontBuildSrcGlyphFT() { memset((void*)this, 0, sizeof(*this)); }
 };
 
 struct ImFontBuildSrcDataFT
@@ -367,197 +396,7 @@ struct ImFontBuildDstDataFT
     ImBitVector         GlyphsSet;          // This is used to resolve collision when multiple sources are merged into a same destination font.
 };
 
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-// EXTRACTED FROM IMDRAW AND MODIFIED FOR FREETYPE COLR SUPPORT
-// see PR : https://github.com/ocornut/imgui/pull/3369
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-
-// A work of art lies ahead! (. = white layer, X = black layer, others are blank)
-// The 2x2 white texels on the top left are the ones we'll use everywhere in Dear ImGui to render filled shapes.
-const int FT_FONT_ATLAS_DEFAULT_TEX_DATA_W = 108; // Actual texture will be 2 times that + 1 spacing.
-const int FT_FONT_ATLAS_DEFAULT_TEX_DATA_H = 27;
-static const char FT_FONT_ATLAS_DEFAULT_TEX_DATA_PIXELS[FT_FONT_ATLAS_DEFAULT_TEX_DATA_W * FT_FONT_ATLAS_DEFAULT_TEX_DATA_H + 1] =
-{
-    "..-         -XXXXXXX-    X    -           X           -XXXXXXX          -          XXXXXXX-     XX          "
-    "..-         -X.....X-   X.X   -          X.X          -X.....X          -          X.....X-    X..X         "
-    "---         -XXX.XXX-  X...X  -         X...X         -X....X           -           X....X-    X..X         "
-    "X           -  X.X  - X.....X -        X.....X        -X...X            -            X...X-    X..X         "
-    "XX          -  X.X  -X.......X-       X.......X       -X..X.X           -           X.X..X-    X..X         "
-    "X.X         -  X.X  -XXXX.XXXX-       XXXX.XXXX       -X.X X.X          -          X.X X.X-    X..XXX       "
-    "X..X        -  X.X  -   X.X   -          X.X          -XX   X.X         -         X.X   XX-    X..X..XXX    "
-    "X...X       -  X.X  -   X.X   -    XX    X.X    XX    -      X.X        -        X.X      -    X..X..X..XX  "
-    "X....X      -  X.X  -   X.X   -   X.X    X.X    X.X   -       X.X       -       X.X       -    X..X..X..X.X "
-    "X.....X     -  X.X  -   X.X   -  X..X    X.X    X..X  -        X.X      -      X.X        -XXX X..X..X..X..X"
-    "X......X    -  X.X  -   X.X   - X...XXXXXX.XXXXXX...X -         X.X   XX-XX   X.X         -X..XX........X..X"
-    "X.......X   -  X.X  -   X.X   -X.....................X-          X.X X.X-X.X X.X          -X...X...........X"
-    "X........X  -  X.X  -   X.X   - X...XXXXXX.XXXXXX...X -           X.X..X-X..X.X           - X..............X"
-    "X.........X -XXX.XXX-   X.X   -  X..X    X.X    X..X  -            X...X-X...X            -  X.............X"
-    "X..........X-X.....X-   X.X   -   X.X    X.X    X.X   -           X....X-X....X           -  X.............X"
-    "X......XXXXX-XXXXXXX-   X.X   -    XX    X.X    XX    -          X.....X-X.....X          -   X............X"
-    "X...X..X    ---------   X.X   -          X.X          -          XXXXXXX-XXXXXXX          -   X...........X "
-    "X..X X..X   -       -XXXX.XXXX-       XXXX.XXXX       -------------------------------------    X..........X "
-    "X.X  X..X   -       -X.......X-       X.......X       -    XX           XX    -           -    X..........X "
-    "XX    X..X  -       - X.....X -        X.....X        -   X.X           X.X   -           -     X........X  "
-    "      X..X          -  X...X  -         X...X         -  X..X           X..X  -           -     X........X  "
-    "       XX           -   X.X   -          X.X          - X...XXXXXXXXXXXXX...X -           -     XXXXXXXXXX  "
-    "------------        -    X    -           X           -X.....................X-           ------------------"
-    "                    ----------------------------------- X...XXXXXXXXXXXXX...X -                             "
-    "                                                      -  X..X           X..X  -                             "
-    "                                                      -   X.X           X.X   -                             "
-    "                                                      -    XX           XX    -                             "
-};
-
-static void ImFreeTypeFontAtlasBuildRender32bppRectFromString(ImFontAtlas* atlas, int x, int y, int w, int h, const char* in_str, char in_marker_char, unsigned int in_marker_pixel_value)
-{
-    IM_ASSERT(x >= 0 && x + w <= atlas->TexWidth);
-    IM_ASSERT(y >= 0 && y + h <= atlas->TexHeight);
-    unsigned int* out_pixel = atlas->TexPixelsRGBA32 + x + (y * atlas->TexWidth);
-    for (int off_y = 0; off_y < h; off_y++, out_pixel += atlas->TexWidth, in_str += w)
-        for (int off_x = 0; off_x < w; off_x++)
-            out_pixel[off_x] = (in_str[off_x] == in_marker_char) ? in_marker_pixel_value : IM_COL32_BLACK_TRANS;
-}
-
-static void ImFreeTypeFontAtlasBuildRenderDefaultTexData(ImFontAtlas* atlas)
-{
-    ImFontAtlasCustomRect* r = atlas->GetCustomRectByIndex(atlas->PackIdMouseCursors);
-    IM_ASSERT(r->IsPacked());
-
-    const int w = atlas->TexWidth;
-    if (!(atlas->Flags & ImFontAtlasFlags_NoMouseCursors))
-    {
-        // Render/copy pixels
-        IM_ASSERT(r->Width == FT_FONT_ATLAS_DEFAULT_TEX_DATA_W * 2 + 1 && r->Height == FT_FONT_ATLAS_DEFAULT_TEX_DATA_H);
-        const int x_for_white = r->X;
-        const int x_for_black = r->X + FT_FONT_ATLAS_DEFAULT_TEX_DATA_W + 1;
-        if (atlas->TexPixelsAlpha8 != NULL)
-        {
-            ImFontAtlasBuildRender8bppRectFromString(atlas, x_for_white, r->Y, FT_FONT_ATLAS_DEFAULT_TEX_DATA_W, FT_FONT_ATLAS_DEFAULT_TEX_DATA_H, FT_FONT_ATLAS_DEFAULT_TEX_DATA_PIXELS, '.', 0xFF);
-            ImFontAtlasBuildRender8bppRectFromString(atlas, x_for_black, r->Y, FT_FONT_ATLAS_DEFAULT_TEX_DATA_W, FT_FONT_ATLAS_DEFAULT_TEX_DATA_H, FT_FONT_ATLAS_DEFAULT_TEX_DATA_PIXELS, 'X', 0xFF);
-        }
-        else
-        {
-            ImFreeTypeFontAtlasBuildRender32bppRectFromString(atlas, x_for_white, r->Y, FT_FONT_ATLAS_DEFAULT_TEX_DATA_W, FT_FONT_ATLAS_DEFAULT_TEX_DATA_H, FT_FONT_ATLAS_DEFAULT_TEX_DATA_PIXELS, '.', IM_COL32_WHITE);
-            ImFreeTypeFontAtlasBuildRender32bppRectFromString(atlas, x_for_black, r->Y, FT_FONT_ATLAS_DEFAULT_TEX_DATA_W, FT_FONT_ATLAS_DEFAULT_TEX_DATA_H, FT_FONT_ATLAS_DEFAULT_TEX_DATA_PIXELS, 'X', IM_COL32_WHITE);
-        }
-    }
-    else
-    {
-        // Render 4 white pixels
-        IM_ASSERT(r->Width == 2 && r->Height == 2);
-        const int offset = (int)r->X + (int)r->Y * w;
-        if (atlas->TexPixelsAlpha8 != NULL)
-        {
-            atlas->TexPixelsAlpha8[offset] = atlas->TexPixelsAlpha8[offset + 1] = atlas->TexPixelsAlpha8[offset + w] = atlas->TexPixelsAlpha8[offset + w + 1] = 0xFF;
-        }
-        else
-        {
-            atlas->TexPixelsRGBA32[offset] = atlas->TexPixelsRGBA32[offset + 1] = atlas->TexPixelsRGBA32[offset + w] = atlas->TexPixelsRGBA32[offset + w + 1] = IM_COL32_WHITE;
-        }
-    }
-    atlas->TexUvWhitePixel = ImVec2((r->X + 0.5f) * atlas->TexUvScale.x, (r->Y + 0.5f) * atlas->TexUvScale.y);
-}
-
-static void ImFreeTypeFontAtlasBuildRenderLinesTexData(ImFontAtlas* atlas)
-{
-    if (atlas->Flags & ImFontAtlasFlags_NoBakedLines)
-        return;
-
-    // This generates a triangular shape in the texture, with the various line widths stacked on top of each other to allow interpolation between them
-    ImFontAtlasCustomRect* r = atlas->GetCustomRectByIndex(atlas->PackIdLines);
-    IM_ASSERT(r->IsPacked());
-    for (unsigned int n = 0; n < IM_DRAWLIST_TEX_LINES_WIDTH_MAX + 1; n++) // +1 because of the zero-width row
-    {
-        // Each line consists of at least two empty pixels at the ends, with a line of solid pixels in the middle
-        unsigned int y = n;
-        unsigned int line_width = n;
-        unsigned int pad_left = (r->Width - line_width) / 2;
-        unsigned int pad_right = r->Width - (pad_left + line_width);
-
-        // Write each slice
-        IM_ASSERT(pad_left + line_width + pad_right == r->Width && y < r->Height); // Make sure we're inside the texture bounds before we start writing pixels
-        if (atlas->TexPixelsAlpha8 != NULL)
-        {
-            unsigned char* write_ptr = &atlas->TexPixelsAlpha8[r->X + ((r->Y + y) * atlas->TexWidth)];
-            for (unsigned int i = 0; i < pad_left; i++)
-                *(write_ptr + i) = 0x00;
-
-            for (unsigned int i = 0; i < line_width; i++)
-                *(write_ptr + pad_left + i) = 0xFF;
-
-            for (unsigned int i = 0; i < pad_right; i++)
-                *(write_ptr + pad_left + line_width + i) = 0x00;
-        }
-        else
-        {
-            unsigned int* write_ptr = &atlas->TexPixelsRGBA32[r->X + ((r->Y + y) * atlas->TexWidth)];
-            for (unsigned int i = 0; i < pad_left; i++)
-                *(write_ptr + i) = IM_COL32_BLACK_TRANS;
-
-            for (unsigned int i = 0; i < line_width; i++)
-                *(write_ptr + pad_left + i) = IM_COL32_WHITE;
-
-            for (unsigned int i = 0; i < pad_right; i++)
-                *(write_ptr + pad_left + line_width + i) = IM_COL32_BLACK_TRANS;
-        }
-
-        // Calculate UVs for this line
-        ImVec2 uv0 = ImVec2((float)(r->X + pad_left - 1), (float)(r->Y + y)) * atlas->TexUvScale;
-        ImVec2 uv1 = ImVec2((float)(r->X + pad_left + line_width + 1), (float)(r->Y + y + 1)) * atlas->TexUvScale;
-        float half_v = (uv0.y + uv1.y) * 0.5f; // Calculate a constant V in the middle of the row to avoid sampling artifacts
-        atlas->TexUvLines[n] = ImVec4(uv0.x, half_v, uv1.x, half_v);
-    }
-}
-
-// This is called/shared by both the stb_truetype and the FreeType builder.
-void ImFreeTypeFontAtlasBuildFinish(ImFontAtlas* atlas)
-{
-    // Render into our custom data blocks
-    IM_ASSERT(atlas->TexPixelsAlpha8 != NULL || atlas->TexPixelsRGBA32 != NULL);
-    ImFreeTypeFontAtlasBuildRenderDefaultTexData(atlas);
-    ImFreeTypeFontAtlasBuildRenderLinesTexData(atlas);
-
-    // Register custom rectangle glyphs
-    for (int i = 0; i < atlas->CustomRects.Size; i++)
-    {
-        const ImFontAtlasCustomRect* r = &atlas->CustomRects[i];
-        if (r->Font == NULL || r->GlyphID == 0)
-            continue;
-
-        IM_ASSERT(r->Font->ContainerAtlas == atlas);
-        ImVec2 uv0, uv1;
-        atlas->CalcCustomRectUV(r, &uv0, &uv1);
-        r->Font->AddGlyph(NULL, (ImWchar)r->GlyphID, r->GlyphOffset.x, r->GlyphOffset.y, r->GlyphOffset.x + r->Width, r->GlyphOffset.y + r->Height, uv0.x, uv0.y, uv1.x, uv1.y, r->GlyphAdvanceX);
-    }
-
-    // Build all fonts lookup tables
-    for (int i = 0; i < atlas->Fonts.Size; i++)
-        if (atlas->Fonts[i]->DirtyLookupTables)
-            atlas->Fonts[i]->BuildLookupTable();
-
-    // Ellipsis character is required for rendering elided text. We prefer using U+2026 (horizontal ellipsis).
-    // However some old fonts may contain ellipsis at U+0085. Here we auto-detect most suitable ellipsis character.
-    // FIXME: Also note that 0x2026 is currently seldom included in our font ranges. Because of this we are more likely to use three individual dots.
-    for (int i = 0; i < atlas->Fonts.size(); i++)
-    {
-        ImFont* font = atlas->Fonts[i];
-        if (font->EllipsisChar != (ImWchar)-1)
-            continue;
-        const ImWchar ellipsis_variants[] = { (ImWchar)0x2026, (ImWchar)0x0085 };
-        for (int j = 0; j < IM_ARRAYSIZE(ellipsis_variants); j++)
-            if (font->FindGlyphNoFallback(ellipsis_variants[j]) != NULL) // Verify glyph exists
-            {
-                font->EllipsisChar = ellipsis_variants[j];
-                break;
-            }
-    }
-}
-
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-//////////////////////////////////////////////////////////////////////////////////////////////////////
-
-bool ImFontAtlasBuildWithFreeType(FT_Library ft_library, ImFontAtlas* atlas, unsigned int extra_flags, FT_Error *vFT_Error)
+bool ImFontAtlasBuildWithFreeTypeEx(FT_Library ft_library, ImFontAtlas* atlas, unsigned int extra_flags, FT_Error *vFT_Error)
 {
     IM_ASSERT(atlas->ConfigData.Size > 0);
 
@@ -571,12 +410,13 @@ bool ImFontAtlasBuildWithFreeType(FT_Library ft_library, ImFontAtlas* atlas, uns
     atlas->ClearTexData();
 
     // Temporary storage for building
+    bool src_load_color = false;
     ImVector<ImFontBuildSrcDataFT> src_tmp_array;
     ImVector<ImFontBuildDstDataFT> dst_tmp_array;
     src_tmp_array.resize(atlas->ConfigData.Size);
     dst_tmp_array.resize(atlas->Fonts.Size);
-    memset(src_tmp_array.Data, 0, (size_t)src_tmp_array.size_in_bytes());
-    memset(dst_tmp_array.Data, 0, (size_t)dst_tmp_array.size_in_bytes());
+    memset((void*)src_tmp_array.Data, 0, (size_t)src_tmp_array.size_in_bytes());
+    memset((void*)dst_tmp_array.Data, 0, (size_t)dst_tmp_array.size_in_bytes());
 
     // 1. Initialize font loading structure, check font data validity
     for (int src_i = 0; src_i < atlas->ConfigData.Size; src_i++)
@@ -600,6 +440,7 @@ bool ImFontAtlasBuildWithFreeType(FT_Library ft_library, ImFontAtlas* atlas, uns
             return false;
 
         // Measure highest codepoints
+        src_load_color |= (cfg.FontBuilderFlags & ImGuiFreeTypeBuilderFlags_LoadColor) != 0;
         ImFontBuildDstDataFT& dst_tmp = dst_tmp_array[src_tmp.DstIndex];
         src_tmp.SrcRanges = cfg.GlyphRanges ? cfg.GlyphRanges : atlas->GetGlyphRangesDefault();
         for (const ImWchar* src_range = src_tmp.SrcRanges; src_range[0] && src_range[1]; src_range += 2)
@@ -619,7 +460,7 @@ bool ImFontAtlasBuildWithFreeType(FT_Library ft_library, ImFontAtlas* atlas, uns
             dst_tmp.GlyphsSet.Create(dst_tmp.GlyphsHighest + 1);
 
         for (const ImWchar* src_range = src_tmp.SrcRanges; src_range[0] && src_range[1]; src_range += 2)
-            for (int codepoint = src_range[0]; codepoint <= src_range[1]; codepoint++)
+            for (int codepoint = src_range[0]; codepoint <= (int)src_range[1]; codepoint++)
             {
                 if (dst_tmp.GlyphsSet.TestBit(codepoint))    // Don't overwrite existing glyphs. We could make this an option (e.g. MergeOverwrite)
                     continue;
@@ -651,7 +492,6 @@ bool ImFontAtlasBuildWithFreeType(FT_Library ft_library, ImFontAtlas* atlas, uns
                     if (entries_32 & ((ImU32)1 << bit_n))
                     {
                         ImFontBuildSrcGlyphFT src_glyph;
-                        memset(&src_glyph, 0, sizeof(src_glyph));
                         src_glyph.Codepoint = (ImWchar)(((it - it_begin) << 5) + bit_n);
                         //src_glyph.GlyphIndex = 0; // FIXME-OPT: We had this info in the previous step and lost it..
                         src_tmp.GlyphsList.push_back(src_glyph);
@@ -672,7 +512,7 @@ bool ImFontAtlasBuildWithFreeType(FT_Library ft_library, ImFontAtlas* atlas, uns
     // Allocate temporary rasterization data buffers.
     // We could not find a way to retrieve accurate glyph size without rendering them.
     // (e.g. slot->metrics->width not always matching bitmap->width, especially considering the Oblique transform)
-    // We allocate in chunks of 256 KB to not waste too much extra memory ahead. Hopefully users of FreeType won't find the temporary allocations.
+    // We allocate in chunks of 256 KB to not waste too much extra memory ahead. Hopefully users of FreeType won't mind the temporary allocations.
     const int BITMAP_BUFFERS_CHUNK_SIZE = 256 * 1024;
     int buf_bitmap_current_used_bytes = 0;
     ImVector<unsigned char*> buf_bitmap_buffers;
@@ -710,7 +550,8 @@ bool ImFontAtlasBuildWithFreeType(FT_Library ft_library, ImFontAtlas* atlas, uns
 
             // Render glyph into a bitmap (currently held by FreeType)
             const FT_Bitmap* ft_bitmap = src_tmp.Font.RenderGlyphAndGetInfo(&src_glyph.Info);
-            IM_ASSERT(ft_bitmap);
+            if (ft_bitmap == NULL)
+                continue;
 
             // Allocate new temporary chunk if needed
             const int bitmap_size_in_bytes = src_glyph.Info.Width * src_glyph.Info.Height * 4;
@@ -719,6 +560,7 @@ bool ImFontAtlasBuildWithFreeType(FT_Library ft_library, ImFontAtlas* atlas, uns
                 buf_bitmap_current_used_bytes = 0;
                 buf_bitmap_buffers.push_back((unsigned char*)IM_ALLOC(BITMAP_BUFFERS_CHUNK_SIZE));
             }
+            IM_ASSERT(buf_bitmap_current_used_bytes + bitmap_size_in_bytes <= BITMAP_BUFFERS_CHUNK_SIZE); // We could probably allocate custom-sized buffer instead.
 
             // Blit rasterized pixels to our temporary buffer and keep a pointer to it.
             src_glyph.BitmapData = (unsigned int*)(buf_bitmap_buffers.back() + buf_bitmap_current_used_bytes);
@@ -770,27 +612,33 @@ bool ImFontAtlasBuildWithFreeType(FT_Library ft_library, ImFontAtlas* atlas, uns
     // 7. Allocate texture
     atlas->TexHeight = (atlas->Flags & ImFontAtlasFlags_NoPowerOfTwoHeight) ? (atlas->TexHeight + 1) : ImUpperPowerOfTwo(atlas->TexHeight);
     atlas->TexUvScale = ImVec2(1.0f / atlas->TexWidth, 1.0f / atlas->TexHeight);
-    if ((extra_flags & ImGuiFreeType::FreeType_LoadColor) == ImGuiFreeType::FreeType_LoadColor)
+    if (src_load_color)
     {
-        atlas->TexPixelsRGBA32 = (unsigned int*)IM_ALLOC(atlas->TexWidth * atlas->TexHeight * 4);
-        memset(atlas->TexPixelsRGBA32, 0, atlas->TexWidth * atlas->TexHeight * 4);
+        size_t tex_size = (size_t)atlas->TexWidth * atlas->TexHeight * 4;
+        atlas->TexPixelsRGBA32 = (unsigned int*)IM_ALLOC(tex_size);
+        memset(atlas->TexPixelsRGBA32, 0, tex_size);
     }
     else
     {
-        atlas->TexPixelsAlpha8 = (unsigned char*)IM_ALLOC(atlas->TexWidth * atlas->TexHeight);
-        memset(atlas->TexPixelsAlpha8, 0, atlas->TexWidth * atlas->TexHeight);
+        size_t tex_size = (size_t)atlas->TexWidth * atlas->TexHeight * 1;
+        atlas->TexPixelsAlpha8 = (unsigned char*)IM_ALLOC(tex_size);
+        memset(atlas->TexPixelsAlpha8, 0, tex_size);
     }
 
     // 8. Copy rasterized font characters back into the main texture
     // 9. Setup ImFont and glyphs for runtime
+    bool tex_use_colors = false;
     for (int src_i = 0; src_i < src_tmp_array.Size; src_i++)
     {
         ImFontBuildSrcDataFT& src_tmp = src_tmp_array[src_i];
         if (src_tmp.GlyphsCount == 0)
             continue;
 
+        // When merging fonts with MergeMode=true:
+        // - We can have multiple input fonts writing into a same destination font.
+        // - dst_font->ConfigData is != from cfg which is our source configuration.
         ImFontConfig& cfg = atlas->ConfigData[src_i];
-        ImFont* dst_font = cfg.DstFont; // We can have multiple input fonts writing into a same destination font (when using MergeMode=true)
+        ImFont* dst_font = cfg.DstFont;
 
         const float ascent = src_tmp.Font.Info.Ascender;
         const float descent = src_tmp.Font.Info.Descender;
@@ -813,6 +661,22 @@ bool ImFontAtlasBuildWithFreeType(FT_Library ft_library, ImFontAtlas* atlas, uns
             const int tx = pack_rect.x + padding;
             const int ty = pack_rect.y + padding;
 
+            // Register glyph
+            float x0 = info.OffsetX + font_off_x;
+            float y0 = info.OffsetY + font_off_y;
+            float x1 = x0 + info.Width;
+            float y1 = y0 + info.Height;
+            float u0 = (tx) / (float)atlas->TexWidth;
+            float v0 = (ty) / (float)atlas->TexHeight;
+            float u1 = (tx + info.Width) / (float)atlas->TexWidth;
+            float v1 = (ty + info.Height) / (float)atlas->TexHeight;
+            dst_font->AddGlyph(&cfg, (ImWchar)src_glyph.Codepoint, x0, y0, x1, y1, u0, v0, u1, v1, info.AdvanceX);
+
+            ImFontGlyph* dst_glyph = &dst_font->Glyphs.back();
+            IM_ASSERT(dst_glyph->Codepoint == src_glyph.Codepoint);
+            if (src_glyph.Info.IsColored)
+                dst_glyph->Colored = tex_use_colors = true;
+
             // Blit from temporary buffer to final texture
             size_t blit_src_stride = (size_t)src_glyph.Info.Width;
             size_t blit_dst_stride = (size_t)atlas->TexWidth;
@@ -831,81 +695,56 @@ bool ImFontAtlasBuildWithFreeType(FT_Library ft_library, ImFontAtlas* atlas, uns
                     for (int x = 0; x < info.Width; x++)
                         blit_dst[x] = blit_src[x];
             }
-
-            float char_advance_x_org = info.AdvanceX;
-            float char_advance_x_mod = ImClamp(char_advance_x_org, cfg.GlyphMinAdvanceX, cfg.GlyphMaxAdvanceX);
-            float char_off_x = font_off_x;
-            if (char_advance_x_org != char_advance_x_mod)
-                char_off_x += cfg.PixelSnapH ? IM_FLOOR((char_advance_x_mod - char_advance_x_org) * 0.5f) : (char_advance_x_mod - char_advance_x_org) * 0.5f;
-
-            // Register glyph
-            float x0 = info.OffsetX + char_off_x;
-            float y0 = info.OffsetY + font_off_y;
-            float x1 = x0 + info.Width;
-            float y1 = y0 + info.Height;
-            float u0 = (tx) / (float)atlas->TexWidth;
-            float v0 = (ty) / (float)atlas->TexHeight;
-            float u1 = (tx + info.Width) / (float)atlas->TexWidth;
-            float v1 = (ty + info.Height) / (float)atlas->TexHeight;
-            dst_font->AddGlyph(&cfg, (ImWchar)src_glyph.Codepoint, x0, y0, x1, y1, u0, v0, u1, v1, char_advance_x_mod);
         }
 
         src_tmp.Rects = NULL;
     }
+    atlas->TexPixelsUseColors = tex_use_colors;
 
     // Cleanup
     for (int buf_i = 0; buf_i < buf_bitmap_buffers.Size; buf_i++)
         IM_FREE(buf_bitmap_buffers[buf_i]);
-    for (int src_i = 0; src_i < src_tmp_array.Size; src_i++)
-        src_tmp_array[src_i].~ImFontBuildSrcDataFT();
+    src_tmp_array.clear_destruct();
 
-    ImFreeTypeFontAtlasBuildFinish(atlas);
+    ImFontAtlasBuildFinish(atlas);
 
     return true;
 }
 
-// Default memory allocators
-static void* ImFreeTypeDefaultAllocFunc(size_t size, void* user_data)   { IM_UNUSED(user_data); return IM_ALLOC(size); }
-static void  ImFreeTypeDefaultFreeFunc(void* ptr, void* user_data)      { IM_UNUSED(user_data); IM_FREE(ptr); }
-
-// Current memory allocators
-static void* (*GImFreeTypeAllocFunc)(size_t size, void* user_data) = ImFreeTypeDefaultAllocFunc;
-static void  (*GImFreeTypeFreeFunc)(void* ptr, void* user_data) = ImFreeTypeDefaultFreeFunc;
-static void* GImFreeTypeAllocatorUserData = NULL;
-
 // FreeType memory allocation callbacks
-static void* FreeType_Alloc(FT_Memory /*memory*/, long size)
+static void* ImGuiFreeTypeBuilderFlags_Alloc(FT_Memory /*memory*/, long size)
 {
-    return GImFreeTypeAllocFunc((size_t)size, GImFreeTypeAllocatorUserData);
+    return GImGuiFreeTypeAllocFunc((size_t)size, GImGuiFreeTypeAllocatorUserData);
 }
 
-static void FreeType_Free(FT_Memory /*memory*/, void* block)
+static void ImGuiFreeTypeBuilderFlags_Free(FT_Memory /*memory*/, void* block)
 {
-    GImFreeTypeFreeFunc(block, GImFreeTypeAllocatorUserData);
+    GImGuiFreeTypeFreeFunc(block, GImGuiFreeTypeAllocatorUserData);
 }
 
-static void* FreeType_Realloc(FT_Memory /*memory*/, long cur_size, long new_size, void* block)
+static void* ImGuiFreeTypeBuilderFlags_Realloc(FT_Memory /*memory*/, long cur_size, long new_size, void* block)
 {
     // Implement realloc() as we don't ask user to provide it.
     if (block == NULL)
-        return GImFreeTypeAllocFunc((size_t)new_size, GImFreeTypeAllocatorUserData);
+        return GImGuiFreeTypeAllocFunc((size_t)new_size, GImGuiFreeTypeAllocatorUserData);
 
     if (new_size == 0)
     {
-        GImFreeTypeFreeFunc(block, GImFreeTypeAllocatorUserData);
+        GImGuiFreeTypeFreeFunc(block, GImGuiFreeTypeAllocatorUserData);
         return NULL;
     }
 
     if (new_size > cur_size)
     {
-        void* new_block = GImFreeTypeAllocFunc((size_t)new_size, GImFreeTypeAllocatorUserData);
+        void* new_block = GImGuiFreeTypeAllocFunc((size_t)new_size, GImGuiFreeTypeAllocatorUserData);
         memcpy(new_block, block, (size_t)cur_size);
-        GImFreeTypeFreeFunc(block, GImFreeTypeAllocatorUserData);
+        GImGuiFreeTypeFreeFunc(block, GImGuiFreeTypeAllocatorUserData);
         return new_block;
     }
 
     return block;
 }
+
 
 const char* ImGuiFreeType::GetErrorMessage(FT_Error err)
 {
@@ -917,14 +756,15 @@ const char* ImGuiFreeType::GetErrorMessage(FT_Error err)
     return "(Unknown error)";
 }
 
-bool ImGuiFreeType::BuildFontAtlas(ImFontAtlas* atlas, unsigned int extra_flags, FT_Error* vFreetypeError)
+static FT_Error* vFTError = nullptr;
+static bool ImFontAtlasBuildWithFreeType(ImFontAtlas* atlas)
 {
     // FreeType memory management: https://www.freetype.org/freetype2/docs/design/design-4.html
     FT_MemoryRec_ memory_rec = {};
     memory_rec.user = NULL;
-    memory_rec.alloc = &FreeType_Alloc;
-    memory_rec.free = &FreeType_Free;
-    memory_rec.realloc = &FreeType_Realloc;
+    memory_rec.alloc = &ImGuiFreeTypeBuilderFlags_Alloc;
+    memory_rec.free = &ImGuiFreeTypeBuilderFlags_Free;
+    memory_rec.realloc = &ImGuiFreeTypeBuilderFlags_Realloc;
 
     // https://www.freetype.org/freetype2/docs/reference/ft2-module_management.html#FT_New_Library
     FT_Library ft_library;
@@ -935,15 +775,22 @@ bool ImGuiFreeType::BuildFontAtlas(ImFontAtlas* atlas, unsigned int extra_flags,
     // If you don't call FT_Add_Default_Modules() the rest of code may work, but FreeType won't use our custom allocator.
     FT_Add_Default_Modules(ft_library);
 
-    bool ret = ImFontAtlasBuildWithFreeType(ft_library, atlas, extra_flags, vFreetypeError);
+    bool ret = ImFontAtlasBuildWithFreeTypeEx(ft_library, atlas, atlas->FontBuilderFlags, vFTError);
     FT_Done_Library(ft_library);
 
     return ret;
 }
 
+const ImFontBuilderIO* ImGuiFreeType::GetBuilderForFreeType()
+{
+    static ImFontBuilderIO io;
+    io.FontBuilder_Build = ImFontAtlasBuildWithFreeType;
+    return &io;
+}
+
 void ImGuiFreeType::SetAllocatorFunctions(void* (*alloc_func)(size_t sz, void* user_data), void (*free_func)(void* ptr, void* user_data), void* user_data)
 {
-    GImFreeTypeAllocFunc = alloc_func;
-    GImFreeTypeFreeFunc = free_func;
-    GImFreeTypeAllocatorUserData = user_data;
+    GImGuiFreeTypeAllocFunc = alloc_func;
+    GImGuiFreeTypeFreeFunc = free_func;
+    GImGuiFreeTypeAllocatorUserData = user_data;
 }

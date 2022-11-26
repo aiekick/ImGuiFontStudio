@@ -1,7 +1,7 @@
 #pragma once
 
 #ifdef USE_SHADOW
-#include <glad/glad.h>
+#include <Headers/Globals.h>
 #include <ctools/cTools.h>
 
 #include <string>

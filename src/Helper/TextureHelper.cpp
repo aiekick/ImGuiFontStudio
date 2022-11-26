@@ -479,12 +479,9 @@ std::shared_ptr<TextureObject> TextureHelper::CreateTextureFromBuffer(uint8_t* b
     res->h = h;
     res->n = n;
 
-    size_t buffer_size = sizeof(char) * n * w * h;
-
     GLint last_texture;
     glGetIntegerv(GL_TEXTURE_BINDING_2D, &last_texture);
 
-    GLuint id = 0;
     glGenTextures(1, &res->textureId);
     glBindTexture(GL_TEXTURE_2D, res->textureId);
     glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, (GLenum)vFiltering);
@@ -528,7 +525,7 @@ bool TextureHelper::SaveTextureToPng(GLFWwindow* vWin, const char* vFilePathName
             vTextureObject->h,
             vTextureObject->n,
             imagedata.data(),
-            stride);
+            (int)stride);
 
         res = (resWrite > 0);
     }

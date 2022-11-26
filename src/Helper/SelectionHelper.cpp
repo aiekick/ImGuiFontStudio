@@ -982,7 +982,7 @@ void SelectionHelper::ReRange_Offset_After_Start(uint32_t vOffsetCodePoint)
 				}
 				else
 				{
-					assert(0); // pas normal d'arriver la
+					CTOOL_DEBUG_BREAK; // pas normal d'arriver la
 				}
 			}
 		}

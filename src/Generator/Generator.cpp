@@ -30,7 +30,9 @@
 #include <sfntly/port/file_input_stream.h>
 #include <sfntly/tag.h>
 
+#ifndef IMGUI_DEFINE_MATH_OPERATORS
 #define _CRT_SECURE_NO_WARNINGS
+#endif
 #include <stdio.h>
 #include <string.h>
 #include <stdlib.h>
@@ -131,10 +133,10 @@ bool Generator::Generate(
 					}
 					else if (font.second->IsGenMode(GENERATOR_MODE_CARD))
 					{
-						std::string fileName = font.second->m_FontFileName;
+						fileName = font.second->m_FontFileName;
 						if (!font.second->m_GeneratedFileName.empty())
 							fileName = font.second->m_GeneratedFileName;
-						auto ps = FileHelper::Instance()->ParsePathFileName(fileName);
+						ps = FileHelper::Instance()->ParsePathFileName(fileName);
 						if (ps.isOk)
 						{
 							res = GenerateCard_One(

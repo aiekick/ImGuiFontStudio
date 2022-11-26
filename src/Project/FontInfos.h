@@ -89,7 +89,7 @@ public: // to save
 	std::string m_GeneratedFileName; // the file name defined by the user in save dialog
 	std::set<std::string> m_Filters; // use map just for have binary tree search
 	RasterizerEnum m_RasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
-	uint32_t m_FreeTypeFlag = ImGuiFreeType::FreeType_Default;
+	uint32_t m_FreeTypeFlag = ImGuiFreeTypeBuilderFlags::ImGuiFreeTypeBuilderFlags_Default;
 	TextureFilteringEnum m_TextureFiltering = TextureFilteringEnum::TEX_FILTER_LINEAR; // for texture generation
 	uint32_t m_CardGlyphHeightInPixel = 40U; // glyph item height in card
 	uint32_t m_CardCountRowsMax = 20U; // after this max, new columns

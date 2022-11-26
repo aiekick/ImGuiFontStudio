@@ -15,7 +15,7 @@
  */
 #pragma once
 
-#include <GLFW/glfw3.h>
+#include <Headers/Globals.h>
 #include <ctools/cTools.h>
 
 #include <stdint.h>

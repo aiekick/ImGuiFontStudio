@@ -82,7 +82,7 @@ void FontInfos::Clear()
 	m_SelectedGlyphs.clear();
 	m_Filters.clear();
 	m_RasterizerMode = RasterizerEnum::RASTERIZER_FREETYPE;
-	m_FreeTypeFlag = FreeType_Default;
+	m_FreeTypeFlag = ImGuiFreeTypeBuilderFlags_Default;
 	m_FontMultiply = 1.0f;
 	m_FontPadding = 1;
 	m_TextureFiltering = TextureFilteringEnum::TEX_FILTER_LINEAR; // for texture generation
@@ -146,7 +146,7 @@ bool FontInfos::LoadFont( const std::string& vFontFilePathName)
 				FT_Error freetypeError = 0;
 				if (m_RasterizerMode == RasterizerEnum::RASTERIZER_FREETYPE)
 				{
-					success = BuildFontAtlas(&m_ImFontAtlas, m_FreeTypeFlag, &freetypeError);
+					success = BuildFontAtlas(&m_ImFontAtlas, m_FreeTypeFlag);
 				}
 				else if (m_RasterizerMode == RasterizerEnum::RASTERIZER_STB)
 				{
@@ -333,7 +333,7 @@ void FontInfos::FillGlyphColoreds()
 	m_ColoredGlyphs.clear();
 
 	if (m_RasterizerMode != RasterizerEnum::RASTERIZER_FREETYPE) return;
-	if ((m_FreeTypeFlag & FreeType_LoadColor) == 0) return;
+	if ((m_FreeTypeFlag & ImGuiFreeTypeBuilderFlags_LoadColor) == 0) return;
 
 	if (!m_ImFontAtlas.ConfigData.empty())
 	{
@@ -533,15 +533,15 @@ void FontInfos::DrawInfos()
 			{
 				if (ImGui::CollapsingHeader("Freetype Settings"))
 				{
-					needFontReGen |= ImGui::CheckboxFlags("NoHinting", &m_FreeTypeFlag, FreeType_NoHinting);
-					needFontReGen |= ImGui::CheckboxFlags("NoAutoHint", &m_FreeTypeFlag, FreeType_NoAutoHint);
-					needFontReGen |= ImGui::CheckboxFlags("ForceAutoHint", &m_FreeTypeFlag, FreeType_ForceAutoHint);
-					needFontReGen |= ImGui::CheckboxFlags("LightHinting", &m_FreeTypeFlag, FreeType_LightHinting);
-					needFontReGen |= ImGui::CheckboxFlags("MonoHinting", &m_FreeTypeFlag, FreeType_MonoHinting);
-					needFontReGen |= ImGui::CheckboxFlags("Bold", &m_FreeTypeFlag, FreeType_Bold);
-					needFontReGen |= ImGui::CheckboxFlags("Oblique", &m_FreeTypeFlag, FreeType_Oblique);
-					needFontReGen |= ImGui::CheckboxFlags("Monochrome", &m_FreeTypeFlag, FreeType_Monochrome);
-					needFontReGen |= ImGui::CheckboxFlags("LoadColor", &m_FreeTypeFlag, FreeType_LoadColor);
+					needFontReGen |= ImGui::CheckboxFlags("NoHinting", &m_FreeTypeFlag, ImGuiFreeTypeBuilderFlags_NoHinting);
+					needFontReGen |= ImGui::CheckboxFlags("NoAutoHint", &m_FreeTypeFlag, ImGuiFreeTypeBuilderFlags_NoAutoHint);
+					needFontReGen |= ImGui::CheckboxFlags("ForceAutoHint", &m_FreeTypeFlag, ImGuiFreeTypeBuilderFlags_ForceAutoHint);
+					needFontReGen |= ImGui::CheckboxFlags("LightHinting", &m_FreeTypeFlag, ImGuiFreeTypeBuilderFlags_LightHinting);
+					needFontReGen |= ImGui::CheckboxFlags("MonoHinting", &m_FreeTypeFlag, ImGuiFreeTypeBuilderFlags_MonoHinting);
+					needFontReGen |= ImGui::CheckboxFlags("Bold", &m_FreeTypeFlag, ImGuiFreeTypeBuilderFlags_Bold);
+					needFontReGen |= ImGui::CheckboxFlags("Oblique", &m_FreeTypeFlag, ImGuiFreeTypeBuilderFlags_Oblique);
+					needFontReGen |= ImGui::CheckboxFlags("Monochrome", &m_FreeTypeFlag, ImGuiFreeTypeBuilderFlags_Monochrome);
+					needFontReGen |= ImGui::CheckboxFlags("LoadColor", &m_FreeTypeFlag, ImGuiFreeTypeBuilderFlags_LoadColor);
 				}
 			}
 

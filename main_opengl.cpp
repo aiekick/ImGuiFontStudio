@@ -1,10 +1,10 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-#include <glad/glad.h> 
+#include <Headers/Globals.h>
 
 #include <imgui/imgui.h>
-#include <common/glfw/imgui_impl_glfw.h>
+#include <backends/imgui_impl_glfw.h>
 #include <backends/imgui_impl_opengl3.h>
 #include <stdio.h>
 
@@ -118,14 +118,6 @@ int main(int, char** argv)
     static const ImWchar icons_ranges[] = { ICON_MIN_IGFS, ICON_MAX_IGFS, 0 };
     ImFontConfig icons_config; icons_config.MergeMode = true; icons_config.PixelSnapH = true;
     ImGui::GetIO().Fonts->AddFontFromMemoryCompressedBase85TTF(FONT_ICON_BUFFER_NAME_IGFS, 15.0f, &icons_config, icons_ranges);
-
-    ImGuiFreeType::FT_Error freetypeError;
-    uint32_t m_FreeTypeFlag = ImGuiFreeType::FreeType_Default;
-    if (!ImGuiFreeType::BuildFontAtlas(ImGui::GetIO().Fonts, m_FreeTypeFlag, &freetypeError))
-    {
-        printf("Faila to load font, reason : %s \n", ImGuiFreeType::GetErrorMessage(freetypeError));
-        return 1;
-    }
 
     MainFrame::Instance(mainWindow)->Init();
 

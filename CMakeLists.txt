@@ -97,23 +97,19 @@ source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR}/src PREFIX src FILES ${PROJECT_SRC
 file(GLOB_RECURSE PROJECT_BACKEND_COMMON_RECURSE 
 		${CMAKE_SOURCE_DIR}/3rdparty/imgui/backends/imgui_impl_glfw.cpp
 		${CMAKE_SOURCE_DIR}/3rdparty/imgui/backends/imgui_impl_glfw.h
-		${CMAKE_SOURCE_DIR}/3rdparty/imgui/misc/freetype/imgui_freetype.cpp
-		${CMAKE_SOURCE_DIR}/3rdparty/imgui/misc/freetype/imgui_freetype.h)
+		${CMAKE_SOURCE_DIR}/Backends/common/freetype/imgui_freetype.cpp
+		${CMAKE_SOURCE_DIR}/Backends/common/freetype/imgui_freetype.h)
 source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX src FILES ${PROJECT_BACKEND_COMMON_RECURSE})
 
 if (USE_VULKAN)
 	file(GLOB PROJECT_MAIN ${CMAKE_SOURCE_DIR}/main_vulkan.cpp)
 	file(GLOB_RECURSE PROJECT_BACKEND_VULKAN_RECURSE 
-		${CMAKE_SOURCE_DIR}/3rdparty/imgui/backends/imgui_impl_glfw.cpp
-		${CMAKE_SOURCE_DIR}/3rdparty/imgui/backends/imgui_impl_glfw.h
 		${CMAKE_SOURCE_DIR}/Backends/vulkan/imgui_impl_vulkan_user_texture.cpp
 		${CMAKE_SOURCE_DIR}/Backends/vulkan/imgui_impl_vulkan_user_texture.h)
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX src FILES ${PROJECT_BACKEND_VULKAN_RECURSE})
 else()
 	file(GLOB PROJECT_MAIN ${CMAKE_SOURCE_DIR}/main_opengl.cpp)
 	file(GLOB_RECURSE PROJECT_BACKEND_OPENGL_RECURSE 
-		${CMAKE_SOURCE_DIR}/3rdparty/imgui/backends/imgui_impl_glfw.cpp
-		${CMAKE_SOURCE_DIR}/3rdparty/imgui/backends/imgui_impl_glfw.h
 		${CMAKE_SOURCE_DIR}/3rdparty/imgui/backends/imgui_impl_opengl3.cpp
 		${CMAKE_SOURCE_DIR}/3rdparty/imgui/backends/imgui_impl_opengl3.h)
 	source_group(TREE ${CMAKE_CURRENT_SOURCE_DIR} PREFIX src FILES ${PROJECT_BACKEND_OPENGL_RECURSE})
