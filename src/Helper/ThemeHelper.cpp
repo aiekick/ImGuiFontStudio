@@ -1,33 +1,32 @@
+/*
+Copyright 2022-2022 Stephane Cuillerdier (aka aiekick)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
-/*
- * Copyright 2020 Stephane Cuillerdier (aka Aiekick)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
 #include "ThemeHelper.h"
 
-#include <Res/CustomFont.h>
-
 #include <Gui/ImWidgets.h>
-#include <Res/CustomFont.h>
+#include <Contrib/FontIcons/CustomFont.h>
 #include <ctools/cTools.h>
 #include <imgui/imgui.h>
-#define IMGUI_DEFINE_MATH_OPERATORS
+
 #include <imgui/imgui_internal.h>
 
-//// STATIC ///////////////////////////////////////////////////////////////////////////////////
+ //// STATIC ///////////////////////////////////////////////////////////////////////////////////
 
 #ifdef USE_SHADOW
 float ThemeHelper::puShadowStrength = 0.5f; // low value is darker than higt (0.0f - 2.0f)
@@ -39,13 +38,7 @@ bool ThemeHelper::puUseTextureForShadow = false;
 
 ThemeHelper::ThemeHelper()
 {
-	prFileTypeInfos[".ttf"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.9f, 0.5f, 1.0f));
-	prFileTypeInfos[".otf"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.1f, 0.5f, 1.0f));
-	prFileTypeInfos[".cpp"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.7f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
-	prFileTypeInfos[".h"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.5f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
-	prFileTypeInfos[".ifs"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.5f, 0.1f, 1.0f), ICON_IGFS_FILE_TYPE_PROJECT);
-
-	ImGui::CustomStyle::Init();
+	ImGui::CustomStyle::Instance();
 	ApplyStyleColorsDefault();
 }
 
@@ -72,9 +65,9 @@ void ThemeHelper::DrawMenu()
 		ImGui::Separator();
 
 		ImGui::MenuItem("Customize", "", &puShowImGuiStyleEdtor);
-		
+
 		ImGui::Separator();
-		
+
 		if (ImGui::BeginMenu("Contrast"))
 		{
 			ImGui::DrawContrastWidgets();
@@ -88,7 +81,7 @@ void ThemeHelper::DrawMenu()
 	{
 		bool fileColorUpdate = false;
 
-		for (auto &it : prFileTypeInfos)
+		for (auto& it : prFileTypeInfos)
 		{
 			fileColorUpdate |= ImGui::ColorEdit4(it.first.c_str(), &prFileTypeInfos[it.first].color.x);
 		}
@@ -114,17 +107,17 @@ void ThemeHelper::ApplyStyleColorsOrangeBlue()
 	colors[ImGuiCol_Text] = ImVec4(0.85f, 0.85f, 0.85f, 1.00f);
 	colors[ImGuiCol_TextDisabled] = ImVec4(0.65f, 0.65f, 0.65f, 1.00f);
 	colors[ImGuiCol_WindowBg] = ImVec4(0.15f, 0.16f, 0.17f, 1.00f);
-	colors[ImGuiCol_ChildBg] = ImVec4(0.15f, 0.16f, 0.17f, 0.00f);
+	colors[ImGuiCol_ChildBg] = ImVec4(0.15f, 0.16f, 0.17f, 1.00f);
 	colors[ImGuiCol_PopupBg] = ImVec4(0.15f, 0.16f, 0.17f, 1.00f);
 	colors[ImGuiCol_Border] = ImVec4(0.26f, 0.28f, 0.29f, 1.00f);
-	colors[ImGuiCol_BorderShadow] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+	colors[ImGuiCol_BorderShadow] = ImVec4(0.32f, 0.34f, 0.36f, 1.00f);
 	colors[ImGuiCol_FrameBg] = ImVec4(0.21f, 0.29f, 0.36f, 1.00f);
 	colors[ImGuiCol_FrameBgHovered] = ImVec4(0.26f, 0.59f, 0.98f, 0.71f);
 	colors[ImGuiCol_FrameBgActive] = ImVec4(0.26f, 0.59f, 0.98f, 0.93f);
 	colors[ImGuiCol_TitleBg] = ImVec4(0.18f, 0.20f, 0.21f, 1.00f);
 	colors[ImGuiCol_TitleBgActive] = ImVec4(0.23f, 0.25f, 0.26f, 1.00f);
 	colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.30f, 0.33f, 0.35f, 1.00f);
-	colors[ImGuiCol_MenuBarBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+	colors[ImGuiCol_MenuBarBg] = ImVec4(0.15f, 0.16f, 0.17f, 1.00f);
 	colors[ImGuiCol_ScrollbarBg] = ImVec4(0.21f, 0.29f, 0.36f, 0.89f);
 	colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.13f, 0.52f, 0.94f, 0.45f);
 	colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.13f, 0.71f, 1.00f, 0.89f);
@@ -167,10 +160,13 @@ void ThemeHelper::ApplyStyleColorsOrangeBlue()
 	colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
 	colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 
-	ImGui::CustomStyle::GoodColor = ImVec4(0.00f, 0.77f, 0.00f, 1.00f);
-	ImGui::CustomStyle::BadColor = ImVec4(0.92f, 0.28f, 0.10f, 1.00f);
-	ImGui::CustomStyle::GlyphButtonColor = ImVec4(0.09f, 0.31f, 0.47f, 1.00f);
-	ImGui::CustomStyle::GlyphButtonColorActive = ImVec4(1.00f, 0.60f, 0.00f, 0.80f);
+	colors[ImGuiCol_WindowBg].w = 0.70f;
+	colors[ImGuiCol_ChildBg].w = 0.00f;
+	colors[ImGuiCol_MenuBarBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+	colors[ImGuiCol_BorderShadow] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+
+	ImGui::CustomStyle::Instance()->GoodColor = ImVec4(0.00f, 0.35f, 0.00f, 1.00f);
+	ImGui::CustomStyle::Instance()->BadColor = ImVec4(0.35f, 0.00f, 0.00f, 1.00f);
 
 	// Main
 	prImGuiStyle.WindowPadding = ImVec2(4.00f, 4.00f);
@@ -178,7 +174,7 @@ void ThemeHelper::ApplyStyleColorsOrangeBlue()
 	prImGuiStyle.ItemSpacing = ImVec2(4.00f, 4.00f);
 	prImGuiStyle.ItemInnerSpacing = ImVec2(4.00f, 4.00f);
 	prImGuiStyle.TouchExtraPadding = ImVec2(0.00f, 0.00f);
-	prImGuiStyle.IndentSpacing = 4.00f;
+	prImGuiStyle.IndentSpacing = 8.00f;
 	prImGuiStyle.ScrollbarSize = 10.00f;
 	prImGuiStyle.GrabMinSize = 8.00f;
 
@@ -208,11 +204,19 @@ void ThemeHelper::ApplyStyleColorsOrangeBlue()
 	// Safe Area Padding
 	prImGuiStyle.DisplaySafeAreaPadding = ImVec2(3.00f, 3.00f);
 
-	prFileTypeInfos[".ttf"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.9f, 0.5f, 1.0f));
-	prFileTypeInfos[".otf"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.1f, 0.5f, 1.0f));
-	prFileTypeInfos[".cpp"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.7f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
-	prFileTypeInfos[".h"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.5f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
-	prFileTypeInfos[".ifs"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.5f, 0.1f, 1.0f), ICON_IGFS_FILE_TYPE_PROJECT);
+	prFileTypeInfos[".glsl"] = IGFD::FileStyle(ImVec4(0.1f, 0.9f, 0.5f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
+	prFileTypeInfos[".vert"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".frag"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".tess"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".eval"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".ctrl"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".geom"] = prFileTypeInfos[".glsl"];
+
+	// dark theme so high color
+	ImGui::CustomStyle::Instance()->GoodColor = ImVec4(0.0f, 0.353f, 0.0f, 1.0f);
+	ImGui::CustomStyle::Instance()->BadColor = ImVec4(0.353f, 0.0f, 0.0f, 1.0f);
+
+	memcpy(&ImGui::GetStyle(), &prImGuiStyle, sizeof(ImGuiStyle));
 
 	ApplyFileTypeColors();
 }
@@ -276,37 +280,32 @@ void ThemeHelper::ApplyStyleColorsGreenBlue()
 	colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
 	colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 
-	ImGui::CustomStyle::GoodColor = ImVec4(0.20f, 0.80f, 0.20f, 1.00f);
-	ImGui::CustomStyle::BadColor = ImVec4(0.80f, 0.20f, 0.20f, 1.00f);
-	ImGui::CustomStyle::GlyphButtonColor = ImVec4(0.13f, 0.75f, 0.55f, 0.40f);
-	ImGui::CustomStyle::GlyphButtonColorActive = ImVec4(0.13f, 0.75f, 1.00f, 0.80f);
+	colors[ImGuiCol_WindowBg].w = 0.70f;
+	colors[ImGuiCol_ChildBg].w = 0.00f;
+	colors[ImGuiCol_MenuBarBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+	colors[ImGuiCol_BorderShadow] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
 
+	prImGuiStyle.WindowPadding = ImVec2(4, 4);
+	prImGuiStyle.FramePadding = ImVec2(4, 4);
+	prImGuiStyle.ItemSpacing = ImVec2(4, 4);
+	prImGuiStyle.ItemInnerSpacing = ImVec2(4, 4);
+	prImGuiStyle.IndentSpacing = 10;
+	prImGuiStyle.ScrollbarSize = 20;
+	prImGuiStyle.GrabMinSize = 4;
 
-	// Main
-	prImGuiStyle.WindowPadding = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.FramePadding = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.ItemSpacing = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.ItemInnerSpacing = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.TouchExtraPadding = ImVec2(0.00f, 0.00f);
-	prImGuiStyle.IndentSpacing = 10.00f;
-	prImGuiStyle.ScrollbarSize = 20.00f;
-	prImGuiStyle.GrabMinSize = 4.00f;
+	prImGuiStyle.WindowRounding = 0;
+	prImGuiStyle.ChildRounding = 0;
+	prImGuiStyle.FrameRounding = 0;
+	prImGuiStyle.PopupRounding = 0;
+	prImGuiStyle.ScrollbarRounding = 0;
+	prImGuiStyle.GrabRounding = 0;
+	prImGuiStyle.TabRounding = 0;
 
-	// Borders
-	prImGuiStyle.WindowBorderSize = 0.00f;
-	prImGuiStyle.ChildBorderSize = 0.00f;
-	prImGuiStyle.PopupBorderSize = 0.00f;
-	prImGuiStyle.FrameBorderSize = 1.00f;
-	prImGuiStyle.TabBorderSize = 0.00f;
-
-	// Rounding
-	prImGuiStyle.WindowRounding = 0.00f;
-	prImGuiStyle.ChildRounding = 0.00f;
-	prImGuiStyle.FrameRounding = 0.00f;
-	prImGuiStyle.PopupRounding = 0.00f;
-	prImGuiStyle.ScrollbarRounding = 0.00f;
-	prImGuiStyle.GrabRounding = 0.00f;
-	prImGuiStyle.TabRounding = 0.00f;
+	prImGuiStyle.WindowBorderSize = 0;
+	prImGuiStyle.ChildBorderSize = 0;
+	prImGuiStyle.PopupBorderSize = 0;
+	prImGuiStyle.FrameBorderSize = 1;
+	prImGuiStyle.TabBorderSize = 0;
 
 	// Alignment
 	prImGuiStyle.WindowTitleAlign = ImVec2(0.50f, 0.50f);
@@ -315,14 +314,18 @@ void ThemeHelper::ApplyStyleColorsGreenBlue()
 	prImGuiStyle.ButtonTextAlign = ImVec2(0.50f, 0.50f);
 	prImGuiStyle.SelectableTextAlign = ImVec2(0.00f, 0.50f);
 
-	// Safe Area Padding
-	prImGuiStyle.DisplaySafeAreaPadding = ImVec2(3.00f, 3.00f);
+	prFileTypeInfos[".glsl"].color = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
+	prFileTypeInfos[".vert"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".frag"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".tess"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".eval"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".ctrl"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".geom"] = prFileTypeInfos[".glsl"];
+	// dark theme so high color
+	ImGui::CustomStyle::Instance()->GoodColor = ImVec4(0.2f, 0.8f, 0.2f, 1.0f);
+	ImGui::CustomStyle::Instance()->BadColor = ImVec4(0.8f, 0.2f, 0.2f, 1.0f);
 
-	prFileTypeInfos[".ttf"].color = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
-	prFileTypeInfos[".otf"].color = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
-	prFileTypeInfos[".cpp"].color = ImVec4(0.5f, 0.9f, 0.1f, 1.0f); // yellow high
-	prFileTypeInfos[".h"].color = ImVec4(0.25f, 0.9f, 0.1f, 1.0f); // yellow high
-	prFileTypeInfos[".ifs"].color = ImVec4(0.9f, 0.1f, 0.9f, 1.0f); // purple high
+	memcpy(&ImGui::GetStyle(), &prImGuiStyle, sizeof(ImGuiStyle));
 
 	ApplyFileTypeColors();
 }
@@ -332,7 +335,7 @@ void ThemeHelper::ApplyStyleColorsClassic()
 	const auto colors = prImGuiStyle.Colors;
 	colors[ImGuiCol_Text] = ImVec4(0.90f, 0.90f, 0.90f, 1.00f);
 	colors[ImGuiCol_TextDisabled] = ImVec4(0.60f, 0.60f, 0.60f, 1.00f);
-	colors[ImGuiCol_WindowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.70f);
+	colors[ImGuiCol_WindowBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.85f);
 	colors[ImGuiCol_ChildBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
 	colors[ImGuiCol_PopupBg] = ImVec4(0.11f, 0.11f, 0.14f, 0.92f);
 	colors[ImGuiCol_Border] = ImVec4(0.50f, 0.50f, 0.50f, 0.50f);
@@ -343,7 +346,7 @@ void ThemeHelper::ApplyStyleColorsClassic()
 	colors[ImGuiCol_TitleBg] = ImVec4(0.27f, 0.27f, 0.54f, 0.83f);
 	colors[ImGuiCol_TitleBgActive] = ImVec4(0.32f, 0.32f, 0.63f, 0.87f);
 	colors[ImGuiCol_TitleBgCollapsed] = ImVec4(0.40f, 0.40f, 0.80f, 0.20f);
-	colors[ImGuiCol_MenuBarBg] = ImVec4(0.00f, 0.00f, 0.00f, 0.00f);
+	colors[ImGuiCol_MenuBarBg] = ImVec4(0.40f, 0.40f, 0.55f, 0.80f);
 	colors[ImGuiCol_ScrollbarBg] = ImVec4(0.20f, 0.25f, 0.30f, 0.60f);
 	colors[ImGuiCol_ScrollbarGrab] = ImVec4(0.40f, 0.40f, 0.80f, 0.30f);
 	colors[ImGuiCol_ScrollbarGrabHovered] = ImVec4(0.40f, 0.40f, 0.80f, 0.40f);
@@ -386,36 +389,32 @@ void ThemeHelper::ApplyStyleColorsClassic()
 	colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
 	colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
 
-	ImGui::CustomStyle::GoodColor = ImVec4(0.20f, 0.80f, 0.20f, 1.00f);
-	ImGui::CustomStyle::BadColor = ImVec4(1.00f, 0.27f, 0.27f, 1.00f);
-	ImGui::CustomStyle::GlyphButtonColor = ImVec4(0.35f, 0.40f, 0.61f, 0.62f);
-	ImGui::CustomStyle::GlyphButtonColorActive = ImVec4(0.46f, 0.54f, 0.80f, 1.00f);
+	colors[ImGuiCol_WindowBg].w = 0.70f;
+	colors[ImGuiCol_ChildBg].w = 0.00f;
+	colors[ImGuiCol_MenuBarBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+	colors[ImGuiCol_BorderShadow] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
 
-	// Main
-	prImGuiStyle.WindowPadding = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.FramePadding = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.ItemSpacing = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.ItemInnerSpacing = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.TouchExtraPadding = ImVec2(0.00f, 0.00f);
-	prImGuiStyle.IndentSpacing = 10.00f;
-	prImGuiStyle.ScrollbarSize = 20.00f;
-	prImGuiStyle.GrabMinSize = 4.00f;
+	prImGuiStyle.WindowPadding = ImVec2(4, 4);
+	prImGuiStyle.FramePadding = ImVec2(4, 4);
+	prImGuiStyle.ItemSpacing = ImVec2(4, 4);
+	prImGuiStyle.ItemInnerSpacing = ImVec2(4, 4);
+	prImGuiStyle.IndentSpacing = 10;
+	prImGuiStyle.ScrollbarSize = 20;
+	prImGuiStyle.GrabMinSize = 4;
 
-	// Borders
-	prImGuiStyle.WindowBorderSize = 0.00f;
-	prImGuiStyle.ChildBorderSize = 0.00f;
-	prImGuiStyle.PopupBorderSize = 0.00f;
-	prImGuiStyle.FrameBorderSize = 1.00f;
-	prImGuiStyle.TabBorderSize = 0.00f;
+	prImGuiStyle.WindowRounding = 0;
+	prImGuiStyle.ChildRounding = 0;
+	prImGuiStyle.FrameRounding = 0;
+	prImGuiStyle.PopupRounding = 0;
+	prImGuiStyle.ScrollbarRounding = 0;
+	prImGuiStyle.GrabRounding = 0;
+	prImGuiStyle.TabRounding = 0;
 
-	// Rounding
-	prImGuiStyle.WindowRounding = 0.00f;
-	prImGuiStyle.ChildRounding = 0.00f;
-	prImGuiStyle.FrameRounding = 0.00f;
-	prImGuiStyle.PopupRounding = 0.00f;
-	prImGuiStyle.ScrollbarRounding = 0.00f;
-	prImGuiStyle.GrabRounding = 0.00f;
-	prImGuiStyle.TabRounding = 0.00f;
+	prImGuiStyle.WindowBorderSize = 0;
+	prImGuiStyle.ChildBorderSize = 0;
+	prImGuiStyle.PopupBorderSize = 0;
+	prImGuiStyle.FrameBorderSize = 1;
+	prImGuiStyle.TabBorderSize = 0;
 
 	// Alignment
 	prImGuiStyle.WindowTitleAlign = ImVec2(0.50f, 0.50f);
@@ -424,14 +423,19 @@ void ThemeHelper::ApplyStyleColorsClassic()
 	prImGuiStyle.ButtonTextAlign = ImVec2(0.50f, 0.50f);
 	prImGuiStyle.SelectableTextAlign = ImVec2(0.00f, 0.50f);
 
-	// Safe Area Padding
-	prImGuiStyle.DisplaySafeAreaPadding = ImVec2(3.00f, 3.00f);
+	prFileTypeInfos[".glsl"].color = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
+	prFileTypeInfos[".vert"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".frag"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".tess"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".eval"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".ctrl"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".geom"] = prFileTypeInfos[".glsl"];
 
-	prFileTypeInfos[".ttf"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.9f, 0.5f, 1.0f));
-	prFileTypeInfos[".otf"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.1f, 0.5f, 1.0f));
-	prFileTypeInfos[".cpp"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.7f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
-	prFileTypeInfos[".h"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.5f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
-	prFileTypeInfos[".ifs"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.5f, 0.1f, 1.0f), ICON_IGFS_FILE_TYPE_PROJECT);
+	// dark theme so high color
+	ImGui::CustomStyle::Instance()->GoodColor = ImVec4(0.2f, 0.8f, 0.2f, 1.0f);
+	ImGui::CustomStyle::Instance()->BadColor = ImVec4(0.8f, 0.2f, 0.2f, 1.0f);
+
+	memcpy(&ImGui::GetStyle(), &prImGuiStyle, sizeof(ImGuiStyle));
 
 	ApplyFileTypeColors();
 }
@@ -495,36 +499,32 @@ void ThemeHelper::ApplyStyleColorsDark()
 	colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
 	colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 
-	ImGui::CustomStyle::GoodColor = ImVec4(0.20f, 0.80f, 0.20f, 1.00f);
-	ImGui::CustomStyle::BadColor = ImVec4(0.80f, 0.20f, 0.20f, 1.00f);
-	ImGui::CustomStyle::GlyphButtonColor = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
-	ImGui::CustomStyle::GlyphButtonColorActive = ImVec4(0.06f, 0.53f, 0.98f, 1.00f);
+	colors[ImGuiCol_WindowBg].w = 0.70f;
+	colors[ImGuiCol_ChildBg].w = 0.00f;
+	colors[ImGuiCol_MenuBarBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+	colors[ImGuiCol_BorderShadow] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
 
-	// Main
-	prImGuiStyle.WindowPadding = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.FramePadding = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.ItemSpacing = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.ItemInnerSpacing = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.TouchExtraPadding = ImVec2(0.00f, 0.00f);
-	prImGuiStyle.IndentSpacing = 10.00f;
-	prImGuiStyle.ScrollbarSize = 20.00f;
-	prImGuiStyle.GrabMinSize = 4.00f;
+	prImGuiStyle.WindowPadding = ImVec2(4, 4);
+	prImGuiStyle.FramePadding = ImVec2(4, 4);
+	prImGuiStyle.ItemSpacing = ImVec2(4, 4);
+	prImGuiStyle.ItemInnerSpacing = ImVec2(4, 4);
+	prImGuiStyle.IndentSpacing = 10;
+	prImGuiStyle.ScrollbarSize = 20;
+	prImGuiStyle.GrabMinSize = 4;
 
-	// Borders
-	prImGuiStyle.WindowBorderSize = 0.00f;
-	prImGuiStyle.ChildBorderSize = 0.00f;
-	prImGuiStyle.PopupBorderSize = 0.00f;
-	prImGuiStyle.FrameBorderSize = 1.00f;
-	prImGuiStyle.TabBorderSize = 0.00f;
+	prImGuiStyle.WindowRounding = 0;
+	prImGuiStyle.ChildRounding = 0;
+	prImGuiStyle.FrameRounding = 0;
+	prImGuiStyle.PopupRounding = 0;
+	prImGuiStyle.ScrollbarRounding = 0;
+	prImGuiStyle.GrabRounding = 0;
+	prImGuiStyle.TabRounding = 0;
 
-	// Rounding
-	prImGuiStyle.WindowRounding = 0.00f;
-	prImGuiStyle.ChildRounding = 0.00f;
-	prImGuiStyle.FrameRounding = 0.00f;
-	prImGuiStyle.PopupRounding = 0.00f;
-	prImGuiStyle.ScrollbarRounding = 0.00f;
-	prImGuiStyle.GrabRounding = 0.00f;
-	prImGuiStyle.TabRounding = 0.00f;
+	prImGuiStyle.WindowBorderSize = 0;
+	prImGuiStyle.ChildBorderSize = 0;
+	prImGuiStyle.PopupBorderSize = 0;
+	prImGuiStyle.FrameBorderSize = 1;
+	prImGuiStyle.TabBorderSize = 0;
 
 	// Alignment
 	prImGuiStyle.WindowTitleAlign = ImVec2(0.50f, 0.50f);
@@ -533,14 +533,19 @@ void ThemeHelper::ApplyStyleColorsDark()
 	prImGuiStyle.ButtonTextAlign = ImVec2(0.50f, 0.50f);
 	prImGuiStyle.SelectableTextAlign = ImVec2(0.00f, 0.50f);
 
-	// Safe Area Padding
-	prImGuiStyle.DisplaySafeAreaPadding = ImVec2(3.00f, 3.00f);
+	prFileTypeInfos[".glsl"].color = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
+	prFileTypeInfos[".vert"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".frag"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".tess"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".eval"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".ctrl"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".geom"] = prFileTypeInfos[".glsl"];
 
-	prFileTypeInfos[".ttf"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.9f, 0.5f, 1.0f));
-	prFileTypeInfos[".otf"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.1f, 0.5f, 1.0f));
-	prFileTypeInfos[".cpp"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.7f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
-	prFileTypeInfos[".h"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.5f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
-	prFileTypeInfos[".ifs"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.5f, 0.1f, 1.0f), ICON_IGFS_FILE_TYPE_PROJECT);
+	// dark theme so high color
+	ImGui::CustomStyle::Instance()->GoodColor = ImVec4(0.2f, 0.8f, 0.2f, 1.0f);
+	ImGui::CustomStyle::Instance()->BadColor = ImVec4(0.8f, 0.2f, 0.2f, 1.0f);
+
+	memcpy(&ImGui::GetStyle(), &prImGuiStyle, sizeof(ImGuiStyle));
 
 	ApplyFileTypeColors();
 }
@@ -604,36 +609,32 @@ void ThemeHelper::ApplyStyleColorsLight()
 	colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.20f, 0.20f, 0.20f, 0.20f);
 	colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.20f, 0.20f, 0.20f, 0.35f);
 
-	ImGui::CustomStyle::GoodColor = ImVec4(0.20f, 0.50f, 0.20f, 1.00f);
-	ImGui::CustomStyle::BadColor = ImVec4(0.91f, 0.00f, 0.00f, 1.00f);
-	ImGui::CustomStyle::GlyphButtonColor = ImVec4(0.26f, 0.59f, 0.98f, 0.40f);
-	ImGui::CustomStyle::GlyphButtonColorActive = ImVec4(0.06f, 0.53f, 0.98f, 1.00f);
+	colors[ImGuiCol_WindowBg].w = 0.70f;
+	colors[ImGuiCol_ChildBg].w = 0.00f;
+	colors[ImGuiCol_MenuBarBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+	colors[ImGuiCol_BorderShadow] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
 
-	// Main
-	prImGuiStyle.WindowPadding = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.FramePadding = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.ItemSpacing = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.ItemInnerSpacing = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.TouchExtraPadding = ImVec2(0.00f, 0.00f);
-	prImGuiStyle.IndentSpacing = 10.00f;
-	prImGuiStyle.ScrollbarSize = 20.00f;
-	prImGuiStyle.GrabMinSize = 4.00f;
+	prImGuiStyle.WindowPadding = ImVec2(4, 4);
+	prImGuiStyle.FramePadding = ImVec2(4, 4);
+	prImGuiStyle.ItemSpacing = ImVec2(4, 4);
+	prImGuiStyle.ItemInnerSpacing = ImVec2(4, 4);
+	prImGuiStyle.IndentSpacing = 10;
+	prImGuiStyle.ScrollbarSize = 20;
+	prImGuiStyle.GrabMinSize = 4;
 
-	// Borders
-	prImGuiStyle.WindowBorderSize = 0.00f;
-	prImGuiStyle.ChildBorderSize = 0.00f;
-	prImGuiStyle.PopupBorderSize = 0.00f;
-	prImGuiStyle.FrameBorderSize = 1.00f;
-	prImGuiStyle.TabBorderSize = 0.00f;
+	prImGuiStyle.WindowRounding = 0;
+	prImGuiStyle.ChildRounding = 0;
+	prImGuiStyle.FrameRounding = 0;
+	prImGuiStyle.PopupRounding = 0;
+	prImGuiStyle.ScrollbarRounding = 0;
+	prImGuiStyle.GrabRounding = 0;
+	prImGuiStyle.TabRounding = 0;
 
-	// Rounding
-	prImGuiStyle.WindowRounding = 0.00f;
-	prImGuiStyle.ChildRounding = 0.00f;
-	prImGuiStyle.FrameRounding = 0.00f;
-	prImGuiStyle.PopupRounding = 0.00f;
-	prImGuiStyle.ScrollbarRounding = 0.00f;
-	prImGuiStyle.GrabRounding = 0.00f;
-	prImGuiStyle.TabRounding = 0.00f;
+	prImGuiStyle.WindowBorderSize = 0;
+	prImGuiStyle.ChildBorderSize = 0;
+	prImGuiStyle.PopupBorderSize = 0;
+	prImGuiStyle.FrameBorderSize = 1;
+	prImGuiStyle.TabBorderSize = 0;
 
 	// Alignment
 	prImGuiStyle.WindowTitleAlign = ImVec2(0.50f, 0.50f);
@@ -642,14 +643,19 @@ void ThemeHelper::ApplyStyleColorsLight()
 	prImGuiStyle.ButtonTextAlign = ImVec2(0.50f, 0.50f);
 	prImGuiStyle.SelectableTextAlign = ImVec2(0.00f, 0.50f);
 
-	// Safe Area Padding
-	prImGuiStyle.DisplaySafeAreaPadding = ImVec2(3.00f, 3.00f);
+	prFileTypeInfos[".glsl"].color = ImVec4(0.1f, 0.5f, 0.1f, 1.0f); // green low
+	prFileTypeInfos[".vert"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".frag"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".tess"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".eval"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".ctrl"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".geom"] = prFileTypeInfos[".glsl"];
 
-	prFileTypeInfos[".ttf"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.9f, 0.5f, 1.0f));
-	prFileTypeInfos[".otf"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.1f, 0.5f, 1.0f));
-	prFileTypeInfos[".cpp"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.7f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
-	prFileTypeInfos[".h"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.5f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
-	prFileTypeInfos[".ifs"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.5f, 0.1f, 1.0f), ICON_IGFS_FILE_TYPE_PROJECT);
+	// light theme so low color
+	ImGui::CustomStyle::Instance()->GoodColor = ImVec4(0.2f, 0.5f, 0.2f, 1.0f);
+	ImGui::CustomStyle::Instance()->BadColor = ImVec4(0.5f, 0.2f, 0.2f, 1.0f);
+
+	memcpy(&ImGui::GetStyle(), &prImGuiStyle, sizeof(ImGuiStyle));
 
 	ApplyFileTypeColors();
 }
@@ -716,36 +722,32 @@ void ThemeHelper::ApplyStyleColorsDarcula()
 	colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
 	colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 
-	ImGui::CustomStyle::GoodColor = ImVec4(0.20f, 0.80f, 0.20f, 1.00f);
-	ImGui::CustomStyle::BadColor = ImVec4(0.95f, 0.30f, 0.30f, 1.00f);
-	ImGui::CustomStyle::GlyphButtonColor = ImVec4(0.33f, 0.35f, 0.36f, 0.49f);
-	ImGui::CustomStyle::GlyphButtonColorActive = ImVec4(0.14f, 0.19f, 0.26f, 1.00f);
+	colors[ImGuiCol_WindowBg].w = 0.70f;
+	colors[ImGuiCol_ChildBg].w = 0.00f;
+	colors[ImGuiCol_MenuBarBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+	colors[ImGuiCol_BorderShadow] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
 
-	// Main
-	prImGuiStyle.WindowPadding = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.FramePadding = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.ItemSpacing = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.ItemInnerSpacing = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.TouchExtraPadding = ImVec2(0.00f, 0.00f);
-	prImGuiStyle.IndentSpacing = 10.00f;
-	prImGuiStyle.ScrollbarSize = 20.00f;
-	prImGuiStyle.GrabMinSize = 4.00f;
+	prImGuiStyle.WindowPadding = ImVec2(4, 4);
+	prImGuiStyle.FramePadding = ImVec2(4, 4);
+	prImGuiStyle.ItemSpacing = ImVec2(4, 4);
+	prImGuiStyle.ItemInnerSpacing = ImVec2(4, 4);
+	prImGuiStyle.IndentSpacing = 10;
+	prImGuiStyle.ScrollbarSize = 20;
+	prImGuiStyle.GrabMinSize = 4;
 
-	// Borders
-	prImGuiStyle.WindowBorderSize = 0.00f;
-	prImGuiStyle.ChildBorderSize = 0.00f;
-	prImGuiStyle.PopupBorderSize = 0.00f;
-	prImGuiStyle.FrameBorderSize = 1.00f;
-	prImGuiStyle.TabBorderSize = 0.00f;
+	prImGuiStyle.WindowRounding = 0;
+	prImGuiStyle.ChildRounding = 0;
+	prImGuiStyle.FrameRounding = 0;
+	prImGuiStyle.PopupRounding = 0;
+	prImGuiStyle.ScrollbarRounding = 0;
+	prImGuiStyle.GrabRounding = 0;
+	prImGuiStyle.TabRounding = 0;
 
-	// Rounding
-	prImGuiStyle.WindowRounding = 0.00f;
-	prImGuiStyle.ChildRounding = 0.00f;
-	prImGuiStyle.FrameRounding = 0.00f;
-	prImGuiStyle.PopupRounding = 0.00f;
-	prImGuiStyle.ScrollbarRounding = 0.00f;
-	prImGuiStyle.GrabRounding = 0.00f;
-	prImGuiStyle.TabRounding = 0.00f;
+	prImGuiStyle.WindowBorderSize = 0;
+	prImGuiStyle.ChildBorderSize = 0;
+	prImGuiStyle.PopupBorderSize = 0;
+	prImGuiStyle.FrameBorderSize = 1;
+	prImGuiStyle.TabBorderSize = 0;
 
 	// Alignment
 	prImGuiStyle.WindowTitleAlign = ImVec2(0.50f, 0.50f);
@@ -754,14 +756,19 @@ void ThemeHelper::ApplyStyleColorsDarcula()
 	prImGuiStyle.ButtonTextAlign = ImVec2(0.50f, 0.50f);
 	prImGuiStyle.SelectableTextAlign = ImVec2(0.00f, 0.50f);
 
-	// Safe Area Padding
-	prImGuiStyle.DisplaySafeAreaPadding = ImVec2(3.00f, 3.00f);
+	prFileTypeInfos[".glsl"].color = ImVec4(0.1f, 0.9f, 0.5f, 1.0f); // green high
+	prFileTypeInfos[".vert"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".frag"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".tess"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".eval"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".ctrl"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".geom"] = prFileTypeInfos[".glsl"];
 
-	prFileTypeInfos[".ttf"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.9f, 0.5f, 1.0f));
-	prFileTypeInfos[".otf"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.1f, 0.5f, 1.0f));
-	prFileTypeInfos[".cpp"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.7f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
-	prFileTypeInfos[".h"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.5f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
-	prFileTypeInfos[".ifs"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.5f, 0.1f, 1.0f), ICON_IGFS_FILE_TYPE_PROJECT);
+	// dark theme so high color
+	ImGui::CustomStyle::Instance()->GoodColor = ImVec4(0.2f, 0.8f, 0.2f, 1.0f);
+	ImGui::CustomStyle::Instance()->BadColor = ImVec4(0.8f, 0.2f, 0.2f, 1.0f);
+
+	memcpy(&ImGui::GetStyle(), &prImGuiStyle, sizeof(ImGuiStyle));
 
 	ApplyFileTypeColors();
 }
@@ -825,36 +832,32 @@ void ThemeHelper::ApplyStyleColorsRedDark()
 	colors[ImGuiCol_NavWindowingDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.20f);
 	colors[ImGuiCol_ModalWindowDimBg] = ImVec4(0.80f, 0.80f, 0.80f, 0.35f);
 
-	ImGui::CustomStyle::GoodColor = ImVec4(0.20f, 0.80f, 0.20f, 1.00f);
-	ImGui::CustomStyle::BadColor = ImVec4(0.89f, 0.00f, 0.19f, 1.00f);
-	ImGui::CustomStyle::GlyphButtonColor = ImVec4(1.00f, 0.19f, 0.19f, 0.40f);
-	ImGui::CustomStyle::GlyphButtonColorActive = ImVec4(0.89f, 0.00f, 0.19f, 1.00f);
+	colors[ImGuiCol_WindowBg].w = 0.70f;
+	colors[ImGuiCol_ChildBg].w = 0.00f;
+	colors[ImGuiCol_MenuBarBg] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
+	colors[ImGuiCol_BorderShadow] = ImVec4(0.0f, 0.0f, 0.0f, 0.0f);
 
-	// Main
-	prImGuiStyle.WindowPadding = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.FramePadding = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.ItemSpacing = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.ItemInnerSpacing = ImVec2(4.00f, 4.00f);
-	prImGuiStyle.TouchExtraPadding = ImVec2(0.00f, 0.00f);
-	prImGuiStyle.IndentSpacing = 10.00f;
-	prImGuiStyle.ScrollbarSize = 20.00f;
-	prImGuiStyle.GrabMinSize = 4.00f;
+	prImGuiStyle.WindowPadding = ImVec2(4, 4);
+	prImGuiStyle.FramePadding = ImVec2(4, 4);
+	prImGuiStyle.ItemSpacing = ImVec2(4, 4);
+	prImGuiStyle.ItemInnerSpacing = ImVec2(4, 4);
+	prImGuiStyle.IndentSpacing = 10;
+	prImGuiStyle.ScrollbarSize = 20;
+	prImGuiStyle.GrabMinSize = 4;
 
-	// Borders
-	prImGuiStyle.WindowBorderSize = 0.00f;
-	prImGuiStyle.ChildBorderSize = 0.00f;
-	prImGuiStyle.PopupBorderSize = 0.00f;
-	prImGuiStyle.FrameBorderSize = 1.00f;
-	prImGuiStyle.TabBorderSize = 0.00f;
+	prImGuiStyle.WindowRounding = 0;
+	prImGuiStyle.ChildRounding = 0;
+	prImGuiStyle.FrameRounding = 0;
+	prImGuiStyle.PopupRounding = 0;
+	prImGuiStyle.ScrollbarRounding = 0;
+	prImGuiStyle.GrabRounding = 0;
+	prImGuiStyle.TabRounding = 0;
 
-	// Rounding
-	prImGuiStyle.WindowRounding = 0.00f;
-	prImGuiStyle.ChildRounding = 0.00f;
-	prImGuiStyle.FrameRounding = 0.00f;
-	prImGuiStyle.PopupRounding = 0.00f;
-	prImGuiStyle.ScrollbarRounding = 0.00f;
-	prImGuiStyle.GrabRounding = 0.00f;
-	prImGuiStyle.TabRounding = 0.00f;
+	prImGuiStyle.WindowBorderSize = 0;
+	prImGuiStyle.ChildBorderSize = 0;
+	prImGuiStyle.PopupBorderSize = 0;
+	prImGuiStyle.FrameBorderSize = 1;
+	prImGuiStyle.TabBorderSize = 0;
 
 	// Alignment
 	prImGuiStyle.WindowTitleAlign = ImVec2(0.50f, 0.50f);
@@ -863,53 +866,48 @@ void ThemeHelper::ApplyStyleColorsRedDark()
 	prImGuiStyle.ButtonTextAlign = ImVec2(0.50f, 0.50f);
 	prImGuiStyle.SelectableTextAlign = ImVec2(0.00f, 0.50f);
 
-	// Safe Area Padding
-	prImGuiStyle.DisplaySafeAreaPadding = ImVec2(3.00f, 3.00f);
+	prFileTypeInfos[".glsl"] = IGFD::FileStyle(ImVec4(0.1f, 0.5f, 0.1f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
+	prFileTypeInfos[".vert"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".frag"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".tess"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".eval"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".ctrl"] = prFileTypeInfos[".glsl"];
+	prFileTypeInfos[".geom"] = prFileTypeInfos[".glsl"];
 
-	prFileTypeInfos[".ttf"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.9f, 0.5f, 1.0f));
-	prFileTypeInfos[".otf"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.1f, 0.5f, 1.0f));
-	prFileTypeInfos[".cpp"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.7f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
-	prFileTypeInfos[".h"] = IGFD::FileExtentionInfosStruct(ImVec4(0.5f, 0.1f, 0.5f, 1.0f), ICON_IGFS_FILE_TYPE_TEXT);
-	prFileTypeInfos[".ifs"] = IGFD::FileExtentionInfosStruct(ImVec4(0.1f, 0.5f, 0.1f, 1.0f), ICON_IGFS_FILE_TYPE_PROJECT);
+	// dark theme so high color
+	ImGui::CustomStyle::Instance()->GoodColor = ImVec4(0.2f, 0.8f, 0.2f, 1.0f);
+	ImGui::CustomStyle::Instance()->BadColor = ImVec4(0.8f, 0.2f, 0.2f, 1.0f);
+
+	memcpy(&ImGui::GetStyle(), &prImGuiStyle, sizeof(ImGuiStyle));
 
 	ApplyFileTypeColors();
 }
-
 void ThemeHelper::ApplyFileTypeColors()
 {
-	for (auto &it : prFileTypeInfos)
+	for (auto& it : prFileTypeInfos)
 	{
-		ImGuiFileDialog::Instance()->SetExtentionInfos(it.first.c_str(), it.second.color, it.second.icon);
+		ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtention, it.first.c_str(), it.second.color, it.second.icon);
 	}
-
-	memcpy(&ImGui::GetStyle(), &prImGuiStyle, sizeof(ImGuiStyle));
 }
 
 ///////////////////////////////////////////////////////
 //// CONFIGURATION ////////////////////////////////////
 ///////////////////////////////////////////////////////
 
-std::string ThemeHelper::getXml(const std::string& vOffset, const std::string& vUserDatas)
+std::string ThemeHelper::getXml(const std::string & vOffset, const std::string & vUserDatas)
 {
 	UNUSED(vUserDatas);
 
 	std::string str;
 
 	{
-		prImGuiStyle = prImGuiStyle;
 		auto colors = prImGuiStyle.Colors;
-		
+
 		str += vOffset + "<ImGui_Styles>\n";
-		for (auto i = 0; i < ImGuiCol_COUNT; i++)
+		for (auto i = 0; i < ImGuiCol_COUNT; ++i)
 		{
 			str += vOffset + "\t<" + GetStyleColorName(i) + " value=\"" + ct::fvec4(colors[i]).string() + "\"/>\n";
 		}
-
-		str += vOffset + "\t<GoodColor value=\"" + ct::fvec4(ImGui::CustomStyle::GoodColor).string() + "\"/>\n";
-		str += vOffset + "\t<BadColor value=\"" + ct::fvec4(ImGui::CustomStyle::BadColor).string() + "\"/>\n";
-		str += vOffset + "\t<GlyphButtonColor value=\"" + ct::fvec4(ImGui::CustomStyle::GlyphButtonColor).string() + "\"/>\n";
-		str += vOffset + "\t<GlyphButtonColorActive value=\"" + ct::fvec4(ImGui::CustomStyle::GlyphButtonColorActive).string() + "\"/>\n";
-
 		str += vOffset + "\t<WindowPadding value=\"" + ct::fvec2(prImGuiStyle.WindowPadding).string() + "\"/>\n";
 		str += vOffset + "\t<FramePadding value=\"" + ct::fvec2(prImGuiStyle.FramePadding).string() + "\"/>\n";
 		str += vOffset + "\t<ItemSpacing value=\"" + ct::fvec2(prImGuiStyle.ItemSpacing).string() + "\"/>\n";
@@ -938,6 +936,36 @@ std::string ThemeHelper::getXml(const std::string& vOffset, const std::string& v
 	}
 
 	{
+#ifdef USE_NODEGRAPH
+		str += vOffset + "<Graph_Styles>\n";
+		str += vOffset + "\t<NodePadding value=\"" + ct::toStrFromImVec4(prNodeGraphStyle.NodePadding) + "\"/>\n";
+		str += vOffset + "\t<NodeRounding value=\"" + ct::toStr(prNodeGraphStyle.NodeRounding) + "\"/>\n";
+		str += vOffset + "\t<NodeBorderWidth value=\"" + ct::toStr(prNodeGraphStyle.NodeBorderWidth) + "\"/>\n";
+		str += vOffset + "\t<HoveredNodeBorderWidth value=\"" + ct::toStr(prNodeGraphStyle.HoveredNodeBorderWidth) + "\"/>\n";
+		str += vOffset + "\t<SelectedNodeBorderWidth value=\"" + ct::toStr(prNodeGraphStyle.SelectedNodeBorderWidth) + "\"/>\n";
+		str += vOffset + "\t<PinRounding value=\"" + ct::toStr(prNodeGraphStyle.PinRounding) + "\"/>\n";
+		str += vOffset + "\t<PinBorderWidth value=\"" + ct::toStr(prNodeGraphStyle.PinBorderWidth) + "\"/>\n";
+		str += vOffset + "\t<LinkStrength value=\"" + ct::toStr(prNodeGraphStyle.LinkStrength) + "\"/>\n";
+		str += vOffset + "\t<SourceDirection value=\"" + ct::toStrFromImVec2(prNodeGraphStyle.SourceDirection) + "\"/>\n";
+		str += vOffset + "\t<TargetDirection value=\"" + ct::toStrFromImVec2(prNodeGraphStyle.TargetDirection) + "\"/>\n";
+		str += vOffset + "\t<ScrollDuration value=\"" + ct::toStr(prNodeGraphStyle.ScrollDuration) + "\"/>\n";
+		str += vOffset + "\t<FlowMarkerDistance value=\"" + ct::toStr(prNodeGraphStyle.FlowMarkerDistance) + "\"/>\n";
+		str += vOffset + "\t<FlowSpeed value=\"" + ct::toStr(prNodeGraphStyle.FlowSpeed) + "\"/>\n";
+		str += vOffset + "\t<FlowDuration value=\"" + ct::toStr(prNodeGraphStyle.FlowDuration) + "\"/>\n";
+		str += vOffset + "\t<PivotAlignment value=\"" + ct::toStrFromImVec2(prNodeGraphStyle.PivotAlignment) + "\"/>\n";
+		str += vOffset + "\t<PivotSize value=\"" + ct::toStrFromImVec2(prNodeGraphStyle.PivotSize) + "\"/>\n";
+		str += vOffset + "\t<PivotScale value=\"" + ct::toStrFromImVec2(prNodeGraphStyle.PivotScale) + "\"/>\n";
+		str += vOffset + "\t<PinCorners value=\"" + ct::toStr(prNodeGraphStyle.PinCorners) + "\"/>\n";
+		str += vOffset + "\t<PinRadius value=\"" + ct::toStr(prNodeGraphStyle.PinRadius) + "\"/>\n";
+		str += vOffset + "\t<PinArrowSize value=\"" + ct::toStr(prNodeGraphStyle.PinArrowSize) + "\"/>\n";
+		str += vOffset + "\t<PinArrowWidth value=\"" + ct::toStr(prNodeGraphStyle.PinArrowWidth) + "\"/>\n";
+		str += vOffset + "\t<GroupRounding value=\"" + ct::toStr(prNodeGraphStyle.GroupRounding) + "\"/>\n";
+		str += vOffset + "\t<GroupBorderWidth value=\"" + ct::toStr(prNodeGraphStyle.GroupBorderWidth) + "\"/>\n";
+		str += vOffset + "</Graph_Styles>\n";
+#endif
+	}
+
+	{
 		str += vOffset + "<FileTypes>\n";
 		for (auto& it : prFileTypeInfos)
 		{
@@ -950,7 +978,7 @@ std::string ThemeHelper::getXml(const std::string& vOffset, const std::string& v
 	return str;
 }
 
-bool ThemeHelper::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas)
+bool ThemeHelper::setFromXml(tinyxml2::XMLElement * vElem, tinyxml2::XMLElement * vParent, const std::string & vUserDatas)
 {
 	UNUSED(vUserDatas);
 
@@ -969,7 +997,7 @@ bool ThemeHelper::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 	{
 		std::string fileType;
 		std::string color;
-		
+
 		for (auto attr = vElem->FirstAttribute(); attr != nullptr; attr = attr->Next())
 		{
 			std::string attName = attr->Name();
@@ -979,9 +1007,67 @@ bool ThemeHelper::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 			if (attName == "color") color = attValue;
 		}
 
-		prFileTypeInfos[fileType] = IGFD::FileExtentionInfosStruct(ct::toImVec4(ct::fvariant(color).GetV4()));
-		ImGuiFileDialog::Instance()->SetExtentionInfos(fileType.c_str(), prFileTypeInfos[fileType]);
+		prFileTypeInfos[fileType] = IGFD::FileStyle(ct::toImVec4(ct::fvariant(color).GetV4()));
+		ImGuiFileDialog::Instance()->SetFileStyle(IGFD_FileStyleByExtention, fileType.c_str(), prFileTypeInfos[fileType]);
 	}
+
+#ifdef USE_NODEGRAPH
+	if (strParentName == "Graph_Styles")
+	{
+		const auto att = vElem->FirstAttribute();
+		if (att && std::string(att->Name()) == "value")
+		{
+			strValue = att->Value();
+
+			if (strName == "NodePadding")
+				prNodeGraphStyle.NodePadding = ct::toImVec4(ct::fvariant(strValue).GetV4());
+			if (strName == "NodeRounding")
+				prNodeGraphStyle.NodeRounding = ct::fvariant(strValue).GetF();
+			if (strName == "NodeBorderWidth")
+				prNodeGraphStyle.NodeBorderWidth = ct::fvariant(strValue).GetF();
+			if (strName == "HoveredNodeBorderWidth")
+				prNodeGraphStyle.HoveredNodeBorderWidth = ct::fvariant(strValue).GetF();
+			if (strName == "SelectedNodeBorderWidth")
+				prNodeGraphStyle.SelectedNodeBorderWidth = ct::fvariant(strValue).GetF();
+			if (strName == "PinRounding")
+				prNodeGraphStyle.PinRounding = ct::fvariant(strValue).GetF();
+			if (strName == "PinBorderWidth")
+				prNodeGraphStyle.PinBorderWidth = ct::fvariant(strValue).GetF();
+			if (strName == "LinkStrength")
+				prNodeGraphStyle.LinkStrength = ct::fvariant(strValue).GetF();
+			if (strName == "SourceDirection")
+				prNodeGraphStyle.SourceDirection = ct::toImVec2(ct::fvariant(strValue).GetV2());
+			if (strName == "TargetDirection")
+				prNodeGraphStyle.TargetDirection = ct::toImVec2(ct::fvariant(strValue).GetV2());
+			if (strName == "ScrollDuration")
+				prNodeGraphStyle.ScrollDuration = ct::fvariant(strValue).GetF();
+			if (strName == "FlowMarkerDistance")
+				prNodeGraphStyle.FlowMarkerDistance = ct::fvariant(strValue).GetF();
+			if (strName == "FlowSpeed")
+				prNodeGraphStyle.FlowSpeed = ct::fvariant(strValue).GetF();
+			if (strName == "FlowDuration")
+				prNodeGraphStyle.FlowDuration = ct::fvariant(strValue).GetF();
+			if (strName == "PivotAlignment")
+				prNodeGraphStyle.PivotAlignment = ct::toImVec2(ct::fvariant(strValue).GetV2());
+			if (strName == "PivotSize")
+				prNodeGraphStyle.PivotSize = ct::toImVec2(ct::fvariant(strValue).GetV2());
+			if (strName == "PivotScale")
+				prNodeGraphStyle.PivotScale = ct::toImVec2(ct::fvariant(strValue).GetV2());
+			if (strName == "PinCorners")
+				prNodeGraphStyle.PinCorners = ct::fvariant(strValue).GetF();
+			if (strName == "PinRadius")
+				prNodeGraphStyle.PinRadius = ct::fvariant(strValue).GetF();
+			if (strName == "PinArrowSize")
+				prNodeGraphStyle.PinArrowSize = ct::fvariant(strValue).GetF();
+			if (strName == "PinArrowWidth")
+				prNodeGraphStyle.PinArrowWidth = ct::fvariant(strValue).GetF();
+			if (strName == "GroupRounding")
+				prNodeGraphStyle.GroupRounding = ct::fvariant(strValue).GetF();
+			if (strName == "GroupBorderWidth")
+				prNodeGraphStyle.GroupBorderWidth = ct::fvariant(strValue).GetF();
+		}
+	}
+#endif
 
 	if (strParentName == "ImGui_Styles")
 	{
@@ -1001,11 +1087,7 @@ bool ThemeHelper::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 				}
 			}
 
-			if (strName == "GoodColor") ImGui::CustomStyle::GoodColor = ct::toImVec4(ct::fvariant(strValue).GetV4());
-			else if (strName == "BadColor") ImGui::CustomStyle::BadColor = ct::toImVec4(ct::fvariant(strValue).GetV4());
-			else if (strName == "GlyphButtonColor") ImGui::CustomStyle::GlyphButtonColor = ct::toImVec4(ct::fvariant(strValue).GetV4());
-			else if (strName == "GlyphButtonColorActive") ImGui::CustomStyle::GlyphButtonColorActive = ct::toImVec4(ct::fvariant(strValue).GetV4());
-			else if (strName == "WindowPadding") prImGuiStyle.WindowPadding = ct::toImVec2(ct::fvariant(strValue).GetV2());
+			if (strName == "WindowPadding") prImGuiStyle.WindowPadding = ct::toImVec2(ct::fvariant(strValue).GetV2());
 			else if (strName == "FramePadding") prImGuiStyle.FramePadding = ct::toImVec2(ct::fvariant(strValue).GetV2());
 			else if (strName == "ItemSpacing") prImGuiStyle.ItemSpacing = ct::toImVec2(ct::fvariant(strValue).GetV2());
 			else if (strName == "ItemInnerSpacing") prImGuiStyle.ItemInnerSpacing = ct::toImVec2(ct::fvariant(strValue).GetV2());
@@ -1033,11 +1115,6 @@ bool ThemeHelper::setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* 
 	}
 
 	return true;
-}
-
-void ThemeHelper::ApplyStyle()
-{
-	ApplyFileTypeColors();
 }
 
 ///////////////////////////////////////////////////////
@@ -1108,7 +1185,7 @@ std::string ThemeHelper::GetStyleColorName(ImGuiCol idx)
 	return "ImGuiCol_Unknown";
 }
 
-int ThemeHelper::GetImGuiColFromName(const std::string& vName)
+int ThemeHelper::GetImGuiColFromName(const std::string & vName)
 {
 	if (vName == "ImGuiCol_Text") return ImGuiCol_Text;
 	else if (vName == "ImGuiCol_TextDisabled") return ImGuiCol_TextDisabled;
@@ -1168,7 +1245,7 @@ int ThemeHelper::GetImGuiColFromName(const std::string& vName)
 	return -1;
 }
 
-inline void DrawItem(int vIdx, const ImGuiTextFilter& vFilter, const char* vName, ImVec4& vStyleColor, ImVec4& vRefColor, ImGuiColorEditFlags vFlags)
+inline void DrawItem(int vIdx, const ImGuiTextFilter & vFilter, const char* vName, ImVec4 & vStyleColor, ImVec4 & vRefColor, ImGuiColorEditFlags vFlags)
 {
 	if (!vFilter.PassFilter(vName))
 		return;
@@ -1180,23 +1257,19 @@ inline void DrawItem(int vIdx, const ImGuiTextFilter& vFilter, const char* vName
 	{
 		// Tips: in a real user application, you may want to merge and use an icon font into the main font, so instead of "Save"/"Revert" you'd use icons.
 		// Read the FAQ and docs/FONTS.txt about using icon fonts. It's really easy and super convenient!
-		ImGui::SameLine(0.0f, style.ItemInnerSpacing.x); 
-		if (ImGui::ContrastedButton("Save")) 
-			vRefColor = vStyleColor;
-		ImGui::SameLine(0.0f, style.ItemInnerSpacing.x); 
-		if (ImGui::ContrastedButton("Revert")) 
-			vStyleColor = vRefColor;
+		ImGui::SameLine(0.0f, style.ItemInnerSpacing.x); if (ImGui::ContrastedButton("Save")) vRefColor = vStyleColor;
+		ImGui::SameLine(0.0f, style.ItemInnerSpacing.x); if (ImGui::ContrastedButton("Revert")) vStyleColor = vRefColor;
 	}
 	ImGui::SameLine(0.0f, style.ItemInnerSpacing.x);
 	ImGui::TextUnformatted(vName);
 	ImGui::PopID();
 }
 
-inline void ExportColors(ImGuiStyle& style_to_export, ImGuiStyle& ref_style, bool export_only_modified)
+inline void ExportColors(ImGuiStyle & style_to_export, ImGuiStyle & ref_style, bool export_only_modified)
 {
-	ImGui::LogText("const auto colors = prImGuiStyle.Colors;" IM_NEWLINE);
+	ImGui::LogText("ImVec4* colors = prImGuiStyle.Colors;" IM_NEWLINE);
 
-	for (auto i = 0; i < ImGuiCol_COUNT; i++)
+	for (auto i = 0; i < ImGuiCol_COUNT; ++i)
 	{
 		const auto& col = style_to_export.Colors[i];
 		const auto name = ImGui::GetStyleColorName(i);
@@ -1206,32 +1279,27 @@ inline void ExportColors(ImGuiStyle& style_to_export, ImGuiStyle& ref_style, boo
 
 	ImGui::LogText(IM_NEWLINE);
 
-	ImGui::LogText("ImGui::CustomStyle::GoodColor%*s= ImVec4(%.2ff, %.2ff, %.2ff, %.2ff);" IM_NEWLINE, 32 - (int)strlen("ImGui::CustomStyle::GoodColor"),
-		"", ImGui::CustomStyle::GoodColor.x, ImGui::CustomStyle::GoodColor.y, ImGui::CustomStyle::GoodColor.z, ImGui::CustomStyle::GoodColor.w);
-	ImGui::LogText("ImGui::CustomStyle::BadColor%*s= ImVec4(%.2ff, %.2ff, %.2ff, %.2ff);" IM_NEWLINE, 32 - (int)strlen("ImGui::CustomStyle::BadColor"),
-		"", ImGui::CustomStyle::BadColor.x, ImGui::CustomStyle::BadColor.y, ImGui::CustomStyle::BadColor.z, ImGui::CustomStyle::BadColor.w);
-
-	ImGui::LogText("ImGui::CustomStyle::GlyphButtonColor%*s= ImVec4(%.2ff, %.2ff, %.2ff, %.2ff);" IM_NEWLINE, 32 - (int)strlen("ImGui::CustomStyle::GlyphButtonColor"),
-		"", ImGui::CustomStyle::GlyphButtonColor.x, ImGui::CustomStyle::GlyphButtonColor.y, ImGui::CustomStyle::GlyphButtonColor.z, ImGui::CustomStyle::GlyphButtonColor.w);
-	ImGui::LogText("ImGui::CustomStyle::GlyphButtonColorActive%*s= ImVec4(%.2ff, %.2ff, %.2ff, %.2ff);" IM_NEWLINE, 32 - (int)strlen("ImGui::CustomStyle::GlyphButtonColorActive"),
-		"", ImGui::CustomStyle::GlyphButtonColorActive.x, ImGui::CustomStyle::GlyphButtonColorActive.y, ImGui::CustomStyle::GlyphButtonColorActive.z, ImGui::CustomStyle::GlyphButtonColorActive.w);
+	ImGui::LogText("ImGui::CustomStyle::Instance()->GoodColor%*s= ImVec4(%.2ff, %.2ff, %.2ff, %.2ff);" IM_NEWLINE, 32 - (int)strlen("ImGui::CustomStyle::Instance()->GoodColor"),
+		"", ImGui::CustomStyle::Instance()->GoodColor.x, ImGui::CustomStyle::Instance()->GoodColor.y, ImGui::CustomStyle::Instance()->GoodColor.z, ImGui::CustomStyle::Instance()->GoodColor.w);
+	ImGui::LogText("ImGui::CustomStyle::Instance()->BadColor%*s= ImVec4(%.2ff, %.2ff, %.2ff, %.2ff);" IM_NEWLINE, 32 - (int)strlen("ImGui::CustomStyle::Instance()->BadColor"),
+		"", ImGui::CustomStyle::Instance()->BadColor.x, ImGui::CustomStyle::Instance()->BadColor.y, ImGui::CustomStyle::Instance()->BadColor.z, ImGui::CustomStyle::Instance()->BadColor.w);
 }
 
 inline void ExportSize_Float(const char* name, float& size_to_export, float& ref_size, bool export_only_modified)
 {
 	if (!export_only_modified || memcmp(&size_to_export, &ref_size, sizeof(float)) != 0)
-		ImGui::LogText("prImGuiStyle.%s%*s= %.2ff;" IM_NEWLINE, name, 25 - (int)strlen(name), "", size_to_export);
+		ImGui::LogText("style.%s%*s= %.2ff;" IM_NEWLINE, name, 25 - (int)strlen(name), "", size_to_export);
 }
 
-inline void ExportSize_ImVec2(const char* name, ImVec2& size_to_export, ImVec2& ref_size, bool export_only_modified)
+inline void ExportSize_ImVec2(const char* name, ImVec2 & size_to_export, ImVec2 & ref_size, bool export_only_modified)
 {
 	if (!export_only_modified || memcmp(&size_to_export, &ref_size, sizeof(ImVec2)) != 0)
-		ImGui::LogText("prImGuiStyle.%s%*s= ImVec2(%.2ff, %.2ff);" IM_NEWLINE, name, 25 - (int)strlen(name), "", size_to_export.x, size_to_export.y);
+		ImGui::LogText("style.%s%*s= ImVec2(%.2ff, %.2ff);" IM_NEWLINE, name, 25 - (int)strlen(name), "", size_to_export.x, size_to_export.y);
 }
 
-inline void ExportSizes(ImGuiStyle& style_to_export, ImGuiStyle& ref_style, bool export_only_modified)
+inline void ExportSizes(ImGuiStyle & style_to_export, ImGuiStyle & ref_style, bool export_only_modified)
 {
-	//ImGui::LogText("ImGuiStyle& style = prImGuiStyle;" IM_NEWLINE);
+	ImGui::LogText("ImGuiStyle& style = prImGuiStyle;" IM_NEWLINE);
 
 	{
 		ImGui::LogText(IM_NEWLINE "// Main" IM_NEWLINE);
@@ -1255,7 +1323,7 @@ inline void ExportSizes(ImGuiStyle& style_to_export, ImGuiStyle& ref_style, bool
 		ExportSize_Float("FrameBorderSize", style_to_export.FrameBorderSize, ref_style.FrameBorderSize, export_only_modified);
 		ExportSize_Float("TabBorderSize", style_to_export.TabBorderSize, ref_style.TabBorderSize, export_only_modified);
 	}
-	
+
 	{
 		ImGui::LogText(IM_NEWLINE "// Rounding" IM_NEWLINE);
 
@@ -1284,7 +1352,7 @@ inline void ExportSizes(ImGuiStyle& style_to_export, ImGuiStyle& ref_style, bool
 			case ImGuiDir_Right: dirName = "ImGuiDir_Right"; break;
 			};
 
-			ImGui::LogText("prImGuiStyle.%s%*s= %s;" IM_NEWLINE, "WindowMenuButtonPosition", 25 - (int)strlen("WindowMenuButtonPosition"), "", dirName);
+			ImGui::LogText("style.%s%*s= %s;" IM_NEWLINE, "WindowMenuButtonPosition", 25 - (int)strlen("WindowMenuButtonPosition"), "", dirName);
 		}
 
 		// for this one we could just save ImGuiDir number, but its more redable to have ImGuiDir_ name
@@ -1297,13 +1365,13 @@ inline void ExportSizes(ImGuiStyle& style_to_export, ImGuiStyle& ref_style, bool
 			case ImGuiDir_Right: dirName = "ImGuiDir_Right"; break;
 			};
 
-			ImGui::LogText("prImGuiStyle.%s%*s= %s;" IM_NEWLINE, "ColorButtonPosition", 25 - (int)strlen("ColorButtonPosition"), "", dirName);
+			ImGui::LogText("style.%s%*s= %s;" IM_NEWLINE, "ColorButtonPosition", 25 - (int)strlen("ColorButtonPosition"), "", dirName);
 		}
 
 		ExportSize_ImVec2("ButtonTextAlign", style_to_export.ButtonTextAlign, ref_style.ButtonTextAlign, export_only_modified);
 		ExportSize_ImVec2("SelectableTextAlign", style_to_export.SelectableTextAlign, ref_style.SelectableTextAlign, export_only_modified);
 	}
-	
+
 	{
 		ImGui::LogText(IM_NEWLINE "// Safe Area Padding" IM_NEWLINE);
 
@@ -1311,7 +1379,7 @@ inline void ExportSizes(ImGuiStyle& style_to_export, ImGuiStyle& ref_style, bool
 	}
 }
 
-void ThemeHelper::ShowCustomImGuiStyleEditor(bool* vOpen, ImGuiStyle* ref)
+void ThemeHelper::ShowCustomImGuiStyleEditor(bool* vOpen, ImGuiStyle * ref)
 {
 	if (ImGui::Begin("Styles Editor", vOpen))
 	{
@@ -1320,9 +1388,6 @@ void ThemeHelper::ShowCustomImGuiStyleEditor(bool* vOpen, ImGuiStyle* ref)
 		static ImGuiStyle ref_saved_style;
 		static ImVec4 ref_Good_Color;
 		static ImVec4 ref_Bad_Color;
-		static ImVec4 ref_Glyph_button;
-		static ImVec4 ref_Glyph_button_Hovered;
-		static ImVec4 ref_Glyph_button_Active;
 
 		// Default to using internal storage as reference
 		static auto init = true;
@@ -1333,6 +1398,14 @@ void ThemeHelper::ShowCustomImGuiStyleEditor(bool* vOpen, ImGuiStyle* ref)
 			ref = &ref_saved_style;
 
 		ImGui::PushItemWidth(ImGui::GetWindowWidth() * 0.50f);
+
+		if (ImGui::ShowStyleSelector("Colors##Selector"))
+			ref_saved_style = style;
+		ImGui::ShowFontSelector("Fonts##Selector");
+
+		// Simplified Settings
+		if (ImGui::SliderFloat("FrameRounding", &style.FrameRounding, 0.0f, 12.0f, "%.0f"))
+			style.GrabRounding = style.FrameRounding; // Make GrabRounding always the same value as FrameRounding
 
 		auto window_border = (style.WindowBorderSize > 0.0f);
 		if (ImGui::Checkbox("WindowBorder", &window_border))
@@ -1364,25 +1437,21 @@ void ThemeHelper::ShowCustomImGuiStyleEditor(bool* vOpen, ImGuiStyle* ref)
 		if (ImGui::ContrastedButton("Save Ref"))
 		{
 			*ref = ref_saved_style = style;
-			ref_Good_Color = ImGui::CustomStyle::GoodColor;
-			ref_Bad_Color = ImGui::CustomStyle::BadColor;
-			ref_Glyph_button = ImGui::CustomStyle::GlyphButtonColor;
-			ref_Glyph_button_Active = ImGui::CustomStyle::GlyphButtonColorActive;
+			ref_Good_Color = ImGui::CustomStyle::Instance()->GoodColor;
+			ref_Bad_Color = ImGui::CustomStyle::Instance()->BadColor;
 		}
 		ImGui::SameLine();
 		if (ImGui::ContrastedButton("Revert Ref"))
 		{
 			style = *ref;
-			ImGui::CustomStyle::GoodColor = ref_Good_Color;
-			ImGui::CustomStyle::BadColor = ref_Bad_Color;
-			ImGui::CustomStyle::GlyphButtonColor = ref_Glyph_button;
-			ImGui::CustomStyle::GlyphButtonColorActive = ref_Glyph_button_Active;
+			ImGui::CustomStyle::Instance()->GoodColor = ref_Good_Color;
+			ImGui::CustomStyle::Instance()->BadColor = ref_Bad_Color;
 		}
 		ImGui::SameLine();
 		ImGui::HelpMarker("Save/Revert in local non-persistent storage. Default Colors definition are not affected. Use \"Export\" below to save them somewhere.");
 
 		ImGui::Separator();
-		
+
 		static auto output_dest = 0;
 		static auto output_only_modified = true;
 		if (ImGui::ContrastedButton("Export Sizes and Colors"))
@@ -1464,10 +1533,10 @@ void ThemeHelper::ShowCustomImGuiStyleEditor(bool* vOpen, ImGuiStyle* ref)
 				ImGui::Combo("ColorButtonPosition", (int*)&style.ColorButtonPosition, "Left\0Right\0");
 				ImGui::SliderFloat2("ButtonTextAlign", (float*)&style.ButtonTextAlign, 0.0f, 1.0f, "%.2f"); ImGui::SameLine(); ImGui::HelpMarker("Alignment applies when a button is larger than its text content.");
 				ImGui::SliderFloat2("SelectableTextAlign", (float*)&style.SelectableTextAlign, 0.0f, 1.0f, "%.2f"); ImGui::SameLine(); ImGui::HelpMarker("Alignment applies when a selectable is larger than its text content.");
-				
+
 				ImGui::Text("Safe Area Padding"); ImGui::SameLine(); ImGui::HelpMarker("Adjust if you cannot see the edges of your screen (e.g. on a TV where scaling has not been configured).");
 				ImGui::SliderFloat2("DisplaySafeAreaPadding", (float*)&style.DisplaySafeAreaPadding, 0.0f, 30.0f, "%.0f");
-				
+
 				ImGui::PopItemWidth();
 				ImGui::EndChild();
 
@@ -1504,16 +1573,14 @@ void ThemeHelper::ShowCustomImGuiStyleEditor(bool* vOpen, ImGuiStyle* ref)
 				ImGui::HelpMarker("In the color list:\nLeft-click on colored square to open color picker,\nRight-click to open edit options menu.");
 
 				ImGui::BeginChild("##colors", ImVec2(0, 0), true, ImGuiWindowFlags_AlwaysVerticalScrollbar | ImGuiWindowFlags_AlwaysHorizontalScrollbar | ImGuiWindowFlags_NavFlattened);
-				ImGui::PushItemWidth(-200);
+				ImGui::PushItemWidth(-160);
 
-				int id = 0;
-				DrawItem(id++, filter, "Good Color", ImGui::CustomStyle::GoodColor, ref_Good_Color, alpha_flags);
-				DrawItem(id++, filter, "Bad Color", ImGui::CustomStyle::BadColor, ref_Bad_Color, alpha_flags);
-				DrawItem(id++, filter, "GlyphButton", ImGui::CustomStyle::GlyphButtonColor, ref_Glyph_button, alpha_flags);
-				DrawItem(id++, filter, "GlyphButtonActive", ImGui::CustomStyle::GlyphButtonColorActive, ref_Glyph_button_Active, alpha_flags);
-				for (int i = 0; i < ImGuiCol_COUNT; i++)
+				DrawItem(14582, filter, "Good Color", ImGui::CustomStyle::Instance()->GoodColor, ref_Good_Color, alpha_flags);
+				DrawItem(114583, filter, "Bad Color", ImGui::CustomStyle::Instance()->BadColor, ref_Bad_Color, alpha_flags);
+
+				for (auto i = 0; i < ImGuiCol_COUNT; ++i)
 				{
-					DrawItem(i + id, filter, ImGui::GetStyleColorName(i), style.Colors[i], ref->Colors[i], alpha_flags);
+					DrawItem(i, filter, ImGui::GetStyleColorName(i), style.Colors[i], ref->Colors[i], alpha_flags);
 				}
 				ImGui::PopItemWidth();
 				ImGui::EndChild();
@@ -1527,6 +1594,13 @@ void ThemeHelper::ShowCustomImGuiStyleEditor(bool* vOpen, ImGuiStyle* ref)
 		ImGui::PopItemWidth();
 	}
 	ImGui::End();
+
+	memcpy(&ImGui::GetStyle(), &prImGuiStyle, sizeof(ImGuiStyle));
+}
+
+void ThemeHelper::ApplyStyle()
+{
+	ApplyFileTypeColors();
 
 	memcpy(&ImGui::GetStyle(), &prImGuiStyle, sizeof(ImGuiStyle));
 }

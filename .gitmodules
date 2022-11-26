@@ -38,3 +38,7 @@
 	path = 3rdparty/ctools
 	url = https://github.com/aiekick/cTools.git
 	branch = master
+[submodule "3rdparty/BuildInc"]
+	path = 3rdparty/BuildInc
+	url = https://github.com/aiekick/buildinc.git
+	branch = master

@@ -15,12 +15,12 @@
  */
 #pragma once
 
+#include <Headers/Globals.h>
 #include <ctools/ConfigAbstract.h>
 #include <tinyxml2/tinyxml2.h>
 
 #include <Project/GlyphInfos.h>
 #include <common/freetype/imgui_freetype.h>
-#include <globals.h>
 #include <Generator/GenMode.h>
 
 #include <Helper/TextureHelper.h>

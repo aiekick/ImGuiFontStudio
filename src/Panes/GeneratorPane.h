@@ -45,16 +45,16 @@ private: // STATUS FLAGS
 public:
 	bool Init() override;
 	void Unit() override;
-	int DrawPanes(int vWidgetId, std::string vUserDatas)  override;
-	void DrawDialogsAndPopups(std::string vUserDatas) override;
-	int DrawWidgets(int vWidgetId, std::string vUserDatas)  override;
+	int DrawPanes(const uint32_t& vCurrentFrame, int vWidgetId, std::string vUserDatas, PaneFlags& vInOutPaneShown)  override;
+	void DrawDialogsAndPopups(const uint32_t& vCurrentFrame, std::string vUserDatas) override;
+	int DrawWidgets(const uint32_t& vCurrentFrame, int vWidgetId, std::string vUserDatas)  override;
 
 	// STATUS FLAGS
 	void AllowStatus(GeneratorStatusFlags vGeneratorStatusFlags);
 	void ProhibitStatus(GeneratorStatusFlags vGeneratorStatusFlags);
 
 private:
-	void DrawGeneratorPane();
+	void DrawGeneratorPane(PaneFlags& vInOutPaneShown);
 	void DrawFontsGenerator();
 	void GeneratorFileDialogPane(const char *vFilter, IGFDUserDatas vUserDatas, bool* vCantContinue);
 
@@ -63,13 +63,13 @@ private:
 	void ModifyConfigurationAccordingToSelectedFeaturesAndErrors();
 
 public: // singleton
-	static GeneratorPane *Instance()
+	static std::shared_ptr<GeneratorPane> Instance()
 	{
-		static GeneratorPane _instance;
-		return &_instance;
+		static auto _instance = std::make_shared<GeneratorPane>();
+		return _instance;
 	}
 
-protected:
+public:
 	GeneratorPane(); // Prevent construction
 	GeneratorPane(const GeneratorPane&) {}; // Prevent construction by copying
 	GeneratorPane& operator =(const GeneratorPane&) { return *this; }; // Prevent assignment

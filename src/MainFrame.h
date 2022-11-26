@@ -15,14 +15,13 @@
  */
 #pragma once
 
-#include <globals.h>
+#include <Headers/Globals.h>
 
 #include <imgui/imgui.h>
 
 #include <ctools/ConfigAbstract.h>
 #include <Project/ProjectFile.h>
 #include <Helper/FrameActionSystem.h>
-#include <globals.h>
 
 #if VULKAN
 	#include <vulkan/imgui_impl_vulkan_user_texture.h>
@@ -191,7 +190,7 @@ private: // actions
 	bool Display_SaveProjectDialog();
 
 private:
-	void SetAppTitle(const std::string& vFilePathName);
+	void SetAppTitle(const std::string& vFilePathName = "");
 
 public: // configuration
 	std::string getXml(const std::string& vOffset, const std::string& vUserDatas = "");

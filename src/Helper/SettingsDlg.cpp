@@ -20,9 +20,9 @@
 #include "SettingsDlg.h"
 
 #include <MainFrame.h>
-#include <Gui/ImWidgets.h>
+#include<Gui/ImWidgets.h>
 #include <Helper/ThemeHelper.h>
-#include <Res/CustomFont.h>
+#include <Contrib/FontIcons/CustomFont.h>
 
 #include <imgui/imgui.h>
 #define IMGUI_DEFINE_MATH_OPERATORS

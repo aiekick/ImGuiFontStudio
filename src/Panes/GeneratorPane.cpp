@@ -21,7 +21,6 @@
 
 #include <MainFrame.h>
 
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 
 #include <stdlib.h>
@@ -30,7 +29,7 @@
 #include <ctools/Logger.h>
 #include <ctools/FileHelper.h>
 #include <Panes/Manager/LayoutManager.h>
-#include <Gui/ImWidgets.h>
+#include<Gui/ImWidgets.h>
 #include <Helper/Messaging.h>
 #include <Helper/SelectionHelper.h>
 #include <Helper/ThemeHelper.h>
@@ -76,16 +75,16 @@ void GeneratorPane::Unit()
 
 }
 
-int GeneratorPane::DrawPanes(int vWidgetId, std::string vUserDatas)
+int GeneratorPane::DrawPanes(const uint32_t& /*vCurrentFrame*/, int vWidgetId, std::string /*vUserDatas*/, PaneFlags& vInOutPaneShown)
 {
 	m_PaneWidgetId = vWidgetId;
 
-	DrawGeneratorPane();
+	DrawGeneratorPane(vInOutPaneShown);
 
 	return m_PaneWidgetId;
 }
 
-void GeneratorPane::DrawDialogsAndPopups(std::string vUserDatas)
+void GeneratorPane::DrawDialogsAndPopups(const uint32_t& /*vCurrentFrame*/, std::string /*vUserDatas*/)
 {
 	ImVec2 min = MainFrame::Instance()->m_DisplaySize * 0.5f;
 	ImVec2 max = MainFrame::Instance()->m_DisplaySize;
@@ -103,11 +102,8 @@ void GeneratorPane::DrawDialogsAndPopups(std::string vUserDatas)
 	}
 }
 
-int GeneratorPane::DrawWidgets(int vWidgetId, std::string vUserDatas)
+int GeneratorPane::DrawWidgets(const uint32_t& /*vCurrentFrame*/, int vWidgetId, std::string /*vUserDatas*/)
 {
-
-	UNUSED(vUserDatas);
-
 	return vWidgetId;
 }
 
@@ -115,19 +111,26 @@ int GeneratorPane::DrawWidgets(int vWidgetId, std::string vUserDatas)
 //// PRIVATE //////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void GeneratorPane::DrawGeneratorPane()
+void GeneratorPane::DrawGeneratorPane(PaneFlags& vInOutPaneShown)
 {
-	if (LayoutManager::Instance()->m_Pane_Shown & m_PaneFlag)
+	if (vInOutPaneShown & m_PaneFlag)
 	{
-		if (ImGui::BeginFlag<PaneFlags>(m_PaneName,
-			&LayoutManager::Instance()->m_Pane_Shown, m_PaneFlag,
-			//ImGuiWindowFlags_NoTitleBar |
-			//ImGuiWindowFlags_MenuBar |
-			//ImGuiWindowFlags_NoMove |
+		static ImGuiWindowFlags flags =
 			ImGuiWindowFlags_NoCollapse |
-			//ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_NoBringToFrontOnFocus))
+			ImGuiWindowFlags_NoBringToFrontOnFocus |
+			ImGuiWindowFlags_MenuBar;
+		if (ImGui::Begin<PaneFlags>(m_PaneName,
+			&vInOutPaneShown, m_PaneFlag, flags))
 		{
+#ifdef USE_DECORATIONS_FOR_RESIZE_CHILD_WINDOWS
+			auto win = ImGui::GetCurrentWindowRead();
+			if (win->Viewport->Idx != 0)
+				flags |= ImGuiWindowFlags_NoResize;// | ImGuiWindowFlags_NoTitleBar;
+			else
+				flags = ImGuiWindowFlags_NoCollapse |
+				ImGuiWindowFlags_NoBringToFrontOnFocus |
+				ImGuiWindowFlags_MenuBar;
+#endif
 			if (ProjectFile::Instance()->IsLoaded())
 			{
 				if (ProjectFile::Instance()->m_SourceFontPaneFlags & SourceFontPaneFlags::SOURCE_FONT_PANE_GLYPH)
@@ -235,7 +238,7 @@ void GeneratorPane::DrawFontsGenerator()
 				ProjectFile::Instance()->AddGenMode(GENERATOR_MODE_CURRENT);
 			}
 
-			float mrw = maxWidth / 3.0f - ImGui::GetStyle().FramePadding.x;
+			mrw = maxWidth / 3.0f - ImGui::GetStyle().FramePadding.x;
 			change |= ImGui::RadioButtonLabeled_BitWize<GenModeFlags>(mrw, "Current", "Current Font",
 				&ProjectFile::Instance()->m_GenModeFlags, GENERATOR_MODE_CURRENT, true, true,
 				GENERATOR_MODE_RADIO_CUR_BAT_MER);
@@ -404,24 +407,24 @@ void GeneratorPane::DrawFontsGenerator()
 					std::string path = ProjectFile::Instance()->m_LastGeneratedPath;
 					if (path.empty() || path == ".")
 						path = ProjectFile::Instance()->m_ProjectFilePath;
-					ImGuiFileDialog::Instance()->OpenModal(
+					ImGuiFileDialog::Instance()->OpenDialog(
 						"GenerateFileDlg",
 						"Location where create the files", nullptr, path, ProjectFile::Instance()->m_LastGeneratedFileName,
 						std::bind(&GeneratorPane::GeneratorFileDialogPane, this,
 							std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
-						200, 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
+						200, 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite | ImGuiFileDialogFlags_Modal);
 				}
 				else
 				{
 					std::string path = ProjectFile::Instance()->m_LastGeneratedPath;
 					if (path.empty() || path == ".")
 						path = ProjectFile::Instance()->m_ProjectFilePath;
-					ImGuiFileDialog::Instance()->OpenModal(
+					ImGuiFileDialog::Instance()->OpenDialog(
 						"GenerateFileDlg",
 						"Location and name where create the file", extTypes, path, ProjectFile::Instance()->m_SelectedFont->m_GeneratedFileName,
 						std::bind(&GeneratorPane::GeneratorFileDialogPane, this,
 							std::placeholders::_1, std::placeholders::_2, std::placeholders::_3),
-						200, 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
+						200, 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite | ImGuiFileDialogFlags_Modal);
 				}
 			}
 			else
@@ -431,20 +434,20 @@ void GeneratorPane::DrawFontsGenerator()
 					std::string path = ProjectFile::Instance()->m_LastGeneratedPath;
 					if (path.empty() || path == ".")
 						path = ProjectFile::Instance()->m_ProjectFilePath;
-					ImGuiFileDialog::Instance()->OpenModal(
+					ImGuiFileDialog::Instance()->OpenDialog(
 						"GenerateFileDlg",
 						"Location where create the files", nullptr, path, ProjectFile::Instance()->m_LastGeneratedFileName,
-						1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
+						1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite | ImGuiFileDialogFlags_Modal);
 				}
 				else
 				{
 					std::string path = ProjectFile::Instance()->m_LastGeneratedPath;
 					if (path.empty() || path == ".")
 						path = ProjectFile::Instance()->m_ProjectFilePath;
-					ImGuiFileDialog::Instance()->OpenModal(
+					ImGuiFileDialog::Instance()->OpenDialog(
 						"GenerateFileDlg",
 						"Location and name where create the file", extTypes, path, ProjectFile::Instance()->m_SelectedFont->m_GeneratedFileName,
-						1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
+						1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite | ImGuiFileDialogFlags_Modal);
 				}
 			}
 		}
@@ -476,7 +479,7 @@ bool GeneratorPane::CheckAndDisplayGenerationConditions()
 	else
 	{
 		res = false;
-		ImGui::TextColored(ImGui::CustomStyle::BadColor, "Can't generate.\n\tSelect one feature at least");
+		ImGui::TextColored(ImGui::CustomStyle::Instance()->BadColor, "Can't generate.\n\tSelect one feature at least");
 	}
 
 	// not remembered why i done that.. so disabled for the moment
@@ -500,14 +503,14 @@ bool GeneratorPane::CheckAndDisplayGenerationConditions()
 			ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_SRC)))
 		{
 			res = false;
-			ImGui::FramedGroupText(ImGui::CustomStyle::BadColor, "the Header is linked ot a font or a cpp.\nPlease Select Cpp or Font at least");
+			ImGui::FramedGroupText(ImGui::CustomStyle::Instance()->BadColor, "the Header is linked ot a font or a cpp.\nPlease Select Cpp or Font at least");
 		}
 
 		// need on language at mini
 		if (!needOneLangageSelectedAtLeast)
 		{
 			res = false;
-			ImGui::FramedGroupText(ImGui::CustomStyle::BadColor, "A language must be selected for the generation of the Header file");
+			ImGui::FramedGroupText(ImGui::CustomStyle::Instance()->BadColor, "A language must be selected for the generation of the Header file");
 		}
 	}
 
@@ -517,7 +520,7 @@ bool GeneratorPane::CheckAndDisplayGenerationConditions()
 		if (!needOneLangageSelectedAtLeast)
 		{
 			res = false;
-			ImGui::FramedGroupText(ImGui::CustomStyle::BadColor, "A language must be selected for the generation of the Source file");
+			ImGui::FramedGroupText(ImGui::CustomStyle::Instance()->BadColor, "A language must be selected for the generation of the Source file");
 		}
 	}
 	// check of codepoint/name in double 
@@ -531,24 +534,24 @@ bool GeneratorPane::CheckAndDisplayGenerationConditions()
 		{
 			if (font.second->m_CodePointInDoubleFound || font.second->m_NameInDoubleFound)
 			{
-				ImGui::FramedGroupText(ImGui::CustomStyle::BadColor, "%s : NOK", font.second->m_FontFileName.c_str());
+				ImGui::FramedGroupText(ImGui::CustomStyle::Instance()->BadColor, "%s : NOK", font.second->m_FontFileName.c_str());
 				errorsCount++;
 			}
 			else if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_MERGED) && font.second->m_SelectedGlyphs.empty())
 			{
-				ImGui::FramedGroupText(ImGui::CustomStyle::BadColor, "%s : NOK\nNo Glyphs are selected.\nYou need it in Merged mode", font.second->m_FontFileName.c_str());
+				ImGui::FramedGroupText(ImGui::CustomStyle::Instance()->BadColor, "%s : NOK\nNo Glyphs are selected.\nYou need it in Merged mode", font.second->m_FontFileName.c_str());
 				errorsCount++;
 			}
 			else
 			{
 				if (font.second->m_SelectedGlyphs.empty()) // no glyphs to extract, we wille extract alls, current and batch only
 				{
-					ImGui::FramedGroupText(ImGui::CustomStyle::BadColor, "%s : NOK\nNo Glyphs are selected.\nCan't generate.", font.second->m_FontFileName.c_str());
+					ImGui::FramedGroupText(ImGui::CustomStyle::Instance()->BadColor, "%s : NOK\nNo Glyphs are selected.\nCan't generate.", font.second->m_FontFileName.c_str());
 					errorsCount++;
 				}
 				else
 				{
-					ImGui::FramedGroupText(ImGui::CustomStyle::GoodColor, "%s : OK\n%u Glyphs selected", font.second->m_FontFileName.c_str(), font.second->m_SelectedGlyphs.size());
+					ImGui::FramedGroupText(ImGui::CustomStyle::Instance()->GoodColor, "%s : OK\n%u Glyphs selected", font.second->m_FontFileName.c_str(), font.second->m_SelectedGlyphs.size());
 					ProjectFile::Instance()->m_CountFontWithSelectedGlyphs++;
 				}
 			}
@@ -564,22 +567,22 @@ bool GeneratorPane::CheckAndDisplayGenerationConditions()
 		{
 			if (errorsCount > 0)
 			{
-				ImGui::FramedGroupText(ImGui::CustomStyle::BadColor, "Can partially generate\nCheck status bar");
+				ImGui::FramedGroupText(ImGui::CustomStyle::Instance()->BadColor, "Can partially generate\nCheck status bar");
 			}
 			else
 			{
-				ImGui::FramedGroupText(ImGui::CustomStyle::GoodColor, "Can fully generate");
+				ImGui::FramedGroupText(ImGui::CustomStyle::Instance()->GoodColor, "Can fully generate");
 			}
 
 			if (ProjectFile::Instance()->IsGenMode(GENERATOR_MODE_MERGED))
 			{
-				ImGui::FramedGroupText(ImGui::CustomStyle::GoodColor,
+				ImGui::FramedGroupText(ImGui::CustomStyle::Instance()->GoodColor,
 					"The selected font\nscale / bounding box\nwill be used for merge in\nall other font glyphs");
 			}
 		}
 		else
 		{
-			ImGui::FramedGroupText(ImGui::CustomStyle::BadColor, "Can't generate\nCheck status bar");
+			ImGui::FramedGroupText(ImGui::CustomStyle::Instance()->BadColor, "Can't generate\nCheck status bar");
 			res = false;
 		}
 	}
@@ -697,7 +700,7 @@ void GeneratorPane::ModifyConfigurationAccordingToSelectedFeaturesAndErrors()
 }
 
 // file dialog pane
-void GeneratorPane::GeneratorFileDialogPane(const char* vFilter, IGFDUserDatas vUserDatas,
+void GeneratorPane::GeneratorFileDialogPane(const char* vFilter, IGFDUserDatas /*vUserDatas*/,
 	bool* vCantContinue) // if vCantContinue is false, the user cant validate the dialog
 {
 	UNUSED(vFilter);

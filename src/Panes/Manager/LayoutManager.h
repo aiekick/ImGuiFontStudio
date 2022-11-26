@@ -1,25 +1,17 @@
 /*
-MIT License
+Copyright 2022-2022 Stephane Cuillerdier (aka aiekick)
 
-Copyright (c) 2021 Stephane Cuillerdier (aka Aiekick)
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+http://www.apache.org/licenses/LICENSE-2.0
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 */
 
 #pragma once
@@ -27,20 +19,12 @@ SOFTWARE.
 #include <ctools/ConfigAbstract.h>
 #include <Panes/Abstract/AbstractPane.h>
 #include <imgui/imgui.h>
+#include <string>
+#include <vector>
+#include <array>
+#include <map>
 
-namespace ImGui
-{
-	// ImGui::Begin for bitwize
-	template<typename T>
-	IMGUI_API bool BeginFlag(const char* name, T* vContainer, T vFlag, ImGuiWindowFlags flags)
-	{
-		bool check = *vContainer & vFlag;
-		const bool res = Begin(name, &check, flags);
-		if (check) *vContainer = (T)(*vContainer | vFlag); // add
-		else *vContainer = (T)(*vContainer & ~vFlag); // remove
-		return res;
-	}
-}
+typedef std::string PaneCategoryName;
 
 class ProjectFile;
 class LayoutManager : public conf::ConfigAbstract
@@ -49,14 +33,23 @@ private:
 	ImGuiID m_DockSpaceID = 0;
 	bool m_FirstLayout = false;
 	bool m_FirstStart = true;
-	char m_MenuLabel[PANE_NAME_BUFFER_SIZE + 1] = "";
-	char m_DefaultMenuLabel[PANE_NAME_BUFFER_SIZE + 1] = "";
+	std::string m_MenuLabel;
+	std::string m_DefaultMenuLabel;
+	std::array<float, (size_t)PaneDisposal::Count> m_PaneDisposalSizes = 
+	{	0.0f, // central size is ignored because dependant of others
+		200.0f, // left size
+		200.0f, // right size
+		200.0f, // bottom size
+		200.0f // top size
+	};
 
 protected:
-	std::map<PaneDisposal, AbstractPane*> m_PanesByDisposal;
-	std::map<const char*, AbstractPane*> m_PanesByName;
-	std::map<PaneFlags, AbstractPane*> m_PanesByFlag;
-	
+	std::map<PaneDisposal, AbstractPaneWeak> m_PanesByDisposal;
+	std::map<std::string, AbstractPaneWeak> m_PanesByName;
+	std::map<PaneCategoryName, std::vector<AbstractPaneWeak>> m_PanesInDisplayOrder;
+	std::map<PaneFlags, AbstractPaneWeak> m_PanesByFlag;
+	int32_t m_FlagCount = 0U;
+
 public:
 	PaneFlags m_Pane_Focused_Default = 0;
 	PaneFlags m_Pane_Opened_Default = 0;
@@ -68,49 +61,72 @@ public:
 
 public:
 	void AddPane(
-		AbstractPane*vPane,
-		const char* vName,
-		PaneFlags vFlag, 
-		PaneDisposal vPaneDisposal, 
-		bool vIsOpenedDefault, 
-		bool vIsFocusedDefault);
+		AbstractPaneWeak vPane,
+		const std::string& vName,
+		const PaneCategoryName& vCategory,
+		const PaneDisposal& vPaneDisposal,
+		const bool& vIsOpenedDefault,
+		const bool& vIsFocusedDefault);
+	void AddPane(
+		AbstractPaneWeak vPane,
+		const std::string& vName,
+		const PaneCategoryName& vCategory,
+		const PaneFlags& vFlag,
+		const PaneDisposal& vPaneDisposal,
+		const bool& vIsOpenedDefault,
+		const bool& vIsFocusedDefault);
+	void SetPaneDisposalSize(const PaneDisposal& vPaneDisposal, const float& vSize);
 
 public:
-	void Init(const char* vMenuLabel, const char* vDefautlMenuLabel);
+	void Init(const std::string& vMenuLabel, const std::string& vDefaultMenuLabel);
 	void Unit();
-	void InitAfterFirstDisplay(ImVec2 vSize);
-	bool BeginDockSpace(ImGuiDockNodeFlags vFlags);
+
+	bool InitPanes();
+	void UnitPanes();
+
+	void InitAfterFirstDisplay(const ImVec2& vSize);
+	bool BeginDockSpace(const ImGuiDockNodeFlags& vFlags);
 	void EndDockSpace();
 	bool IsDockSpaceHoleHovered();
 
-	void ApplyInitialDockingLayout(ImVec2 vSize = ImVec2(0, 0));
+	void ApplyInitialDockingLayout(const ImVec2& vSize = ImVec2(0, 0));
 
-	virtual void DisplayMenu(ImVec2 vSize);
-	virtual int DisplayPanes(int vWidgetId, std::string vUserDatas = "");
-	virtual void DrawDialogsAndPopups(std::string vUserDatas = "");
-	virtual int DrawWidgets(int vWidgetId, std::string vUserDatas = "");
+	virtual void DisplayMenu(const ImVec2& vSize);
+	virtual int DisplayPanes(const uint32_t& vCurrentFrame, const int& vWidgetId, const std::string& vUserDatas = "");
+	virtual void DrawDialogsAndPopups(const uint32_t& vCurrentFrame, const std::string& vUserDatas = "");
+	virtual int DrawWidgets(const uint32_t& vCurrentFrame, const int& vWidgetId, const std::string& vUserDatas = "");
 
-	void ShowSpecificPane(PaneFlags vPane);
-	void HideSpecificPane(PaneFlags vPane);
-	void FocusSpecificPane(PaneFlags vPane);
-	void FocusSpecificPane(const char* vlabel);
-	void ShowAndFocusSpecificPane(PaneFlags vPane);
-	bool IsSpecificPaneFocused(PaneFlags vPane);
-	bool IsSpecificPaneFocused(const char* vlabel);
-	void AddSpecificPaneToExisting(const char* vNewPane, const char* vExistingPane);
+public:
+	void ShowSpecificPane(const PaneFlags& vPane);
+	void HideSpecificPane(const PaneFlags& vPane);
+	void FocusSpecificPane(const PaneFlags& vPane);
+	void FocusSpecificPane(const std::string& vlabel);
+	void ShowAndFocusSpecificPane(const PaneFlags& vPane);
+	bool IsSpecificPaneFocused(const PaneFlags& vPane);
+	bool IsSpecificPaneFocused(const std::string& vlabel);
+	void AddSpecificPaneToExisting(const std::string& vNewPane, const std::string& vExistingPane);
 
 private: // configuration
 	PaneFlags Internal_GetFocusedPanes();
-	void Internal_SetFocusedPanes(PaneFlags vActivePanes);
+	void Internal_SetFocusedPanes(const PaneFlags& vActivePanes);
 
 public: // configuration
 	std::string getXml(const std::string& vOffset, const std::string& vUserDatas = "");
 	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas = "");
 
 public: // singleton
-	static LayoutManager *Instance()
+	static LayoutManager *Instance(LayoutManager* vCopy = nullptr, bool vForce = false)
 	{
 		static LayoutManager _instance;
+		static LayoutManager* _instance_copy = nullptr;
+		if (vCopy || vForce)
+		{
+			_instance_copy = vCopy;
+		}
+		if (_instance_copy)
+		{
+			return _instance_copy;
+		}
 		return &_instance;
 	}
 

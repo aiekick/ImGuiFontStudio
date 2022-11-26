@@ -17,7 +17,7 @@
 
 #include <Panes/Abstract/AbstractPane.h>
 #include <ctools/ConfigAbstract.h>
-#include <Gui/ImWidgets.h>
+#include<Gui/ImWidgets.h>
 
 #include <imgui/imgui.h>
 #include <map>
@@ -57,9 +57,9 @@ private:
 public:
 	bool Init() override;
 	void Unit() override;
-	int DrawPanes(int vWidgetId, std::string vUserDatas)  override;
-	void DrawDialogsAndPopups(std::string vUserDatas) override;
-	int DrawWidgets(int vWidgetId, std::string vUserDatas)  override;
+	int DrawPanes(const uint32_t& vCurrentFrame, int vWidgetId, std::string vUserDatas, PaneFlags& vInOutPaneShown)  override;
+	void DrawDialogsAndPopups(const uint32_t& vCurrentFrame, std::string vUserDatas) override;
+	int DrawWidgets(const uint32_t& vCurrentFrame, int vWidgetId, std::string vUserDatas)  override;
 
 	// Preparation
 	void SetFinalFontPaneMode(FinalFontPaneModeFlags vFinalFontPaneModeFlags);
@@ -67,7 +67,7 @@ public:
 	void PrepareSelection();
 
 private:
-	void DrawFinalFontPane();
+	void DrawFinalFontPane(PaneFlags& vInOutPaneShown);
 
 	bool DrawGlyph(
 		std::shared_ptr<FontInfos> vFontInfos, const ImVec2& vSize,
@@ -125,13 +125,13 @@ public: // configuration
 	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas);
 
 public: // singleton
-	static FinalFontPane *Instance()
+	static std::shared_ptr<FinalFontPane> Instance()
 	{
-		static FinalFontPane _instance;
-		return &_instance;
+		static auto _instance = std::make_shared<FinalFontPane>();
+		return _instance;
 	}
 
-protected:
+public:
 	FinalFontPane(); // Prevent construction
 	FinalFontPane(const FinalFontPane&) {}; // Prevent construction by copying
 	FinalFontPane& operator =(const FinalFontPane&) { return *this; }; // Prevent assignment

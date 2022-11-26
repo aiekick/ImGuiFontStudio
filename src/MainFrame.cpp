@@ -36,8 +36,9 @@
 #include <Project/FontInfos.h>
 #include <Project/ProjectFile.h>
 #include <Helper/AssetManager.h>
-#include <Res/CustomFont.h>
 #include <Helper/TextureHelper.h>
+
+#include <Contrib/FontIcons/CustomFont.h>
 
 #include <Panes/Manager/LayoutManager.h>
 #ifdef _DEBUG
@@ -52,7 +53,9 @@
 #include <Panes/FontPreviewPane.h>
 #include <Panes/SourceFontPane.h>
 
-#define IMGUI_DEFINE_MATH_OPERATORS
+#include <Headers/Globals.h>
+#include <Headers/ImGuiFontStudioBuild.h>
+
 #include <imgui/imgui_internal.h>
 
 #define WIDGET_ID_MAGIC_NUMBER 4577
@@ -77,37 +80,45 @@ MainFrame::~MainFrame()
 
 void MainFrame::Init()
 {
-	char buf[256];
-	snprintf(buf, 255, "ImGuiFontStudio %s", IMGUIFONTSTUDIO_VERSION);
-	glfwSetWindowTitle(m_Window, buf);
+	SetAppTitle();
 
-	ImGui::CustomStyle::Init();
+	ImGui::CustomStyle::Instance();
 
-	ThemeHelper::Instance();
-	LoadConfigFile("config.xml");
-	ThemeHelper::Instance()->ApplyStyle();
+	LayoutManager::Instance()->Init(ICON_IGFS_LAYOUT " Layouts", "Default Layout");
+
+	LayoutManager::Instance()->SetPaneDisposalSize(PaneDisposal::LEFT, 200.0f);
+	LayoutManager::Instance()->SetPaneDisposalSize(PaneDisposal::RIGHT, 500.0f);
+	LayoutManager::Instance()->SetPaneDisposalSize(PaneDisposal::BOTTOM, 200.0f);
 
 	LayoutManager::Instance()->Init("Layouts", "Default Layout");
-	LayoutManager::Instance()->AddPane(ParamsPane::Instance(), "Params", PARAM_PANE, PaneDisposal::LEFT, true, true);
-	LayoutManager::Instance()->AddPane(SourceFontPane::Instance(), "Source", SOURCE_PANE, PaneDisposal::CENTRAL, true, true);
-	LayoutManager::Instance()->AddPane(FinalFontPane::Instance(), "Final", FINAL_PANE, PaneDisposal::CENTRAL, true, true);
-	LayoutManager::Instance()->AddPane(SelectionFontPane::Instance(), "Selection", SELECTION_PANE, PaneDisposal::RIGHT, true, true);
-	LayoutManager::Instance()->AddPane(GeneratorPane::Instance(), "Generator", GENERATOR_PANE, PaneDisposal::RIGHT, true, true);
-	LayoutManager::Instance()->AddPane(FontStructurePane::Instance(), "Font Structure", STRUCTURE_PANE, PaneDisposal::CENTRAL, false, false);
-	LayoutManager::Instance()->AddPane(GlyphPane::Instance(), "Glyph", GLYPH_PANE, PaneDisposal::CENTRAL, false, false);
-	LayoutManager::Instance()->AddPane(FontPreviewPane::Instance(), "Font Preview", PREVIEW_PANE, PaneDisposal::BOTTOM, false, false);
+	LayoutManager::Instance()->AddPane(ParamsPane::Instance(), "Params", "", PaneDisposal::LEFT, true, true);
+	LayoutManager::Instance()->AddPane(SourceFontPane::Instance(), "Source", "", PaneDisposal::CENTRAL, true, true);
+	LayoutManager::Instance()->AddPane(FinalFontPane::Instance(), "Final", "", PaneDisposal::CENTRAL, true, true);
+	LayoutManager::Instance()->AddPane(SelectionFontPane::Instance(), "Selection", "", PaneDisposal::RIGHT, true, true);
+	LayoutManager::Instance()->AddPane(GeneratorPane::Instance(), "Generator", "", PaneDisposal::RIGHT, true, true);
+	LayoutManager::Instance()->AddPane(FontStructurePane::Instance(), "Font Structure", "", PaneDisposal::CENTRAL, false, false);
+	LayoutManager::Instance()->AddPane(GlyphPane::Instance(), "Glyph", "", PaneDisposal::CENTRAL, false, false);
+	LayoutManager::Instance()->AddPane(FontPreviewPane::Instance(), "Font Preview", "", PaneDisposal::BOTTOM, false, false);
 #ifdef _DEBUG
-	LayoutManager::Instance()->AddPane(DebugPane::Instance(), "Debug", DEBUG_PANE, PaneDisposal::LEFT, false, false);
+	LayoutManager::Instance()->AddPane(DebugPane::Instance(), "Debug", "", PaneDisposal::LEFT, false, false);
 #endif
 #ifdef USE_SHADOW
 	AssetManager::Instance()->LoadTexture2D("btn", "src/res/btn.png");
 #endif
+
+	LayoutManager::Instance()->InitPanes();
+	ThemeHelper::Instance(); // default theme
+
+	LoadConfigFile("config.xml");
+
+	ThemeHelper::Instance()->ApplyStyle();
 }
 
 void MainFrame::Unit()
 {
 	SaveConfigFile("config.xml");
 
+	LayoutManager::Instance()->UnitPanes();
 	ProjectFile::Instance()->Clear();
 }
 
@@ -156,7 +167,7 @@ void MainFrame::SaveAsProject(const std::string& vFilePathName)
 bool MainFrame::Display(ImVec2 vPos, ImVec2 vSize)
 {
 	widgetId = WIDGET_ID_MAGIC_NUMBER; // important for event catching on imgui widgets
-	ImGui::CustomStyle::ResetCustomId();
+	ImGui::CustomStyle::Instance()->pushId = WIDGET_ID_MAGIC_NUMBER;
 	TextureHelper::sNeedToSkipRendering = false;
 
 	m_DisplayPos = vPos;
@@ -196,12 +207,15 @@ bool MainFrame::Display(ImVec2 vPos, ImVec2 vSize)
 		ImGui::EndMainStatusBar();
 	}
 
-	if (LayoutManager::Instance()->BeginDockSpace(ImGuiDockNodeFlags_PassthruCentralNode))
+	if (LayoutManager::Instance()->BeginDockSpace(
+		ImGuiDockNodeFlags_PassthruCentralNode))
 	{
 		LayoutManager::Instance()->EndDockSpace();
 	}
 
-	ImGui::CustomStyle::pushId = LayoutManager::Instance()->DisplayPanes(ImGui::CustomStyle::pushId);
+	ImGui::CustomStyle::Instance()->pushId = 
+		LayoutManager::Instance()->DisplayPanes(
+			0U, ImGui::CustomStyle::Instance()->pushId);
 
 	DisplayDialogsAndPopups();
 
@@ -318,7 +332,7 @@ void MainFrame::DisplayDialogsAndPopups()
 
 	if (ProjectFile::Instance()->IsLoaded())
 	{
-		LayoutManager::Instance()->DrawDialogsAndPopups();
+		LayoutManager::Instance()->DrawDialogsAndPopups(0U);
 
 		ImVec2 min = MainFrame::Instance()->m_DisplaySize * 0.5f;
 		ImVec2 max = MainFrame::Instance()->m_DisplaySize;
@@ -451,12 +465,20 @@ limitations under the License.)", "https://github.com/aiekick/ImGuiFontStudio/bl
 
 void MainFrame::SetAppTitle(const std::string& vFilePathName)
 {
-	auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
-	if (ps.isOk)
+	static char bufTitle[1024] = "";
+	if (vFilePathName.empty())
 	{
-		char bufTitle[1024];
-		snprintf(bufTitle, 1023, "ImGuiFontStudio %s - Project : %s.ifs", IMGUIFONTSTUDIO_VERSION, ps.name.c_str());
+		snprintf(bufTitle, 1023, "%s %s", APP_TITLE, ImGuiFontStudio_BuildId);
 		glfwSetWindowTitle(m_Window, bufTitle);
+	}
+	else
+	{
+		auto ps = FileHelper::Instance()->ParsePathFileName(vFilePathName);
+		if (ps.isOk)
+		{
+			snprintf(bufTitle, 1023, "%s %s - Project : %s.ifs", APP_TITLE, ImGuiFontStudio_BuildId, ps.name.c_str());
+			glfwSetWindowTitle(m_Window, bufTitle);
+		}
 	}
 }
 
@@ -575,8 +597,8 @@ open project :
 			std::string path = ".";
 			if (ProjectFile::Instance()->IsLoaded())
 				path = ProjectFile::Instance()->m_ProjectFilePath;
-			ImGuiFileDialog::Instance()->OpenModal(
-				"OpenProjectDlg", "Open Project File", "Project File{.ifs}", path);
+			ImGuiFileDialog::Instance()->OpenDialog(
+				"OpenProjectDlg", "Open Project File", "Project File{.ifs}", path, 1, nullptr, ImGuiFileDialogFlags_Modal);
 			return true;
 		});
 	m_ActionSystem.Add([this]()
@@ -622,8 +644,8 @@ save project :
 				std::string path = ".";
 				if (ProjectFile::Instance()->IsLoaded())
 					path = ProjectFile::Instance()->m_ProjectFilePath;
-				ImGuiFileDialog::Instance()->OpenModal(
-					"SaveProjectDlg", "Save Project File", "Project File{.ifs}", path);
+				ImGuiFileDialog::Instance()->OpenDialog(
+					"SaveProjectDlg", "Save Project File", "Project File{.ifs}", path, 1, nullptr, ImGuiFileDialogFlags_Modal);
 			}
 			return true;
 		});
@@ -646,9 +668,9 @@ save as project :
 			std::string path = ".";
 			if (ProjectFile::Instance()->IsLoaded())
 				path = ProjectFile::Instance()->m_ProjectFilePath;
-			ImGuiFileDialog::Instance()->OpenModal(
+			ImGuiFileDialog::Instance()->OpenDialog(
 				"SaveProjectDlg", "Save Project File", "Project File{.ifs}", path,
-				1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
+				1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite | ImGuiFileDialogFlags_Modal);
 			return true;
 		});
 	m_ActionSystem.Add([this]()
@@ -768,9 +790,9 @@ bool MainFrame::Action_UnSavedDialog_SaveProject()
 				std::string path = ".";
 				if (ProjectFile::Instance()->IsLoaded())
 					path = ProjectFile::Instance()->m_ProjectFilePath;
-				ImGuiFileDialog::Instance()->OpenModal(
+				ImGuiFileDialog::Instance()->OpenDialog(
 					"SaveProjectDlg", "Save Project File", "Project File{.ifs}",
-					path, 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
+					path, 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite | ImGuiFileDialogFlags_Modal);
 				return true;
 			});
 	}
@@ -789,9 +811,9 @@ void MainFrame::Action_UnSavedDialog_SaveAsProject()
 			std::string path = ".";
 			if (ProjectFile::Instance()->IsLoaded())
 				path = ProjectFile::Instance()->m_ProjectFilePath;
-			ImGuiFileDialog::Instance()->OpenModal(
+			ImGuiFileDialog::Instance()->OpenDialog(
 				"SaveProjectDlg", "Save Project File", "Project File{.ifs}",
-				path, 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite);
+				path, 1, nullptr, ImGuiFileDialogFlags_ConfirmOverwrite | ImGuiFileDialogFlags_Modal);
 			return true;
 		});
 }

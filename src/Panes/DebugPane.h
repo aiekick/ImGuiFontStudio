@@ -38,9 +38,9 @@ private:
 public:
 	bool Init() override;
 	void Unit() override;
-	int DrawPanes(int vWidgetId, std::string vUserDatas)  override;
-	void DrawDialogsAndPopups(std::string vUserDatas) override;
-	int DrawWidgets(int vWidgetId, std::string vUserDatas)  override;
+	int DrawPanes(const uint32_t& vCurrentFrame, int vWidgetId, std::string vUserDatas, PaneFlags& vInOutPaneShown) override;
+	void DrawDialogsAndPopups(const uint32_t& vCurrentFrame, std::string vUserDatas) override;
+	int DrawWidgets(const uint32_t& vCurrentFrame, int vWidgetId, std::string vUserDatas) override;
 
 private:
 	void DrawDebugPane();
@@ -54,17 +54,17 @@ public:
 	void DrawGlyphCurrentPoint(float vPreviewScale, ImVec2 vScreenPos, ImDrawList *vImDrawList);
 
 public: // singleton
-	static DebugPane *Instance()
+	static std::shared_ptr<DebugPane> Instance()
 	{
-		static DebugPane _instance;
-		return &_instance;
+		static auto _instance = std::make_shared<DebugPane>();
+		return _instance;
 	}
 
-protected:
-	DebugPane(); // Prevent construction
-	DebugPane(const DebugPane&) {}; // Prevent construction by copying
+public:
+	DebugPane() = default; // Prevent construction
+	DebugPane(const DebugPane&) = default; // Prevent construction by copying
 	DebugPane& operator =(const DebugPane&) { return *this; }; // Prevent assignment
-	~DebugPane(); // Prevent unwanted destruction};
+	~DebugPane() = default; // Prevent unwanted destruction};
 };
 
 #endif

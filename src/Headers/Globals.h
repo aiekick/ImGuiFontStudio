@@ -1,11 +1,11 @@
 #pragma once
 
 #if VULKAN
-	#include <GLFW/glfw3.h>
-	#include <vulkan/vulkan.h>
+#include <GLFW/glfw3.h>
+#include <vulkan/vulkan.h>
 #else
-	#include <glad/glad.h>
-	#include <GLFW/glfw3.h>
+#include <glad/glad.h>
+#include <GLFW/glfw3.h>
 #endif
 
 enum PaneFlags_
@@ -22,3 +22,5 @@ enum PaneFlags_
 	DEBUG_PANE = (1 << 8)
 #endif
 };
+
+#define APP_TITLE "ImGuiFontStudio"

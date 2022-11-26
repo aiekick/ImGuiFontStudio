@@ -1,25 +1,17 @@
 /*
-MIT License
+Copyright 2022-2022 Stephane Cuillerdier (aka aiekick)
 
-Copyright (c) 2021 Stephane Cuillerdier (aka Aiekick)
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
 
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
+http://www.apache.org/licenses/LICENSE-2.0
 
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
 */
 
 #pragma once
@@ -38,26 +30,36 @@ enum class PaneDisposal
 	Count
 };
 
-#define PANE_NAME_BUFFER_SIZE 100
+class AbstractPane;
+typedef std::shared_ptr<AbstractPane> AbstractPanePtr;
+typedef std::weak_ptr<AbstractPane> AbstractPaneWeak;
 
-class GenericRenderer;
+class ProjectFile;
 class AbstractPane
 {
 public:
-	char m_PaneName[PANE_NAME_BUFFER_SIZE + 1] = "";
+	std::string m_PaneName;
 	PaneFlags m_PaneFlag = 0;
 	PaneDisposal m_PaneDisposal = PaneDisposal::CENTRAL;
 	bool m_OpenedDefault = false;
 	bool m_FocusedDefault = false;
+	bool m_ShowPaneAtFirstCall = false;
+	bool m_HidePaneAtFirstCall = false;
 
 public:
 	int m_PaneWidgetId = 0;
 	int NewWidgetId() { return ++m_PaneWidgetId; }
-	
+	PaneFlags GetPaneFlag() { return m_PaneFlag; }
+
 public:
 	virtual bool Init() = 0;
 	virtual void Unit() = 0;
-	virtual int DrawPanes(int vWidgetId, std::string vUserDatas) = 0;
-	virtual void DrawDialogsAndPopups(std::string vUserDatas) = 0;
-	virtual int DrawWidgets(int vWidgetId, std::string vUserDatas) = 0;
+	virtual int DrawPanes(const uint32_t& vCurrentFrame, int vWidgetId, std::string vUserDatas, PaneFlags& vInOutPaneShown) = 0;
+	virtual void DrawDialogsAndPopups(const uint32_t& vCurrentFrame, std::string vUserDatas) = 0;
+	virtual int DrawWidgets(const uint32_t& vCurrentFrame, int vWidgetId, std::string vUserDatas) = 0;
+
+public:
+	virtual void ShowPane() { m_ShowPaneAtFirstCall = true; };
+	virtual void HidePane() { m_HidePaneAtFirstCall = true; };
+	virtual bool CanWeDisplay() { return true; };
 };

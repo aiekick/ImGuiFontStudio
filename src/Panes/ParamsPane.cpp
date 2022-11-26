@@ -31,14 +31,10 @@
 
 #include <cinttypes> // printf zu
 
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 
 static ProjectFile defaultProjectValues;
 static FontInfos defaultFontInfosValues;
-
-ParamsPane::ParamsPane() = default;
-ParamsPane::~ParamsPane() = default;
 
 ///////////////////////////////////////////////////////////////////////////////////
 //// OVERRIDES ////////////////////////////////////////////////////////////////////
@@ -54,16 +50,16 @@ void ParamsPane::Unit()
 
 }
 
-int ParamsPane::DrawPanes(int vWidgetId, std::string vUserDatas)
+int ParamsPane::DrawPanes(const uint32_t& /*vCurrentFrame*/, int vWidgetId, std::string /*vUserDatas*/, PaneFlags& vInOutPaneShown)
 {
 	m_PaneWidgetId = vWidgetId;
 
-	DrawParamsPane();
+	DrawParamsPane(vInOutPaneShown);
 
 	return m_PaneWidgetId;
 }
 
-void ParamsPane::DrawDialogsAndPopups(std::string vUserDatas)
+void ParamsPane::DrawDialogsAndPopups(const uint32_t& /*vCurrentFrame*/, std::string /*vUserDatas*/)
 {
 	if (ProjectFile::Instance()->IsLoaded())
 	{
@@ -106,10 +102,8 @@ void ParamsPane::DrawDialogsAndPopups(std::string vUserDatas)
 	}
 }
 
-int ParamsPane::DrawWidgets(int vWidgetId, std::string vUserDatas)
+int ParamsPane::DrawWidgets(const uint32_t& /*vCurrentFrame*/, int vWidgetId, std::string /*vUserDatas*/)
 {
-	UNUSED(vUserDatas);
-
 	return vWidgetId;
 }
 
@@ -117,19 +111,26 @@ int ParamsPane::DrawWidgets(int vWidgetId, std::string vUserDatas)
 //// PRIVATE : PANES //////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void ParamsPane::DrawParamsPane()
+void ParamsPane::DrawParamsPane(PaneFlags& vInOutPaneShown)
 {
-	if (LayoutManager::Instance()->m_Pane_Shown & m_PaneFlag)
+	if (vInOutPaneShown & m_PaneFlag)
 	{
-		if (ImGui::BeginFlag<PaneFlags>(m_PaneName,
-			&LayoutManager::Instance()->m_Pane_Shown, m_PaneFlag,
-			//ImGuiWindowFlags_NoTitleBar |
-			//ImGuiWindowFlags_MenuBar |
-			//ImGuiWindowFlags_NoMove |
+		static ImGuiWindowFlags flags =
 			ImGuiWindowFlags_NoCollapse |
-			//ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_NoBringToFrontOnFocus))
+			ImGuiWindowFlags_NoBringToFrontOnFocus |
+			ImGuiWindowFlags_MenuBar;
+		if (ImGui::Begin<PaneFlags>(m_PaneName,
+			&vInOutPaneShown, m_PaneFlag, flags))
 		{
+#ifdef USE_DECORATIONS_FOR_RESIZE_CHILD_WINDOWS
+			auto win = ImGui::GetCurrentWindowRead();
+			if (win->Viewport->Idx != 0)
+				flags |= ImGuiWindowFlags_NoResize;// | ImGuiWindowFlags_NoTitleBar;
+			else
+				flags = ImGuiWindowFlags_NoCollapse |
+				ImGuiWindowFlags_NoBringToFrontOnFocus |
+				ImGuiWindowFlags_MenuBar;
+#endif
 			if (ProjectFile::Instance()->IsLoaded())
 			{
 				if (ImGui::BeginFramedGroup("Font File"))
@@ -158,11 +159,11 @@ void ParamsPane::DrawParamsPane()
 						static int _countLines = 7;
 						//ImGui::SliderIntDefaultCompact(ImGui::GetContentRegionAvail().x, "Count Lines", &_countLines, 0, 100, 7);
 
-						static ImGuiTableFlags flags =
+						static ImGuiTableFlags flags2 =
 							ImGuiTableFlags_SizingFixedFit | ImGuiTableFlags_RowBg |
 							ImGuiTableFlags_ScrollX | ImGuiTableFlags_ScrollY |
 							ImGuiTableFlags_NoHostExtendY | ImGuiTableFlags_Borders;
-						if (ImGui::BeginTable("##fileTable", 2, flags, ImVec2(-1.0f, _countLines * ImGui::GetTextLineHeightWithSpacing())))
+						if (ImGui::BeginTable("##fileTable", 2, flags2, ImVec2(-1.0f, _countLines * ImGui::GetTextLineHeightWithSpacing())))
 						{
 							ImGui::TableSetupScrollFreeze(0, 1); // Make header always visible
 							ImGui::TableSetupColumn("Font Files", ImGuiTableColumnFlags_WidthStretch, -1, 0);
@@ -213,10 +214,10 @@ void ParamsPane::DrawParamsPane()
 										std::string path = ".";
 										if (ProjectFile::Instance()->IsLoaded())
 											path = ProjectFile::Instance()->m_ProjectFilePath;
-										ImGuiFileDialog::Instance()->OpenModal(
+										ImGuiFileDialog::Instance()->OpenDialog(
 											"SolveBadFilePathName",
 											label.c_str(), "Font File (*.ttf *.otf){.ttf,.otf}", path,
-											itFont.first.c_str(), 1, IGFDUserDatas(itFont.first.c_str()));
+											itFont.first.c_str(), 1, IGFDUserDatas(itFont.first.c_str()), ImGuiFileDialogFlags_Modal);
 									}
 									if (itFont.second->m_NeedFilePathResolve)
 										ImGui::PopStyleColor();
@@ -249,7 +250,7 @@ void ParamsPane::DrawParamsPane()
 				{
 					ProjectFile::Instance()->m_SelectedFont->DrawInfos();
 
-					LayoutManager::Instance()->DrawWidgets(0, "");
+					LayoutManager::Instance()->DrawWidgets(0U, 0);
 
 					if (ImGui::BeginFramedGroup("Glyphs"))
 					{
@@ -360,8 +361,9 @@ open font :
 			std::string path = ".";
 			if (ProjectFile::Instance()->IsLoaded())
 				path = ProjectFile::Instance()->m_ProjectFilePath;
-			ImGuiFileDialog::Instance()->OpenModal(
-				"OpenFontDlg", "Open Font File", "Font File (*.ttf *.otf){.ttf,.otf},All Files (*.*){.*}", path, 0);
+			ImGuiFileDialog::Instance()->OpenDialog(
+				"OpenFontDlg", "Open Font File", "Font File (*.ttf *.otf){.ttf,.otf},All Files (*.*){.*}", 
+				path, 1, nullptr, ImGuiFileDialogFlags_Modal);
 			return true;
 		});
 }

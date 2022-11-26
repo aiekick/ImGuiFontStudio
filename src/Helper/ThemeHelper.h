@@ -1,18 +1,19 @@
 /*
- * Copyright 2020 Stephane Cuillerdier (aka Aiekick)
- *
- * Licensed under the Apache License, Version 2.0 (the "License");
- * you may not use this file except in compliance with the License.
- * You may obtain a copy of the License at
- *
- *      http://www.apache.org/licenses/LICENSE-2.0
- *
- * Unless required by applicable law or agreed to in writing, software
- * distributed under the License is distributed on an "AS IS" BASIS,
- * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
- * See the License for the specific language governing permissions and
- * limitations under the License.
- */
+Copyright 2022-2022 Stephane Cuillerdier (aka aiekick)
+
+Licensed under the Apache License, Version 2.0 (the "License");
+you may not use this file except in compliance with the License.
+You may obtain a copy of the License at
+
+http://www.apache.org/licenses/LICENSE-2.0
+
+Unless required by applicable law or agreed to in writing, software
+distributed under the License is distributed on an "AS IS" BASIS,
+WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+See the License for the specific language governing permissions and
+limitations under the License.
+*/
+
 #pragma once
 
 #include <ImGuiFileDialog/ImGuiFileDialog.h>
@@ -20,7 +21,6 @@
 #include <imgui/imgui.h>
 #include <string>
 #include <map>
-//#define USE_SHADOW
 
 class ThemeHelper : public conf::ConfigAbstract
 {
@@ -31,9 +31,10 @@ public:
 	static bool puUseTextureForShadow;
 #endif
 	bool puShowImGuiStyleEdtor = false;
+	bool puShowTextEditorStyleEditor = false;
 
 private:
-	std::map<std::string, IGFD::FileExtentionInfosStruct> prFileTypeInfos;
+	std::map<std::string, IGFD::FileStyle> prFileTypeInfos;
 	ImGuiStyle prImGuiStyle;
 
 public:
@@ -44,7 +45,7 @@ public:
 	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas = "") override;
 
 	ImGuiStyle GetImGuiStyle() { return prImGuiStyle; }
-	
+
 	void ApplyStyle();
 
 private:
@@ -59,12 +60,11 @@ private:
 
 	void ApplyFileTypeColors();
 
-	// ImGuiColorTextEdit Palette
 	std::string GetStyleColorName(ImGuiCol idx);
 	int GetImGuiColFromName(const std::string& vName);
 
 public: // singleton
-	static ThemeHelper *Instance()
+	static ThemeHelper* Instance()
 	{
 		static ThemeHelper _instance;
 		return &_instance;
@@ -72,8 +72,7 @@ public: // singleton
 
 protected:
 	ThemeHelper(); // Prevent construction
-	ThemeHelper(const ThemeHelper&) {}; // Prevent construction by copying
+	ThemeHelper(const ThemeHelper&) = default; // Prevent construction by copying
 	ThemeHelper& operator =(const ThemeHelper&) { return *this; }; // Prevent assignment
 	~ThemeHelper(); // Prevent unwanted destruction
 };
-

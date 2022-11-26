@@ -3,7 +3,7 @@
 #include <imgui/imgui.h>
 #include <Project/ProjectFile.h>
 #include <Project/FontInfos.h>
-#include <Gui/ImWidgets.h>
+#include<Gui/ImWidgets.h>
 
 
 void GenMode::AddGenMode(GenModeFlags vFlags)

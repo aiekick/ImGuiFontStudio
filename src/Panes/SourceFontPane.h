@@ -18,7 +18,7 @@
 #include <Panes/Abstract/AbstractPane.h>
 #include <ctools/ConfigAbstract.h>
 #include <ctools/cTools.h>
-#include <Gui/ImWidgets.h>
+#include<Gui/ImWidgets.h>
 
 #include <string>
 #include <map>
@@ -44,9 +44,9 @@ private: // private enum
 public:
 	bool Init() override;
 	void Unit() override;
-	int DrawPanes(int vWidgetId, std::string vUserDatas)  override;
-	void DrawDialogsAndPopups(std::string vUserDatas) override;
-	int DrawWidgets(int vWidgetId, std::string vUserDatas)  override;
+	int DrawPanes(const uint32_t& vCurrentFrame, int vWidgetId, std::string vUserDatas, PaneFlags& vInOutPaneShown)  override;
+	void DrawDialogsAndPopups(const uint32_t& vCurrentFrame, std::string vUserDatas) override;
+	int DrawWidgets(const uint32_t& vCurrentFrame, int vWidgetId, std::string vUserDatas)  override;
 
 private: 
 	void DrawFilterBar(std::shared_ptr<FontInfos> vFontInfos);
@@ -54,20 +54,20 @@ private:
 	void DrawFontAtlas_Virtual(std::shared_ptr<FontInfos> vFontInfos);
 	
 	// panes
-	void DrawSourceFontPane();
+	void DrawSourceFontPane(PaneFlags& vInOutPaneShown);
 
 public: // configuration
 	std::string getXml(const std::string& vOffset, const std::string& vUserDatas);
 	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas);
 
 public: // singleton
-	static SourceFontPane* Instance()
+	static std::shared_ptr<SourceFontPane> Instance()
 	{
-		static SourceFontPane _instance;
-		return &_instance;
+		static auto _instance = std::make_shared<SourceFontPane>();
+		return _instance;
 	}
 
-protected:
+public:
 	SourceFontPane(); // Prevent construction
 	SourceFontPane(const SourceFontPane&) {}; // Prevent construction by copying
 	SourceFontPane& operator =(const SourceFontPane&) { return *this; }; // Prevent assignment

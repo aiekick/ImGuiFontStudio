@@ -24,18 +24,14 @@
 #include <MainFrame.h>
 
 #include <Panes/Manager/LayoutManager.h>
-#include <Gui/ImWidgets.h>
+#include<Gui/ImWidgets.h>
 
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 
 #include <ctools/cTools.h>
 #include <ctools/FileHelper.h>
 
 #include <cinttypes> // printf zu
-
-DebugPane::DebugPane() = default;
-DebugPane::~DebugPane() = default;
 
 ///////////////////////////////////////////////////////////////////////////////////
 //// OVERRIDES ////////////////////////////////////////////////////////////////////
@@ -51,44 +47,28 @@ void DebugPane::Unit()
 
 }
 
-int DebugPane::DrawPanes(int vWidgetId, std::string vUserDatas)
+int DebugPane::DrawPanes(const uint32_t& /*vCurrentFrame*/, int vWidgetId, std::string /*vUserDatas*/, PaneFlags& vInOutPaneShown)
 {
 	m_PaneWidgetId = vWidgetId;
 
-	DrawDebugPane();
-
-	return m_PaneWidgetId;
-}
-
-void DebugPane::DrawDialogsAndPopups(std::string vUserDatas)
-{
-
-}
-
-int DebugPane::DrawWidgets(int vWidgetId, std::string vUserDatas)
-{
-	UNUSED(vUserDatas);
-
-	return vWidgetId;
-}
-
-///////////////////////////////////////////////////////////////////////////////////
-//// PRIVATE //////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////
-
-void DebugPane::DrawDebugPane()
-{
-	if (LayoutManager::Instance()->m_Pane_Shown & m_PaneFlag)
+	if (vInOutPaneShown & m_PaneFlag)
 	{
-		if (ImGui::BeginFlag<PaneFlags>(m_PaneName,
-			&LayoutManager::Instance()->m_Pane_Shown, m_PaneFlag,
-			//ImGuiWindowFlags_NoTitleBar |
-			//ImGuiWindowFlags_MenuBar |
-			//ImGuiWindowFlags_NoMove |
+		static ImGuiWindowFlags flags =
 			ImGuiWindowFlags_NoCollapse |
-			//ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_NoBringToFrontOnFocus))
+			ImGuiWindowFlags_NoBringToFrontOnFocus |
+			ImGuiWindowFlags_MenuBar;
+		if (ImGui::Begin<PaneFlags>(m_PaneName,
+			&vInOutPaneShown, m_PaneFlag, flags))
 		{
+#ifdef USE_DECORATIONS_FOR_RESIZE_CHILD_WINDOWS
+			auto win = ImGui::GetCurrentWindowRead();
+			if (win->Viewport->Idx != 0)
+				flags |= ImGuiWindowFlags_NoResize;// | ImGuiWindowFlags_NoTitleBar;
+			else
+				flags = ImGuiWindowFlags_NoCollapse |
+				ImGuiWindowFlags_NoBringToFrontOnFocus |
+				ImGuiWindowFlags_MenuBar;
+#endif
 			if (ProjectFile::Instance()->IsLoaded())
 			{
 				if (LayoutManager::Instance()->IsSpecificPaneFocused(m_PaneFlag))
@@ -98,12 +78,26 @@ void DebugPane::DrawDebugPane()
 			}
 		}
 
+		//MainFrame::sAnyWindowsHovered |= ImGui::IsWindowHovered();
+
 		ImGui::End();
 	}
+
+	return m_PaneWidgetId;
+}
+
+void DebugPane::DrawDialogsAndPopups(const uint32_t& /*vCurrentFrame*/, std::string /*vUserDatas*/)
+{
+
+}
+
+int DebugPane::DrawWidgets(const uint32_t& /*vCurrentFrame*/, int vWidgetId, std::string /*vUserDatas*/)
+{
+	return vWidgetId;
 }
 
 ///////////////////////////////////////////////////////////////////////////////////
-///////////////////////////////////////////////////////////////////////////////////
+//// PRIVATE //////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
 void DebugPane::SetGlyphToDebug(std::weak_ptr<GlyphInfos> vGlyphInfos)
@@ -185,10 +179,10 @@ void DebugPane::DrawDebugGlyphPane()
 							ImGui::Selectable_FramedText("[%i] x:%i y:%i", _i, pt.x, pt.y);
 							if (ImGui::IsItemHovered())
 								m_GlyphCurrentPoint = ct::ivec2(_c, _i);
-							_i++;
+							++_i;
 						}
 					}
-					_c++;
+					++_c;
 				}
 			}
 		}

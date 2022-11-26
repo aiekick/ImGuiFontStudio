@@ -35,23 +35,23 @@ private:
 public:
 	bool Init() override;
 	void Unit() override;
-	int DrawPanes(int vWidgetId, std::string vUserDatas)  override;
-	void DrawDialogsAndPopups(std::string vUserDatas) override;
-	int DrawWidgets(int vWidgetId, std::string vUserDatas)  override;
+	int DrawPanes(const uint32_t& vCurrentFrame, int vWidgetId, std::string vUserDatas, PaneFlags& vInOutPaneShown)  override;
+	void DrawDialogsAndPopups(const uint32_t& vCurrentFrame, std::string vUserDatas) override;
+	int DrawWidgets(const uint32_t& vCurrentFrame, int vWidgetId, std::string vUserDatas)  override;
 	
 private:
-	void DrawFontPreviewPane();
+	void DrawFontPreviewPane(PaneFlags& vInOutPaneShown);
 	void DrawMixerWidget();
 	void DrawMixedFontResult();
 
 public: // singleton
-	static FontPreviewPane *Instance()
+	static std::shared_ptr<FontPreviewPane> Instance()
 	{
-		static FontPreviewPane _instance;
-		return &_instance;
+		static auto _instance = std::make_shared<FontPreviewPane>();
+		return _instance;
 	}
 
-protected:
+public:
 	FontPreviewPane(); // Prevent construction
 	FontPreviewPane(const FontPreviewPane&) {}; // Prevent construction by copying
 	FontPreviewPane& operator =(const FontPreviewPane&) { return *this; }; // Prevent assignment

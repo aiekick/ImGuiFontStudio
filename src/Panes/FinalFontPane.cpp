@@ -20,16 +20,15 @@
 
 #include <MainFrame.h>
 #include <Generator/Generator.h>
-#include <Gui/ImWidgets.h>
+#include<Gui/ImWidgets.h>
 #include <Panes/Manager/LayoutManager.h>
-#include <Res/CustomFont.h>
+#include <Contrib/FontIcons/CustomFont.h>
 #include <Helper/SelectionHelper.h>
 #include <Panes/GlyphPane.h>
 #include <Project/GlyphInfos.h>
 
 #include <Helper/TranslationSystem.h>
 
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 
 #include <cinttypes> // printf zu
@@ -53,24 +52,22 @@ void FinalFontPane::Unit()
 
 }
 
-int FinalFontPane::DrawPanes(int vWidgetId, std::string vUserDatas)
+int FinalFontPane::DrawPanes(const uint32_t& /*vCurrentFrame*/, int vWidgetId, std::string /*vUserDatas*/, PaneFlags& vInOutPaneShown)
 {
 	m_PaneWidgetId = vWidgetId;
 
-	DrawFinalFontPane();
+	DrawFinalFontPane(vInOutPaneShown);
 
 	return m_PaneWidgetId;
 }
 
-void FinalFontPane::DrawDialogsAndPopups(std::string vUserDatas)
+void FinalFontPane::DrawDialogsAndPopups(const uint32_t& /*vCurrentFrame*/, std::string /*vUserDatas*/)
 {
 
 }
 
-int FinalFontPane::DrawWidgets(int vWidgetId, std::string vUserDatas)
+int FinalFontPane::DrawWidgets(const uint32_t& /*vCurrentFrame*/, int vWidgetId, std::string /*vUserDatas*/)
 {
-	UNUSED(vUserDatas);
-
 	return vWidgetId;
 }
 
@@ -78,40 +75,47 @@ int FinalFontPane::DrawWidgets(int vWidgetId, std::string vUserDatas)
 //// PRIVATE //////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void FinalFontPane::DrawFinalFontPane()
+void FinalFontPane::DrawFinalFontPane(PaneFlags& vInOutPaneShown)
 {
-	if (LayoutManager::Instance()->m_Pane_Shown & FINAL_PANE)
+	if (vInOutPaneShown & m_PaneFlag)
 	{
-		if (ImGui::BeginFlag<PaneFlags>(m_PaneName,
-			&LayoutManager::Instance()->m_Pane_Shown, FINAL_PANE,
-			//ImGuiWindowFlags_NoTitleBar |
-			ImGuiWindowFlags_MenuBar |
-			//ImGuiWindowFlags_NoMove |
+		static ImGuiWindowFlags flags =
 			ImGuiWindowFlags_NoCollapse |
-			//ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_NoBringToFrontOnFocus))
+			ImGuiWindowFlags_NoBringToFrontOnFocus |
+			ImGuiWindowFlags_MenuBar;
+		if (ImGui::Begin<PaneFlags>(m_PaneName,
+			&vInOutPaneShown, m_PaneFlag, flags))
 		{
+#ifdef USE_DECORATIONS_FOR_RESIZE_CHILD_WINDOWS
+			auto win = ImGui::GetCurrentWindowRead();
+			if (win->Viewport->Idx != 0)
+				flags |= ImGuiWindowFlags_NoResize;// | ImGuiWindowFlags_NoTitleBar;
+			else
+				flags = ImGuiWindowFlags_NoCollapse |
+				ImGuiWindowFlags_NoBringToFrontOnFocus |
+				ImGuiWindowFlags_MenuBar;
+#endif
 			if (ProjectFile::Instance()->IsLoaded())
 			{
 				if (!ProjectFile::Instance()->m_Fonts.empty())
 				{
 					if (ImGui::BeginMenuBar())
 					{
-						if (ImGui::BeginMenu(TSLOC(FFP,ViewMode)))
+						if (ImGui::BeginMenu(TSLOC(FFP, ViewMode)))
 						{
 							ImGui::MenuItem<FinalFontPaneModeFlags>("by Font, no order", "",
-								&m_FinalFontPaneModeFlags, 
+								&m_FinalFontPaneModeFlags,
 								FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_NO_ORDER, true);
 
 							if (ImGui::MenuItem<FinalFontPaneModeFlags>("by Font, ordered by CodePoint", "",
-								&m_FinalFontPaneModeFlags , 
+								&m_FinalFontPaneModeFlags,
 								FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_CODEPOINT, true))
 							{
 								PrepareSelectionByFontOrderedByCodePoint();
 							}
 
 							if (ImGui::MenuItem<FinalFontPaneModeFlags>("by Font, ordered by Name", "",
-								&m_FinalFontPaneModeFlags , 
+								&m_FinalFontPaneModeFlags,
 								FinalFontPaneModeFlags::FINAL_FONT_PANE_BY_FONT_ORDERED_BY_NAMES, true))
 							{
 								PrepareSelectionByFontOrderedByGlyphNames();
@@ -120,21 +124,21 @@ void FinalFontPane::DrawFinalFontPane()
 							ImGui::Spacing();
 
 							if (ImGui::MenuItem<FinalFontPaneModeFlags>("Merged, no order", "",
-								&m_FinalFontPaneModeFlags , 
+								&m_FinalFontPaneModeFlags,
 								FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_NO_ORDER, true))
 							{
 								PrepareSelectionMergedNoOrder();
 							}
 
 							if (ImGui::MenuItem<FinalFontPaneModeFlags>("Merged, ordered by CodePoint", "",
-								&m_FinalFontPaneModeFlags , 
+								&m_FinalFontPaneModeFlags,
 								FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_ORDERED_BY_CODEPOINT, true))
 							{
 								PrepareSelectionMergedOrderedByCodePoint();
 							}
 
 							if (ImGui::MenuItem<FinalFontPaneModeFlags>("Merged, ordered by Name", "",
-								&m_FinalFontPaneModeFlags , 
+								&m_FinalFontPaneModeFlags,
 								FinalFontPaneModeFlags::FINAL_FONT_PANE_MERGED_ORDERED_BY_NAMES, true))
 							{
 								PrepareSelectionMergedOrderedByGlyphNames();
@@ -149,7 +153,7 @@ void FinalFontPane::DrawFinalFontPane()
 							{
 								ProjectFile::Instance()->SetProjectChange();
 							}
-							
+
 							ImGui::EndMenu();
 						}
 

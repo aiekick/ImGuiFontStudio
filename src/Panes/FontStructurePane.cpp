@@ -22,9 +22,8 @@
 #include <MainFrame.h>
 
 #include <Panes/Manager/LayoutManager.h>
-#include <Gui/ImWidgets.h>
+#include<Gui/ImWidgets.h>
 
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 
 #include <ctools/cTools.h>
@@ -49,25 +48,22 @@ void FontStructurePane::Unit()
 
 }
 
-int FontStructurePane::DrawPanes(int vWidgetId, std::string vUserDatas)
+int FontStructurePane::DrawPanes(const uint32_t& /*vCurrentFrame*/, int vWidgetId, std::string /*vUserDatas*/, PaneFlags& vInOutPaneShown)
 {
     m_PaneWidgetId = vWidgetId;
 
-    DrawFontStructurePane();
+    DrawFontStructurePane(vInOutPaneShown);
 
     return m_PaneWidgetId;
 }
 
-void FontStructurePane::DrawDialogsAndPopups(std::string vUserDatas)
+void FontStructurePane::DrawDialogsAndPopups(const uint32_t& /*vCurrentFrame*/, std::string /*vUserDatas*/)
 {
 
 }
 
-int FontStructurePane::DrawWidgets(int vWidgetId, std::string vUserDatas)
+int FontStructurePane::DrawWidgets(const uint32_t& /*vCurrentFrame*/, int vWidgetId, std::string /*vUserDatas*/)
 {
-    
-    UNUSED(vUserDatas);
-
     return vWidgetId;
 }
 
@@ -75,19 +71,26 @@ int FontStructurePane::DrawWidgets(int vWidgetId, std::string vUserDatas)
 //// PRIVATE //////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void FontStructurePane::DrawFontStructurePane()
+void FontStructurePane::DrawFontStructurePane(PaneFlags& vInOutPaneShown)
 {
-    if (LayoutManager::Instance()->m_Pane_Shown & m_PaneFlag)
-    {
-        if (ImGui::BeginFlag<PaneFlags>(m_PaneName,
-            &LayoutManager::Instance()->m_Pane_Shown, m_PaneFlag,
-            //ImGuiWindowFlags_NoTitleBar |
-            //ImGuiWindowFlags_MenuBar |
-            //ImGuiWindowFlags_NoMove |
-            ImGuiWindowFlags_NoCollapse |
-            //ImGuiWindowFlags_NoResize |
-            ImGuiWindowFlags_NoBringToFrontOnFocus))
-        {
+	if (vInOutPaneShown & m_PaneFlag)
+	{
+		static ImGuiWindowFlags flags =
+			ImGuiWindowFlags_NoCollapse |
+			ImGuiWindowFlags_NoBringToFrontOnFocus |
+			ImGuiWindowFlags_MenuBar;
+		if (ImGui::Begin<PaneFlags>(m_PaneName,
+			&vInOutPaneShown, m_PaneFlag, flags))
+		{
+#ifdef USE_DECORATIONS_FOR_RESIZE_CHILD_WINDOWS
+			auto win = ImGui::GetCurrentWindowRead();
+			if (win->Viewport->Idx != 0)
+				flags |= ImGuiWindowFlags_NoResize;// | ImGuiWindowFlags_NoTitleBar;
+			else
+				flags = ImGuiWindowFlags_NoCollapse |
+				ImGuiWindowFlags_NoBringToFrontOnFocus |
+				ImGuiWindowFlags_MenuBar;
+#endif
             if (ProjectFile::Instance()->IsLoaded())
             {
                 if (ImGui::ContrastedButton("Analyse Font"))

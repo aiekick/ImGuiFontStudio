@@ -1,19 +1,19 @@
 // This is an open source non-commercial project. Dear PVS-Studio, please check it.
 // PVS-Studio Static Code Analyzer for C, C++ and C#: http://www.viva64.com
 
+#include <glad/glad.h> 
+
 #include <imgui/imgui.h>
 #include <common/glfw/imgui_impl_glfw.h>
-#include <opengl/imgui_impl_opengl3.h>
+#include <backends/imgui_impl_opengl3.h>
 #include <stdio.h>
 
 #include <ctools/FileHelper.h>
 #include <MainFrame.h>
-#include <Res/CustomFont.cpp>
-#include <Res/Roboto_Medium.cpp>
+#include <Contrib/FontIcons/CustomFont.cpp>
+#include <Contrib/FontIcons/Roboto_Medium.cpp>
 #include <common/freetype/imgui_freetype.h>
 
-#include <glad/glad.h> 
-#include <GLFW/glfw3.h>
 
 #define SHOW_CONSOLE
 

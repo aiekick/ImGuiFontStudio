@@ -22,12 +22,11 @@
 #include <MainFrame.h>
 
 #include <Panes/Manager/LayoutManager.h>
-#include <Gui/ImWidgets.h>
+#include<Gui/ImWidgets.h>
 #ifdef _DEBUG
 #include <Panes/DebugPane.h>
 #endif
 
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 
 #include <ctools/cTools.h>
@@ -54,24 +53,22 @@ void GlyphPane::Unit()
 
 }
 
-int GlyphPane::DrawPanes(int vWidgetId, std::string vUserDatas)
+int GlyphPane::DrawPanes(const uint32_t& /*vCurrentFrame*/, int vWidgetId, std::string /*vUserDatas*/, PaneFlags& vInOutPaneShown)
 {
 	m_PaneWidgetId = vWidgetId;
 
-	DrawGlyphPane();
+	DrawGlyphPane(vInOutPaneShown);
 
 	return m_PaneWidgetId;
 }
 
-void GlyphPane::DrawDialogsAndPopups(std::string vUserDatas)
+void GlyphPane::DrawDialogsAndPopups(const uint32_t& /*vCurrentFrame*/, std::string /*vUserDatas*/)
 {
 
 }
 
-int GlyphPane::DrawWidgets(int vWidgetId, std::string vUserDatas)
+int GlyphPane::DrawWidgets(const uint32_t& /*vCurrentFrame*/, int vWidgetId, std::string /*vUserDatas*/)
 {
-	UNUSED(vUserDatas);
-	
 	if (ProjectFile::Instance()->IsLoaded())
 	{
 		// finally not very praticable
@@ -85,19 +82,26 @@ int GlyphPane::DrawWidgets(int vWidgetId, std::string vUserDatas)
 ///////////////////////////////////////////////////////////////////////////////////
 
 static ProjectFile _DefaultProjectFile;
-void GlyphPane::DrawGlyphPane()
+void GlyphPane::DrawGlyphPane(PaneFlags& vInOutPaneShown)
 {
-	if (LayoutManager::Instance()->m_Pane_Shown & m_PaneFlag)
+	if (vInOutPaneShown & m_PaneFlag)
 	{
-		if (ImGui::BeginFlag<PaneFlags>(m_PaneName,
-			&LayoutManager::Instance()->m_Pane_Shown, m_PaneFlag,
-			//ImGuiWindowFlags_NoTitleBar |
-			ImGuiWindowFlags_MenuBar |
-			//ImGuiWindowFlags_NoMove |
+		static ImGuiWindowFlags flags =
 			ImGuiWindowFlags_NoCollapse |
-			//ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_NoBringToFrontOnFocus))
+			ImGuiWindowFlags_NoBringToFrontOnFocus |
+			ImGuiWindowFlags_MenuBar;
+		if (ImGui::Begin<PaneFlags>(m_PaneName,
+			&vInOutPaneShown, m_PaneFlag, flags))
 		{
+#ifdef USE_DECORATIONS_FOR_RESIZE_CHILD_WINDOWS
+			auto win = ImGui::GetCurrentWindowRead();
+			if (win->Viewport->Idx != 0)
+				flags |= ImGuiWindowFlags_NoResize;// | ImGuiWindowFlags_NoTitleBar;
+			else
+				flags = ImGuiWindowFlags_NoCollapse |
+				ImGuiWindowFlags_NoBringToFrontOnFocus |
+				ImGuiWindowFlags_MenuBar;
+#endif
 			if (ProjectFile::Instance()->IsLoaded())
 			{
 				static float _ZoomPrecisionRatio = 1.0f / ProjectFile::Instance()->m_GlyphPreviewZoomPrecision;

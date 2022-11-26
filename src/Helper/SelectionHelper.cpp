@@ -18,7 +18,7 @@
  */
 
 #include "SelectionHelper.h"
-#include <globals.h>
+#include <Headers/Globals.h>
 #include <MainFrame.h>
 #include <Gui/ImWidgets.h>
 #include <Helper/Messaging.h>
@@ -26,9 +26,8 @@
 #include <Panes/FinalFontPane.h>
 #include <Panes/GeneratorPane.h>
 #include <Project/ProjectFile.h>
-#include <Res/CustomFont.h>
+#include <Contrib/FontIcons/CustomFont.h>
 
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 
 #include <cinttypes> // printf zu
@@ -168,7 +167,7 @@ void SelectionHelper::DrawMenu()
 			if (!m_ReRangeStruct.startCodePoint.valid)
 				ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.8f, 0.2f, 0.2f, 0.8f));
 			bool edited = ImGui::SliderUIntCompact(-1.0f,
-				"Start CodePoint", &m_ReRangeStruct.startCodePoint.codePoint, 0U, 65535U);
+				"Start CodePoint", &m_ReRangeStruct.startCodePoint.codePoint, 0U, 65535U, 1U);
 			if (!m_ReRangeStruct.startCodePoint.valid)
 				ImGui::PopStyleColor();
 			if (edited)
@@ -181,7 +180,7 @@ void SelectionHelper::DrawMenu()
 			if (!m_ReRangeStruct.endCodePoint.valid)
 				ImGui::PushStyleColor(ImGuiCol_FrameBg, ImVec4(0.8f, 0.2f, 0.2f, 0.8f));
 			edited = ImGui::SliderUIntCompact(-1.0f,
-				"End CodePoint", &m_ReRangeStruct.endCodePoint.codePoint, 0U, 65535U);
+				"End CodePoint", &m_ReRangeStruct.endCodePoint.codePoint, 0U, 65535U, 1U);
 			if (!m_ReRangeStruct.endCodePoint.valid)
 				ImGui::PopStyleColor();
 			if (edited)

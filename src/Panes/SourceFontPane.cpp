@@ -32,7 +32,6 @@
 
 #include <cinttypes> // printf zu
 
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 
 static ProjectFile defaultProjectValues;
@@ -55,24 +54,22 @@ void SourceFontPane::Unit()
 
 }
 
-int SourceFontPane::DrawPanes(int vWidgetId, std::string vUserDatas)
+int SourceFontPane::DrawPanes(const uint32_t& /*vCurrentFrame*/, int vWidgetId, std::string /*vUserDatas*/, PaneFlags& vInOutPaneShown)
 {
 	m_PaneWidgetId = vWidgetId;
 
-	DrawSourceFontPane();
+	DrawSourceFontPane(vInOutPaneShown);
 	
 	return m_PaneWidgetId;
 }
 
-void SourceFontPane::DrawDialogsAndPopups(std::string vUserDatas)
+void SourceFontPane::DrawDialogsAndPopups(const uint32_t& /*vCurrentFrame*/, std::string /*vUserDatas*/)
 {
 	
 }
 
-int SourceFontPane::DrawWidgets(int vWidgetId, std::string vUserDatas)
+int SourceFontPane::DrawWidgets(const uint32_t& /*vCurrentFrame*/, int vWidgetId, std::string /*vUserDatas*/)
 {
-	UNUSED(vUserDatas);
-
 	if (ProjectFile::Instance()->IsLoaded())
 	{
 		if (LayoutManager::Instance()->IsSpecificPaneFocused(m_PaneFlag))
@@ -111,19 +108,26 @@ int SourceFontPane::DrawWidgets(int vWidgetId, std::string vUserDatas)
 //// PRIVATE : PANES //////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void SourceFontPane::DrawSourceFontPane()
+void SourceFontPane::DrawSourceFontPane(PaneFlags& vInOutPaneShown)
 {
-	if (LayoutManager::Instance()->m_Pane_Shown & m_PaneFlag)
+	if (vInOutPaneShown & m_PaneFlag)
 	{
-		if (ImGui::BeginFlag<PaneFlags>(m_PaneName,
-			&LayoutManager::Instance()->m_Pane_Shown, m_PaneFlag,
-			//ImGuiWindowFlags_NoTitleBar |
-			ImGuiWindowFlags_MenuBar |
-			//ImGuiWindowFlags_NoMove |
+		static ImGuiWindowFlags flags =
 			ImGuiWindowFlags_NoCollapse |
-			//ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_NoBringToFrontOnFocus))
+			ImGuiWindowFlags_NoBringToFrontOnFocus |
+			ImGuiWindowFlags_MenuBar;
+		if (ImGui::Begin<PaneFlags>(m_PaneName,
+			&vInOutPaneShown, m_PaneFlag, flags))
 		{
+#ifdef USE_DECORATIONS_FOR_RESIZE_CHILD_WINDOWS
+			auto win = ImGui::GetCurrentWindowRead();
+			if (win->Viewport->Idx != 0)
+				flags |= ImGuiWindowFlags_NoResize;// | ImGuiWindowFlags_NoTitleBar;
+			else
+				flags = ImGuiWindowFlags_NoCollapse |
+				ImGuiWindowFlags_NoBringToFrontOnFocus |
+				ImGuiWindowFlags_MenuBar;
+#endif
 			if (ProjectFile::Instance()->IsLoaded())
 			{
 				if (ProjectFile::Instance()->m_SelectedFont)
@@ -331,8 +335,9 @@ void SourceFontPane::DrawFontTexture(std::shared_ptr<FontInfos> vFontInfos)
 						std::string path = ".";
 						if (ProjectFile::Instance()->IsLoaded())
 							path = ProjectFile::Instance()->m_ProjectFilePath;
-						ImGuiFileDialog::Instance()->OpenModal("SaveFontToPictureFile", "Svae Font Testure to File", ".png", 
-							path, 0, IGFDUserDatas(&vFontInfos->m_FontTexture), ImGuiFileDialogFlags_ConfirmOverwrite);
+						ImGuiFileDialog::Instance()->OpenDialog("SaveFontToPictureFile", "Svae Font Testure to File", ".png", 
+							path, 1, IGFDUserDatas(&vFontInfos->m_FontTexture), 
+							ImGuiFileDialogFlags_ConfirmOverwrite | ImGuiFileDialogFlags_Modal);
 					}
 
 					ImGui::EndMenuBar();

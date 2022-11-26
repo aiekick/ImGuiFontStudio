@@ -32,22 +32,22 @@ private:
 public:
 	bool Init() override;
 	void Unit() override;
-	int DrawPanes(int vWidgetId, std::string vUserDatas)  override;
-	void DrawDialogsAndPopups(std::string vUserDatas) override;
-	int DrawWidgets(int vWidgetId, std::string vUserDatas)  override;
+	int DrawPanes(const uint32_t& vCurrentFrame, int vWidgetId, std::string vUserDatas, PaneFlags& vInOutPaneShown)  override;
+	void DrawDialogsAndPopups(const uint32_t& vCurrentFrame, std::string vUserDatas) override;
+	int DrawWidgets(const uint32_t& vCurrentFrame, int vWidgetId, std::string vUserDatas)  override;
 
 private:
-	void DrawFontStructurePane();
+	void DrawFontStructurePane(PaneFlags& vInOutPaneShown);
 	void DisplayAnalyze();
 
 public: // singleton
-	static FontStructurePane *Instance()
+	static std::shared_ptr<FontStructurePane> Instance()
 	{
-		static FontStructurePane _instance;
-		return &_instance;
+		static auto _instance = std::make_shared<FontStructurePane>();
+		return _instance;
 	}
 
-protected:
+public:
 	FontStructurePane(); // Prevent construction
 	FontStructurePane(const FontStructurePane&) = default; // Prevent construction by copying
 	FontStructurePane& operator =(const FontStructurePane&) { return *this; }; // Prevent assignment

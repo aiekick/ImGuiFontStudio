@@ -22,7 +22,7 @@
 #include <Generator/FontGenerator.h>
 #include <MainFrame.h>
 #include <Panes/Manager/LayoutManager.h>
-#include <Gui/ImWidgets.h>
+#include<Gui/ImWidgets.h>
 #ifdef _DEBUG
 #include <Panes/DebugPane.h>
 #endif
@@ -30,13 +30,12 @@
 #include <Generator/FontGenerator.h>
 #include <Panes/GlyphPane.h>
 
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 
 #include <ctools/cTools.h>
 #include <ctools/FileHelper.h>
 #include <sfntly/font_factory.h>
-#include <Gui/ImWidgets.h>
+#include<Gui/ImWidgets.h>
 #include <Helper/SelectionHelper.h>
 #include <Project/GlyphInfos.h>
 
@@ -71,25 +70,22 @@ void FontPreviewPane::Unit()
 
 }
 
-int FontPreviewPane::DrawPanes(int vWidgetId, std::string vUserDatas)
+int FontPreviewPane::DrawPanes(const uint32_t& /*vCurrentFrame*/, int vWidgetId, std::string /*vUserDatas*/, PaneFlags& vInOutPaneShown)
 {
 	m_PaneWidgetId = vWidgetId;
 
-	DrawFontPreviewPane();
+	DrawFontPreviewPane(vInOutPaneShown);
 
 	return m_PaneWidgetId;
 }
 
-void FontPreviewPane::DrawDialogsAndPopups(std::string vUserDatas)
+void FontPreviewPane::DrawDialogsAndPopups(const uint32_t& /*vCurrentFrame*/, std::string /*vUserDatas*/)
 {
 
 }
 
-int FontPreviewPane::DrawWidgets(int vWidgetId, std::string vUserDatas)
+int FontPreviewPane::DrawWidgets(const uint32_t& /*vCurrentFrame*/, int vWidgetId, std::string /*vUserDatas*/)
 {
-	
-	UNUSED(vUserDatas);
-
 	return vWidgetId;
 }
 
@@ -112,19 +108,26 @@ et il faudra pouvoir scale/translate le glyph
 //// PRIVATE //////////////////////////////////////////////////////////////////////
 ///////////////////////////////////////////////////////////////////////////////////
 
-void FontPreviewPane::DrawFontPreviewPane()
+void FontPreviewPane::DrawFontPreviewPane(PaneFlags& vInOutPaneShown)
 {
-	if (LayoutManager::Instance()->m_Pane_Shown & m_PaneFlag)
+	if (vInOutPaneShown & m_PaneFlag)
 	{
-		if (ImGui::BeginFlag<PaneFlags>(m_PaneName,
-			&LayoutManager::Instance()->m_Pane_Shown, m_PaneFlag,
-			//ImGuiWindowFlags_NoTitleBar |
-			//ImGuiWindowFlags_MenuBar |
-			//ImGuiWindowFlags_NoMove |
+		static ImGuiWindowFlags flags =
 			ImGuiWindowFlags_NoCollapse |
-			//ImGuiWindowFlags_NoResize |
-			ImGuiWindowFlags_NoBringToFrontOnFocus))
+			ImGuiWindowFlags_NoBringToFrontOnFocus |
+			ImGuiWindowFlags_MenuBar;
+		if (ImGui::Begin<PaneFlags>(m_PaneName,
+			&vInOutPaneShown, m_PaneFlag, flags))
 		{
+#ifdef USE_DECORATIONS_FOR_RESIZE_CHILD_WINDOWS
+			auto win = ImGui::GetCurrentWindowRead();
+			if (win->Viewport->Idx != 0)
+				flags |= ImGuiWindowFlags_NoResize;// | ImGuiWindowFlags_NoTitleBar;
+			else
+				flags = ImGuiWindowFlags_NoCollapse |
+				ImGuiWindowFlags_NoBringToFrontOnFocus |
+				ImGuiWindowFlags_MenuBar;
+#endif
 			if (ProjectFile::Instance()->IsLoaded())
 			{
 				ImGui::Text("Select glyphs to test in Final Pane");

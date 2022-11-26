@@ -39,11 +39,11 @@ private:
 public:
 	bool Init() override;
 	void Unit() override;
-	int DrawPanes(int vWidgetId, std::string vUserDatas)  override;
-	void DrawDialogsAndPopups(std::string vUserDatas) override;
-	int DrawWidgets(int vWidgetId, std::string vUserDatas)  override;
+	int DrawPanes(const uint32_t& vCurrentFrame, int vWidgetId, std::string vUserDatas, PaneFlags& vInOutPaneShown)  override;
+	void DrawDialogsAndPopups(const uint32_t& vCurrentFrame, std::string vUserDatas) override;
+	int DrawWidgets(const uint32_t& vCurrentFrame, int vWidgetId, std::string vUserDatas)  override;
 
-	void DrawGlyphPane();
+	void DrawGlyphPane(PaneFlags& vInOutPaneShown);
 	bool LoadGlyph( std::shared_ptr<FontInfos> vFontInfos, std::weak_ptr<GlyphInfos> vGlyphInfos);
 	void Clear();
 
@@ -51,13 +51,13 @@ private:
 	bool DrawSimpleGlyph();
 
 public: // singleton
-	static GlyphPane *Instance()
+	static std::shared_ptr<GlyphPane> Instance()
 	{
-		static GlyphPane _instance;
-		return &_instance;
+		static auto _instance = std::make_shared<GlyphPane>();
+		return _instance;
 	}
 
-protected:
+public:
 	GlyphPane(); // Prevent construction
 	GlyphPane(const GlyphPane&) {}; // Prevent construction by copying
 	GlyphPane& operator =(const GlyphPane&) { return *this; }; // Prevent assignment

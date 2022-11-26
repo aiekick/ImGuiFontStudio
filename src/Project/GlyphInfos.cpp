@@ -22,7 +22,6 @@
 
 #include <utility>
 
-#define IMGUI_DEFINE_MATH_OPERATORS
 #include <imgui/imgui_internal.h>
 
 #include <Gui/ImWidgets.h>
@@ -945,9 +944,9 @@ void GlyphInfos::GetGlyphButtonColorsForCodePoint(bool vShowRangeColoring, CodeP
 		}
 		else
 		{
-			vOut3StateColors[0] = ImGui::CustomStyle::GlyphButtonColor;
-			vOut3StateColors[1] = ImGui::CustomStyle::GlyphButtonColorActive;
-			vOut3StateColors[2] = ImGui::CustomStyle::GlyphButtonColorActive;
+			vOut3StateColors[0] = ImGui::CustomStyle::Instance()->GlyphButtonColor;
+			vOut3StateColors[1] = ImGui::CustomStyle::Instance()->GlyphButtonColorActive;
+			vOut3StateColors[2] = ImGui::CustomStyle::Instance()->GlyphButtonColorActive;
 		}
 	}
 }
@@ -1068,7 +1067,7 @@ int GlyphInfos::DrawGlyphButton(
 			}
 		}
 
-		const bool pushed = ImGui::PushStyleColorWithContrast(colButton, ImGuiCol_Text, ImGui::CustomStyle::puContrastedTextColor, ImGui::CustomStyle::puContrastRatio);
+		const bool pushed = ImGui::PushStyleColorWithContrast(colButton, ImGuiCol_Text, ImGui::CustomStyle::Instance()->puContrastedTextColor, ImGui::CustomStyle::Instance()->puContrastRatio);
 		ImU32 textCol = ImGui::GetColorU32(ImGuiCol_Text);
 		if (pushed)
 			ImGui::PopStyleColor();

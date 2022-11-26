@@ -18,7 +18,7 @@
 #include <Panes/Abstract/AbstractPane.h>
 #include <ctools/ConfigAbstract.h>
 #include <ctools/cTools.h>
-#include <Gui/ImWidgets.h>
+#include<Gui/ImWidgets.h>
 
 #include <string>
 #include <map>
@@ -42,16 +42,16 @@ private: // private enum
 public:
 	bool Init() override;
 	void Unit() override;
-	int DrawPanes(int vWidgetId, std::string vUserDatas)  override;
-	void DrawDialogsAndPopups(std::string vUserDatas) override;
-	int DrawWidgets(int vWidgetId, std::string vUserDatas)  override;
+	int DrawPanes(const uint32_t& vCurrentFrame, int vWidgetId, std::string vUserDatas, PaneFlags& vInOutPaneShown)  override;
+	void DrawDialogsAndPopups(const uint32_t& vCurrentFrame, std::string vUserDatas) override;
+	int DrawWidgets(const uint32_t& vCurrentFrame, int vWidgetId, std::string vUserDatas)  override;
 
 	void OpenFonts(const std::map<std::string, std::string>& vFontFilePathNames);
 	bool OpenFont(const std::string& vFontFilePathName, bool vUpdateCount);
 	void SelectFont(std::shared_ptr<FontInfos> vFontInfos);
 
 private: 
-	void DrawParamsPane();
+	void DrawParamsPane(PaneFlags& vInOutPaneShown);
 
 private: // actions
 	// via menu
@@ -67,16 +67,16 @@ public: // configuration
 	bool setFromXml(tinyxml2::XMLElement* vElem, tinyxml2::XMLElement* vParent, const std::string& vUserDatas);
 
 public: // singleton
-	static ParamsPane* Instance()
+	static std::shared_ptr<ParamsPane> Instance()
 	{
-		static ParamsPane _instance;
-		return &_instance;
+		static auto _instance = std::make_shared<ParamsPane>();
+		return _instance;
 	}
 
-protected:
-	ParamsPane(); // Prevent construction
+public:
+	ParamsPane() = default; // Prevent construction
 	ParamsPane(const ParamsPane&) {}; // Prevent construction by copying
 	ParamsPane& operator =(const ParamsPane&) { return *this; }; // Prevent assignment
-	~ParamsPane(); // Prevent unwanted destruction};
+	~ParamsPane() = default; // Prevent unwanted destruction};
 };
 

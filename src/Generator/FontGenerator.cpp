@@ -562,7 +562,7 @@ sfntly::Ptr<sfntly::WritableFontData> FontGenerator::ReScale_Glyph(
 		}
 		else if (glyph->GlyphType() == sfntly::GlyphType::kComposite)
 		{
-			LogVar("No support of Compositie glyph for the moment");
+			LogVarInfo("No support of Compositie glyph for the moment");
 		}
 	}
 		
@@ -782,7 +782,7 @@ bool FontGenerator::Assemble_Post_Table(std::map<CodePoint, std::string> vSelect
 				}
 				else
 				{
-					LogVar("Err : id (%i) was not found in m_NewToOldGlyfId and is higher than sfntly::PostScriptTable::NUM_STANDARD_NAMES (%i).. to debug", 
+					LogVarInfo("Err : id (%i) was not found in m_NewToOldGlyfId and is higher than sfntly::PostScriptTable::NUM_STANDARD_NAMES (%i).. to debug",
 						id, sfntly::PostScriptTable::NUM_STANDARD_NAMES);
 				}
 			}
