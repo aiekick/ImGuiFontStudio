@@ -7,8 +7,8 @@ on:
     - master
 
 jobs:
-  build_Win_2016:
-    runs-on: windows-2016
+  build_Win_2022:
+    runs-on: windows-2022
     steps:
     - uses: actions/checkout@v1
     - name: checkout submodules
@@ -18,7 +18,7 @@ jobs:
     - name: build
       run: cmake --build build --config Release
     - name: upload artifact
-      uses: actions/upload-artifact@v1
+      uses: actions/upload-artifact@v7
       with:
-        name: ImGuiFontStudio_Msvc_x32
-        path: build\Release\ImGuiFontStudio_Msvc_x32.exe
+        path: build\Release\ImGuiFontStudio_Msvc_x64.exe
+        archive: false
